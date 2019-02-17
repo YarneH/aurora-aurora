@@ -9,7 +9,6 @@ pipeline {
             steps {
                 // Compile the app and its dependencies
                   sh './gradlew clean compileDebugSources'
-                  
             }
         }
 
@@ -24,8 +23,8 @@ pipeline {
                     }
 
 
-                       // Analyse the test results and update the build result as appropriate
-                     junit '**/TEST-*.xml'
+                    // Analyse the test results and update the build result as appropriate
+                    junit allowEmptyResults: true, testResults: '**/TEST-*.xml'
                 }
              }
            }
