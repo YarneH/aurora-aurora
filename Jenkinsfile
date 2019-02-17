@@ -26,7 +26,7 @@ pipeline {
       		steps {
         		// Run Lint and analyse the results
 		        sh './gradlew lintDebug'
-		        androidLint pattern: '**/lint-results-*.xml' failedTotalAll: '0'
+		        androidLint pattern: '**/lint-results-*.xml', failedTotalAll: '0'
 		    }
     	}
   	}
