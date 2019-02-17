@@ -1,33 +1,40 @@
 #!/usr/bin/env groovy
 
 pipeline {
-	agent any
+    agent any
 
-  	stages {
-    	stage('Compile') {
+      stages {
+        stage('Compile') {
 
-			steps {
-				// Compile the app and its dependencies
-	      		sh './gradlew clean compileDebugSources'
-			}
-    	}
+            steps {
+                // Compile the app and its dependencies
+                  sh './gradlew clean compileDebugSources'
+            }
+        }
 
-		stage('Unit test') {
-	 		steps {
-	   			// Compile and run the unit tests for the app and its dependencies
-	   			sh './gradlew testDebugUnitTest testDebugUnitTest'
+        stage('Unit test') {
+            steps {
+                script {
+                    // Compile and run the unit tests for the app and its dependencies
+                    if (env.BRANCH_NAME == 'master' || env.BRANCH_NAME == 'dev') {
+                        sh './gradlew testReleaseUnitTest'
+                    } else {
+                        sh './gradlew testDebugUnitTest'
+                    }
 
-	   			// Analyse the test results and update the build result as appropriate
-	   			junit '**/TEST-*.xml'
-	 		}
-   		}
 
-		stage('Static analysis') {
-      		steps {
-        		// Run Lint and analyse the results
-		        sh './gradlew lintDebug'
-		        androidLint pattern: '**/lint-results-*.xml', failedTotalAll: '0'
-		    }
-    	}
-  	}
+                       // Analyse the test results and update the build result as appropriate
+                     junit '**/TEST-*.xml'
+                }
+             }
+           }
+
+        stage('Static analysis') {
+              steps {
+                // Run Lint and analyse the results
+                sh './gradlew lintDebug'
+                androidLint pattern: '**/lint-results-*.xml', failedTotalAll: '0'
+            }
+        }
+      }
 }
