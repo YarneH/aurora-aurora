@@ -5,7 +5,7 @@ import net.sf.json.JSONObject
 pipeline {
     agent any
 
-      stages {
+    stages {
         stage('Compile') {
 
             steps {
@@ -18,7 +18,7 @@ pipeline {
                     slack_error_build()
                 }
             }
-        }
+        } // Compile stage
 
         stage('Unit test') {
             steps {
@@ -41,17 +41,29 @@ pipeline {
                     slack_error_test()
                 }
             }
-        }
+        } // Unit test stage
 
         stage('Static analysis') {
-              steps {
+            steps {
                 // Run Lint and analyse the results
                 sh './gradlew lintDebug'
                 androidLint pattern: '**/lint-results-*.xml', failedTotalAll: '0'
             }
-        }
-    }
-}
+
+            post {
+                failure {
+                    slack_error_analysis()
+                }
+            }
+        } // Static analysis stage
+    } // Stages
+
+    post {
+		success {
+			slack_success()
+		}
+	}
+} // Pipeline
 
 
 /**
