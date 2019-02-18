@@ -154,7 +154,7 @@ def slack_report(boolean successful, String text, JSONArray fields, failedStage=
     // Configure message details
     attachment.put('color', successful ? 'good' : 'danger')
     attachment.put('title', commit_message + ' @ branch ' + env.BRANCH_NAME)
-    attachment.put('title_link', 'http://gitlab.com/Singular-IT/projecten/limpio-online/backend/commit/' + commit)
+    attachment.put('title_link', 'https://github.ugent.be/Aurora/aurora/commit/' + commit)
     if (text != '') {
         attachment.put('text', text)
     }
