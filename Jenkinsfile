@@ -47,13 +47,18 @@ pipeline {
             steps {
                 // Run Lint and analyse the results
                 sh './gradlew lintDebug'
-                androidLint pattern: '**/lint-results-*.xml', failedTotalAll: '0'
+                androidLint pattern: '**/lint-results-*.xml', unstableTotalAll: '5', failedNewHigh: '0', failedTotalAll: '20'
             }
 
             post {
-                unsuccessful {
+                unstable {
+                    slack_error_analysis_unstable()
+                }
+
+                failure {
                     slack_error_analysis()
                 }
+
             }
         } // Static analysis stage
     } // Stages
@@ -89,6 +94,13 @@ def slack_error_analysis() {
     slack_report(false, ':x: Static analysis failed', null, 'Static analysis')
 }
 
+
+/**
+ * Gets called when static analysis is unstable
+ */
+def slack_error_analysis_unstable() {
+    slack_report(false, ':heavy_multiplication_x: Static analysis unstable', null, 'Static analysis')
+}
 
 /**
  * Gets called when build succeeds
