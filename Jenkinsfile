@@ -51,7 +51,7 @@ pipeline {
             }
 
             post {
-                failure {
+                unsuccessful {
                     slack_error_analysis()
                 }
             }
@@ -59,10 +59,10 @@ pipeline {
     } // Stages
 
     post {
-		success {
-			slack_success()
-		}
-	}
+        success {
+            slack_success()
+        }
+    }
 } // Pipeline
 
 
@@ -100,8 +100,8 @@ def slack_success() {
 
 /**
  * Find name of author
- * @param  email [description]
- * @return       [description]
+ * @param  email the commit author's email
+ * @return       A string containing the author's name
  */
 static String author_name(String email) {
     if (email.startsWith("robbe")) {
