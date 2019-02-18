@@ -129,7 +129,7 @@ static String author_name(String email) {
 
 /**
  * Report results of pipeline to slack
- * @param  successful     was build succesful
+ * @param  successful     was build successful
  * @param  text           Message to display
  * @param  fields         extra fields to include in the message
  * @param  failedStage='' If build failed, at which stage did it fail
@@ -197,7 +197,7 @@ def slack_report(boolean successful, String text, JSONArray fields, failedStage=
 
     attachments.add(attachment)
 
-    String token = succesful ? 'TD60N85K8/BG960T35H/zH59dbicld2uw5Tfdaipg0oL' : 'TD60N85K8/BGABQ0CS3/xS539cEwbxr6cMPvk7LMu7Ve'
+    String token = successful ? 'TD60N85K8/BG960T35H/zH59dbicld2uw5Tfdaipg0oL' : 'TD60N85K8/BGABQ0CS3/xS539cEwbxr6cMPvk7LMu7Ve'
 
     slackSend(channel: '#aurora', attachments: attachments.toString(), teamDomain: 'aurora1819', baseUrl: 'https://hooks.slack.com/services/', token: token)
 }
