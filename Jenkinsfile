@@ -61,6 +61,20 @@ pipeline {
 
             }
         } // Static analysis stage
+
+        stage('SonarQube analysis') {
+            steps {
+                    sh './gradlew sonarqube -Dsonar.projectKey=aurora \
+                     -Dsonar.host.url=http://sonarqube.aurora-files.ml \
+                     -Dsonar.login=ef51b700af27f7f8e8cdc2054060da85f335bdbc'
+            }
+
+            post {
+                failure {
+                    slack_error_sonar()
+                }
+            }
+        }
     } // Stages
 
     post {
@@ -100,6 +114,10 @@ def slack_error_analysis() {
  */
 def slack_error_analysis_unstable() {
     slack_report(false, ':heavy_multiplication_x: Static analysis unstable', null, 'Static analysis')
+}
+
+def slack_error_sonar() {
+    slack_report(false, ':x: Sonar failed', null, 'SonarQube analysis')
 }
 
 /**
@@ -176,7 +194,7 @@ def slack_report(boolean successful, String text, JSONArray fields, failedStage=
     // Add actions to message
     JSONObject actionViewBuild = new JSONObject()
 
-    // Add a button 'buil log' to message that links to Jenkins
+    // Add a button 'build log' to message that links to Jenkins
     actionViewBuild.put('type', 'button')
     actionViewBuild.put('text', 'Build log')
     actionViewBuild.put('url', env.BUILD_URL)
