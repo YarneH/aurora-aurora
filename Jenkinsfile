@@ -61,20 +61,6 @@ pipeline {
 
             }
         } // Static analysis stage
-
-        stage('SonarQube analysis') {
-            steps {
-                    sh './gradlew sonarqube -Dsonar.projectKey=aurora \
-                     -Dsonar.host.url=http://sonarqube.aurora-files.ml \
-                     -Dsonar.login=ef51b700af27f7f8e8cdc2054060da85f335bdbc'
-            }
-
-            post {
-                failure {
-                    slack_error_sonar()
-                }
-            }
-        }
     } // Stages
 
     post {
