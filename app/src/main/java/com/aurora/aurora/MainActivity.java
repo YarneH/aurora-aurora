@@ -11,6 +11,8 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -24,11 +26,12 @@ import org.w3c.dom.Text;
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
-    /**
-     * Need a global toast to prevent queued toasts
-     */
+
+    // Toast and TextView used for demo and preventing queued Toasts
     private Toast mToast;
     private TextView mTextViewMain;
+    private RecyclerView mRecyclerView;
+    private CardFileAdapter adapter;
 
     /**
      * Runs on startup of the activity, in this case on startup of the app
@@ -68,6 +71,12 @@ public class MainActivity extends AppCompatActivity
 
         /* Setup Main TextView */
         mTextViewMain = (TextView) findViewById(R.id.tv_main);
+
+        /* Setup RecyclerView */
+        mRecyclerView = (RecyclerView) findViewById(R.id.rv_files);
+        mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+        adapter = new CardFileAdapter(this);
+        mRecyclerView.setAdapter(adapter);
     }
 
     /**
@@ -119,17 +128,26 @@ public class MainActivity extends AppCompatActivity
 
         // String for demo
         String text = "";
+        boolean home = false;
         if (id == R.id.nav_about_us) {
             text = "About us";
         } else if (id == R.id.nav_help_feedback) {
             text = "Help & Feedback";
         } else if (id == R.id.nav_home) {
             text = "Home";
+            home = true;
         } else if (id == R.id.nav_settings) {
             text = "Settings";
         }
-        // Change text for demo
+        // Change text and visibility (Used for demo)
         mTextViewMain.setText(text);
+        if(home){
+            mRecyclerView.setVisibility(View.VISIBLE);
+            mTextViewMain.setVisibility(View.INVISIBLE);
+        } else {
+            mRecyclerView.setVisibility(View.INVISIBLE);
+            mTextViewMain.setVisibility(View.VISIBLE);
+        }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
