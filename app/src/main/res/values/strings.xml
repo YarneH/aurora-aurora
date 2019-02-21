@@ -1,3 +1,7 @@
 <resources>
+    <!-- TODO Add classification for the strings -->
     <string name="app_name">Aurora</string>
+    <string name="about_us">About Us</string>
+    <string name="settings">Settings</string>
+    <string name="help_feedback">Help &amp; Feedback</string>
 </resources>
