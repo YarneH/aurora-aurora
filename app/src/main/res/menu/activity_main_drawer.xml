@@ -2,7 +2,8 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     tools:showIn="navigation_view">
-
+    <!-- Contents of the navigation view -->
+    <!-- One of these is selected -->
     <group android:checkableBehavior="single">
         <item
             android:id="@+id/nav_home"
@@ -22,5 +23,4 @@
             android:icon="@drawable/ic_nav_info"
             android:title="@string/about_us" />
     </group>
-
 </menu>
