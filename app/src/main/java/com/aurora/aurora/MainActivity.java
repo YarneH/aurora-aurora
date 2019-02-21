@@ -16,9 +16,20 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import org.w3c.dom.Text;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
+
+    /**
+     * Need a global toast to prevent queued toasts
+     */
+    private Toast mToast;
+    private TextView mTextViewMain;
+
     /**
      * Runs on startup of the activity, in this case on startup of the app
      * @param savedInstanceState
@@ -38,7 +49,7 @@ public class MainActivity extends AppCompatActivity
             /* Implementation of adding files in onClick */
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
+                Snackbar.make(view, "This will open a window where you can select a file to add", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
             }
         });
@@ -50,9 +61,13 @@ public class MainActivity extends AppCompatActivity
         drawer.addDrawerListener(toggle);
         toggle.syncState();
 
-        /* Setup NavigationView */
+        /* Setup NavigationView and preselect 'Home' */
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+        navigationView.getMenu().getItem(0).setChecked(true);
+
+        /* Setup Main TextView */
+        mTextViewMain = (TextView) findViewById(R.id.tv_main);
     }
 
     /**
@@ -84,6 +99,12 @@ public class MainActivity extends AppCompatActivity
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
+            // Toast for demo
+            if (mToast != null){
+                mToast.cancel();
+            }
+            mToast = Toast.makeText(this,"Settings",Toast.LENGTH_SHORT);
+            mToast.show();
             return true;
         }
 
@@ -96,9 +117,19 @@ public class MainActivity extends AppCompatActivity
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
+        // String for demo
+        String text = "";
         if (id == R.id.nav_about_us) {
-            // Handle the camera action
+            text = "About us";
+        } else if (id == R.id.nav_help_feedback) {
+            text = "Help & Feedback";
+        } else if (id == R.id.nav_home) {
+            text = "Home";
+        } else if (id == R.id.nav_settings) {
+            text = "Settings";
         }
+        // Change text for demo
+        mTextViewMain.setText(text);
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
