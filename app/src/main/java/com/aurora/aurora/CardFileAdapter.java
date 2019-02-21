@@ -56,7 +56,7 @@ public class CardFileAdapter extends RecyclerView.Adapter<CardFileAdapter.CardFi
 
         @Override
         public void onClick(View view) {
-            Snackbar.make(view, "This will open " + mTextView.getText() + " with the previous selected plugin", Snackbar.LENGTH_LONG)
+            Snackbar.make(view, "This will open " + mTextView.getText() + " with the previously selected plugin", Snackbar.LENGTH_LONG)
                     .setAction("Action", null).show();
         }
     }
