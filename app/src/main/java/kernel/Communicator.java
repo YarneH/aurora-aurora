@@ -7,9 +7,4 @@ import android.util.Log;
  */
 abstract class Communicator implements EventHandler {
     protected Bus bus;
-
-    void subscribe(Class<? extends Event> eventtype) {
-        Log.d("Communicator", "Not implemented");
-    }
-
 }

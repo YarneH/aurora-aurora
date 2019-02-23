@@ -5,7 +5,8 @@ import android.util.Log;
 class AuroraCommunicator extends Communicator {
     private static AuroraCommunicator communicator = new AuroraCommunicator();
 
-    private AuroraCommunicator() {}
+    private AuroraCommunicator() {
+    }
 
     public static AuroraCommunicator getCommunicator() {
         return communicator;

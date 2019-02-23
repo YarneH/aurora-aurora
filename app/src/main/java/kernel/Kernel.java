@@ -14,6 +14,7 @@ public class Kernel {
 
     /**
      * gets a reference to the singleton kernel
+     *
      * @return a reference to the kernel
      */
     public static Kernel getKernel() {
@@ -22,6 +23,7 @@ public class Kernel {
 
     /**
      * gets a reference to the aurora communicator
+     *
      * @return AuroraCommunicator
      */
     public AuroraCommunicator getAuroraCommunicator() {

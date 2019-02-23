@@ -14,14 +14,17 @@ class Bus {
     // of events at the same time
     private final Subject<Event> busSubject = PublishSubject.create();
 
-    private Bus() {}
+    private Bus() {
+    }
 
     public static Bus getBus() {
         return bus;
     }
 
+
     /**
      * Register for a particular type of events
+     *
      * @param eventClass the class of the events you want to subscribe to
      * @return an Observable of events
      */
@@ -32,8 +35,10 @@ class Bus {
                 .map(obj -> (T) obj);
     }
 
+
     /**
      * Post a new event on the bus
+     *
      * @param event the event to post
      */
     public void post(Event event) {
