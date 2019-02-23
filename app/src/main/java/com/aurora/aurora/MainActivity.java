@@ -1,6 +1,8 @@
 package com.aurora.aurora;
 
+import android.content.Intent;
 import android.content.res.Configuration;
+import android.net.Uri;
 import android.os.PersistableBundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
@@ -26,6 +28,7 @@ import org.w3c.dom.Text;
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
+    static final int REQUEST_FILE_GET = 1;
 
     // Toast and TextView used for demo and preventing queued Toasts
     private Toast mToast;
@@ -35,6 +38,7 @@ public class MainActivity extends AppCompatActivity
 
     /**
      * Runs on startup of the activity, in this case on startup of the app
+     *
      * @param savedInstanceState
      */
     @Override
@@ -52,8 +56,7 @@ public class MainActivity extends AppCompatActivity
             /* Implementation of adding files in onClick */
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "This will open a window where you can select a file to add", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
+                selectFile();
             }
         });
 
@@ -77,6 +80,43 @@ public class MainActivity extends AppCompatActivity
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         adapter = new CardFileAdapter(this);
         mRecyclerView.setAdapter(adapter);
+    }
+
+    /**
+     * Creates an intent to open the file manager. Can currently only select pdf files;
+     * If more filetypes need to be opened, use a final String[], for example:
+     *
+     * final String[] ACCEPT_MIME_TYPES = {
+     *         "application/pdf",
+     *         "image/*"
+     *   };
+     *
+     * Intent intent = new Intent();
+     * intent.setType("* / *");
+     * intent.setAction(Intent.ACTION_GET_CONTENT);
+     * intent.putExtra(Intent.EXTRA_MIME_TYPES,ACCEPT_MIME_TYPES);
+     */
+    protected void selectFile() {
+        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+        intent.setType("application/pdf");
+        if (intent.resolveActivity(getPackageManager()) != null) {
+            startActivityForResult(intent, REQUEST_FILE_GET);
+        }
+    }
+
+    /**
+     * In this case when selectFile()'s intent returns
+     * @param requestCode code used to send the intent
+     * @param resultCode status code
+     * @param data resulting data, a Uri in case of fileselector
+     */
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == REQUEST_FILE_GET && resultCode == RESULT_OK) {
+            Uri textFile = data.getData();
+            Toast.makeText(this, "A file with uri \"" + textFile + "\" was selected.", Snackbar.LENGTH_LONG).show();
+            // Use File
+        }
     }
 
     /**
@@ -109,10 +149,10 @@ public class MainActivity extends AppCompatActivity
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_search) {
             // Toast for demo
-            if (mToast != null){
+            if (mToast != null) {
                 mToast.cancel();
             }
-            mToast = Toast.makeText(this,"Search for a file",Toast.LENGTH_SHORT);
+            mToast = Toast.makeText(this, "Search for a file", Toast.LENGTH_SHORT);
             mToast.show();
             return true;
         }
@@ -141,7 +181,7 @@ public class MainActivity extends AppCompatActivity
         }
         // Change text and visibility (Used for demo)
         mTextViewMain.setText(text);
-        if(home){
+        if (home) {
             mRecyclerView.setVisibility(View.VISIBLE);
             mTextViewMain.setVisibility(View.INVISIBLE);
         } else {
