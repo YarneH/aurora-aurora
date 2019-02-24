@@ -10,7 +10,7 @@ import io.reactivex.subjects.Subject;
 class Bus {
     // bus subject is observable and observer
     // of events at the same time
-    private final Subject<Event> busSubject = PublishSubject.create();
+    private final Subject<Event> mBusSubject = PublishSubject.create();
 
 
     /**
@@ -21,7 +21,7 @@ class Bus {
      */
     public <T extends Event>
     Observable<T> register(final Class<T> eventClass) {
-        return busSubject
+        return mBusSubject
                 .filter(event -> event.getClass().equals(eventClass)) // Filter events based on class
                 .map(obj -> {
                     if (eventClass.isInstance(obj)) {
@@ -43,6 +43,6 @@ class Bus {
      * @param event the event to post
      */
     public void post(Event event) {
-        busSubject.onNext(event);
+        mBusSubject.onNext(event);
     }
 }

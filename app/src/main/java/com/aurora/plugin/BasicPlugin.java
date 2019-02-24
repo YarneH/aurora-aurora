@@ -6,6 +6,6 @@ import java.io.File;
  * Class that maintains some basic information on a plugin
  */
 public abstract class BasicPlugin {
-    private String name;
-    private File pluginLogo; // TODO: Datatype may change
+    private String mName;
+    private File mPluginLogo; // TODO: Datatype may change
 }

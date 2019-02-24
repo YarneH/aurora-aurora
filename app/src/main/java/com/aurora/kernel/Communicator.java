@@ -7,6 +7,6 @@ abstract class Communicator {
     /**
      * Keeps a reference to the communication bus used in the channel
      */
-    protected Bus bus;
+    protected Bus mBus;
 
 }

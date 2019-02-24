@@ -16,7 +16,7 @@ class PluginRegistry {
     /**
      * Maintains relation between a plugin name and a Plugin object
      */
-    private Map<String, Plugin> plugins;
+    private Map<String, Plugin> mPluginsMap;
 
     private ProcessingCommunicator processingCommunicator;
 

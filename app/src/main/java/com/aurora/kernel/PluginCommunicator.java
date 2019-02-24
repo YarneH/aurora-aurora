@@ -10,8 +10,8 @@ import com.aurora.plugin.PluginFragment;
  * Communicator that communicates with Plugin environments
  */
 public class PluginCommunicator extends Communicator {
-    private PluginFragment pluginFragment;
-    private PluginRegistry pluginRegistry;
+    private PluginFragment mPluginFragment;
+    private PluginRegistry mPluginRegistry;
 
     /**
      * Requests settingActivity from a pluginFragment

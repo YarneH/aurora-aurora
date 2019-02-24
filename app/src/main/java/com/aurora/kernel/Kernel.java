@@ -1,13 +1,13 @@
 package com.aurora.kernel;
 
 public class Kernel {
-    private AuroraCommunicator auroraCommunicator;
+    private AuroraCommunicator mAuroraCommunicator;
 
     /**
      * Starts and creates all communicator, keeping references
      */
     private Kernel() {
-        this.auroraCommunicator = new AuroraCommunicator();
+        this.mAuroraCommunicator = new AuroraCommunicator();
     }
 
 
@@ -17,6 +17,6 @@ public class Kernel {
      * @return AuroraCommunicator
      */
     public AuroraCommunicator getAuroraCommunicator() {
-        return auroraCommunicator;
+        return mAuroraCommunicator;
     }
 }
