@@ -14,16 +14,14 @@ import android.widget.TextView;
  * The adapter for the RecyclerView of the file-cards
  */
 public class CardFileAdapter extends RecyclerView.Adapter<CardFileAdapter.CardFileViewHolder> {
-    private Context context;
-    private int amount = 100;
+    private int mAmount = 100;
 
-    public CardFileAdapter(Context context){
-        this.context = context;
-    }
+    public CardFileAdapter(){}
 
     @NonNull
     @Override
     public CardFileViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) {
+        Context context = viewGroup.getContext();
         View view = LayoutInflater.from(context).inflate(R.layout.card_file, viewGroup, false);
         return new CardFileViewHolder(view);
     }
@@ -35,7 +33,7 @@ public class CardFileAdapter extends RecyclerView.Adapter<CardFileAdapter.CardFi
 
     @Override
     public int getItemCount() {
-        return amount;
+        return mAmount;
     }
 
     public class CardFileViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
@@ -46,7 +44,6 @@ public class CardFileAdapter extends RecyclerView.Adapter<CardFileAdapter.CardFi
             super(itemView);
             mTextView = (TextView) itemView.findViewById(R.id.tv_card_title);
             mButton = (Button) itemView.findViewById(R.id.button_card_file);
-
             mButton.setOnClickListener(this);
         }
 
