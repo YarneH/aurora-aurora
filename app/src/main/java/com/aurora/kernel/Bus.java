@@ -23,7 +23,17 @@ class Bus {
     Observable<T> register(final Class<T> eventClass) {
         return busSubject
                 .filter(event -> event.getClass().equals(eventClass)) // Filter events based on class
-                .map(obj -> (T) obj);
+                .map(obj -> {
+                    if (eventClass.isInstance(obj)) {
+                        // This is an 'unsafe type cast' but it is because of how generics work
+                        // in Java. In reality, it will always be possible to cast an
+                        // Event to the type T (which is a sub class of the event)
+                        @SuppressWarnings("unchecked")
+                        T res = (T) obj;
+                        return res;
+                    }
+                    return null; // This should not happen
+                });
     }
 
 
