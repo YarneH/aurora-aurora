@@ -1,5 +1,7 @@
 package com.aurora.kernel;
 
-class AuroraCommunicator extends Communicator {
-
+/**
+ * Communicator class that communicates to Aurora app environment
+ */
+public class AuroraCommunicator extends Communicator {
 }
