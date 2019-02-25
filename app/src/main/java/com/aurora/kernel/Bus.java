@@ -1,5 +1,7 @@
 package com.aurora.kernel;
 
+import com.aurora.kernel.event.Event;
+
 import io.reactivex.Observable;
 import io.reactivex.subjects.PublishSubject;
 import io.reactivex.subjects.Subject;

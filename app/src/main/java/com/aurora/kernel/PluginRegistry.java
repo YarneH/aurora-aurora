@@ -18,7 +18,11 @@ class PluginRegistry {
      */
     private Map<String, Plugin> mPluginsMap;
 
-    private ProcessingCommunicator processingCommunicator;
+    private ProcessingCommunicator mProcessingCommunicator;
+
+    public PluginRegistry(ProcessingCommunicator processingCommunicator) {
+        this.mProcessingCommunicator = processingCommunicator;
+    }
 
     /**
      * private helper method to find a plugin based on the plugin name
