@@ -9,6 +9,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -22,7 +23,8 @@ public class CardFileAdapter extends RecyclerView.Adapter<CardFileAdapter.CardFi
     private int mCardHeight;
     private int mExpandHeight;
 
-    public CardFileAdapter(){}
+    public CardFileAdapter() {
+    }
 
     @NonNull
     @Override
@@ -57,7 +59,7 @@ public class CardFileAdapter extends RecyclerView.Adapter<CardFileAdapter.CardFi
             mButton.setOnClickListener(this);
         }
 
-        public void bind(int i){
+        public void bind(int i) {
             index = i;
             mTextView.setText("File " + String.valueOf(i));
 
@@ -70,31 +72,43 @@ public class CardFileAdapter extends RecyclerView.Adapter<CardFileAdapter.CardFi
 
         @Override
         public void onClick(View view) {
-            if(view.getId() == R.id.cv_file) {
-                mSelectedIndex = index;
-                expand(view);
-            } else if(view.getId() == R.id.button_card_file) {
-                Snackbar.make(view, "This will open " + mTextView.getText() + " with the previously selected plugin", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
+            if (view.getId() == R.id.cv_file) {
+                RecyclerView recyclerView = (RecyclerView) view.getParent();
+                if (mSelectedIndex == -1) {
+                    mSelectedIndex = index;
+                    expand(view);
+                    recyclerView.scrollToPosition(index);
+                } else if (mSelectedIndex == index) {
+                    mSelectedIndex = -1;
+                    collapse(view);
+                    recyclerView.scrollToPosition(index);
+                } else {
+                    CardFileViewHolder prev = (CardFileViewHolder) recyclerView.findViewHolderForLayoutPosition(mSelectedIndex);
+                    if(prev != null) {
+                        collapse(prev.mCardView);
+                    }
+                    mSelectedIndex = index;
+                    expand(view);
+                    recyclerView.scrollToPosition(index);
+                }
+            } else if (view.getId() == R.id.button_card_file) {
+
             }
         }
     }
 
 
     public static void expand(final View v) {
-        v.measure(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-        // Older versions of android (pre API 21) cancel animations for views with a height of 0.
-        CardView mCardView = (CardView) v;
-        RecyclerView mRecyclerView = (RecyclerView) mCardView.getParent();
-        final int targetHeight = mRecyclerView.getMeasuredHeight();
-        final int childHeight = mCardView.getMeasuredHeight();
-
-        mCardView.setMinimumHeight(targetHeight);
+        FrameLayout detailView = (FrameLayout) v.findViewById(R.id.cv_fl_detail);
+        FrameLayout baseView = (FrameLayout) v.findViewById(R.id.cv_fl_base_card);
+        detailView.setVisibility(View.VISIBLE);
+        baseView.setVisibility(View.GONE);
     }
 
     public static void collapse(final View v) {
-        CardView mCardView = (CardView) v;
-        final int initialHeight = v.getMeasuredHeight();
-
+        FrameLayout detailView = (FrameLayout) v.findViewById(R.id.cv_fl_detail);
+        FrameLayout baseView = (FrameLayout) v.findViewById(R.id.cv_fl_base_card);
+        detailView.setVisibility(View.GONE);
+        baseView.setVisibility(View.VISIBLE);
     }
 }
