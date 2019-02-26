@@ -24,7 +24,9 @@
         android:id="@+id/rv_files"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/colorPrimaryDark">
+        android:background="@color/colorPrimaryDark"
+        android:paddingBottom="20dp"
+        android:clipToPadding="false">
 
     </android.support.v7.widget.RecyclerView>
 
