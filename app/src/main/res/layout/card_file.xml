@@ -4,49 +4,57 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginLeft="@dimen/fc_margin_horizontal"
-    android:layout_marginRight="@dimen/fc_margin_horizontal"
     android:layout_marginTop="@dimen/fc_margin_vertical"
+    android:layout_marginRight="@dimen/fc_margin_horizontal"
     app:cardCornerRadius="@dimen/fc_corner_radius"
     app:cardElevation="@dimen/fc_elevation">
 
-    <!-- This LinearLayout holds and orders all TextView from one card -->
+    <!-- This LinearLayout holds the whole content of the cardview -->
     <LinearLayout
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_vertical"
-        android:orientation="vertical"
-        android:padding="@dimen/fc_individual_padding">
+        android:layout_height="wrap_content">
 
-        <TextView
-            android:id="@+id/tv_card_title"
-            android:layout_width="match_parent"
+        <!-- This LinearLayout holds and orders all TextView from one card -->
+        <LinearLayout
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="left"
-            android:textSize="@dimen/fc_large_text"
-            android:textStyle="bold" />
+            android:layout_gravity="center_vertical"
+            android:orientation="vertical"
+            android:padding="@dimen/fc_individual_padding">
 
-        <TextView
-            android:id="@+id/tv_card_detail"
-            android:layout_width="match_parent"
+            <TextView
+                android:id="@+id/tv_card_title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="left"
+                android:textSize="@dimen/fc_large_text"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/tv_card_detail"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="left"
+                android:text="Details about file"
+                android:textSize="@dimen/fc_small_text"
+                android:textStyle="italic" />
+        </LinearLayout>
+
+        <!-- The 'Open' button -->
+        <Button
+            android:id="@+id/button_card_file"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="left"
-            android:text="Details about file"
-            android:textSize="@dimen/fc_small_text"
-            android:textStyle="italic" />
+            android:layout_gravity="right"
+            android:layout_margin="@dimen/fc_open_button_margin"
+            android:background="@drawable/rounded_button"
+            android:elevation="@dimen/fc_elevation"
+            android:text="@string/button_open"
+            android:textAllCaps="false"
+            android:textColor="#FFFFFF"
+            android:textSize="18sp" />
+
     </LinearLayout>
 
-    <!-- The 'Open' button -->
-    <Button
-        android:id="@+id/button_card_file"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="right"
-        android:layout_margin="@dimen/fc_open_button_margin"
-        android:background="@drawable/rounded_button"
-        android:elevation="@dimen/fc_elevation"
-        android:text="@string/button_open"
-        android:textAllCaps="false"
-        android:textColor="#FFFFFF"
-        android:textSize="18sp" />
 
 </android.support.v7.widget.CardView>
