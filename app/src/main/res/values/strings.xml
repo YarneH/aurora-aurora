@@ -18,4 +18,7 @@
 
     <!-- Recycler View strings -->
     <string name="button_open">Open</string>
+
+    <!-- Card File strings -->
+    <string name="file_details">Details about file</string>
 </resources>

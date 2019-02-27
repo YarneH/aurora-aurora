@@ -23,7 +23,7 @@
             android:layout_gravity="center_vertical"
             android:orientation="vertical"
             android:padding="@dimen/fc_individual_padding">
-
+            <!-- File name -->
             <TextView
                 android:id="@+id/tv_card_title"
                 android:layout_width="match_parent"
@@ -31,13 +31,13 @@
                 android:layout_gravity="left"
                 android:textSize="@dimen/fc_large_text"
                 android:textStyle="bold" />
-
+            <!-- Details about file -->
             <TextView
                 android:id="@+id/tv_card_detail"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="left"
-                android:text="Details about file"
+                android:text="@string/file_details"
                 android:textSize="@dimen/fc_small_text"
                 android:textStyle="italic" />
         </LinearLayout>
