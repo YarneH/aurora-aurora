@@ -13,6 +13,8 @@ import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import java.util.Locale;
+
 /**
  * The adapter for the RecyclerView of the file-cards
  */
@@ -100,7 +102,7 @@ public class CardFileAdapter extends RecyclerView.Adapter<CardFileAdapter.CardFi
         public void bind(int i) {
             index = i;
             // Set name of the correct file to the reused container.
-            mTextView.setText("File " + String.valueOf(i));
+            mTextView.setText(String.format(Locale.getDefault(), "File %d", i));
 
             /*
             If the card is the selected card, expand it (as it was when it was scrolled away
@@ -163,6 +165,7 @@ public class CardFileAdapter extends RecyclerView.Adapter<CardFileAdapter.CardFi
     /**
      * Expand the view to show details.
      * Simply sets the visibility of the details to VISIBLE, while setting the original card to GONE
+     *
      * @param v view to expand
      */
     public static void expand(final View v) {
@@ -175,6 +178,7 @@ public class CardFileAdapter extends RecyclerView.Adapter<CardFileAdapter.CardFi
     /**
      * Collapse an expanded view.
      * Swaps visibility of the detail view and base view to GONE and VISIBLE respectively.
+     *
      * @param v view to collapse
      */
     public static void collapse(final View v) {
