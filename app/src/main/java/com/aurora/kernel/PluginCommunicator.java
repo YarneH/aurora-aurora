@@ -19,48 +19,56 @@ public class PluginCommunicator extends Communicator {
     private PluginFragment mPluginFragment;
     private PluginRegistry mPluginRegistry;
 
-    private Observable<OpenFileWithPluginRequest> pluginEventObservable;
-    private Observable<PluginSettingsRequest> pluginSettingsEventsObservable;
+    private Observable<OpenFileWithPluginRequest> mOpenFileWithPluginRequestObservable;
+    private Observable<PluginSettingsRequest> mPluginSettingsRequestObservable;
 
     public PluginCommunicator(Bus bus, PluginRegistry pluginRegistry) {
         super(bus);
 
         this.mPluginRegistry = pluginRegistry;
 
-        pluginEventObservable = mBus.register(OpenFileWithPluginRequest.class);
-        pluginEventObservable.subscribe((OpenFileWithPluginRequest openFileWithPluginRequest) -> openFileWithPlugin(openFileWithPluginRequest.getPluginName(), openFileWithPluginRequest.getFileRef()));
+        // Register for requests to open file with plugin
+        mOpenFileWithPluginRequestObservable = mBus.register(OpenFileWithPluginRequest.class);
 
-        pluginSettingsEventsObservable = mBus.register(PluginSettingsRequest.class);
-        pluginSettingsEventsObservable.subscribe((PluginSettingsRequest pluginSettingsRequest) -> {
-            getSettingsActivity(pluginSettingsRequest.getPluginName());
-        });
+        // When a request comes in, call appropriate function
+        mOpenFileWithPluginRequestObservable.subscribe((OpenFileWithPluginRequest openFileWithPluginRequest) ->
+                openFileWithPlugin(openFileWithPluginRequest.getPluginName(), openFileWithPluginRequest.getFileRef())
+        );
+
+
+        mPluginSettingsRequestObservable = mBus.register(PluginSettingsRequest.class);
+        mPluginSettingsRequestObservable.subscribe((PluginSettingsRequest pluginSettingsRequest) ->
+                getSettingsActivity(pluginSettingsRequest.getPluginName())
+        );
 
     }
 
     /**
-     * Requests settingActivity from a pluginFragment
+     * Requests the settings of a given plugin
      *
-     * @return Class reference of the activity to open
+     * @param pluginName the name of the plugin to get the settings for
      */
-    private Class<Activity> getSettingsActivity(String pluginName) {
+    private void getSettingsActivity(String pluginName) {
+        // TODO: get settings
+        // TODO: make a PluginSettingsResponse
         Log.d("PluginCommunicator", "Not implemented yet!");
-        return null;
     }
 
-    private Fragment openFileWithPlugin(String pluginName, String fileRef) {
+
+    private void openFileWithPlugin(String pluginName, String fileRef) {
+        // TODO: get file representation
+        // TODO: make an OpenFileWithPluginResponse
         Log.d("PluginCommunicator", "Not implemented yet!");
-        return null;
     }
 
     public void processFileWithPluginProcessor(PluginProcessor pluginProcessor, String fileRef) {
 
         // TODO This event should be captured by processingcomm and internalcache, but only be replied once
+        // TODO Make different request and handle the results here
         this.mBus.post(new PluginProcessorRequest(pluginProcessor, fileRef));
 
         Log.d("PluginCommunicator", "Not implemented yet!");
     }
-
-
 
 
 }
