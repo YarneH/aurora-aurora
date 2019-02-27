@@ -13,14 +13,13 @@
             android:id="@+id/nav_settings"
             android:icon="@drawable/ic_nav_settings"
             android:title="@string/settings" />
-
-        <item
-            android:id="@+id/nav_help_feedback"
-            android:icon="@drawable/ic_nav_help"
-            android:title="@string/help_feedback" />
         <item
             android:id="@+id/nav_about_us"
             android:icon="@drawable/ic_nav_info"
             android:title="@string/about_us" />
     </group>
+    <item
+        android:id="@+id/nav_help_feedback"
+        android:icon="@drawable/ic_nav_help"
+        android:title="@string/help_feedback" />
 </menu>
