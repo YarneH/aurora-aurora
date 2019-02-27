@@ -3,9 +3,9 @@ package com.aurora.kernel.event;
 /**
  * Event to request a list of installed plugins
  */
-public class RequestPluginsEvent extends Event {
+public class ListPluginsRequest extends Event {
 
-    public RequestPluginsEvent() {
+    public ListPluginsRequest() {
         super();
     }
 }

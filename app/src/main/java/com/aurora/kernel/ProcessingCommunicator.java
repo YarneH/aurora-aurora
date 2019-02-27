@@ -2,8 +2,8 @@ package com.aurora.kernel;
 
 import android.util.Log;
 
-import com.aurora.kernel.event.InternalProcessorEvent;
-import com.aurora.kernel.event.PluginProcessorEvent;
+import com.aurora.kernel.event.InternalProcessorRequest;
+import com.aurora.kernel.event.PluginProcessorRequest;
 import com.aurora.plugin.PluginProcessor;
 
 import java.util.Map;
@@ -17,14 +17,14 @@ public class ProcessingCommunicator extends Communicator {
 
     private PluginProcessor activePluginProcessor;
 
-    private Observable<PluginProcessorEvent> pluginProcessorEventObservable;
+    private Observable<PluginProcessorRequest> pluginProcessorEventObservable;
 
     public ProcessingCommunicator(Bus mBus) {
         super(mBus);
 
-        pluginProcessorEventObservable = mBus.register(PluginProcessorEvent.class);
-        pluginProcessorEventObservable.subscribe((PluginProcessorEvent pluginProcessorEvent) -> {
-            processFileWithPluginProcessor(pluginProcessorEvent.getPluginProcessor(), pluginProcessorEvent.getFileRef());
+        pluginProcessorEventObservable = mBus.register(PluginProcessorRequest.class);
+        pluginProcessorEventObservable.subscribe((PluginProcessorRequest pluginProcessorRequest) -> {
+            processFileWithPluginProcessor(pluginProcessorRequest.getPluginProcessor(), pluginProcessorRequest.getFileRef());
         });
     }
 
@@ -37,7 +37,7 @@ public class ProcessingCommunicator extends Communicator {
      * Part of API exposed to plugin processors to process a file with the internal processor of Aurora
      */
     public void processFileWithAuroraProcessor(String fileref, Map<String, ?> parameters) {
-        this.mBus.post(new InternalProcessorEvent(fileref, parameters));
+        this.mBus.post(new InternalProcessorRequest(fileref, parameters));
 
         Log.d("ProcessorCommunicator", "Not implemented yet!");
     }

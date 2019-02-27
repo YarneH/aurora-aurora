@@ -5,11 +5,11 @@ import com.aurora.plugin.PluginProcessor;
 /**
  * Event to request that a file is processed with a PluginProcessor
  */
-public class PluginProcessorEvent extends Event {
+public class PluginProcessorRequest extends Event {
     private PluginProcessor mPluginProcessor;
     private String mFileRef;
 
-    public PluginProcessorEvent(PluginProcessor pluginProcessor, String fileRef) {
+    public PluginProcessorRequest(PluginProcessor pluginProcessor, String fileRef) {
         this.mPluginProcessor = pluginProcessor;
         this.mFileRef = fileRef;
     }

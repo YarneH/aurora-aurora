@@ -5,12 +5,12 @@ import java.util.Map;
 /**
  * Event to request that a file is processed with a InternalProcessor
  */
-public class InternalProcessorEvent extends Event {
+public class InternalProcessorRequest extends Event {
 
     private String mFileRef;
     private Map<String, ?> mParameters;
 
-    public InternalProcessorEvent(String fileRef, Map parameters) {
+    public InternalProcessorRequest(String fileRef, Map<String, ?> parameters) {
         this.mFileRef = fileRef;
         this.mParameters = parameters;
     }

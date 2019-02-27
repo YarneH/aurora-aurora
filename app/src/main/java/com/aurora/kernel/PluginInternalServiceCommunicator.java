@@ -2,7 +2,7 @@ package com.aurora.kernel;
 
 import android.util.Log;
 
-import com.aurora.kernel.event.InternalProcessorEvent;
+import com.aurora.kernel.event.InternalProcessorRequest;
 
 import java.util.Map;
 
@@ -13,14 +13,14 @@ import io.reactivex.Observable;
  */
 public class PluginInternalServiceCommunicator extends Communicator {
 
-    private Observable<InternalProcessorEvent> internalProcessorEventObservable;
+    private Observable<InternalProcessorRequest> internalProcessorEventObservable;
 
     public PluginInternalServiceCommunicator(Bus mBus) {
         super(mBus);
 
-        internalProcessorEventObservable = mBus.register(InternalProcessorEvent.class);
-        internalProcessorEventObservable.subscribe((InternalProcessorEvent internalProcessorEvent) -> {
-            processFileWithInternalProcessor(internalProcessorEvent.getFileRef(), internalProcessorEvent.getParameters());
+        internalProcessorEventObservable = mBus.register(InternalProcessorRequest.class);
+        internalProcessorEventObservable.subscribe((InternalProcessorRequest internalProcessorRequest) -> {
+            processFileWithInternalProcessor(internalProcessorRequest.getFileRef(), internalProcessorRequest.getParameters());
         });
     }
 

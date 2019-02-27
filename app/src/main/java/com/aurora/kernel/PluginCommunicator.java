@@ -4,9 +4,9 @@ import android.app.Activity;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 
-import com.aurora.kernel.event.PluginEvent;
-import com.aurora.kernel.event.PluginProcessorEvent;
-import com.aurora.kernel.event.PluginSettingsEvent;
+import com.aurora.kernel.event.OpenFileWithPluginRequest;
+import com.aurora.kernel.event.PluginProcessorRequest;
+import com.aurora.kernel.event.PluginSettingsRequest;
 import com.aurora.plugin.PluginFragment;
 import com.aurora.plugin.PluginProcessor;
 
@@ -19,20 +19,20 @@ public class PluginCommunicator extends Communicator {
     private PluginFragment mPluginFragment;
     private PluginRegistry mPluginRegistry;
 
-    private Observable<PluginEvent> pluginEventObservable;
-    private Observable<PluginSettingsEvent> pluginSettingsEventsObservable;
+    private Observable<OpenFileWithPluginRequest> pluginEventObservable;
+    private Observable<PluginSettingsRequest> pluginSettingsEventsObservable;
 
     public PluginCommunicator(Bus bus, PluginRegistry pluginRegistry) {
         super(bus);
 
         this.mPluginRegistry = pluginRegistry;
 
-        pluginEventObservable = mBus.register(PluginEvent.class);
-        pluginEventObservable.subscribe((PluginEvent pluginEvent) -> openFileWithPlugin(pluginEvent.getPluginName(), pluginEvent.getFileRef()));
+        pluginEventObservable = mBus.register(OpenFileWithPluginRequest.class);
+        pluginEventObservable.subscribe((OpenFileWithPluginRequest openFileWithPluginRequest) -> openFileWithPlugin(openFileWithPluginRequest.getPluginName(), openFileWithPluginRequest.getFileRef()));
 
-        pluginSettingsEventsObservable = mBus.register(PluginSettingsEvent.class);
-        pluginSettingsEventsObservable.subscribe((PluginSettingsEvent pluginSettingsEvent) -> {
-            getSettingsActivity(pluginSettingsEvent.getPluginName());
+        pluginSettingsEventsObservable = mBus.register(PluginSettingsRequest.class);
+        pluginSettingsEventsObservable.subscribe((PluginSettingsRequest pluginSettingsRequest) -> {
+            getSettingsActivity(pluginSettingsRequest.getPluginName());
         });
 
     }
@@ -55,7 +55,7 @@ public class PluginCommunicator extends Communicator {
     public void processFileWithPluginProcessor(PluginProcessor pluginProcessor, String fileRef) {
 
         // TODO This event should be captured by processingcomm and internalcache, but only be replied once
-        this.mBus.post(new PluginProcessorEvent(pluginProcessor, fileRef));
+        this.mBus.post(new PluginProcessorRequest(pluginProcessor, fileRef));
 
         Log.d("PluginCommunicator", "Not implemented yet!");
     }

@@ -3,11 +3,11 @@ package com.aurora.kernel.event;
 /**
  * Event to request the settings activity of a plugin
  */
-public class PluginSettingsEvent extends Event {
+public class PluginSettingsRequest extends Event {
 
     private String mPluginName;
 
-    public PluginSettingsEvent(String pluginName) {
+    public PluginSettingsRequest(String pluginName) {
         super();
         this.mPluginName = pluginName;
     }
