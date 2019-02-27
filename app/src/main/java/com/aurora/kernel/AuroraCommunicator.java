@@ -32,6 +32,10 @@ public class AuroraCommunicator extends Communicator {
         this.mBus.post(new OpenFileWithPluginRequest(pluginName, fileRef));
 
         // TODO: Before implementing this, first do testing
+        // When implementing this, first subscribe to the response on the event bus
+        // Then, send the request event via the post method.
+        // Since the bus returns an Observable<OpenFileWithPluginResponse>, the observable
+        // will need to be mapped to extract the actual fragment from the event (ask Robbe)
         Log.d("AuroraCommunicator", "Callback not implemented yet!");
         return null;
     }
