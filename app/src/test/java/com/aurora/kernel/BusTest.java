@@ -39,7 +39,6 @@ public class BusTest {
     }
 
 
-
     /**
      * Test event class
      */
