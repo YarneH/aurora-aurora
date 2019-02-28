@@ -34,7 +34,8 @@ class Bus {
                         T res = (T) obj;
                         return res;
                     }
-                    return null; // This should not happen
+                    // This should not happen
+                    return null;
                 });
     }
 
