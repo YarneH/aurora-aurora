@@ -1,29 +1,28 @@
 package com.aurora.aurora;
 
 import android.os.AsyncTask;
-import android.os.NetworkOnMainThreadException;
-import android.support.design.widget.NavigationView;
+import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 
 import org.json.JSONObject;
 
-import java.io.BufferedOutputStream;
 import java.io.DataOutputStream;
-import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.security.spec.ECField;
-import java.util.concurrent.ExecutionException;
 
 public class FeedbackActivity extends AppCompatActivity {
 
     EditText mEditTextFeedback;
 
+    /**
+     * Runs on startup of the activity, in this case on startup of the app
+     *
+     * @param savedInstanceState
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -34,6 +33,13 @@ public class FeedbackActivity extends AppCompatActivity {
     }
 
     // This will start a SendFeedbackTask and notice the user whether it succeeded or not
+
+    /**
+     * When the user clicks on the 'Send'-button,
+     * this will start a SendFeedbackTask and notice the user whether it succeeded or not
+     *
+     * @param view
+     */
     public void onFeedbackClick(View view) {
         boolean success = false;
         String input = mEditTextFeedback.getText().toString();
@@ -59,8 +65,18 @@ public class FeedbackActivity extends AppCompatActivity {
 
     }
 
+    /**
+     * A task which will run asynchronously and send the feedback to our Slack channel
+     */
     static class SendFeedbackTask extends AsyncTask<String, Void, Boolean> {
-        protected Boolean doInBackground(String... urls) {
+
+        /**
+         * The background task of the AsyncTask which is called when the task is executed
+         *
+         * @param args the 0th element is the input-string of the user
+         * @return boolean which indicates whether the task succeeded or failed
+         */
+        protected Boolean doInBackground(String... args) {
             boolean success = false;
             HttpURLConnection conn = null;
 
@@ -75,7 +91,7 @@ public class FeedbackActivity extends AppCompatActivity {
 
                 // Add the stringWebHook to the JSONObject
                 JSONObject jsonParam = new JSONObject();
-                jsonParam.put("text", urls[0]);
+                jsonParam.put("text", args[0]);
 
                 DataOutputStream os = new DataOutputStream(conn.getOutputStream());
                 os.writeBytes(jsonParam.toString());
