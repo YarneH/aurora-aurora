@@ -162,6 +162,8 @@ public class CardFileAdapter extends RecyclerView.Adapter<CardFileAdapter.CardFi
         }
     }
 
+//    TODO: Expanding card when another expanded card is in view results in the card growing upwards instead of down. Scrolling down before expanding "solves" this.
+//    Fix This bug :)
     /**
      * Expand the view to show details.
      * Simply sets the visibility of the details to VISIBLE, while setting the original card to GONE
