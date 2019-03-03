@@ -2,6 +2,8 @@
 import net.sf.json.JSONArray
 import net.sf.json.JSONObject
 
+def buildUnstable = false
+
 pipeline {
     agent any
 
@@ -56,12 +58,12 @@ pipeline {
 
             post {
                 unstable {
-                    slack_error_analysis_unstable()
                     error 'Build unstable.'
+                    unstable = true
                 }
 
                 failure {
-                    slack_error_analysis()
+                    slack_error_analysis(unstable)
                 }
 
             }
@@ -141,8 +143,12 @@ def slack_error_test() {
 /**
  * Gets called when static analysis fails
  */
-def slack_error_analysis() {
-    slack_report(false, ':x: Static analysis failed', null, 'Static analysis')
+def slack_error_analysis(boolean unstable) {
+    if (unstable) {
+        slack_error_analysis_unstable()
+    } else {
+        slack_report(false, ':x: Static analysis failed', null, 'Static analysis')
+    }
 }
 
 
