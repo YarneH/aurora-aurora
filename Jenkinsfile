@@ -47,21 +47,6 @@ pipeline {
             }
         } // Unit test stage
 
-        stage('Static analysis') {
-            steps {
-                // Run Lint and analyse the results
-                sh './gradlew lintDebug'
-                androidLint pattern: '**/lint-results-*.xml', failedNewHigh: '0', failedTotalAll: '5', failedNewAll: '0'
-            }
-
-            post {
-                unsuccessful {
-                    slack_error_analysis()
-                    currentBuild.currentResult = 'FAILURE'
-                }
-            }
-        } // Static analysis stage
-
         stage('SonarQube') {
             steps {
                 withSonarQubeEnv("Aurora SonarQube") {
@@ -83,6 +68,20 @@ pipeline {
                 }
             }
         } // SonarQube stage
+
+        stage('Static analysis') {
+            steps {
+                // Run Lint and analyse the results
+                sh './gradlew lintDebug'
+                androidLint pattern: '**/lint-results-*.xml', failedTotalAll: '5', failedNewAll: '0'
+            }
+
+            post {
+                unsuccessful {
+                    slack_error_analysis()
+                }
+            }
+        } // Static analysis stage
 
         stage('Deploy') {
             when {
