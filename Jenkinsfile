@@ -70,7 +70,7 @@ pipeline {
         stage('SonarQube') {
             steps {
                 withSonarQubeEnv("Aurora SonarQube") {
-                    sh "${scannerHome}/bin/sonar-scanner -Dproject.settings=sonar-project.properties -Dsonar.branch=${env.BRANCH_NAME}"
+                    sh "${scannerHome}/bin/sonar-scanner -X -Dproject.settings=sonar-project.properties -Dsonar.branch=${env.BRANCH_NAME}"
                 }
                 script {
                     timeout(time: 1, unit: 'HOURS') {
