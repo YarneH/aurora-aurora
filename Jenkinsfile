@@ -58,8 +58,10 @@ pipeline {
 
             post {
                 unstable {
-                    error 'Build unstable.'
-                    unstable = true
+                    script {
+                        error 'Build unstable.'
+                        unstable = true                        
+                    }
                 }
 
                 failure {
