@@ -57,6 +57,7 @@ pipeline {
             post {
                 unsuccessful {
                     slack_error_analysis()
+                    error 'build failed'
                 }
             }
         } // Static analysis stage
