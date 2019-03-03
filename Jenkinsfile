@@ -6,7 +6,7 @@ pipeline {
     agent any
 
     environment {
-        scannerHome = tool 'sonarscanner'
+        scannerHome = tool '/var/jenkins_home/sonar-scanner/'
     }
 
     stages {
@@ -68,8 +68,8 @@ pipeline {
 
         stage('SonarQube') {
             steps {
-                withSonarQubeEnv("SonarQube") {
-                    sh '${scannerHome}/bin/sonar-scanner -Dproject.settings=sonar-project.properties -Dsonar.branch=${env.BRANCH_NAME}'
+                withSonarQubeEnv("SonarQube scanner") {
+                    sh '${scannerHome}/sonar-scanner-3.3.0.1492-linux -Dproject.settings=sonar-project.properties -Dsonar.branch=${env.BRANCH_NAME}'
                 }
                 script {
                     timeout(time: 1, unit: 'HOURS') {
