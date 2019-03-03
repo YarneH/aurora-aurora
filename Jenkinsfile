@@ -57,6 +57,7 @@ pipeline {
         //     post {
         //         unstable {
         //             slack_error_analysis_unstable()
+        //             error 'Build unstable.'
         //         }
         //
         //         failure {
@@ -68,7 +69,7 @@ pipeline {
 
         stage('SonarQube') {
             steps {
-                withSonarQubeEnv("SonarQube scanner") {
+                withSonarQubeEnv("Aurora SonarQube") {
                     sh '${scannerHome}/bin/sonar-scanner -Dproject.settings=sonar-project.properties -Dsonar.branch=${env.BRANCH_NAME}'
                 }
                 script {
