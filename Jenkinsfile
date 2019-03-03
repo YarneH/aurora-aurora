@@ -59,12 +59,12 @@ pipeline {
                 unstable {
                     script {
                         error 'Build unstable.'
-                        unstable = true
+                        buildUnstable = true
                     }
                 }
 
                 failure {
-                    slack_error_analysis(unstable)
+                    slack_error_analysis(buildUnstable)
                 }
 
             }
