@@ -51,18 +51,13 @@ pipeline {
             steps {
                 // Run Lint and analyse the results
                 sh './gradlew lintDebug'
-                androidLint pattern: '**/lint-results-*.xml', unstableTotalAll: '5', failedNewHigh: '0', failedTotalAll: '20'
+                androidLint pattern: '**/lint-results-*.xml', failedNewHigh: '0', failedTotalAll: '5'
             }
 
             post {
-                unstable {
-                    slack_error_analysis_unstable()
-                }
-
                 failure {
                     slack_error_analysis()
                 }
-
             }
         } // Static analysis stage
 
