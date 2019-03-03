@@ -2,13 +2,12 @@
 import net.sf.json.JSONArray
 import net.sf.json.JSONObject
 
-def buildUnstable = false
-
 pipeline {
     agent any
 
     environment {
         scannerHome = tool 'sonarscanner'
+        buildUnstable = false
     }
 
     stages {
@@ -60,7 +59,7 @@ pipeline {
                 unstable {
                     script {
                         error 'Build unstable.'
-                        unstable = true                        
+                        unstable = true
                     }
                 }
 
