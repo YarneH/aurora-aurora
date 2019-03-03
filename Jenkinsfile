@@ -47,24 +47,24 @@ pipeline {
             }
         } // Unit test stage
 
-        stage('Static analysis') {
-            steps {
-                // Run Lint and analyse the results
-                sh './gradlew lintDebug'
-                androidLint pattern: '**/lint-results-*.xml', unstableTotalAll: '5', failedNewHigh: '0', failedTotalAll: '20'
-            }
-
-            post {
-                unstable {
-                    slack_error_analysis_unstable()
-                }
-
-                failure {
-                    slack_error_analysis()
-                }
-
-            }
-        } // Static analysis stage
+        // stage('Static analysis') {
+        //     steps {
+        //         // Run Lint and analyse the results
+        //         sh './gradlew lintDebug'
+        //         androidLint pattern: '**/lint-results-*.xml', unstableTotalAll: '5', failedNewHigh: '0', failedTotalAll: '20'
+        //     }
+        //
+        //     post {
+        //         unstable {
+        //             slack_error_analysis_unstable()
+        //         }
+        //
+        //         failure {
+        //             slack_error_analysis()
+        //         }
+        //
+        //     }
+        // } // Static analysis stage
 
         stage('SonarQube') {
             steps {
