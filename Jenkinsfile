@@ -7,7 +7,6 @@ pipeline {
 
     environment {
         scannerHome = tool 'sonarscanner'
-        buildUnstable = false
     }
 
     stages {
@@ -57,16 +56,11 @@ pipeline {
 
             post {
                 unstable {
-                    script {
-                        error 'Build unstable.'
-                        buildUnstable = true
-                    }
+                    slack_error_analysis_unstable()
                 }
 
                 failure {
-                    script {
-                        slack_error_analysis(buildUnstable)
-                    }
+                    slack_error_analysis()
                 }
 
             }
@@ -146,12 +140,8 @@ def slack_error_test() {
 /**
  * Gets called when static analysis fails
  */
-def slack_error_analysis(boolean unstable) {
-    if (unstable) {
-        slack_error_analysis_unstable()
-    } else {
-        slack_report(false, ':x: Static analysis failed', null, 'Static analysis')
-    }
+def slack_error_analysis() {
+    slack_report(false, ':x: Static analysis failed', null, 'Static analysis')
 }
 
 
