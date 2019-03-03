@@ -64,7 +64,9 @@ pipeline {
                 }
 
                 failure {
-                    slack_error_analysis(buildUnstable)
+                    script {
+                        slack_error_analysis(buildUnstable)
+                    }
                 }
 
             }
