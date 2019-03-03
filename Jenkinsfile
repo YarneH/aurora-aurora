@@ -55,7 +55,7 @@ pipeline {
             }
 
             post {
-                unsucessful {
+                unsuccessful {
                     slack_error_analysis()
                 }
             }
