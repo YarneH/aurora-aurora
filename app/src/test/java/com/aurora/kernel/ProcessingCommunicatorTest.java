@@ -1,7 +1,7 @@
 package com.aurora.kernel;
 
+import com.aurora.internalservice.internalprocessor.ExtractedText;
 import com.aurora.kernel.event.InternalProcessorResponse;
-import com.aurora.plugin.ProcessedText;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -36,14 +36,14 @@ public class ProcessingCommunicatorTest {
                         .collect(Collectors.toList());
 
         // Create test observer to subscribe to observable
-        TestObserver<ProcessedText> observer = new TestObserver<>();
+        TestObserver<ExtractedText> observer = new TestObserver<>();
 
         // Call method under test
-        Observable<ProcessedText>
+        Observable<ExtractedText>
                 processedTextObservable = mProcessingCommunicator.processFileWithAuroraProcessor(fileRef);
 
         // Make dummy processed text
-        ProcessedText text = new ProcessedText(title, paragraphs);
+        ExtractedText text = new ExtractedText(title, paragraphs);
 
         // Subscribe to observable
         processedTextObservable.subscribe(observer);

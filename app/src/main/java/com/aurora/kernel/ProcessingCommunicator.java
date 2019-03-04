@@ -2,11 +2,11 @@ package com.aurora.kernel;
 
 import android.util.Log;
 
+import com.aurora.internalservice.internalprocessor.ExtractedText;
 import com.aurora.kernel.event.InternalProcessorRequest;
 import com.aurora.kernel.event.InternalProcessorResponse;
 import com.aurora.kernel.event.PluginProcessorRequest;
 import com.aurora.plugin.PluginProcessor;
-import com.aurora.plugin.ProcessedText;
 
 import io.reactivex.Observable;
 
@@ -53,9 +53,9 @@ public class ProcessingCommunicator extends Communicator {
      * @param fileRef a reference to where the file can be found
      * @return An observable that contains the processed text
      */
-    public Observable<ProcessedText> processFileWithAuroraProcessor(String fileRef) {
+    public Observable<ExtractedText> processFileWithAuroraProcessor(String fileRef) {
         this.mBus.post(new InternalProcessorRequest(fileRef));
 
-        return mInternalProcessorResponseObservable.map(InternalProcessorResponse::getProcessedText);
+        return mInternalProcessorResponseObservable.map(InternalProcessorResponse::getExtractedText);
     }
 }

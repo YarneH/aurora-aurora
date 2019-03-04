@@ -1,18 +1,18 @@
 package com.aurora.kernel.event;
 
-import com.aurora.plugin.ProcessedText;
+import com.aurora.internalservice.internalprocessor.ExtractedText;
 
 /**
  * Event to respond that a file has been processed internally
  */
 public class InternalProcessorResponse extends Event {
-    private ProcessedText mProcessedText;
+    private ExtractedText mExtractedText;
 
-    public InternalProcessorResponse(ProcessedText processedText) {
-        mProcessedText = processedText;
+    public InternalProcessorResponse(ExtractedText extractedText) {
+        mExtractedText = extractedText;
     }
 
-    public ProcessedText getProcessedText() {
-        return mProcessedText;
+    public ExtractedText getExtractedText() {
+        return mExtractedText;
     }
 }
