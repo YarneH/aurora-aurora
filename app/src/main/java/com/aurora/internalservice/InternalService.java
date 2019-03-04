@@ -3,7 +3,7 @@ package com.aurora.internalservice;
 /**
  * Abstract class maintaining some properties and methods for an
  */
-public abstract class InternalService {
+public interface InternalService {
 
     // TODO: Will probably return something instead of void!
     /**
@@ -11,5 +11,5 @@ public abstract class InternalService {
      *
      * @param fileRef a reference to where the file can be found
      */
-    public abstract void process(String fileRef);
+    void process(String fileRef);
 }
