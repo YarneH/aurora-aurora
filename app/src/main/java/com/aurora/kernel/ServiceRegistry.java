@@ -8,5 +8,5 @@ import java.util.Map;
  * Registry for (internal) services
  */
 abstract class ServiceRegistry {
-    Map<String, InternalService> mServiceMap;
+    private Map<String, InternalService> mServiceMap;
 }

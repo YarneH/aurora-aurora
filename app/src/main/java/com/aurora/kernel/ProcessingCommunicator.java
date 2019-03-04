@@ -23,9 +23,9 @@ public class ProcessingCommunicator extends Communicator {
         super(mBus);
 
         pluginProcessorEventObservable = mBus.register(PluginProcessorRequest.class);
-        pluginProcessorEventObservable.subscribe((PluginProcessorRequest pluginProcessorRequest) -> {
-            processFileWithPluginProcessor(pluginProcessorRequest.getPluginProcessor(), pluginProcessorRequest.getFileRef());
-        });
+        pluginProcessorEventObservable.subscribe((PluginProcessorRequest pluginProcessorRequest) ->
+                processFileWithPluginProcessor(pluginProcessorRequest.getPluginProcessor(),
+                        pluginProcessorRequest.getFileRef()));
     }
 
     private void processFileWithPluginProcessor(PluginProcessor pluginProcessor, String fileref) {

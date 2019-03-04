@@ -20,7 +20,8 @@ public class PluginInternalServiceCommunicator extends Communicator {
 
         internalProcessorEventObservable = mBus.register(InternalProcessorRequest.class);
         internalProcessorEventObservable.subscribe((InternalProcessorRequest internalProcessorRequest) ->
-                processFileWithInternalProcessor(internalProcessorRequest.getFileRef(), internalProcessorRequest.getParameters()));
+                processFileWithInternalProcessor(internalProcessorRequest.getFileRef(),
+                        internalProcessorRequest.getParameters()));
     }
 
     private void processFileWithInternalProcessor(String fileRef, Map<String, ?> parameters) {
