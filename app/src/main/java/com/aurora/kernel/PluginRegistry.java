@@ -6,6 +6,7 @@ import com.aurora.plugin.BasicPlugin;
 import com.aurora.plugin.Plugin;
 import com.aurora.plugin.PluginFragment;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -31,18 +32,18 @@ class PluginRegistry {
      * @return the plugin object associated with the name or null if not found
      */
     private Plugin resolvePlugin(String pluginName) {
-        Log.d("PluginRegistry", "Not implemented yet!");
+        Log.d("PluginRegistry", "resolvePlugin not implemented yet! " + pluginName);
         return null;
     }
 
     /**
-     * Finds the PLuginFragment to show given a plugin name
+     * Finds the PluginFragment to show given a plugin name
      *
      * @param pluginName the name of the plugin to load
      * @return the PluginFragment associated with the plugin name or null if not found
      */
     public PluginFragment loadPlugin(String pluginName) {
-        Log.d("PluginRegistry", "Not implemented yet!");
+        Log.d("PluginRegistry", "loadPlugin not implemented yet!" + pluginName);
         return null;
     }
 
@@ -53,6 +54,6 @@ class PluginRegistry {
      */
     public List<BasicPlugin> getPlugins() {
         Log.d("PluginRegistry", "Not implemented yet!");
-        return null;
+        return new ArrayList<>();
     }
 }

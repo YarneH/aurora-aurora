@@ -1,12 +1,11 @@
 package com.aurora.kernel;
 
-import android.app.Activity;
-import android.support.v4.app.Fragment;
 import android.util.Log;
 
 import com.aurora.kernel.event.OpenFileWithPluginRequest;
 import com.aurora.kernel.event.PluginProcessorRequest;
 import com.aurora.kernel.event.PluginSettingsRequest;
+import com.aurora.kernel.event.PluginSettingsResponse;
 import com.aurora.plugin.PluginFragment;
 import com.aurora.plugin.PluginProcessor;
 
@@ -51,14 +50,14 @@ public class PluginCommunicator extends Communicator {
     private void getSettingsActivity(String pluginName) {
         // TODO: get settings
         // TODO: make a PluginSettingsResponse
-        Log.d("PluginCommunicator", "Not implemented yet!");
+        Log.d("PluginCommunicator", "Not implemented yet! " + pluginName);
     }
 
 
     private void openFileWithPlugin(String pluginName, String fileRef) {
         // TODO: get file representation
         // TODO: make an OpenFileWithPluginResponse
-        Log.d("PluginCommunicator", "Not implemented yet!");
+        Log.d("PluginCommunicator", "Not implemented yet!" + pluginName + " " + fileRef);
     }
 
     public void processFileWithPluginProcessor(PluginProcessor pluginProcessor, String fileRef) {

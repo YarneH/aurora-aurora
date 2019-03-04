@@ -23,9 +23,10 @@ class Bus {
      */
     public <T extends Event>
     Observable<T> register(final Class<T> eventClass) {
+        // Filter events based on class
         return mBusSubject
-                .filter(event -> event.getClass().equals(eventClass)) // Filter events based on class
-                .map(obj -> {
+                .filter((Event event) -> event.getClass().equals(eventClass))
+                .map((Event obj) -> {
                     if (eventClass.isInstance(obj)) {
                         // This is an 'unsafe type cast' but it is because of how generics work
                         // in Java. In reality, it will always be possible to cast an
@@ -34,6 +35,7 @@ class Bus {
                         T res = (T) obj;
                         return res;
                     }
+
                     // This should not happen
                     return null;
                 });

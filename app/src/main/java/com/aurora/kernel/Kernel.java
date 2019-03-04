@@ -1,6 +1,6 @@
 package com.aurora.kernel;
 
-public class Kernel {
+public final class Kernel {
     private Bus mBus;
 
     private AuroraCommunicator mAuroraCommunicator;
