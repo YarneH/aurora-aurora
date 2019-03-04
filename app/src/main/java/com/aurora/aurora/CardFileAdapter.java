@@ -20,12 +20,14 @@ import java.util.Locale;
  */
 public class CardFileAdapter extends RecyclerView.Adapter<CardFileAdapter.CardFileViewHolder> {
     private static final int NO_DETAILS = -1;
-    // TODO: mAmount is currently MagicNumber, need to show actual files instead
-    private int mAmount = 100;
+    // TODO: Remove dummy amount
+    private static final int DUMMY_AMOUNT = 100;
+    private int mAmount = DUMMY_AMOUNT;
     // value of the currently selected file (file card that is expanded)
     private int mSelectedIndex = NO_DETAILS;
 
     public CardFileAdapter() {
+        // TODO: This could take an argument as input (which contains the recent files)
     }
 
     /**

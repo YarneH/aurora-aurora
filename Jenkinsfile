@@ -5,6 +5,10 @@ import net.sf.json.JSONObject
 pipeline {
     agent any
 
+    environment {
+        scannerHome = tool 'sonarscanner'
+    }
+
     stages {
         stage('Compile') {
 
@@ -43,24 +47,27 @@ pipeline {
             }
         } // Unit test stage
 
-        stage('Static analysis') {
+        stage('SonarQube') {
             steps {
-                // Run Lint and analyse the results
-                sh './gradlew lintDebug'
-                androidLint pattern: '**/lint-results-*.xml', unstableTotalAll: '5', failedNewHigh: '0', failedTotalAll: '20'
+                withSonarQubeEnv("Aurora SonarQube") {
+                    sh "${scannerHome}/bin/sonar-scanner -X -Dproject.settings=sonar-project.properties -Dsonar.branch=${env.BRANCH_NAME}"
+                }
+                script {
+                    timeout(time: 1, unit: 'HOURS') {
+                        def qg = waitForQualityGate()
+                        if (qg.status != 'OK') {
+                            error 'Sonarqube failed.'
+                        }
+                    }
+                }
             }
 
             post {
-                unstable {
-                    slack_error_analysis_unstable()
-                }
-
                 failure {
-                    slack_error_analysis()
+                    slack_error_sonar()
                 }
-
             }
-        } // Static analysis stage
+        } // SonarQube stage
     } // Stages
 
     post {
@@ -86,25 +93,13 @@ def slack_error_test() {
     slack_report(false, ':x: Tests failed', null, 'Unit Test')
 }
 
-
 /**
- * Gets called when static analysis fails
+ * Gets called when sonar fails
  */
-def slack_error_analysis() {
-    slack_report(false, ':x: Static analysis failed', null, 'Static analysis')
-}
-
-
-/**
- * Gets called when static analysis is unstable
- */
-def slack_error_analysis_unstable() {
-    slack_report(false, ':heavy_multiplication_x: Static analysis unstable', null, 'Static analysis')
-}
-
 def slack_error_sonar() {
     slack_report(false, ':x: Sonar failed', null, 'SonarQube analysis')
 }
+
 
 /**
  * Gets called when build succeeds
@@ -112,6 +107,7 @@ def slack_error_sonar() {
 def slack_success() {
     slack_report(true, ':heavy_check_mark: Build succeeded', null, '')
 }
+
 
 
 /**
@@ -198,6 +194,22 @@ def slack_report(boolean successful, String text, JSONArray fields, failedStage=
 
     actions.add(actionViewBuild)
 
+    // Add a button 'sonar log' to message that links to sonar (if sonar failed or if build was successful)
+    if (successful || failedStage == 'SonarQube analysis') {
+        JSONObject actionViewSonar = new JSONObject()
+        actionViewSonar.put('type', 'button')
+        actionViewSonar.put('text', 'Sonar log')
+        actionViewSonar.put('url', 'http://sonarqube.aurora-files.ml/projects')
+
+        if (successful) {
+            actionViewSonar.put('style', 'primary')
+        } else {
+            actionViewSonar.put('style', 'danger')
+        }
+
+        actions.add(actionViewSonar)
+    }
+
     attachment.put('actions', actions)
 
     // Add fields to message
@@ -205,8 +217,8 @@ def slack_report(boolean successful, String text, JSONArray fields, failedStage=
         attachment.put('fields', fields)
     }
 
-    // Add commit to message
     attachment.put('footer', commit)
+    // Add commit to message
 
     // Add github logo to message
     attachment.put('footer_icon', 'https://github.githubassets.com/images/modules/logos_page/Octocat.png')
@@ -214,6 +226,49 @@ def slack_report(boolean successful, String text, JSONArray fields, failedStage=
     attachments.add(attachment)
 
     String token = successful ? 'TD60N85K8/BG960T35H/zH59dbicld2uw5Tfdaipg0oL' : 'TD60N85K8/BGABQ0CS3/xS539cEwbxr6cMPvk7LMu7Ve'
+
+    slackSend(channel: '#aurora-builds', attachments: attachments.toString(), teamDomain: 'aurora1819', baseUrl: 'https://hooks.slack.com/services/', token: token)
+}
+
+
+def slack_deployed() {
+    JSONArray attachments = new JSONArray()
+    JSONObject attachment = new JSONObject()
+
+    // Get commit info
+    String commit = env.GIT_COMMIT
+    String commit_branch = env.BRANCH_NAME
+    String commit_hash = "#" + commit.substring(0, 8)
+    String commit_message = sh(script: 'git show -s --pretty=%B | head -n1', returnStdout: true).trim()
+
+    attachment.put('color', 'good')
+    attachment.put('title', commit_message + ' @ branch ' + env.BRANCH_NAME)
+    attachment.put('title_link', 'https://github.ugent.be/Aurora/aurora/commit/' + commit)
+    attachment.put('text', ':heavy_check_mark: New version deployed!')
+
+    JSONArray actions = new JSONArray()
+
+    // Add actions to message
+    JSONObject actionViewBuild = new JSONObject()
+
+    // Add a button 'build log' to message that links to Jenkins
+    actionViewBuild.put('type', 'button')
+    actionViewBuild.put('text', 'Build log')
+    actionViewBuild.put('url', env.BUILD_URL)
+
+    actions.add(actionViewBuild)
+
+    attachment.put('actions', actions)
+
+    attachment.put('footer', commit)
+    // Add commit to message
+
+    // Add github logo to message
+    attachment.put('footer_icon', 'https://github.githubassets.com/images/modules/logos_page/Octocat.png')
+
+    attachments.add(attachment)
+
+    String token = 'TD60N85K8/BG960T35H/zH59dbicld2uw5Tfdaipg0oL'
 
     slackSend(channel: '#aurora-builds', attachments: attachments.toString(), teamDomain: 'aurora1819', baseUrl: 'https://hooks.slack.com/services/', token: token)
 }
