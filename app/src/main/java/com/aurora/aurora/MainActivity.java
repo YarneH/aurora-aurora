@@ -22,7 +22,7 @@ import android.widget.Toast;
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
-    static final int REQUEST_FILE_GET = 1;
+    private static final int REQUEST_FILE_GET = 1;
 
     // Toast and TextView used for demo and preventing queued Toasts
     private Toast mToast = null;
