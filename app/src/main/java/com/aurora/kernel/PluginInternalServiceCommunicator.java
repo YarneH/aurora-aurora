@@ -4,8 +4,6 @@ import android.util.Log;
 
 import com.aurora.kernel.event.InternalProcessorRequest;
 
-import java.util.Map;
-
 import io.reactivex.Observable;
 
 /**
