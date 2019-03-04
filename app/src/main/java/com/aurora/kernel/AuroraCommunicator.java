@@ -17,6 +17,7 @@ import io.reactivex.Observable;
  * Communicator class that communicates to Aurora app environment
  */
 public class AuroraCommunicator extends Communicator {
+    private static final String CLASS_TAG = "AuroraCommunicator";
 
     public AuroraCommunicator(Bus mBus) {
         super(mBus);
@@ -36,7 +37,7 @@ public class AuroraCommunicator extends Communicator {
         // Then, send the request event via the post method.
         // Since the bus returns an Observable<OpenFileWithPluginResponse>, the observable
         // will need to be mapped to extract the actual fragment from the event (ask Robbe)
-        Log.d("AuroraCommunicator", "Callback not implemented yet!");
+        Log.d(CLASS_TAG, "Callback not implemented yet!");
         return null;
     }
 
@@ -49,7 +50,7 @@ public class AuroraCommunicator extends Communicator {
         this.mBus.post(new PluginSettingsRequest(pluginName));
 
         // TODO: Before implementing this, first do testing
-        Log.d("AuroraCommunicator", "Callback not implemented yet!");
+        Log.d(CLASS_TAG, "Callback not implemented yet!");
         return null;
     }
 
@@ -60,7 +61,7 @@ public class AuroraCommunicator extends Communicator {
         this.mBus.post(new ListPluginsRequest());
 
         // TODO: Before implementing this, first do testing
-        Log.d("AuroraCommunicator", "Callback not implemented yet!");
+        Log.d(CLASS_TAG, "Callback not implemented yet!");
         return null;
     }
 

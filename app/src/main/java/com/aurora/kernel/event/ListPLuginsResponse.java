@@ -8,7 +8,7 @@ import java.util.List;
  * Event containing a list of available plugins
  */
 public class ListPLuginsResponse extends Event {
-    List<BasicPlugin> plugins;
+    private List<BasicPlugin> plugins;
 
     public ListPLuginsResponse(List<BasicPlugin> plugins) {
         this.plugins = plugins;
