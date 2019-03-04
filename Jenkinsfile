@@ -93,13 +93,13 @@ def slack_error_test() {
     slack_report(false, ':x: Tests failed', null, 'Unit Test')
 }
 
+/**
+ * Gets called when sonar fails
+ */
 def slack_error_sonar() {
     slack_report(false, ':x: Sonar failed', null, 'SonarQube analysis')
 }
 
-def slack_error_deploy() {
-    slack_report(false, ':x: Deployment failed', null, 'Deploy')
-}
 
 /**
  * Gets called when build succeeds
