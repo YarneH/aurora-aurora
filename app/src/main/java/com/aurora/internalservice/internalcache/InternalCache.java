@@ -11,6 +11,7 @@ import java.util.List;
  * Class that interacts with cached file representations
  */
 public class InternalCache implements InternalService {
+    private static final String CLASS_TAG = "InternalCache";
 
     /**
      * Checks if a file is in cache and if so return processed version
@@ -20,11 +21,11 @@ public class InternalCache implements InternalService {
     @Override
     public void process(String fileRef) {
         // TODO: implement this
-        Log.d("InternalCache", "Not implemented yet");
+        Log.d(CLASS_TAG, "Not implemented yet");
     }
 
     public void checkCacheForProcessedFile() {
-        Log.d("InternalCache", "Not implemented yet!");
+        Log.d(CLASS_TAG, "Not implemented yet!");
     }
 
     /**
@@ -33,7 +34,7 @@ public class InternalCache implements InternalService {
      * @return a list of paths to cached files TODO: may change to CachedFile representation class!
      */
     public List<String> getFullCache() {
-        Log.d("InternalCache", "Not implemented yet!");
+        Log.d(CLASS_TAG, "Not implemented yet!");
         return new ArrayList<>();
     }
 }
