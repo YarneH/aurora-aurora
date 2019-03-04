@@ -7,7 +7,7 @@ import com.aurora.internalservice.InternalService;
 /**
  * Class that takes care of internal processing of file (such as text extraction)
  */
-public class InternalTextProcessing extends InternalService {
+public class InternalTextProcessing implements InternalService {
 
     // TODO: return type may change
     /**
