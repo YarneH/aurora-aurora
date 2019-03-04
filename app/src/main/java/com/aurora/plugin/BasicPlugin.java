@@ -7,5 +7,6 @@ import java.io.File;
  */
 public abstract class BasicPlugin {
     private String mName;
-    private File mPluginLogo; // TODO: Datatype may change
+    // TODO: Datatype may change
+    private File mPluginLogo;
 }
