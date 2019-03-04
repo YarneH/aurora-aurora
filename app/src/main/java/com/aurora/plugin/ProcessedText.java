@@ -5,7 +5,7 @@ import java.util.List;
 /**
  * Class to represent text processed by the plugin
  */
-public abstract class ProcessedText {
+public class ProcessedText {
     /**
      * The title of the text
      */
