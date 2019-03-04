@@ -1,7 +1,5 @@
 package com.aurora.kernel;
 
-import android.app.Activity;
-import android.support.v4.app.Fragment;
 import android.util.Log;
 
 import com.aurora.kernel.event.OpenFileWithPluginRequest;
