@@ -2,17 +2,15 @@ package com.aurora.kernel;
 
 import android.app.Activity;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 
 import com.aurora.kernel.event.ListPLuginsResponse;
+import com.aurora.kernel.event.ListPluginsRequest;
 import com.aurora.kernel.event.OpenFileWithPluginRequest;
 import com.aurora.kernel.event.OpenFileWithPluginResponse;
 import com.aurora.kernel.event.PluginSettingsRequest;
-import com.aurora.kernel.event.ListPluginsRequest;
 import com.aurora.kernel.event.PluginSettingsResponse;
 import com.aurora.plugin.BasicPlugin;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import io.reactivex.Observable;
