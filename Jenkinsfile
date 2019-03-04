@@ -181,13 +181,6 @@ def slack_report(boolean successful, String text, JSONArray fields, failedStage=
     actionViewBuild.put('text', 'Build log')
     actionViewBuild.put('url', env.BUILD_URL)
 
-    // Add a button 'sonar log' to message that links to sonar (if sonar failed or if build was successful)
-    if (successful || failedStage == 'SonarQube analysis') {
-        actionViewBuild.put('type', 'button')
-        actionViewBuild.put('text', 'Sonar log')
-        actionViewBuild.put('url', 'http://sonarqube.aurora-files.ml/projects')
-    }
-
     // Add if build succeeded or failed
     if (successful) {
         attachment.put('fallback', 'Run succeeded @ ' + commit_branch + '.')
@@ -200,6 +193,22 @@ def slack_report(boolean successful, String text, JSONArray fields, failedStage=
     }
 
     actions.add(actionViewBuild)
+
+    // Add a button 'sonar log' to message that links to sonar (if sonar failed or if build was successful)
+    if (successful || failedStage == 'SonarQube analysis') {
+        JSONObject actionViewSonar = new JSONObject()
+        actionViewSonar.put('type', 'button')
+        actionViewSonar.put('text', 'Sonar log')
+        actionViewSonar.put('url', 'http://sonarqube.aurora-files.ml/projects')
+
+        if (successful) {
+            actionViewSonar.put('style', 'primary')
+        } else {
+            actionViewSonar.put('style', 'danger')
+        }
+
+        actions.add(actionViewSonar)
+    }
 
     attachment.put('actions', actions)
 
