@@ -5,8 +5,13 @@ import java.io.File;
 /**
  * Class that maintains some basic information on a plugin
  */
-public abstract class BasicPlugin {
+public class BasicPlugin {
     private String mName;
     // TODO: Datatype may change
     private File mPluginLogo;
+
+    public BasicPlugin(String name, File pluginLogo) {
+        mName = name;
+        mPluginLogo = pluginLogo;
+    }
 }
