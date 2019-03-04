@@ -25,6 +25,6 @@ public class PluginInternalServiceCommunicator extends Communicator {
     }
 
     private void processFileWithInternalProcessor(String fileRef, Map<String, ?> parameters) {
-        Log.d("InternalServiceComm", "Not implemented yet!");
+        Log.d("InternalServiceComm", "Not implemented yet! " + fileRef + " " + parameters.toString());
     }
 }

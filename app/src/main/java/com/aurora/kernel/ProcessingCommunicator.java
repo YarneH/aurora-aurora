@@ -30,7 +30,7 @@ public class ProcessingCommunicator extends Communicator {
 
     private void processFileWithPluginProcessor(PluginProcessor pluginProcessor, String fileref) {
 
-        Log.d("ProcessorCommunicator", "Not implemented yet!");
+        Log.d("ProcessorCommunicator", "Not implemented yet!" + pluginProcessor.toString() + " " + fileref);
     }
 
     /**

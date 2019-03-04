@@ -32,7 +32,7 @@ class PluginRegistry {
      * @return the plugin object associated with the name or null if not found
      */
     private Plugin resolvePlugin(String pluginName) {
-        Log.d("PluginRegistry", "resolvePlugin not implemented yet!");
+        Log.d("PluginRegistry", "resolvePlugin not implemented yet! " + pluginName);
         return null;
     }
 
@@ -43,7 +43,7 @@ class PluginRegistry {
      * @return the PluginFragment associated with the plugin name or null if not found
      */
     public PluginFragment loadPlugin(String pluginName) {
-        Log.d("PluginRegistry", "loadPlugin not implemented yet!");
+        Log.d("PluginRegistry", "loadPlugin not implemented yet!" + pluginName);
         return null;
     }
 
