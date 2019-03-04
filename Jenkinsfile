@@ -68,44 +68,6 @@ pipeline {
                 }
             }
         } // SonarQube stage
-
-        stage('Static analysis') {
-            steps {
-                // Run Lint and analyse the results
-                sh './gradlew lintDebug'
-                androidLint pattern: '**/lint-results-*.xml', failedTotalAll: '5', failedNewAll: '0'
-            }
-
-            post {
-                unsuccessful {
-                    slack_error_analysis()
-                }
-            }
-        } // Static analysis stage
-
-        stage('Deploy') {
-            when {
-                branch 'master'
-            }
-
-            steps {
-                // Generate (for now unsigned) apk file
-                sh './gradlew build'
-
-                // Copy apk file to directory where web page points to
-                sh 'cp app/build/outputs/apk/release/app-release-unsigned.apk /var/www/html/download/aurora-unsigned.apk'
-            }
-
-            post {
-                failure {
-                    slack_error_deploy()
-                }
-
-                success {
-                    slack_deployed()
-                }
-            }
-        } // Deploy stage
     } // Stages
 
     post {
