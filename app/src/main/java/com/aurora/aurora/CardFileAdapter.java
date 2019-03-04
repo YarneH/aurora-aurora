@@ -16,6 +16,10 @@ import android.widget.TextView;
 public class CardFileAdapter extends RecyclerView.Adapter<CardFileAdapter.CardFileViewHolder> {
     private int mAmount = 100;
 
+    /**
+     * The constructor for the CardFileAdapter
+     * TODO: This could take an argument as input (which contains the recent files)
+     */
     public CardFileAdapter(){}
 
     @NonNull
@@ -48,7 +52,7 @@ public class CardFileAdapter extends RecyclerView.Adapter<CardFileAdapter.CardFi
         }
 
         public void bind(int i){
-            mTextView.setText("File " + String.valueOf(i));
+            mTextView.setText("File " + i);
         }
 
         @Override

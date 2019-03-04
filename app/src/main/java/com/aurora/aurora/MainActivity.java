@@ -28,7 +28,6 @@ public class MainActivity extends AppCompatActivity
     private Toast mToast;
     private TextView mTextViewMain;
     private RecyclerView mRecyclerView;
-    private CardFileAdapter mAdapter;
 
     /**
      * Runs on startup of the activity, in this case on startup of the app
@@ -72,8 +71,8 @@ public class MainActivity extends AppCompatActivity
         /* Setup RecyclerView */
         mRecyclerView = (RecyclerView) findViewById(R.id.rv_files);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
-        mAdapter = new CardFileAdapter();
-        mRecyclerView.setAdapter(mAdapter);
+        CardFileAdapter adapter = new CardFileAdapter();
+        mRecyclerView.setAdapter(adapter);
     }
 
     /**
