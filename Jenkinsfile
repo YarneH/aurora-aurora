@@ -93,22 +93,6 @@ def slack_error_test() {
     slack_report(false, ':x: Tests failed', null, 'Unit Test')
 }
 
-
-/**
- * Gets called when static analysis fails
- */
-def slack_error_analysis() {
-    slack_report(false, ':x: Static analysis failed', null, 'Static analysis')
-}
-
-
-/**
- * Gets called when static analysis is unstable
- */
-def slack_error_analysis_unstable() {
-    slack_report(false, ':heavy_multiplication_x: Static analysis unstable', null, 'Static analysis')
-}
-
 def slack_error_sonar() {
     slack_report(false, ':x: Sonar failed', null, 'SonarQube analysis')
 }
@@ -196,6 +180,13 @@ def slack_report(boolean successful, String text, JSONArray fields, failedStage=
     actionViewBuild.put('type', 'button')
     actionViewBuild.put('text', 'Build log')
     actionViewBuild.put('url', env.BUILD_URL)
+
+    // Add a button 'sonar log' to message that links to sonar (if sonar failed or if build was successful)
+    if (successful || failedStage='SonarQube analysis') {
+        actionViewBuild.put('type', 'button')
+        actionViewBuild.put('text', 'Sonar log')
+        actionViewBuild.put('url', 'http://sonarqube.aurora-files.ml/projects')
+    }
 
     // Add if build succeeded or failed
     if (successful) {
