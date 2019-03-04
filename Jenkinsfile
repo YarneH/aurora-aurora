@@ -182,7 +182,7 @@ def slack_report(boolean successful, String text, JSONArray fields, failedStage=
     actionViewBuild.put('url', env.BUILD_URL)
 
     // Add a button 'sonar log' to message that links to sonar (if sonar failed or if build was successful)
-    if (successful || failedStage='SonarQube analysis') {
+    if (successful || failedStage == 'SonarQube analysis') {
         actionViewBuild.put('type', 'button')
         actionViewBuild.put('text', 'Sonar log')
         actionViewBuild.put('url', 'http://sonarqube.aurora-files.ml/projects')
