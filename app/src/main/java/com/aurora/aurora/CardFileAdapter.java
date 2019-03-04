@@ -14,13 +14,16 @@ import android.widget.TextView;
  * The adapter for the RecyclerView of the file-cards
  */
 public class CardFileAdapter extends RecyclerView.Adapter<CardFileAdapter.CardFileViewHolder> {
-    private int mAmount = 100;
+    //TODO: Remove dummy constant
+    private static final int DUMMY_AMOUNT = 100;
+    private int mAmount = DUMMY_AMOUNT;
 
     /**
      * The constructor for the CardFileAdapter
-     * TODO: This could take an argument as input (which contains the recent files)
      */
-    public CardFileAdapter(){}
+    public CardFileAdapter() {
+        //TODO: This could take an argument as input (which contains the recent files)
+    }
 
     @NonNull
     @Override
@@ -51,14 +54,14 @@ public class CardFileAdapter extends RecyclerView.Adapter<CardFileAdapter.CardFi
             mButton.setOnClickListener(this);
         }
 
-        public void bind(int i){
+        public void bind(int i) {
             mTextView.setText("File " + i);
         }
 
         @Override
         public void onClick(View view) {
-            Snackbar.make(view, "This will open " + mTextView.getText() + " with the previously selected plugin", Snackbar.LENGTH_LONG)
-                    .setAction("Action", null).show();
+            Snackbar.make(view, "This will open " + mTextView.getText() + " with the previously selected plugin",
+                    Snackbar.LENGTH_LONG).setAction("Action", null).show();
         }
     }
 }

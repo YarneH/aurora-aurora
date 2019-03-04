@@ -25,9 +25,9 @@ public class MainActivity extends AppCompatActivity
     static final int REQUEST_FILE_GET = 1;
 
     // Toast and TextView used for demo and preventing queued Toasts
-    private Toast mToast;
-    private TextView mTextViewMain;
-    private RecyclerView mRecyclerView;
+    private Toast mToast = null;
+    private TextView mTextViewMain = null;
+    private RecyclerView mRecyclerView = null;
 
     /**
      * Runs on startup of the activity, in this case on startup of the app
@@ -169,7 +169,7 @@ public class MainActivity extends AppCompatActivity
         } else if (id == R.id.nav_home) {
             text = "Home";
             home = true;
-        } else if (id == R.id.nav_settings) {
+        } else {
             text = "Settings";
         }
         // Change text and visibility (Used for demo)
