@@ -6,7 +6,7 @@ import com.aurora.internalservice.internalprocessor.ExtractedText;
 import com.aurora.kernel.event.InternalProcessorRequest;
 import com.aurora.kernel.event.InternalProcessorResponse;
 import com.aurora.kernel.event.PluginProcessorRequest;
-import com.aurora.plugin.PluginProcessor;
+import com.aurora.processingservice.PluginProcessor;
 
 import io.reactivex.Observable;
 
@@ -19,8 +19,6 @@ public class ProcessingCommunicator extends Communicator {
 
     private Observable<PluginProcessorRequest> mPluginProcessorRequestObservable;
 
-    private Observable<InternalProcessorResponse> mInternalProcessorResponseObservable;
-
     public ProcessingCommunicator(Bus mBus) {
         super(mBus);
 
@@ -31,9 +29,6 @@ public class ProcessingCommunicator extends Communicator {
         mPluginProcessorRequestObservable.subscribe((PluginProcessorRequest pluginProcessorRequest) ->
                 processFileWithPluginProcessor(pluginProcessorRequest.getPluginProcessor(),
                         pluginProcessorRequest.getFileRef()));
-
-        // Subscribe to internal processor responses
-        mInternalProcessorResponseObservable = mBus.register(InternalProcessorResponse.class);
     }
 
     /**
@@ -54,6 +49,7 @@ public class ProcessingCommunicator extends Communicator {
      * @return An observable that contains the processed text
      */
     public Observable<ExtractedText> processFileWithAuroraProcessor(String fileRef) {
+        Observable<InternalProcessorResponse> mInternalProcessorResponseObservable = mBus.register(InternalProcessorResponse.class);
         this.mBus.post(new InternalProcessorRequest(fileRef));
 
         return mInternalProcessorResponseObservable.map(InternalProcessorResponse::getExtractedText);

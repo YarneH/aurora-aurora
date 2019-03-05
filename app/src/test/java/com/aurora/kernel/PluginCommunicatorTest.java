@@ -2,7 +2,7 @@ package com.aurora.kernel;
 
 import com.aurora.kernel.event.PluginProcessorResponse;
 import com.aurora.plugin.BasicProcessedText;
-import com.aurora.plugin.PluginProcessor;
+import com.aurora.processingservice.PluginProcessor;
 import com.aurora.plugin.ProcessedText;
 
 import org.junit.BeforeClass;

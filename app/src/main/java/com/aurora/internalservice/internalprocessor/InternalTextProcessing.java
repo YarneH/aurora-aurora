@@ -16,7 +16,7 @@ public class InternalTextProcessing implements InternalService {
      * @param fileRef a reference to where the file can be found
      */
     @Override
-    public void process(String fileRef) {
+    public void processFile(String fileRef) {
         Log.d("InternalTextProcessing", "Not implemented yet!");
     }
 }

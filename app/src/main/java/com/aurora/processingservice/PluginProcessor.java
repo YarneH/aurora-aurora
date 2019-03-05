@@ -1,4 +1,4 @@
-package com.aurora.plugin;
+package com.aurora.processingservice;
 
 /**
  * Class that maintains some information about the Plugin processor.

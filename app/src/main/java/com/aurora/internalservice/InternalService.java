@@ -1,7 +1,7 @@
 package com.aurora.internalservice;
 
 /**
- * Abstract class maintaining some properties and methods for an
+ * Abstract class maintaining some properties and methods for an InternalService
  */
 public interface InternalService {
 
@@ -11,5 +11,5 @@ public interface InternalService {
      *
      * @param fileRef a reference to where the file can be found
      */
-    void process(String fileRef);
+    void processFile(String fileRef);
 }

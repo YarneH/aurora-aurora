@@ -14,4 +14,12 @@ public class BasicPlugin {
         mName = name;
         mPluginLogo = pluginLogo;
     }
+
+    public String getName() {
+        return mName;
+    }
+
+    public File getPluginLogo() {
+        return mPluginLogo;
+    }
 }

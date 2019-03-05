@@ -7,7 +7,7 @@ import com.aurora.kernel.event.PluginProcessorRequest;
 import com.aurora.kernel.event.PluginProcessorResponse;
 import com.aurora.kernel.event.PluginSettingsRequest;
 import com.aurora.plugin.PluginFragment;
-import com.aurora.plugin.PluginProcessor;
+import com.aurora.processingservice.PluginProcessor;
 import com.aurora.plugin.ProcessedText;
 
 import io.reactivex.Observable;
@@ -22,7 +22,6 @@ public class PluginCommunicator extends Communicator {
     private Observable<OpenFileWithPluginRequest> mOpenFileWithPluginRequestObservable;
     private Observable<PluginSettingsRequest> mPluginSettingsRequestObservable;
 
-    private Observable<PluginProcessorResponse> mPluginProcessorResponseObservable;
 
     public PluginCommunicator(Bus bus, PluginRegistry pluginRegistry) {
         super(bus);
@@ -44,10 +43,6 @@ public class PluginCommunicator extends Communicator {
         mPluginSettingsRequestObservable.subscribe((PluginSettingsRequest pluginSettingsRequest) ->
                 getSettingsActivity(pluginSettingsRequest.getPluginName())
         );
-
-        // Subscribe to response events
-        mPluginProcessorResponseObservable = mBus.register(PluginProcessorResponse.class);
-
     }
 
     /**
@@ -61,7 +56,11 @@ public class PluginCommunicator extends Communicator {
         Log.d("PluginCommunicator", "Not implemented yet! " + pluginName);
     }
 
-
+    /**
+     *
+     * @param pluginName the name of the plugin to get the settings for
+     * @param fileRef a reference to the file to process
+     */
     private void openFileWithPlugin(String pluginName, String fileRef) {
         // TODO: get file representation
         // TODO: make an OpenFileWithPluginResponse
@@ -77,6 +76,7 @@ public class PluginCommunicator extends Communicator {
      * @return an observable containing the processed text
      */
     public Observable<ProcessedText> processFileWithPluginProcessor(PluginProcessor pluginProcessor, String fileRef) {
+        Observable<PluginProcessorResponse> mPluginProcessorResponseObservable = mBus.register(PluginProcessorResponse.class);
         this.mBus.post(new PluginProcessorRequest(pluginProcessor, fileRef));
 
         return mPluginProcessorResponseObservable.map(PluginProcessorResponse::getProcessedText);
