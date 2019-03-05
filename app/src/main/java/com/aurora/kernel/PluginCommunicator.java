@@ -11,7 +11,6 @@ import com.aurora.plugin.PluginProcessor;
 import com.aurora.plugin.ProcessedText;
 
 import io.reactivex.Observable;
-import io.reactivex.disposables.Disposable;
 
 /**
  * Communicator that communicates with Plugin environments
@@ -34,22 +33,21 @@ public class PluginCommunicator extends Communicator {
         mOpenFileWithPluginRequestObservable = mBus.register(OpenFileWithPluginRequest.class);
 
         // When a request comes in, call appropriate function
-        Disposable openFileWithPluginRequestDisposable =
-                mOpenFileWithPluginRequestObservable.subscribe((OpenFileWithPluginRequest openFileWithPluginRequest) ->
-                        openFileWithPlugin(openFileWithPluginRequest.getPluginName(), openFileWithPluginRequest.getFileRef())
-                );
+        mOpenFileWithPluginRequestObservable.subscribe((OpenFileWithPluginRequest openFileWithPluginRequest) ->
+                openFileWithPlugin(openFileWithPluginRequest.getPluginName(), openFileWithPluginRequest.getFileRef())
+        );
 
         // Register for requests to show settings
         mPluginSettingsRequestObservable = mBus.register(PluginSettingsRequest.class);
 
         // When a request comes in, call the appropriate function
-        Disposable pluginSettingsRequestDisposable =
-                mPluginSettingsRequestObservable.subscribe((PluginSettingsRequest pluginSettingsRequest) ->
-                        getSettingsActivity(pluginSettingsRequest.getPluginName())
-                );
+        mPluginSettingsRequestObservable.subscribe((PluginSettingsRequest pluginSettingsRequest) ->
+                getSettingsActivity(pluginSettingsRequest.getPluginName())
+        );
 
         // Subscribe to response events
         mPluginProcessorResponseObservable = mBus.register(PluginProcessorResponse.class);
+
     }
 
     /**
