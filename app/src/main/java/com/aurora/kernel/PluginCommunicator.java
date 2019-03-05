@@ -76,7 +76,8 @@ public class PluginCommunicator extends Communicator {
      * @return an observable containing the processed text
      */
     public Observable<ProcessedText> processFileWithPluginProcessor(PluginProcessor pluginProcessor, String fileRef) {
-        Observable<PluginProcessorResponse> mPluginProcessorResponseObservable = mBus.register(PluginProcessorResponse.class);
+        Observable<PluginProcessorResponse> mPluginProcessorResponseObservable
+                = mBus.register(PluginProcessorResponse.class);
         this.mBus.post(new PluginProcessorRequest(pluginProcessor, fileRef));
 
         return mPluginProcessorResponseObservable.map(PluginProcessorResponse::getProcessedText);

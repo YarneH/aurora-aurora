@@ -49,7 +49,8 @@ public class ProcessingCommunicator extends Communicator {
      * @return An observable that contains the processed text
      */
     public Observable<ExtractedText> processFileWithAuroraProcessor(String fileRef) {
-        Observable<InternalProcessorResponse> mInternalProcessorResponseObservable = mBus.register(InternalProcessorResponse.class);
+        Observable<InternalProcessorResponse> mInternalProcessorResponseObservable
+                = mBus.register(InternalProcessorResponse.class);
         this.mBus.post(new InternalProcessorRequest(fileRef));
 
         return mInternalProcessorResponseObservable.map(InternalProcessorResponse::getExtractedText);
