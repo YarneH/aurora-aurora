@@ -25,12 +25,14 @@ public class TextExtractorTXT implements TextExtractor {
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
-        BufferedReader br = new BufferedReader(fr);
-        List<String> paragraphs = new ArrayList<>();
-        String line;
-        while((line = br.readLine()) != null){
-            //process the line
-            paragraphs.add(line);
+        List<String> paragraphs;
+        try (BufferedReader br = new BufferedReader(fr)) {
+            paragraphs = new ArrayList<>();
+            String line;
+            while ((line = br.readLine()) != null) {
+                //process the line
+                paragraphs.add(line);
+            }
         }
         return new ExtractedText(null, paragraphs);
     }
