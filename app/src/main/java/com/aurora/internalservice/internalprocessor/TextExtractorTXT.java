@@ -1,5 +1,7 @@
 package com.aurora.internalservice.internalprocessor;
 
+import android.util.Log;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -23,7 +25,7 @@ public class TextExtractorTXT implements TextExtractor {
         try {
             fr = new FileReader(file);
         } catch (FileNotFoundException e) {
-            e.printStackTrace();
+            Log.d("TextExtractorTXT", "Could not find file");
         }
         List<String> paragraphs;
         try (BufferedReader br = new BufferedReader(fr)) {
