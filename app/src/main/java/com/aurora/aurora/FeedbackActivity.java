@@ -16,8 +16,7 @@ import java.net.URL;
 
 public class FeedbackActivity extends AppCompatActivity {
     private static final int OK_RESPONSE_CODE = 200;
-
-    EditText mEditTextFeedback;
+    private EditText mEditTextFeedback;
 
     /**
      * Runs on startup of the activity, in this case on startup of the app
@@ -83,7 +82,7 @@ public class FeedbackActivity extends AppCompatActivity {
             try {
                 URL url = new URL("https://hooks.slack.com/services/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");
                 HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-                try (AutoCloseable conc = () -> conn.disconnect()) {
+                try (AutoCloseable conc = conn::disconnect) {
                     conn.setRequestMethod("POST");
                     conn.setRequestProperty("Content-Type", "application/json;charset=UTF-8");
                     conn.setRequestProperty("Accept", "application/json");
