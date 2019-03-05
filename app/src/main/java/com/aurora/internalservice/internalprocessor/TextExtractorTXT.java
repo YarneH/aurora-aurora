@@ -2,6 +2,7 @@ package com.aurora.internalservice.internalprocessor;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -18,7 +19,12 @@ public class TextExtractorTXT implements TextExtractor {
     @Override
     public ExtractedText extract(String fileRef) throws IOException {
         File file = new File(fileRef);
-        FileReader fr = new FileReader(file);
+        FileReader fr = null;
+        try {
+            fr = new FileReader(file);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
         BufferedReader br = new BufferedReader(fr);
         List<String> paragraphs = new ArrayList<>();
         String line;
