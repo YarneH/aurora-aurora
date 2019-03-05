@@ -26,16 +26,12 @@ public class InternalTextProcessing implements InternalService {
         Log.d("InternalTextProcessing", "Not implemented yet!");
 
         ExtractedText extractedText;
-        assert getMimeType(fileRef) != null;
-        try {
-            if (fileformat_ExtractorMap.containsKey(getMimeType(fileRef))){
-                extractedText = fileformat_ExtractorMap.get(getMimeType(fileRef)).extract(fileRef);
-            } else {
-                Log.d("InternalTextProcessing", "File type not supported");
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
+        if (fileformat_ExtractorMap.containsKey(getMimeType(fileRef))){
+            extractedText = fileformat_ExtractorMap.get(getMimeType(fileRef)).extract(fileRef);
+        } else {
+            Log.d("InternalTextProcessing", "File type not supported");
         }
+
     }
 
     /**

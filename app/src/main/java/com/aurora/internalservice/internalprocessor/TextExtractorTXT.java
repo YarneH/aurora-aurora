@@ -16,25 +16,25 @@ public class TextExtractorTXT implements TextExtractor {
      * Extracts the text from a .txt file.
      * @param fileRef a reference to where the file can be found
      * @return an ExtractedText object without title and one line per paragraph.
-     * @throws IOException if fileRef is invalid or the permissions to the file are insufficient
      */
     @Override
-    public ExtractedText extract(String fileRef) throws IOException {
+    public ExtractedText extract(String fileRef) {
         File file = new File(fileRef);
         FileReader fr = null;
+        List<String> paragraphs = new ArrayList<>();
         try {
             fr = new FileReader(file);
         } catch (FileNotFoundException e) {
             Log.d("TextExtractorTXT", "Could not find file");
         }
-        List<String> paragraphs;
         try (BufferedReader br = new BufferedReader(fr)) {
-            paragraphs = new ArrayList<>();
             String line;
             while ((line = br.readLine()) != null) {
                 //process the line
                 paragraphs.add(line);
             }
+        } catch (IOException e) {
+            Log.d("TextExtractorTXT", "Could not read file");
         }
         return new ExtractedText(null, paragraphs);
     }

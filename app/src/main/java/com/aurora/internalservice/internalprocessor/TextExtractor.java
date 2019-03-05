@@ -11,5 +11,5 @@ public interface TextExtractor {
      * @param fileRef a reference to where the file can be found
      * @return the extracted text, split in parts
      */
-    ExtractedText extract(String fileRef) throws IOException;
+    ExtractedText extract(String fileRef);
 }
