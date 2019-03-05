@@ -157,7 +157,8 @@ public class CardFileAdapter extends RecyclerView.Adapter<CardFileAdapter.CardFi
                     expand(view);
                 }
                 // if the click happened on the open button
-            } // TODO add: else if (view.getId() == R.id.button_card_file) {...}
+            }
+            // TODO add the case that view.getId() is R.id.button_card_file
         }
     }
 

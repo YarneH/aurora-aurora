@@ -3,7 +3,6 @@ package com.aurora.aurora;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.design.widget.BaseTransientBottomBar;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
@@ -29,8 +28,6 @@ public class MainActivity extends AppCompatActivity
     private Toast mToast = null;
     private TextView mTextViewMain = null;
     private RecyclerView mRecyclerView = null;
-    private NavigationView mNavigationView = null;
-
 
     /**
      * Runs on startup of the activity, in this case on startup of the app
@@ -64,7 +61,7 @@ public class MainActivity extends AppCompatActivity
         toggle.syncState();
 
         /* Setup NavigationView and preselect 'Home' */
-        mNavigationView = (NavigationView) findViewById(R.id.nav_view);
+        NavigationView mNavigationView = (NavigationView) findViewById(R.id.nav_view);
         mNavigationView.setNavigationItemSelectedListener(this);
         mNavigationView.getMenu().getItem(0).setChecked(true);
 

@@ -11,9 +11,7 @@ import android.widget.EditText;
 import org.json.JSONObject;
 
 import java.io.DataOutputStream;
-import java.io.IOException;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.URL;
 
 public class FeedbackActivity extends AppCompatActivity {
@@ -47,7 +45,7 @@ public class FeedbackActivity extends AppCompatActivity {
         boolean success = false;
         String input = mEditTextFeedback.getText().toString();
 
-        if (!input.equals("")) {
+        if (!("").equals(input)) {
             String stringWebHook = "*:fire::fire:New feedback:fire::fire:* \n" + input;
 
             try {
