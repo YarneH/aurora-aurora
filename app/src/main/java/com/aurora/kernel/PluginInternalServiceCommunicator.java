@@ -19,12 +19,12 @@ public class PluginInternalServiceCommunicator extends Communicator {
         super(mBus);
 
         internalProcessorEventObservable = mBus.register(InternalProcessorRequest.class);
-        internalProcessorEventObservable.subscribe((InternalProcessorRequest internalProcessorRequest) -> {
-            processFileWithInternalProcessor(internalProcessorRequest.getFileRef(), internalProcessorRequest.getParameters());
-        });
+        internalProcessorEventObservable.subscribe((InternalProcessorRequest internalProcessorRequest) ->
+                processFileWithInternalProcessor(internalProcessorRequest.getFileRef(),
+                        internalProcessorRequest.getParameters()));
     }
 
     private void processFileWithInternalProcessor(String fileRef, Map<String, ?> parameters) {
-        Log.d("InternalServiceComm", "Not implemented yet!");
+        Log.d("InternalServiceComm", "Not implemented yet! " + fileRef + " " + parameters.toString());
     }
 }

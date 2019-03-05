@@ -11,10 +11,11 @@ public abstract class ProcessedText {
      */
     private String mTitle;
 
+    // TODO: Data type may change
     /**
      * Different 'paragraphs' or subdivisions in text
      */
-    private List<String> mParagraphs; // TODO: Data type may change
+    private List<String> mParagraphs;
 
     public ProcessedText(String title, List<String> paragraphs) {
         this.mTitle = title;

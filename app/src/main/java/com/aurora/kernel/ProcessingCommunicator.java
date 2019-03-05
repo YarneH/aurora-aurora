@@ -23,14 +23,14 @@ public class ProcessingCommunicator extends Communicator {
         super(mBus);
 
         pluginProcessorEventObservable = mBus.register(PluginProcessorRequest.class);
-        pluginProcessorEventObservable.subscribe((PluginProcessorRequest pluginProcessorRequest) -> {
-            processFileWithPluginProcessor(pluginProcessorRequest.getPluginProcessor(), pluginProcessorRequest.getFileRef());
-        });
+        pluginProcessorEventObservable.subscribe((PluginProcessorRequest pluginProcessorRequest) ->
+                processFileWithPluginProcessor(pluginProcessorRequest.getPluginProcessor(),
+                        pluginProcessorRequest.getFileRef()));
     }
 
     private void processFileWithPluginProcessor(PluginProcessor pluginProcessor, String fileref) {
 
-        Log.d("ProcessorCommunicator", "Not implemented yet!");
+        Log.d("ProcessorCommunicator", "Not implemented yet!" + pluginProcessor.toString() + " " + fileref);
     }
 
     /**

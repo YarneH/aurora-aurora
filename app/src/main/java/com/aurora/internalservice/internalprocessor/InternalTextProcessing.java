@@ -10,7 +10,7 @@ import java.util.HashMap;
 /**
  * Class that takes care of internal processing of file (such as text extraction)
  */
-public class InternalTextProcessing extends InternalService {
+public class InternalTextProcessing implements InternalService {
     private HashMap<String, TextExtractor> fileformat_ExtractorMap = create_File_to_Extractor_map();
 
     // TODO: return type may change as well as fileRef type
