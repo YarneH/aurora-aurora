@@ -8,7 +8,6 @@ import org.junit.Test;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import io.reactivex.Observable;
 import io.reactivex.observers.TestObserver;
@@ -29,11 +28,7 @@ public class ProcessingCommunicatorTest {
         // Create dummy parameters
         String fileRef = "/path/to/dummy/file";
         String title = "Dummy Title";
-
-        // Convert array to list
-        List<String> paragraphs =
-                Arrays.stream(new String[]{"Paragraph 1", "Paragraph 2", "Paragraph 3"})
-                        .collect(Collectors.toList());
+        List<String> paragraphs = Arrays.asList("Paragraph 1", "Paragraph 2", "Paragraph 3");
 
         // Create test observer to subscribe to observable
         TestObserver<ExtractedText> observer = new TestObserver<>();

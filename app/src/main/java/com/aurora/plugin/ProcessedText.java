@@ -5,7 +5,7 @@ import java.util.List;
 /**
  * Class to represent text processed by the plugin
  */
-public class ProcessedText {
+public abstract class ProcessedText {
     /**
      * The title of the text
      */
@@ -17,6 +17,7 @@ public class ProcessedText {
      */
     private List<String> mParagraphs;
 
+    // Note that this abstract class has a constructor to enforce that a minimum of fields are present
     public ProcessedText(String title, List<String> paragraphs) {
         this.mTitle = title;
         mParagraphs = paragraphs;

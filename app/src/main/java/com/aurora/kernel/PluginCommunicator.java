@@ -4,12 +4,14 @@ import android.util.Log;
 
 import com.aurora.kernel.event.OpenFileWithPluginRequest;
 import com.aurora.kernel.event.PluginProcessorRequest;
+import com.aurora.kernel.event.PluginProcessorResponse;
 import com.aurora.kernel.event.PluginSettingsRequest;
-import com.aurora.kernel.event.PluginSettingsResponse;
 import com.aurora.plugin.PluginFragment;
 import com.aurora.plugin.PluginProcessor;
+import com.aurora.plugin.ProcessedText;
 
 import io.reactivex.Observable;
+import io.reactivex.disposables.Disposable;
 
 /**
  * Communicator that communicates with Plugin environments
@@ -21,6 +23,8 @@ public class PluginCommunicator extends Communicator {
     private Observable<OpenFileWithPluginRequest> mOpenFileWithPluginRequestObservable;
     private Observable<PluginSettingsRequest> mPluginSettingsRequestObservable;
 
+    private Observable<PluginProcessorResponse> mPluginProcessorResponseObservable;
+
     public PluginCommunicator(Bus bus, PluginRegistry pluginRegistry) {
         super(bus);
 
@@ -30,16 +34,22 @@ public class PluginCommunicator extends Communicator {
         mOpenFileWithPluginRequestObservable = mBus.register(OpenFileWithPluginRequest.class);
 
         // When a request comes in, call appropriate function
-        mOpenFileWithPluginRequestObservable.subscribe((OpenFileWithPluginRequest openFileWithPluginRequest) ->
-                openFileWithPlugin(openFileWithPluginRequest.getPluginName(), openFileWithPluginRequest.getFileRef())
-        );
+        Disposable openFileWithPluginRequestDisposable =
+                mOpenFileWithPluginRequestObservable.subscribe((OpenFileWithPluginRequest openFileWithPluginRequest) ->
+                        openFileWithPlugin(openFileWithPluginRequest.getPluginName(), openFileWithPluginRequest.getFileRef())
+                );
 
-
+        // Register for requests to show settings
         mPluginSettingsRequestObservable = mBus.register(PluginSettingsRequest.class);
-        mPluginSettingsRequestObservable.subscribe((PluginSettingsRequest pluginSettingsRequest) ->
-                getSettingsActivity(pluginSettingsRequest.getPluginName())
-        );
 
+        // When a request comes in, call the appropriate function
+        Disposable pluginSettingsRequestDisposable =
+                mPluginSettingsRequestObservable.subscribe((PluginSettingsRequest pluginSettingsRequest) ->
+                        getSettingsActivity(pluginSettingsRequest.getPluginName())
+                );
+
+        // Subscribe to response events
+        mPluginProcessorResponseObservable = mBus.register(PluginProcessorResponse.class);
     }
 
     /**
@@ -60,13 +70,18 @@ public class PluginCommunicator extends Communicator {
         Log.d("PluginCommunicator", "Not implemented yet!" + pluginName + " " + fileRef);
     }
 
-    public void processFileWithPluginProcessor(PluginProcessor pluginProcessor, String fileRef) {
 
-        // TODO This event should be captured by processingcomm and internalcache, but only be replied once
-        // TODO Make different request and handle the results here
+    /**
+     * Delegates work to a certain pluginProcessor and returns processed text when ready
+     *
+     * @param pluginProcessor the pluginProcessor to process the file with
+     * @param fileRef         a reference to the file to process
+     * @return an observable containing the processed text
+     */
+    public Observable<ProcessedText> processFileWithPluginProcessor(PluginProcessor pluginProcessor, String fileRef) {
         this.mBus.post(new PluginProcessorRequest(pluginProcessor, fileRef));
 
-        Log.d("PluginCommunicator", "Not implemented yet!");
+        return mPluginProcessorResponseObservable.map(PluginProcessorResponse::getProcessedText);
     }
 
 
