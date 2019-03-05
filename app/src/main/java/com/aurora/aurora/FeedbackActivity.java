@@ -11,10 +11,13 @@ import android.widget.EditText;
 import org.json.JSONObject;
 
 import java.io.DataOutputStream;
+import java.io.IOException;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
 
 public class FeedbackActivity extends AppCompatActivity {
+    private static final int OK_RESPONSE_CODE = 200;
 
     EditText mEditTextFeedback;
 
@@ -78,41 +81,36 @@ public class FeedbackActivity extends AppCompatActivity {
          */
         protected Boolean doInBackground(String... args) {
             boolean success = false;
-            HttpURLConnection conn = null;
 
             try {
-                // Setup the connection for the Slack Webhook
                 URL url = new URL("https://hooks.slack.com/services/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");
-                conn = (HttpURLConnection) url.openConnection();
-                conn.setRequestMethod("POST");
-                conn.setRequestProperty("Content-Type", "application/json;charset=UTF-8");
-                conn.setRequestProperty("Accept", "application/json");
-                conn.setDoOutput(true);
+                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                try (AutoCloseable conc = () -> conn.disconnect()) {
+                    conn.setRequestMethod("POST");
+                    conn.setRequestProperty("Content-Type", "application/json;charset=UTF-8");
+                    conn.setRequestProperty("Accept", "application/json");
+                    conn.setDoOutput(true);
 
-                // Add the stringWebHook to the JSONObject
-                JSONObject jsonParam = new JSONObject();
-                jsonParam.put("text", args[0]);
+                    // Add the stringWebHook to the JSONObject
+                    JSONObject jsonParam = new JSONObject();
+                    jsonParam.put("text", args[0]);
 
-                DataOutputStream os = new DataOutputStream(conn.getOutputStream());
-                os.writeBytes(jsonParam.toString());
+                    DataOutputStream os = new DataOutputStream(conn.getOutputStream());
+                    os.writeBytes(jsonParam.toString());
 
-                os.flush();
-                os.close();
+                    os.flush();
+                    os.close();
 
-                // Check if response is OK
-                int responseCode = conn.getResponseCode();
-                if (responseCode == 200) {
-                    success = true;
+                    // Check if response is OK
+                    int responseCode = conn.getResponseCode();
+                    if (responseCode == OK_RESPONSE_CODE) {
+                        success = true;
+                    }
                 }
-
-                conn.disconnect();
             } catch (Exception e) {
                 Log.d("Feedback", "exception", e);
-            } finally {
-                if (conn != null) {
-                    conn.disconnect();
-                }
             }
+
             return success;
         }
     }
