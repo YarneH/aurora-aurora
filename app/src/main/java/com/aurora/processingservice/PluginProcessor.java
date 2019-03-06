@@ -39,8 +39,7 @@ public abstract class PluginProcessor {
                 mProcessingCommunicator.processFileWithAuroraProcessor(fileRef);
 
 
-        extractedTextObservable.subscribe((ExtractedText extractedText) ->
-            resultProcessFileWithAuroraProcessor(extractedText));
+        extractedTextObservable.subscribe(this::resultProcessFileWithAuroraProcessor);
     }
 
     /**
