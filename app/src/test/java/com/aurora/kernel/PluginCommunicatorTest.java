@@ -1,5 +1,6 @@
 package com.aurora.kernel;
 
+import com.aurora.internalservice.internalprocessor.ExtractedText;
 import com.aurora.kernel.event.PluginProcessorResponse;
 import com.aurora.plugin.BasicProcessedText;
 import com.aurora.processingservice.PluginProcessor;
@@ -33,7 +34,7 @@ public class PluginCommunicatorTest {
     @Test
     public void PluginCommunicator_processFileWithPlugin_shouldReturnProcessedFile() {
         // Create dummy arguments
-        PluginProcessor processor = new DummyPluginProcessor();
+        PluginProcessor processor = new DummyPluginProcessor(mProcessingCommunicator);
         String fileRef = "/path/to/dummy/file";
 
         // Create test observer to subscribe to the observable
@@ -64,6 +65,21 @@ public class PluginCommunicatorTest {
     /**
      * Dummy plugin processor for testing purposes
      */
-    private class DummyPluginProcessor implements PluginProcessor {
+    private class DummyPluginProcessor extends PluginProcessor {
+
+        public DummyPluginProcessor(ProcessingCommunicator processingCommunicator) {
+            super(processingCommunicator);
+        }
+
+        @Override
+        public ProcessedText processFileWithPluginProcessor(String fileRef) {
+            return null;
+            //TODO
+        }
+
+        @Override
+        protected void resultProcessFileWithAuroraProcessor(ExtractedText extractedText){
+            //TODO
+        }
     }
 }

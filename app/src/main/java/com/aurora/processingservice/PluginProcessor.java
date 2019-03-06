@@ -50,6 +50,6 @@ public abstract class PluginProcessor {
      *
      * @param extractedText the object returned by the internal processor
      */
-    abstract void resultProcessFileWithAuroraProcessor(ExtractedText extractedText);
+    protected abstract void resultProcessFileWithAuroraProcessor(ExtractedText extractedText);
 
 }
