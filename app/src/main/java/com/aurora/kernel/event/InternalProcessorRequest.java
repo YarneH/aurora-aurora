@@ -6,7 +6,7 @@ package com.aurora.kernel.event;
 public class InternalProcessorRequest extends Event {
 
     private String mFileRef;
-    // TODO: if needed add mechanism to add parameters to internal processor request
+    //TODO: if needed add mechanism to add parameters to internal processor request
 
     public InternalProcessorRequest(String fileRef) {
         this.mFileRef = fileRef;

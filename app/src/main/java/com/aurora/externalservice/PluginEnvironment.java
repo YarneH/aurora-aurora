@@ -3,18 +3,24 @@ package com.aurora.externalservice;
 import android.app.Activity;
 import android.support.v4.app.Fragment;
 
-/**
- * TODO maybe this should be an abstract class. This way we can make sure that the class takes an
- * PluginCommunicator in the constructor. We could also define an final method for the callback
- * that subscribes on the observable and calls an abstract method render(Type that we want).
- */
+import com.aurora.kernel.PluginCommunicator;
+import com.aurora.plugin.ProcessedText;
+import com.aurora.processingservice.PluginProcessor;
+
+import io.reactivex.Observable;
 
 
 /**
- * Interface that needs to be implemented by every PluginEnvironment.
+ * Abstract class that needs to be implemented by every PluginEnvironment.
  * Instantiated classes will define the Android Fragments for the representation of the file.
  */
-public interface PluginEnvironment {
+public abstract class PluginEnvironment {
+
+    private PluginCommunicator mPluginCommunicator;
+
+    public PluginEnvironment(PluginCommunicator pluginCommunicator) {
+        this.mPluginCommunicator = pluginCommunicator;
+    }
 
     /**
      * This method will be called by the PluginCommunicator to get an Android Activity where the
@@ -22,7 +28,7 @@ public interface PluginEnvironment {
      *
      * @return an activity that contains all the settings of the plugin that can be changed
      */
-    Class<? extends Activity> getSettingsActivity();
+    public abstract Class<? extends Activity> getSettingsActivity();
 
     /**
      * This method will be called by the PluginCommunicator to receive a view of the file generated
@@ -33,5 +39,30 @@ public interface PluginEnvironment {
      * @return an Android Fragment that contains the full view of the plugin, this Fragment will be
      * loaded into the Aurora UI.
      */
-    Fragment openFile(String fileRef);
+    public abstract Fragment openFile(String fileRef);
+
+    /**
+     * Delegates work to a certain pluginProcessor, upon returning calls the
+     * resultProcessFileWithPluginProcessor method
+     *
+     * @param pluginProcessor the pluginProcessor to process the file with
+     * @param fileRef a reference to the file to process
+     */
+    protected final void processFileWithPluginProcessor(PluginProcessor pluginProcessor, String fileRef) {
+        Observable<ProcessedText> processedTextObservable =
+                mPluginCommunicator.processFileWithPluginProcessor(pluginProcessor, fileRef);
+
+
+        processedTextObservable.subscribe((ProcessedText processedText) -> {
+            resultProcessFileWithPluginProcessor(processedText);
+        });
+    }
+
+    /**
+     * This method is automatically called upon receiving a response from
+     * processFileWithPluginProcessor
+     *
+     * @param processedText the object returned by the pluginProcessor
+     */
+    abstract void resultProcessFileWithPluginProcessor(ProcessedText processedText);
 }

@@ -54,6 +54,10 @@ public class PluginCommunicator extends Communicator {
         // TODO: get settings
         // TODO: make a PluginSettingsResponse
         Log.d("PluginCommunicator", "Not implemented yet! " + pluginName);
+
+        //PluginSettingsResponse pluginSettingsResponse =
+                //new PluginSettingsResponse(mPluginRegistry.resolvePlugin(pluginName).getSettingsActivity());
+        //this.mBus.post(pluginSettingsResponse);
     }
 
     /**

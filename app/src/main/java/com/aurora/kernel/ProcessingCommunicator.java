@@ -1,11 +1,10 @@
 package com.aurora.kernel;
 
-import android.util.Log;
-
 import com.aurora.internalservice.internalprocessor.ExtractedText;
 import com.aurora.kernel.event.InternalProcessorRequest;
 import com.aurora.kernel.event.InternalProcessorResponse;
 import com.aurora.kernel.event.PluginProcessorRequest;
+import com.aurora.kernel.event.PluginProcessorResponse;
 import com.aurora.processingservice.PluginProcessor;
 
 import io.reactivex.Observable;
@@ -38,8 +37,9 @@ public class ProcessingCommunicator extends Communicator {
      * @param fileRef         a reference to where the file can be found
      */
     private void processFileWithPluginProcessor(PluginProcessor pluginProcessor, String fileRef) {
-
-        Log.d("ProcessorCommunicator", "Not implemented yet!" + pluginProcessor.toString() + " " + fileRef);
+        PluginProcessorResponse pluginProcessorResponse =
+                new PluginProcessorResponse(pluginProcessor.processFileWithPluginProcessor(fileRef));
+        this.mBus.post(pluginProcessorResponse);
     }
 
     /**
