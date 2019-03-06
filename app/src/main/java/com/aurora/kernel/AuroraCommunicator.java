@@ -30,9 +30,10 @@ public class AuroraCommunicator extends Communicator {
      * Open file with a given plugin
      *
      * @param pluginName the name of the plugin to open the file with, contains version number
-     * @param fileRef a reference to the file that needs to be opened
+     * @param fileRef    a reference to the file that needs to be opened
+     * @return the fragment to be shown wrapped in an observable
      */
-    public Observable<Fragment> openFileWithPlugin(String pluginName, String fileRef){
+    public Observable<Fragment> openFileWithPlugin(String pluginName, String fileRef) {
         Observable<OpenFileWithPluginResponse> mOpenFileWithPluginResponse
                 = this.mBus.register(OpenFileWithPluginResponse.class);
         this.mBus.post(new OpenFileWithPluginRequest(pluginName, fileRef));
@@ -46,6 +47,7 @@ public class AuroraCommunicator extends Communicator {
      * Gets the settings of a plugin
      *
      * @param pluginName the name of the plugin to get the settings for
+     * @return the class reference to the activity to show wrapped in an observable
      */
     public Observable<Class<? extends Activity>> getSettingsOfPlugin(String pluginName) {
         Observable<PluginSettingsResponse> mPluginSettingsResponse
@@ -57,6 +59,7 @@ public class AuroraCommunicator extends Communicator {
 
     /**
      * Gets a list of all the available plugins
+     * @return a list of basic information on every plugin wrapped in an observable
      */
     public Observable<List<BasicPlugin>> getListOfPlugins() {
         Observable<ListPLuginsResponse> mListPLuginsResponse

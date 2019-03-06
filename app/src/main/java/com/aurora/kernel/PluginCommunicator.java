@@ -56,14 +56,13 @@ public class PluginCommunicator extends Communicator {
         Log.d("PluginCommunicator", "Not implemented yet! " + pluginName);
 
         //PluginSettingsResponse pluginSettingsResponse =
-                //new PluginSettingsResponse(mPluginRegistry.resolvePlugin(pluginName).getSettingsActivity());
+        //new PluginSettingsResponse(mPluginRegistry.resolvePlugin(pluginName).getSettingsActivity());
         //this.mBus.post(pluginSettingsResponse);
     }
 
     /**
-     *
      * @param pluginName the name of the plugin to get the settings for
-     * @param fileRef a reference to the file to process
+     * @param fileRef    a reference to the file to process
      */
     private void openFileWithPlugin(String pluginName, String fileRef) {
         // TODO: get file representation
