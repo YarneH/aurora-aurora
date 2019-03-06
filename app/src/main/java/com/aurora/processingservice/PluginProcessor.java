@@ -12,7 +12,7 @@ import io.reactivex.Observable;
  */
 public abstract class PluginProcessor {
 
-    ProcessingCommunicator mProcessingCommunicator;
+    private ProcessingCommunicator mProcessingCommunicator;
 
     public PluginProcessor(ProcessingCommunicator processingCommunicator) {
         this.mProcessingCommunicator = processingCommunicator;
@@ -39,9 +39,8 @@ public abstract class PluginProcessor {
                 mProcessingCommunicator.processFileWithAuroraProcessor(fileRef);
 
 
-        extractedTextObservable.subscribe((ExtractedText extractedText) -> {
-            resultProcessFileWithAuroraProcessor(extractedText);
-        });
+        extractedTextObservable.subscribe((ExtractedText extractedText) ->
+            resultProcessFileWithAuroraProcessor(extractedText));
     }
 
     /**

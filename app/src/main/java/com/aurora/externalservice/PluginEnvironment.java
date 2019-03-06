@@ -53,9 +53,8 @@ public abstract class PluginEnvironment {
                 mPluginCommunicator.processFileWithPluginProcessor(pluginProcessor, fileRef);
 
 
-        processedTextObservable.subscribe((ProcessedText processedText) -> {
-            resultProcessFileWithPluginProcessor(processedText);
-        });
+        processedTextObservable.subscribe((ProcessedText processedText) ->
+            resultProcessFileWithPluginProcessor(processedText));
     }
 
     /**
