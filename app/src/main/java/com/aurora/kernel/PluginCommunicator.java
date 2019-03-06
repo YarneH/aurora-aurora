@@ -4,10 +4,11 @@ import android.util.Log;
 
 import com.aurora.kernel.event.OpenFileWithPluginRequest;
 import com.aurora.kernel.event.PluginProcessorRequest;
+import com.aurora.kernel.event.PluginProcessorResponse;
 import com.aurora.kernel.event.PluginSettingsRequest;
-import com.aurora.kernel.event.PluginSettingsResponse;
 import com.aurora.plugin.PluginFragment;
-import com.aurora.plugin.PluginProcessor;
+import com.aurora.processingservice.PluginProcessor;
+import com.aurora.plugin.ProcessedText;
 
 import io.reactivex.Observable;
 
@@ -20,6 +21,7 @@ public class PluginCommunicator extends Communicator {
 
     private Observable<OpenFileWithPluginRequest> mOpenFileWithPluginRequestObservable;
     private Observable<PluginSettingsRequest> mPluginSettingsRequestObservable;
+
 
     public PluginCommunicator(Bus bus, PluginRegistry pluginRegistry) {
         super(bus);
@@ -34,12 +36,13 @@ public class PluginCommunicator extends Communicator {
                 openFileWithPlugin(openFileWithPluginRequest.getPluginName(), openFileWithPluginRequest.getFileRef())
         );
 
-
+        // Register for requests to show settings
         mPluginSettingsRequestObservable = mBus.register(PluginSettingsRequest.class);
+
+        // When a request comes in, call the appropriate function
         mPluginSettingsRequestObservable.subscribe((PluginSettingsRequest pluginSettingsRequest) ->
                 getSettingsActivity(pluginSettingsRequest.getPluginName())
         );
-
     }
 
     /**
@@ -51,22 +54,36 @@ public class PluginCommunicator extends Communicator {
         // TODO: get settings
         // TODO: make a PluginSettingsResponse
         Log.d("PluginCommunicator", "Not implemented yet! " + pluginName);
+
+        //PluginSettingsResponse pluginSettingsResponse =
+        //new PluginSettingsResponse(mPluginRegistry.resolvePlugin(pluginName).getSettingsActivity());
+        //this.mBus.post(pluginSettingsResponse);
     }
 
-
+    /**
+     * @param pluginName the name of the plugin to get the settings for
+     * @param fileRef    a reference to the file to process
+     */
     private void openFileWithPlugin(String pluginName, String fileRef) {
         // TODO: get file representation
         // TODO: make an OpenFileWithPluginResponse
         Log.d("PluginCommunicator", "Not implemented yet!" + pluginName + " " + fileRef);
     }
 
-    public void processFileWithPluginProcessor(PluginProcessor pluginProcessor, String fileRef) {
 
-        // TODO This event should be captured by processingcomm and internalcache, but only be replied once
-        // TODO Make different request and handle the results here
+    /**
+     * Delegates work to a certain pluginProcessor and returns processed text when ready
+     *
+     * @param pluginProcessor the pluginProcessor to process the file with
+     * @param fileRef         a reference to the file to process
+     * @return an observable containing the processed text
+     */
+    public Observable<ProcessedText> processFileWithPluginProcessor(PluginProcessor pluginProcessor, String fileRef) {
+        Observable<PluginProcessorResponse> mPluginProcessorResponseObservable
+                = mBus.register(PluginProcessorResponse.class);
         this.mBus.post(new PluginProcessorRequest(pluginProcessor, fileRef));
 
-        Log.d("PluginCommunicator", "Not implemented yet!");
+        return mPluginProcessorResponseObservable.map(PluginProcessorResponse::getProcessedText);
     }
 
 

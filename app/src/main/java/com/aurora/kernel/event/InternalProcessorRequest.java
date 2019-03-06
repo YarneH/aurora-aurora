@@ -1,25 +1,18 @@
 package com.aurora.kernel.event;
 
-import java.util.Map;
-
 /**
  * Event to request that a file is processed with a InternalProcessor
  */
 public class InternalProcessorRequest extends Event {
 
     private String mFileRef;
-    private Map<String, ?> mParameters;
+    //TODO: if needed add mechanism to add parameters to internal processor request
 
-    public InternalProcessorRequest(String fileRef, Map<String, ?> parameters) {
+    public InternalProcessorRequest(String fileRef) {
         this.mFileRef = fileRef;
-        this.mParameters = parameters;
     }
 
     public String getFileRef() {
         return mFileRef;
-    }
-
-    public Map<String, ?> getParameters() {
-        return mParameters;
     }
 }

@@ -21,7 +21,7 @@ class Bus {
      * @param eventClass the class of the events you want to subscribe to
      * @return an Observable of events
      */
-    public <T extends Event>
+    <T extends Event>
     Observable<T> register(final Class<T> eventClass) {
         // Filter events based on class
         return mBusSubject
@@ -47,7 +47,7 @@ class Bus {
      *
      * @param event the event to post
      */
-    public void post(Event event) {
+    void post(Event event) {
         mBusSubject.onNext(event);
     }
 }

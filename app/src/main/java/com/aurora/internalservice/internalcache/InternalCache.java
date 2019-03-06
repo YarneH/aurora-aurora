@@ -19,7 +19,7 @@ public class InternalCache implements InternalService {
      * @param fileRef a reference to where the file can be found
      */
     @Override
-    public void process(String fileRef) {
+    public void processFile(String fileRef) {
         // TODO: implement this
         Log.d(CLASS_TAG, "Not implemented yet");
     }

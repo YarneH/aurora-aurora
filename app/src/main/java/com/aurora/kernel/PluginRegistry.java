@@ -31,7 +31,7 @@ class PluginRegistry {
      * @param pluginName the name of the plugin
      * @return the plugin object associated with the name or null if not found
      */
-    private Plugin resolvePlugin(String pluginName) {
+    public Plugin resolvePlugin(String pluginName) {
         Log.d("PluginRegistry", "resolvePlugin not implemented yet! " + pluginName);
         return null;
     }
