@@ -14,7 +14,7 @@ import io.reactivex.Observable;
  */
 public class ProcessingCommunicator extends Communicator {
 
-    private PluginProcessor activePluginProcessor;
+    private PluginProcessor mActivePluginProcessor;
 
     private Observable<PluginProcessorRequest> mPluginProcessorRequestObservable;
 
@@ -54,5 +54,13 @@ public class ProcessingCommunicator extends Communicator {
         this.mBus.post(new InternalProcessorRequest(fileRef));
 
         return mInternalProcessorResponseObservable.map(InternalProcessorResponse::getExtractedText);
+    }
+
+    public PluginProcessor getActivePluginProcessor() {
+        return mActivePluginProcessor;
+    }
+
+    public void setActivePluginProcessor(PluginProcessor activePluginProcessor) {
+        this.mActivePluginProcessor = activePluginProcessor;
     }
 }

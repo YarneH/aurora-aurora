@@ -2,9 +2,9 @@ package com.aurora.kernel;
 
 import android.util.Log;
 
+import com.aurora.externalservice.PluginEnvironment;
 import com.aurora.plugin.BasicPlugin;
 import com.aurora.plugin.Plugin;
-import com.aurora.plugin.PluginFragment;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,15 +15,23 @@ import java.util.Map;
  */
 class PluginRegistry {
     /**
-     * Maintains relation between a plugin name and a Plugin object
+     * Maintains a relation between a plugin name and a Plugin object
      */
     private Map<String, Plugin> mPluginsMap;
 
+    /**
+     * A reference to the processing communicator
+     */
     private ProcessingCommunicator mProcessingCommunicator;
+
 
     public PluginRegistry(ProcessingCommunicator processingCommunicator) {
         this.mProcessingCommunicator = processingCommunicator;
+
+        // Load plugins
+        constructPluginMap();
     }
+
 
     /**
      * private helper method to find a plugin based on the plugin name
@@ -31,20 +39,33 @@ class PluginRegistry {
      * @param pluginName the name of the plugin
      * @return the plugin object associated with the name or null if not found
      */
-    public Plugin resolvePlugin(String pluginName) {
-        Log.d("PluginRegistry", "resolvePlugin not implemented yet! " + pluginName);
-        return null;
+    private Plugin resolvePlugin(String pluginName) {
+        // Returns the plugin if found, null otherwise
+        return mPluginsMap.get(pluginName);
     }
 
+
     /**
-     * Finds the PluginFragment to show given a plugin name
+     * Finds the PluginEnvironment to load given a pluginName
      *
      * @param pluginName the name of the plugin to load
-     * @return the PluginFragment associated with the plugin name or null if not found
+     * @return the PluginEnvironment associated with the plugin name or null if not found
      */
-    public PluginFragment loadPlugin(String pluginName) {
-        Log.d("PluginRegistry", "loadPlugin not implemented yet!" + pluginName);
-        return null;
+    public PluginEnvironment loadPlugin(String pluginName) {
+        Plugin plugin = resolvePlugin(pluginName);
+
+        if (plugin != null) {
+            // Set plugin processor in the processing communicator
+            mProcessingCommunicator.setActivePluginProcessor(plugin.getPluginProcessor());
+
+            // Return the environment to the caller
+            return plugin.getPluginEnvironment();
+        } else {
+            Log.d("PluginRegistry", "Could not find the plugin with name " +
+                    pluginName + ".");
+
+            return null;
+        }
     }
 
     /**
@@ -55,5 +76,13 @@ class PluginRegistry {
     public List<BasicPlugin> getPlugins() {
         Log.d("PluginRegistry", "Not implemented yet!");
         return new ArrayList<>();
+    }
+
+
+    /**
+     * Private helper method to read the plugins from a config file and load them into a map
+     */
+    private void constructPluginMap() {
+        Log.d("PluginRegistry", "Not implemented yet!");
     }
 }

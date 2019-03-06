@@ -46,7 +46,7 @@ public abstract class PluginEnvironment {
      * resultProcessFileWithPluginProcessor method
      *
      * @param pluginProcessor the pluginProcessor to process the file with
-     * @param fileRef a reference to the file to process
+     * @param fileRef         a reference to the file to process
      */
     protected final void processFileWithPluginProcessor(PluginProcessor pluginProcessor, String fileRef) {
         Observable<ProcessedText> processedTextObservable =
@@ -62,5 +62,5 @@ public abstract class PluginEnvironment {
      *
      * @param processedText the object returned by the pluginProcessor
      */
-    abstract void resultProcessFileWithPluginProcessor(ProcessedText processedText);
+    protected abstract void resultProcessFileWithPluginProcessor(ProcessedText processedText);
 }
