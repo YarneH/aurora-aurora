@@ -125,6 +125,7 @@ class PluginRegistry {
         // Create map
         mPluginsMap = new HashMap<>();
 
-        Log.d("PluginRegistry", "Not implemented yet!");
+        Log.d("PluginRegistry", "This method should look for a file called "
+                + configFileRef + ", to load the plugins");
     }
 }

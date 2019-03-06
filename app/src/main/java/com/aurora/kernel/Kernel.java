@@ -12,7 +12,7 @@ public final class Kernel {
     private PluginRegistry mPluginRegistry;
 
     // TODO: change this if necessary
-    private static final String pluginConfigFileRef = "plugins.cfg";
+    private static final String PLUGINS_CFG = "plugins.cfg";
 
     /**
      * Starts and creates all communicators, keeping references
@@ -24,7 +24,7 @@ public final class Kernel {
         this.mAuroraCommunicator = new AuroraCommunicator(mBus);
 
         this.mProcessingCommunicator = new ProcessingCommunicator(mBus);
-        this.mPluginRegistry = new PluginRegistry(mProcessingCommunicator, pluginConfigFileRef);
+        this.mPluginRegistry = new PluginRegistry(mProcessingCommunicator, PLUGINS_CFG);
         this.mPluginCommunicator = new PluginCommunicator(mBus, mPluginRegistry);
 
         this.mPluginInternalServiceCommunicator = new PluginInternalServiceCommunicator(mBus);
