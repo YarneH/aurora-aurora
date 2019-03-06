@@ -7,6 +7,7 @@ import com.aurora.plugin.BasicPlugin;
 import com.aurora.plugin.Plugin;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -25,11 +26,11 @@ class PluginRegistry {
     private ProcessingCommunicator mProcessingCommunicator;
 
 
-    public PluginRegistry(ProcessingCommunicator processingCommunicator) {
+    public PluginRegistry(ProcessingCommunicator processingCommunicator, String configFileRef) {
         this.mProcessingCommunicator = processingCommunicator;
 
         // Load plugins
-        constructPluginMap();
+        constructPluginMap(configFileRef);
     }
 
 
@@ -78,11 +79,52 @@ class PluginRegistry {
         return new ArrayList<>();
     }
 
+    /**
+     * Adds a plugin with a given name to the map and writes back the configuration file
+     *
+     * @param pluginName the name of the plugin to add
+     * @param plugin the plugin object that contains the plugin
+     * @return true if the plugin was added, false if the plugin could not be added (e.g. if it was already present)
+     */
+    public boolean registerPlugin(String pluginName, Plugin plugin) {
+        // TODO: write back config file immediately
+        if (!mPluginsMap.containsKey(pluginName)) {
+            // Add plugin to the map
+            mPluginsMap.put(pluginName, plugin);
+            return true;
+        }
+
+        // Return false because plugin was already present
+        return false;
+    }
 
     /**
-     * Private helper method to read the plugins from a config file and load them into a map
+     * Removes a plugin with a given name if possible
+     *
+     * @param pluginName the name of the plugin to remove from the registry
      */
-    private void constructPluginMap() {
+    public void removePlugin(String pluginName) {
+        // TODO: write back config file immediately
+        mPluginsMap.remove(pluginName);
+    }
+
+    /**
+     * Removes all plugins from the registry
+     */
+    public void removeAllPlugins() {
+        // TODO: write back config file immediately
+        mPluginsMap.clear();
+    }
+
+    /**
+     * Private helper method that reads the available plugins from a config file
+     *
+     * @param configFileRef a reference to where the config file can be found
+     */
+    private void constructPluginMap(String configFileRef) {
+        // Create map
+        mPluginsMap = new HashMap<>();
+
         Log.d("PluginRegistry", "Not implemented yet!");
     }
 }

@@ -13,10 +13,6 @@ import com.aurora.processingservice.PluginProcessor;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import java.lang.reflect.Field;
-import java.util.HashMap;
-import java.util.Map;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
@@ -24,12 +20,13 @@ public class PluginRegistryTest {
     private static Bus mBus;
     private static ProcessingCommunicator mProcessingCommunicator;
     private static PluginRegistry mRegistry;
-
     private static PluginCommunicator mPluginCommunicator;
 
-    private static final String DUMMY_PLUGIN_1 = "DummyPlugin1";
-    private static final String DUMMY_PLUGIN_2 = "DummyPlugin2";
-    private static final String PLUGIN_NAME_NOT_IN_MAP = "DummyPlugin3";
+    private static String mConfigRef = "testConfigFile.cfg";
+
+    private static final String DUMMY_NAME_1 = "DummyPlugin1";
+    private static final String DUMMY_NAME_2 = "DummyPlugin2";
+    private static final String NOT_IN_MAP_PLUGIN = "DummyPlugin3";
 
     private static Plugin plugin1;
     private static Plugin plugin2;
@@ -38,48 +35,33 @@ public class PluginRegistryTest {
     public static void initialize() {
         mBus = new Bus();
         mProcessingCommunicator = new ProcessingCommunicator(mBus);
-        mRegistry = new PluginRegistry(mProcessingCommunicator);
-
+        mRegistry = new PluginRegistry(mProcessingCommunicator, mConfigRef);
         mPluginCommunicator = new PluginCommunicator(mBus, mRegistry);
 
-        // Prepare the registry by setting the map
-        try {
-            // get the private field
-            Field pluginMap = mRegistry.getClass().getDeclaredField("mPluginsMap");
-            pluginMap.setAccessible(true);
+        // Clear the map of plugins
+        mRegistry.removeAllPlugins();
 
-            // Create fake PluginEnvironments and PluginProcessors
-            PluginEnvironment environment1 = new DummyPluginEnvironment(mPluginCommunicator);
-            PluginEnvironment environment2 = new DummyPluginEnvironment(mPluginCommunicator);
+        // Create environments and processors
+        PluginEnvironment environment1 = new DummyPluginEnvironment(mPluginCommunicator);
+        PluginEnvironment environment2 = new DummyPluginEnvironment(mPluginCommunicator);
 
-            PluginProcessor processor1 = new DummyPluginProcessor(mProcessingCommunicator);
-            PluginProcessor processor2 = new DummyPluginProcessor(mProcessingCommunicator);
+        PluginProcessor processor1 = new DummyPluginProcessor(mProcessingCommunicator);
+        PluginProcessor processor2 = new DummyPluginProcessor(mProcessingCommunicator);
 
-            // Create dummy plugins
-            plugin1 = new DummyPlugin1(environment1, processor1);
-            plugin2 = new DummyPlugin2(environment2, processor2);
+        // Create dummy plugins
+        plugin1 = new DummyPlugin1(environment1, processor1);
+        plugin2 = new DummyPlugin2(environment1, processor2);
 
-            Map<String, Plugin> fakeMap = new HashMap<>();
-            fakeMap.put(DUMMY_PLUGIN_1, plugin1);
-            fakeMap.put(DUMMY_PLUGIN_2, plugin2);
-
-            pluginMap.set(mRegistry, fakeMap);
-
-            // Set the accessibility of the field back to false
-            pluginMap.setAccessible(false);
-        } catch (NoSuchFieldException e) {
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        }
-
+        // Add dummy plugins
+        mRegistry.registerPlugin(DUMMY_NAME_1, plugin1);
+        mRegistry.registerPlugin(DUMMY_NAME_2, plugin2);
     }
 
 
     @Test
     public void PluginRegistry_loadPlugin_shouldReturnNull() {
         // Call load plugin method with a name that is not in the map
-        PluginEnvironment environment = mRegistry.loadPlugin(PLUGIN_NAME_NOT_IN_MAP);
+        PluginEnvironment environment = mRegistry.loadPlugin(NOT_IN_MAP_PLUGIN);
 
         // Assert that environment is indeed null
         assertNull(environment);
@@ -88,8 +70,8 @@ public class PluginRegistryTest {
     @Test
     public void PluginRegistry_loadPlugin_shouldReturnDummyPlugins() {
         // Call load plugin method with names that are in the map
-        PluginEnvironment environment1 = mRegistry.loadPlugin(DUMMY_PLUGIN_1);
-        PluginEnvironment environment2 = mRegistry.loadPlugin(DUMMY_PLUGIN_2);
+        PluginEnvironment environment1 = mRegistry.loadPlugin(DUMMY_NAME_1);
+        PluginEnvironment environment2 = mRegistry.loadPlugin(DUMMY_NAME_2);
 
         // Assert that the environments are what expected
         assertEquals(plugin1.getPluginEnvironment(), environment1);
@@ -100,7 +82,7 @@ public class PluginRegistryTest {
     @Test
     public void PluginRegistry_loadPlugin_shouldSetProcessorOfCommunicator() {
         // Call load plugin method with name that is in the map
-        mRegistry.loadPlugin(DUMMY_PLUGIN_1);
+        mRegistry.loadPlugin(DUMMY_NAME_1);
 
         // Assert that field of processor communicator is what expected
         assertEquals(mProcessingCommunicator.getActivePluginProcessor(), plugin1.getPluginProcessor());

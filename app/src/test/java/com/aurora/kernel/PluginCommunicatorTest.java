@@ -21,13 +21,14 @@ public class PluginCommunicatorTest {
     private static ProcessingCommunicator mProcessingCommunicator;
     private static PluginRegistry mPluginRegistry;
     private static PluginCommunicator mPluginCommunicator;
+    private static final String mPluginConfigFileRef = "plugins.cfg";
 
     @BeforeClass
     public static void initialize() {
         mBus = new Bus();
 
         mProcessingCommunicator = new ProcessingCommunicator(mBus);
-        mPluginRegistry = new PluginRegistry(mProcessingCommunicator);
+        mPluginRegistry = new PluginRegistry(mProcessingCommunicator, mPluginConfigFileRef);
         mPluginCommunicator = new PluginCommunicator(mBus, mPluginRegistry);
     }
 
