@@ -1,15 +1,5 @@
 package com.aurora.internalservice.internalprocessor;
 
-import android.util.Log;
-
-
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Scanner;
-import java.util.logging.Logger;
-
 public class TextExtractorTXT implements TextExtractor {
 
     /**
