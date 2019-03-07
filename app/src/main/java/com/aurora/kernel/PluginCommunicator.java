@@ -1,9 +1,11 @@
 package com.aurora.kernel;
 
 import android.app.Activity;
-import android.util.Log;
+import android.support.v4.app.Fragment;
 
+import com.aurora.externalservice.PluginEnvironment;
 import com.aurora.kernel.event.OpenFileWithPluginRequest;
+import com.aurora.kernel.event.OpenFileWithPluginResponse;
 import com.aurora.kernel.event.PluginProcessorRequest;
 import com.aurora.kernel.event.PluginProcessorResponse;
 import com.aurora.kernel.event.PluginSettingsRequest;
@@ -51,17 +53,18 @@ public class PluginCommunicator extends Communicator {
      * @param pluginName the name of the plugin to get the settings for
      */
     private void getSettingsActivity(String pluginName) {
-        // TODO: get settings
-        // TODO: make a PluginSettingsResponse
-        Log.d("PluginCommunicator", "Not implemented yet! " + pluginName);
+        // Load the plugin
+        PluginEnvironment plugin = mPluginRegistry.loadPlugin(pluginName);
 
-        // Get the settings from the plugin registry
-        Class<? extends Activity> settingsActivity =
-                mPluginRegistry.loadPlugin(pluginName).getSettingsActivity();
+        // Get the settings from the plugin
+        Class<? extends Activity> settingsActivity = null;
 
-        // Create a response and post it
-        PluginSettingsResponse pluginSettingsResponse =
-                new PluginSettingsResponse(settingsActivity);
+        if (plugin != null) {
+            settingsActivity = plugin.getSettingsActivity();
+        }
+
+        // Create a response and post it, response will contain null if plugin was not found
+        PluginSettingsResponse pluginSettingsResponse = new PluginSettingsResponse(settingsActivity);
 
         mBus.post(pluginSettingsResponse);
     }
@@ -71,9 +74,18 @@ public class PluginCommunicator extends Communicator {
      * @param fileRef    a reference to the file to process
      */
     private void openFileWithPlugin(String pluginName, String fileRef) {
-        // TODO: get file representation
-        // TODO: make an OpenFileWithPluginResponse
-        Log.d("PluginCommunicator", "Not implemented yet!" + pluginName + " " + fileRef);
+        PluginEnvironment plugin =  mPluginRegistry.loadPlugin(pluginName);
+
+        Fragment pluginFragment = null;
+
+        if (plugin != null) {
+            pluginFragment = plugin.openFile(fileRef);
+        }
+
+        // Create a response and post it, response will contain null if plugin was not found
+        OpenFileWithPluginResponse pluginResponse = new OpenFileWithPluginResponse(pluginFragment);
+
+        mBus.post(pluginResponse);
     }
 
 

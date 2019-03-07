@@ -5,13 +5,15 @@ import android.support.v4.app.Fragment;
 
 import com.aurora.externalservice.PluginEnvironment;
 import com.aurora.internalservice.internalprocessor.ExtractedText;
+import com.aurora.kernel.event.OpenFileWithPluginRequest;
+import com.aurora.kernel.event.OpenFileWithPluginResponse;
 import com.aurora.kernel.event.PluginProcessorResponse;
 import com.aurora.kernel.event.PluginSettingsRequest;
 import com.aurora.kernel.event.PluginSettingsResponse;
 import com.aurora.plugin.BasicProcessedText;
 import com.aurora.plugin.Plugin;
-import com.aurora.processingservice.PluginProcessor;
 import com.aurora.plugin.ProcessedText;
+import com.aurora.processingservice.PluginProcessor;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -28,28 +30,51 @@ public class PluginCommunicatorTest {
     private static ProcessingCommunicator mProcessingCommunicator;
     private static PluginRegistry mPluginRegistry;
     private static PluginCommunicator mPluginCommunicator;
-    private static final String pluginConfigFileRef = "plugins.cfg";
+    private static final String PLUGINS_CFG = "plugins.cfg";
+    private static final String PLUGIN_NAME = "DummyPlugin";
+    private static final String FILE_PATH = "/path/to/file";
+
+    private static Fragment mDummyFragment;
 
     @BeforeClass
     public static void initialize() {
         mBus = new Bus();
 
         mProcessingCommunicator = new ProcessingCommunicator(mBus);
-        mPluginRegistry = new PluginRegistry(mProcessingCommunicator, pluginConfigFileRef);
+        mPluginRegistry = new PluginRegistry(mProcessingCommunicator, PLUGINS_CFG);
         mPluginCommunicator = new PluginCommunicator(mBus, mPluginRegistry);
+
+        mDummyFragment = new DummyFragment();
+    }
+
+    /**
+     * Helper method to add a dummy plugin to the registry
+     */
+    private void addPluginToRegistry() {
+        // Clear registry
+        mPluginRegistry.removeAllPlugins();
+
+        // Create environment and processor
+        PluginEnvironment environment = new DummyPluginEnvironment(mPluginCommunicator, DummyActivity.class);
+        PluginProcessor processor = new DummyPluginProcessor(mProcessingCommunicator);
+
+        // Create plugin using environment and processor
+        Plugin plugin = new DummyPlugin(environment, processor);
+
+        // Register plugin in registry
+        mPluginRegistry.registerPlugin(PLUGIN_NAME, plugin);
     }
 
     @Test
     public void PluginCommunicator_processFileWithPlugin_shouldReturnProcessedFile() {
         // Create dummy arguments
         PluginProcessor processor = new DummyPluginProcessor(mProcessingCommunicator);
-        String fileRef = "/path/to/dummy/file";
 
         // Create test observer to subscribe to the observable
         TestObserver<ProcessedText> observer = new TestObserver<>();
 
         // Call method under test
-        Observable<ProcessedText> processedTextObservable = mPluginCommunicator.processFileWithPluginProcessor(processor, fileRef);
+        Observable<ProcessedText> processedTextObservable = mPluginCommunicator.processFileWithPluginProcessor(processor, FILE_PATH);
 
         // Create dummy processed text
         String title = "Title";
@@ -73,13 +98,7 @@ public class PluginCommunicatorTest {
 
     @Test
     public void PluginCommunicator_PluginSettingsObservable_shouldPostSettingsResponse() {
-        // Prepare the registry with a dummy plugin
-        mPluginRegistry.removeAllPlugins();
-        String pluginName = "DummyPlugin";
-        PluginEnvironment environment = new DummyPluginEnvironment(mPluginCommunicator, DummyActivity.class);
-        PluginProcessor processor = new DummyPluginProcessor(mProcessingCommunicator);
-        Plugin plugin = new DummyPlugin(environment, processor);
-        mPluginRegistry.registerPlugin(pluginName, plugin);
+        addPluginToRegistry();
 
         // Create test observer to subscribe to the observable
         TestObserver<Class<? extends Activity>> observer = new TestObserver<>();
@@ -91,12 +110,32 @@ public class PluginCommunicatorTest {
         observable.map(PluginSettingsResponse::getActivity).subscribe(observer);
 
         // Post request event
-        mBus.post(new PluginSettingsRequest(pluginName));
+        mBus.post(new PluginSettingsRequest(PLUGIN_NAME));
 
         // Assert values
         observer.assertSubscribed();
         observer.assertValue(DummyActivity.class);
+    }
 
+    @Test
+    public void PluginCommunicator_OpenFileWithPluginRequest_shouldPostResponseEvent() {
+        addPluginToRegistry();
+
+        // Create test observer to subscribe to observable
+        TestObserver<Fragment> observer = new TestObserver<>();
+
+        // Register for OpenFileWithPluginResponse events
+        Observable<OpenFileWithPluginResponse> observable = mBus.register(OpenFileWithPluginResponse.class);
+
+        // Subscribe to observable
+        observable.map(OpenFileWithPluginResponse::getPluginFragment).subscribe(observer);
+
+        // Post request event
+        mBus.post(new OpenFileWithPluginRequest(PLUGIN_NAME, FILE_PATH));
+
+        // Assert values
+        observer.assertSubscribed();
+        observer.assertValue(mDummyFragment);
     }
 
     /**
@@ -140,7 +179,7 @@ public class PluginCommunicatorTest {
 
         @Override
         public Fragment openFile(String fileRef) {
-            return null;
+            return mDummyFragment;
         }
 
         @Override
@@ -154,6 +193,12 @@ public class PluginCommunicatorTest {
      * Dummy activity for testing purposes
      */
     private class DummyActivity extends Activity {
+    }
+
+    /**
+     * Dummy fragment for testing purposes
+     */
+    private static class DummyFragment extends Fragment {
     }
 
 }
