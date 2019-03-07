@@ -89,7 +89,7 @@ public class PluginRegistryTest {
     }
 
     @Test
-    public void PluginRegistry_loadPLugin_shouldNotSetProcessorOfCommunicator() {
+    public void PluginRegistry_loadPlugin_shouldNotSetProcessorOfCommunicator() {
         // First get the current active processor
         PluginProcessor currentProcessor = mProcessingCommunicator.getActivePluginProcessor();
 
