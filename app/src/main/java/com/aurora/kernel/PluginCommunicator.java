@@ -3,6 +3,8 @@ package com.aurora.kernel;
 import android.app.Activity;
 import android.support.v4.app.Fragment;
 
+import com.aurora.aurora.NotFoundActivity;
+import com.aurora.aurora.NotFoundFragment;
 import com.aurora.externalservice.PluginEnvironment;
 import com.aurora.kernel.event.OpenFileWithPluginRequest;
 import com.aurora.kernel.event.OpenFileWithPluginResponse;
@@ -61,6 +63,9 @@ public class PluginCommunicator extends Communicator {
 
         if (plugin != null) {
             settingsActivity = plugin.getSettingsActivity();
+        } else {
+            // Create not found activity
+            settingsActivity = NotFoundActivity.class;
         }
 
         // Create a response and post it, response will contain null if plugin was not found
@@ -80,6 +85,9 @@ public class PluginCommunicator extends Communicator {
 
         if (plugin != null) {
             pluginFragment = plugin.openFile(fileRef);
+        } else {
+            // Create not found fragment
+            pluginFragment = new NotFoundFragment();
         }
 
         // Create a response and post it, response will contain null if plugin was not found

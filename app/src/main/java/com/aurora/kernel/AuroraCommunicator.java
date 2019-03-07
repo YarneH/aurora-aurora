@@ -54,7 +54,8 @@ public class AuroraCommunicator extends Communicator {
                 = this.mBus.register(PluginSettingsResponse.class);
         this.mBus.post(new PluginSettingsRequest(pluginName));
 
-        return mPluginSettingsResponse.map(PluginSettingsResponse::getActivity);
+        return mPluginSettingsResponse
+                .map(PluginSettingsResponse::getActivity);
     }
 
     /**
