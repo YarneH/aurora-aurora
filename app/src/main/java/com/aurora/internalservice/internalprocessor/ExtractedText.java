@@ -1,16 +1,18 @@
 package com.aurora.internalservice.internalprocessor;
 
+import com.aurora.internalservice.InternallyProcessedFile;
+
 import java.util.List;
 
 /**
  * Class to represent extracted text from an internal processor
  */
-public class ExtractedText {
+public class ExtractedText implements InternallyProcessedFile {
     private String mTitle;
 
     private List<String> mParagraphs;
 
-    public ExtractedText(String title, List<String> paragraphs) {
+    ExtractedText(String title, List<String> paragraphs) {
         mTitle = title;
         mParagraphs = paragraphs;
     }

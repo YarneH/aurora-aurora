@@ -11,5 +11,5 @@ public interface InternalService {
      *
      * @param fileRef a reference to where the file can be found
      */
-    void process(String fileRef);
+    InternallyProcessedFile process(String fileRef);
 }

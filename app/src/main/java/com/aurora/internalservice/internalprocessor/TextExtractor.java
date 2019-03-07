@@ -1,6 +1,5 @@
 package com.aurora.internalservice.internalprocessor;
 
-import java.io.IOException;
 
 /**
  * Interface for different extractors, extracting text from different file formats

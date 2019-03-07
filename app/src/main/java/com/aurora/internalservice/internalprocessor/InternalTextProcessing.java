@@ -3,6 +3,7 @@ package com.aurora.internalservice.internalprocessor;
 import android.util.Log;
 
 import com.aurora.internalservice.InternalService;
+import com.aurora.internalservice.InternallyProcessedFile;
 
 import java.util.HashMap;
 
@@ -21,16 +22,18 @@ public class InternalTextProcessing implements InternalService {
      * @param fileRef a reference to where the file can be found
      */
     @Override
-    public void process(String fileRef) {
+    public InternallyProcessedFile process(String fileRef) {
         Log.d("InternalTextProcessing", "Not implemented yet!");
 
-        ExtractedText extractedText;
-        if (fileFormatExtractorMap.containsKey(getMimeType(fileRef))) {
-            extractedText = fileFormatExtractorMap.get(getMimeType(fileRef)).extract(fileRef);
+        ExtractedText extractedText = new ExtractedText(null,null);
+        String fileType = getMimeType(fileRef);
+        TextExtractor extractor = fileFormatExtractorMap.get(getMimeType(fileRef));
+        if (extractor != null) {
+            extractedText = extractor.extract(fileRef);
         } else {
             Log.d("InternalTextProcessing", "File type not supported");
         }
-
+        return extractedText;
     }
 
     /**
