@@ -4,7 +4,6 @@ import android.util.Log;
 
 import com.aurora.internalservice.InternalService;
 
-import java.io.IOException;
 import java.util.HashMap;
 
 /**
@@ -12,7 +11,7 @@ import java.util.HashMap;
  */
 public class InternalTextProcessing implements InternalService {
 
-    private HashMap<String, TextExtractor> fileformat_ExtractorMap = create_File_to_Extractor_map();
+    private HashMap<String, TextExtractor> fileFormatExtractorMap = createFileToExtractorMap();
 
     // TODO: return type may change as well as fileRef type
 
@@ -26,8 +25,8 @@ public class InternalTextProcessing implements InternalService {
         Log.d("InternalTextProcessing", "Not implemented yet!");
 
         ExtractedText extractedText;
-        if (fileformat_ExtractorMap.containsKey(getMimeType(fileRef))){
-            extractedText = fileformat_ExtractorMap.get(getMimeType(fileRef)).extract(fileRef);
+        if (fileFormatExtractorMap.containsKey(getMimeType(fileRef))) {
+            extractedText = fileFormatExtractorMap.get(getMimeType(fileRef)).extract(fileRef);
         } else {
             Log.d("InternalTextProcessing", "File type not supported");
         }
@@ -35,21 +34,20 @@ public class InternalTextProcessing implements InternalService {
     }
 
     /**
-     *
      * @param fileRef the reference of the to be processed file
      * @return the extension of the file
      */
-    // TODO: implement
-    private String getMimeType(String fileRef){
-        return null;
+    // TODO: implement for real
+    private static String getMimeType(String fileRef) {
+        String[] splitted = fileRef.split("\\.");
+        return splitted[splitted.length - 1];
     }
 
     /**
-     *
      * @return the mapping of fileTypes to the related extractor
      */
-    private HashMap<String, TextExtractor> create_File_to_Extractor_map() {
-        HashMap<String,TextExtractor> map = new HashMap<>();
+    private HashMap<String, TextExtractor> createFileToExtractorMap() {
+        HashMap<String, TextExtractor> map = new HashMap<>();
         map.put("txt", new TextExtractorTXT());
         map.put("pdf", new TextExtractorPDF());
         return map;
