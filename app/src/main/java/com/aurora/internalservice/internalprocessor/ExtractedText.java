@@ -12,7 +12,7 @@ public class ExtractedText implements InternallyProcessedFile {
 
     private List<String> mParagraphs;
 
-    ExtractedText(String title, List<String> paragraphs) {
+    public ExtractedText(String title, List<String> paragraphs) {
         mTitle = title;
         mParagraphs = paragraphs;
     }
