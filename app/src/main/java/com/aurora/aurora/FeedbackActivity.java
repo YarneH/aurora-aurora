@@ -15,7 +15,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 
 public class FeedbackActivity extends AppCompatActivity {
-
+    private static final int OK_RESPONSE_CODE = 200;
     EditText mEditTextFeedback;
 
     /**
@@ -44,7 +44,7 @@ public class FeedbackActivity extends AppCompatActivity {
         boolean success = false;
         String input = mEditTextFeedback.getText().toString();
 
-        if (!input.equals("")) {
+        if (!("").equals(input)) {
             String stringWebHook = "*:fire::fire:New feedback:fire::fire:* \n" + input;
 
             try {
@@ -80,7 +80,7 @@ public class FeedbackActivity extends AppCompatActivity {
             boolean success = false;
             HttpURLConnection conn = null;
 
-            try {
+            try (AutoCloseable conc = conn::disconnect){
                 // Setup the connection for the Slack Webhook
                 URL url = new URL("https://hooks.slack.com/services/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");
                 conn = (HttpURLConnection) url.openConnection();
@@ -101,7 +101,7 @@ public class FeedbackActivity extends AppCompatActivity {
 
                 // Check if response is OK
                 int responseCode = conn.getResponseCode();
-                if (responseCode == 200) {
+                if (responseCode == OK_RESPONSE_CODE) {
                     success = true;
                 }
 

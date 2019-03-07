@@ -2,7 +2,6 @@ package com.aurora.aurora;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
-import android.support.design.widget.Snackbar;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -10,7 +9,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.FrameLayout;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import java.util.Locale;
@@ -130,8 +128,8 @@ public class CardFileAdapter extends RecyclerView.Adapter<CardFileAdapter.CardFi
         // TODO: onClick for the open button, onClick for the open with different plugin button, delete button
         @Override
         public void onClick(View view) {
-            // If the click happened on the card itself
             if (view.getId() == R.id.cv_file) {
+                // If the click happened on the card itself
                 if (mSelectedIndex == NO_DETAILS) {
                     /*
                     Case no card selected. Sets the selected card and expands the view.
@@ -154,21 +152,25 @@ public class CardFileAdapter extends RecyclerView.Adapter<CardFileAdapter.CardFi
                     Set the index to the selected card, and expand that card.
                      */
                     RecyclerView recyclerView = (RecyclerView) view.getParent();
-                    CardFileViewHolder prev = (CardFileViewHolder) recyclerView.findViewHolderForLayoutPosition(mSelectedIndex);
+                    CardFileViewHolder prev =(CardFileViewHolder) recyclerView.
+                            findViewHolderForLayoutPosition(mSelectedIndex);
                     if (prev != null) {
                         collapse(prev.mCardView);
                     }
                     mSelectedIndex = index;
                     expand(view);
                 }
-                // if the click happened on the open button
             } else if (view.getId() == R.id.button_card_file) {
-
+                // if the click happened on the open button
+            } else {
+                // Normally not reachable.
             }
         }
     }
 
-//    TODO: Expanding card when another expanded card is in view results in the card growing upwards instead of down. Scrolling down before expanding "solves" this.
+//    TODO: Expanding card when another expanded card is
+//    in view results in the card growing upwards instead of down.
+//    Scrolling down before expanding "solves" this.
 //    Fix This bug :)
     /**
      * Expand the view to show details.
