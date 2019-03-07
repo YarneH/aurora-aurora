@@ -1,11 +1,13 @@
 package com.aurora.kernel;
 
+import android.app.Activity;
 import android.util.Log;
 
 import com.aurora.kernel.event.OpenFileWithPluginRequest;
 import com.aurora.kernel.event.PluginProcessorRequest;
 import com.aurora.kernel.event.PluginProcessorResponse;
 import com.aurora.kernel.event.PluginSettingsRequest;
+import com.aurora.kernel.event.PluginSettingsResponse;
 import com.aurora.plugin.ProcessedText;
 import com.aurora.processingservice.PluginProcessor;
 
@@ -44,7 +46,7 @@ public class PluginCommunicator extends Communicator {
     }
 
     /**
-     * Requests the settings of a given plugin
+     * Requests the settings of a given plugin in the plugin registry
      *
      * @param pluginName the name of the plugin to get the settings for
      */
@@ -53,9 +55,15 @@ public class PluginCommunicator extends Communicator {
         // TODO: make a PluginSettingsResponse
         Log.d("PluginCommunicator", "Not implemented yet! " + pluginName);
 
-        //PluginSettingsResponse pluginSettingsResponse =
-        //new PluginSettingsResponse(mPluginRegistry.resolvePlugin(pluginName).getSettingsActivity());
-        //this.mBus.post(pluginSettingsResponse);
+        // Get the settings from the plugin registry
+        Class<? extends Activity> settingsActivity =
+                mPluginRegistry.loadPlugin(pluginName).getSettingsActivity();
+
+        // Create a response and post it
+        PluginSettingsResponse pluginSettingsResponse =
+                new PluginSettingsResponse(settingsActivity);
+
+        mBus.post(pluginSettingsResponse);
     }
 
     /**

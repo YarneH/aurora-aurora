@@ -42,8 +42,8 @@ public class PluginRegistryTest {
         mRegistry.removeAllPlugins();
 
         // Create environments and processors
-        PluginEnvironment environment1 = new DummyPluginEnvironment(mPluginCommunicator);
-        PluginEnvironment environment2 = new DummyPluginEnvironment(mPluginCommunicator);
+        PluginEnvironment environment1 = new DummyPluginEnvironment(mPluginCommunicator, DummyActivity.class);
+        PluginEnvironment environment2 = new DummyPluginEnvironment(mPluginCommunicator, DummyActivity.class);
 
         PluginProcessor processor1 = new DummyPluginProcessor(mProcessingCommunicator);
         PluginProcessor processor2 = new DummyPluginProcessor(mProcessingCommunicator);
@@ -122,8 +122,10 @@ public class PluginRegistryTest {
      * Dummy plugin enviroment class for testing purposes
      */
     private static class DummyPluginEnvironment extends PluginEnvironment {
-        public DummyPluginEnvironment(PluginCommunicator pluginCommunicator) {
-            super(pluginCommunicator);
+
+
+        public DummyPluginEnvironment(PluginCommunicator pluginCommunicator, Class<? extends Activity> pluginSettingsActivity) {
+            super(pluginCommunicator, pluginSettingsActivity);
         }
 
         @Override
@@ -160,5 +162,12 @@ public class PluginRegistryTest {
         protected void resultProcessFileWithAuroraProcessor(ExtractedText extractedText) {
 
         }
+    }
+
+    /**
+     * Dummy activity class for testing purposes
+     */
+    private class DummyActivity extends Activity {
+
     }
 }

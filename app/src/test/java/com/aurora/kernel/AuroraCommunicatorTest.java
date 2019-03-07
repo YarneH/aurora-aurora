@@ -11,7 +11,6 @@ import com.aurora.plugin.BasicPlugin;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -87,6 +86,7 @@ public class AuroraCommunicatorTest {
     public void AuroraCommunicator_getListOfPLugins_shouldReturnListOfPLugins() {
         // Create dummy arguments
         String pluginName = "DummyPlugin";
+        String pluginDescription = "this is a dummy description.";
 
         // Create observer to subscribe to observable
         TestObserver<List<BasicPlugin>> observer = new TestObserver<>();
@@ -98,7 +98,7 @@ public class AuroraCommunicatorTest {
         List<BasicPlugin> basicPluginList = new ArrayList<>();
 
         // Add fake basic plugin
-        basicPluginList.add(new BasicPlugin(pluginName, null));
+        basicPluginList.add(new BasicPlugin(pluginName, null, pluginDescription));
 
         // Make response containing the list
         ListPLuginsResponse response = new ListPLuginsResponse(basicPluginList);
