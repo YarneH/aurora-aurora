@@ -23,7 +23,7 @@ public class InternalTextProcessing implements InternalService {
      * @return The extracted content from the file
      */
     @Override
-    public InternallyProcessedFile processFile(String fileRef) {
+    public InternallyProcessedFile processFile(String fileRef) throws FileTypeNotSupportedException {
         Log.d("InternalTextProcessing", "Not implemented yet!");
 
         InternallyProcessedFile extractedText = new ExtractedText(null,null);
@@ -33,6 +33,7 @@ public class InternalTextProcessing implements InternalService {
             extractedText = extractor.extract(fileRef);
         } else {
             Log.d("InternalTextProcessing", "File type not supported");
+            throw new FileTypeNotSupportedException("");
         }
         return extractedText;
     }
