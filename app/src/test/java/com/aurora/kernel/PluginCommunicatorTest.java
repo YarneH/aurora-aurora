@@ -32,6 +32,7 @@ public class PluginCommunicatorTest {
     private static PluginCommunicator mPluginCommunicator;
     private static final String PLUGINS_CFG = "plugins.cfg";
     private static final String PLUGIN_NAME = "DummyPlugin";
+    private static final String PLUGIN_NOT_IN_REGISTRY = "You have found the candy, congratulations!";
     private static final String FILE_PATH = "/path/to/file";
 
     private static Fragment mDummyFragment;
@@ -118,6 +119,29 @@ public class PluginCommunicatorTest {
     }
 
     @Test
+    public void PluginCommunicator_PluginSettingsObservable_shouldPostResponseContainingNull() {
+        addPluginToRegistry();
+
+        // Create test observer to subscribe to the observable
+        TestObserver<Boolean> observer = new TestObserver<>();
+
+        // Register for PluginSettingsResponse events
+        Observable<PluginSettingsResponse> observable = mBus.register(PluginSettingsResponse.class);
+
+        // Subscribe to observable
+        observable.map(pluginSettingsResponse -> pluginSettingsResponse.getActivity() == null)
+                .subscribe(observer);
+
+        // Post request event
+        mBus.post(new PluginSettingsRequest(PLUGIN_NOT_IN_REGISTRY));
+
+        // Assert values
+        observer.assertSubscribed();
+        observer.assertValue(true);
+
+    }
+
+    @Test
     public void PluginCommunicator_OpenFileWithPluginRequest_shouldPostResponseEvent() {
         addPluginToRegistry();
 
@@ -136,6 +160,27 @@ public class PluginCommunicatorTest {
         // Assert values
         observer.assertSubscribed();
         observer.assertValue(mDummyFragment);
+    }
+
+    @Test
+    public void PluginCommunicator_OpenFileWithPluginRequest_shouldPostResponseEventContainingNull() {
+        addPluginToRegistry();
+
+        // Create test observer to subscribe to observable
+        TestObserver<Boolean> observer = new TestObserver<>();
+
+        // Register for OpenFileWithPluginResponse events
+        Observable<OpenFileWithPluginResponse> observable = mBus.register(OpenFileWithPluginResponse.class);
+
+        // Subscribe to observable
+        observable.map(openFileWithPluginResponse -> openFileWithPluginResponse.getPluginFragment() == null).subscribe(observer);
+
+        // Post request event
+        mBus.post(new OpenFileWithPluginRequest(PLUGIN_NOT_IN_REGISTRY, FILE_PATH));
+
+        // Assert values
+        observer.assertSubscribed();
+        observer.assertValue(true);
     }
 
     /**
