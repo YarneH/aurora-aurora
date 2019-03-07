@@ -23,7 +23,7 @@ import android.widget.Toast;
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
-    static final int REQUEST_FILE_GET = 1;
+    private static final int REQUEST_FILE_GET = 1;
 
     // Toast and TextView used for demo and preventing queued Toasts
     private Toast mToast;
@@ -74,8 +74,8 @@ public class MainActivity extends AppCompatActivity
         /* Setup RecyclerView */
         mRecyclerView = (RecyclerView) findViewById(R.id.rv_files);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
-        mAdapter = new CardFileAdapter();
-        mRecyclerView.setAdapter(mAdapter);
+        CardFileAdapter adapter = new CardFileAdapter();
+        mRecyclerView.setAdapter(adapter);
     }
 
     /**
@@ -175,7 +175,7 @@ public class MainActivity extends AppCompatActivity
         } else if (id == R.id.nav_home) {
             text = "Home";
             home = true;
-        } else if (id == R.id.nav_settings) {
+        } else {
             text = "Settings";
         }
         // Change text and visibility (Used for demo)
