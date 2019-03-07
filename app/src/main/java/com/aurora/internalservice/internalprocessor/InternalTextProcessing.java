@@ -27,7 +27,7 @@ public class InternalTextProcessing implements InternalService {
 
         ExtractedText extractedText = new ExtractedText(null,null);
         String fileType = getMimeType(fileRef);
-        TextExtractor extractor = fileFormatExtractorMap.get(getMimeType(fileRef));
+        TextExtractor extractor = fileFormatExtractorMap.get(fileType);
         if (extractor != null) {
             extractedText = extractor.extract(fileRef);
         } else {
