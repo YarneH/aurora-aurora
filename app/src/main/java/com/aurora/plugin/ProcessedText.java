@@ -17,6 +17,7 @@ public abstract class ProcessedText {
      */
     private List<String> mParagraphs;
 
+    // Note that this abstract class has a constructor to enforce that a minimum of fields are present
     public ProcessedText(String title, List<String> paragraphs) {
         this.mTitle = title;
         mParagraphs = paragraphs;

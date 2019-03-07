@@ -4,8 +4,6 @@ import android.util.Log;
 
 import com.aurora.kernel.event.InternalProcessorRequest;
 
-import java.util.Map;
-
 import io.reactivex.Observable;
 
 /**
@@ -20,11 +18,11 @@ public class PluginInternalServiceCommunicator extends Communicator {
 
         internalProcessorEventObservable = mBus.register(InternalProcessorRequest.class);
         internalProcessorEventObservable.subscribe((InternalProcessorRequest internalProcessorRequest) ->
-                processFileWithInternalProcessor(internalProcessorRequest.getFileRef(),
-                        internalProcessorRequest.getParameters()));
+                processFileWithInternalProcessor(internalProcessorRequest.getFileRef()));
     }
 
-    private void processFileWithInternalProcessor(String fileRef, Map<String, ?> parameters) {
-        Log.d("InternalServiceComm", "Not implemented yet! " + fileRef + " " + parameters.toString());
+    private void processFileWithInternalProcessor(String fileRef) {
+        //TODO Call the internal processor
+        Log.d("InternalServiceComm", "Not implemented yet! " + fileRef);
     }
 }

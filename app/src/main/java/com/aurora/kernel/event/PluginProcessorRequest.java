@@ -1,6 +1,6 @@
 package com.aurora.kernel.event;
 
-import com.aurora.plugin.PluginProcessor;
+import com.aurora.processingservice.PluginProcessor;
 
 /**
  * Event to request that a file is processed with a PluginProcessor
