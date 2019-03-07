@@ -62,11 +62,11 @@ public class AuroraCommunicator extends Communicator {
      * @return a list of basic information on every plugin wrapped in an observable
      */
     public Observable<List<BasicPlugin>> getListOfPlugins() {
-        Observable<ListPLuginsResponse> mListPLuginsResponse
+        Observable<ListPLuginsResponse> mListPluginsResponse
                 = this.mBus.register(ListPLuginsResponse.class);
         this.mBus.post(new ListPluginsRequest());
 
-        return mListPLuginsResponse.map(ListPLuginsResponse::getPlugins);
+        return mListPluginsResponse.map(ListPLuginsResponse::getPlugins);
     }
 
 
