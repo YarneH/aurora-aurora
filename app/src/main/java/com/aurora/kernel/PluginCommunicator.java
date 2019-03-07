@@ -6,9 +6,8 @@ import com.aurora.kernel.event.OpenFileWithPluginRequest;
 import com.aurora.kernel.event.PluginProcessorRequest;
 import com.aurora.kernel.event.PluginProcessorResponse;
 import com.aurora.kernel.event.PluginSettingsRequest;
-import com.aurora.plugin.PluginFragment;
-import com.aurora.processingservice.PluginProcessor;
 import com.aurora.plugin.ProcessedText;
+import com.aurora.processingservice.PluginProcessor;
 
 import io.reactivex.Observable;
 
@@ -16,7 +15,6 @@ import io.reactivex.Observable;
  * Communicator that communicates with Plugin environments
  */
 public class PluginCommunicator extends Communicator {
-    private PluginFragment mPluginFragment;
     private PluginRegistry mPluginRegistry;
 
     private Observable<OpenFileWithPluginRequest> mOpenFileWithPluginRequestObservable;
