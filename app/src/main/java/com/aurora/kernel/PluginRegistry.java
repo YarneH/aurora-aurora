@@ -75,15 +75,22 @@ class PluginRegistry {
      * @return List of Plugin objects with basic information
      */
     public List<BasicPlugin> getPlugins() {
-        Log.d("PluginRegistry", "Not implemented yet!");
-        return new ArrayList<>();
+        List<BasicPlugin> basicPlugins = new ArrayList<>();
+
+        // Loop over all values and extract their basic info
+        for (Plugin p : mPluginsMap.values()) {
+            // Create basic plugin
+            basicPlugins.add(p.getBasicPluginInfo());
+        }
+
+        return basicPlugins;
     }
 
     /**
      * Adds a plugin with a given name to the map and writes back the configuration file
      *
      * @param pluginName the name of the plugin to add
-     * @param plugin the plugin object that contains the plugin
+     * @param plugin     the plugin object that contains the plugin
      * @return true if the plugin was added, false if the plugin could not be added (e.g. if it was already present)
      */
     public boolean registerPlugin(String pluginName, Plugin plugin) {

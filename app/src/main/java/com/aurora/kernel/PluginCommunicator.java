@@ -6,14 +6,19 @@ import android.support.v4.app.Fragment;
 import com.aurora.aurora.NotFoundActivity;
 import com.aurora.aurora.NotFoundFragment;
 import com.aurora.externalservice.PluginEnvironment;
+import com.aurora.kernel.event.ListPluginsResponse;
+import com.aurora.kernel.event.ListPluginsRequest;
 import com.aurora.kernel.event.OpenFileWithPluginRequest;
 import com.aurora.kernel.event.OpenFileWithPluginResponse;
 import com.aurora.kernel.event.PluginProcessorRequest;
 import com.aurora.kernel.event.PluginProcessorResponse;
 import com.aurora.kernel.event.PluginSettingsRequest;
 import com.aurora.kernel.event.PluginSettingsResponse;
+import com.aurora.plugin.BasicPlugin;
 import com.aurora.plugin.ProcessedText;
 import com.aurora.processingservice.PluginProcessor;
+
+import java.util.List;
 
 import io.reactivex.Observable;
 
@@ -25,6 +30,7 @@ public class PluginCommunicator extends Communicator {
 
     private Observable<OpenFileWithPluginRequest> mOpenFileWithPluginRequestObservable;
     private Observable<PluginSettingsRequest> mPluginSettingsRequestObservable;
+    private Observable<ListPluginsRequest> mListPluginsRequestObservable;
 
 
     public PluginCommunicator(Bus bus, PluginRegistry pluginRegistry) {
@@ -46,6 +52,14 @@ public class PluginCommunicator extends Communicator {
         // When a request comes in, call the appropriate function
         mPluginSettingsRequestObservable.subscribe((PluginSettingsRequest pluginSettingsRequest) ->
                 getSettingsActivity(pluginSettingsRequest.getPluginName())
+        );
+
+        // Register for requests to list available plugins
+        mListPluginsRequestObservable = mBus.register(ListPluginsRequest.class);
+
+        // When a request comes in, call the appropriate function
+        mListPluginsRequestObservable.subscribe((ListPluginsRequest listPluginsRequest) ->
+                listPlugins()
         );
     }
 
@@ -75,6 +89,8 @@ public class PluginCommunicator extends Communicator {
     }
 
     /**
+     * Opens a file with a given plugin
+     *
      * @param pluginName the name of the plugin to get the settings for
      * @param fileRef    a reference to the file to process
      */
@@ -94,6 +110,19 @@ public class PluginCommunicator extends Communicator {
         OpenFileWithPluginResponse pluginResponse = new OpenFileWithPluginResponse(pluginFragment);
 
         mBus.post(pluginResponse);
+    }
+
+    /**
+     * Lists all available plugins. It actually fires a ListPluginsResponseEvent that should be
+     * subscribed on by the AuroraCommunicator
+     */
+    private void listPlugins() {
+        // Get available plugins from plugin registry
+        List<BasicPlugin> pluginList = mPluginRegistry.getPlugins();
+
+        // Make a response event and post it
+        ListPluginsResponse response = new ListPluginsResponse(pluginList);
+        mBus.post(response);
     }
 
 

@@ -13,6 +13,8 @@ import com.aurora.processingservice.PluginProcessor;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import java.io.File;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
@@ -27,6 +29,8 @@ public class PluginRegistryTest {
     private static final String DUMMY_NAME_1 = "DummyPlugin1";
     private static final String DUMMY_NAME_2 = "DummyPlugin2";
     private static final String NOT_IN_MAP_PLUGIN = "DummyPlugin3";
+    private static final String DESCRIPTION_1 = "Dummydescription 1";
+    private static final String DESCRIPTION_2 = "Dummydescription 2";
 
     private static Plugin plugin1;
     private static Plugin plugin2;
@@ -49,8 +53,8 @@ public class PluginRegistryTest {
         PluginProcessor processor2 = new DummyPluginProcessor(mProcessingCommunicator);
 
         // Create dummy plugins
-        plugin1 = new DummyPlugin1(environment1, processor1);
-        plugin2 = new DummyPlugin2(environment2, processor2);
+        plugin1 = new DummyPlugin1(DUMMY_NAME_1, null, DESCRIPTION_1, environment1, processor1);
+        plugin2 = new DummyPlugin2(DUMMY_NAME_2, null, DESCRIPTION_2, environment2, processor2);
 
         // Add dummy plugins
         mRegistry.registerPlugin(DUMMY_NAME_1, plugin1);
@@ -104,8 +108,9 @@ public class PluginRegistryTest {
      * Dummy plugin for testing purposes
      */
     private static class DummyPlugin1 extends Plugin {
-        public DummyPlugin1(PluginEnvironment pluginEnvironment, PluginProcessor pluginProcessor) {
-            super(pluginEnvironment, pluginProcessor);
+        public DummyPlugin1(String name, File pluginLogo, String description,
+                            PluginEnvironment pluginEnvironment, PluginProcessor pluginProcessor) {
+            super(name, pluginLogo, description, pluginEnvironment, pluginProcessor);
         }
     }
 
@@ -113,8 +118,10 @@ public class PluginRegistryTest {
      * Another dummy plugin for testing purposes
      */
     private static class DummyPlugin2 extends Plugin {
-        public DummyPlugin2(PluginEnvironment pluginEnvironment, PluginProcessor pluginProcessor) {
-            super(pluginEnvironment, pluginProcessor);
+
+        public DummyPlugin2(String name, File pluginLogo, String description,
+                            PluginEnvironment pluginEnvironment, PluginProcessor pluginProcessor) {
+            super(name, pluginLogo, description, pluginEnvironment, pluginProcessor);
         }
     }
 

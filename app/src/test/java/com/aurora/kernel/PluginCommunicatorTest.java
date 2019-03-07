@@ -7,6 +7,8 @@ import com.aurora.aurora.NotFoundActivity;
 import com.aurora.aurora.NotFoundFragment;
 import com.aurora.externalservice.PluginEnvironment;
 import com.aurora.internalservice.internalprocessor.ExtractedText;
+import com.aurora.kernel.event.ListPluginsRequest;
+import com.aurora.kernel.event.ListPluginsResponse;
 import com.aurora.kernel.event.OpenFileWithPluginRequest;
 import com.aurora.kernel.event.OpenFileWithPluginResponse;
 import com.aurora.kernel.event.PluginProcessorResponse;
@@ -20,6 +22,7 @@ import com.aurora.processingservice.PluginProcessor;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import java.io.File;
 import java.util.Arrays;
 import java.util.List;
 
@@ -36,6 +39,8 @@ public class PluginCommunicatorTest {
     private static final String PLUGIN_NAME = "DummyPlugin";
     private static final String PLUGIN_NOT_IN_REGISTRY = "You have found the candy, congratulations!";
     private static final String FILE_PATH = "/path/to/file";
+
+    private static Plugin mPlugin;
 
     private static Fragment mDummyFragment;
 
@@ -57,15 +62,19 @@ public class PluginCommunicatorTest {
         // Clear registry
         mPluginRegistry.removeAllPlugins();
 
+        // Create name and description
+        String pluginName = "DummyPlugin";
+        String description = "This is a dummy description.";
         // Create environment and processor
         PluginEnvironment environment = new DummyPluginEnvironment(mPluginCommunicator, DummyActivity.class);
         PluginProcessor processor = new DummyPluginProcessor(mProcessingCommunicator);
 
         // Create plugin using environment and processor
-        Plugin plugin = new DummyPlugin(environment, processor);
+        mPlugin = new DummyPlugin(pluginName, null, description,
+                environment, processor);
 
         // Register plugin in registry
-        mPluginRegistry.registerPlugin(PLUGIN_NAME, plugin);
+        mPluginRegistry.registerPlugin(PLUGIN_NAME, mPlugin);
     }
 
     @Test
@@ -185,6 +194,28 @@ public class PluginCommunicatorTest {
         observer.assertValue(NotFoundFragment.class);
     }
 
+    @Test
+    public void PluginCommunicator_ListPluginRequest_shouldPostResponseEvent() {
+        addPluginToRegistry();
+
+        // Create a test observer to subscribe to observable
+        TestObserver<String> observer = new TestObserver<>();
+
+        // Register for ListPluginsResponse events
+        Observable<ListPluginsResponse> observable = mBus.register(ListPluginsResponse.class);
+
+        // Subscribe to observable
+        observable.map(listPluginsResponse -> listPluginsResponse.getPlugins().get(0).getName()).subscribe(observer);
+
+        // Post request event
+        mBus.post(new ListPluginsRequest());
+
+        // Assert values
+        observer.assertSubscribed();
+        observer.assertValue(mPlugin.getBasicPluginInfo().getName());
+    }
+
+
     /**
      * Dummy plugin processor for testing purposes
      */
@@ -210,8 +241,10 @@ public class PluginCommunicatorTest {
      * Dummy plugin class for testing purposes
      */
     private class DummyPlugin extends Plugin {
-        public DummyPlugin(PluginEnvironment pluginEnvironment, PluginProcessor pluginProcessor) {
-            super(pluginEnvironment, pluginProcessor);
+
+        public DummyPlugin(String name, File pluginLogo, String description,
+                           PluginEnvironment pluginEnvironment, PluginProcessor pluginProcessor) {
+            super(name, pluginLogo, description, pluginEnvironment, pluginProcessor);
         }
     }
 

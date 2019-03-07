@@ -3,7 +3,7 @@ package com.aurora.kernel;
 import android.app.Activity;
 import android.support.v4.app.Fragment;
 
-import com.aurora.kernel.event.ListPLuginsResponse;
+import com.aurora.kernel.event.ListPluginsResponse;
 import com.aurora.kernel.event.OpenFileWithPluginResponse;
 import com.aurora.kernel.event.PluginSettingsResponse;
 import com.aurora.plugin.BasicPlugin;
@@ -101,7 +101,7 @@ public class AuroraCommunicatorTest {
         basicPluginList.add(new BasicPlugin(pluginName, null, pluginDescription));
 
         // Make response containing the list
-        ListPLuginsResponse response = new ListPLuginsResponse(basicPluginList);
+        ListPluginsResponse response = new ListPluginsResponse(basicPluginList);
 
         // Subscribe to observable and assert that list is what expected
         listObservable.subscribe(observer);
