@@ -17,7 +17,7 @@ import javax.net.ssl.HttpsURLConnection;
 
 public class FeedbackActivity extends AppCompatActivity {
     private static final int OK_RESPONSE_CODE = 200;
-    private EditText mEditTextFeedback;
+    private EditText mEditTextFeedback = null;
 
     /**
      * Runs on startup of the activity, in this case on startup of the app
