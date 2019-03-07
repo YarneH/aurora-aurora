@@ -88,6 +88,18 @@ public class PluginRegistryTest {
         assertEquals(mProcessingCommunicator.getActivePluginProcessor(), plugin1.getPluginProcessor());
     }
 
+    @Test
+    public void PluginRegistry_loadPLugin_shouldNotSetProcessorOfCommunicator() {
+        // First get the current active processor
+        PluginProcessor currentProcessor = mProcessingCommunicator.getActivePluginProcessor();
+
+        // Call the method with a name that is not in the map
+        mRegistry.loadPlugin(NOT_IN_MAP_PLUGIN);
+
+        // Assert that field of processor communicator is not changed
+        assertEquals(currentProcessor, mProcessingCommunicator.getActivePluginProcessor());
+    }
+
     /**
      * Dummy plugin for testing purposes
      */

@@ -1,5 +1,8 @@
 package com.aurora.kernel;
 
+/**
+ * Wrapper class that wraps all communicators and instantiates the unique event bus
+ */
 public final class Kernel {
     private Bus mBus;
 
