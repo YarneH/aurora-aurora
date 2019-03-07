@@ -18,6 +18,7 @@ public class InternalCache implements InternalService {
      * Checks if a file is in cache and if so return processed version
      *
      * @param fileRef a reference to where the file can be found
+     * @return The cached and already processed file
      */
     @Override
     public InternallyProcessedFile processFile(String fileRef) {

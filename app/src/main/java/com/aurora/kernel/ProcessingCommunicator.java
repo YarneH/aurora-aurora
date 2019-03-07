@@ -33,7 +33,7 @@ public class ProcessingCommunicator extends Communicator {
     /**
      * Helper method that processes file with a given pluginprocessor
      *
-     * @param pluginProcessor the processor to processFile the file with
+     * @param pluginProcessor the processor to process the file with
      * @param fileRef         a reference to where the file can be found
      */
     private void processFileWithPluginProcessor(PluginProcessor pluginProcessor, String fileRef) {

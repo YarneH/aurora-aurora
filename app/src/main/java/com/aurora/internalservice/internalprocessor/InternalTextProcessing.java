@@ -6,26 +6,27 @@ import com.aurora.internalservice.InternalService;
 import com.aurora.internalservice.InternallyProcessedFile;
 
 import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Class that takes care of internal processing of file (such as text extraction)
  */
 public class InternalTextProcessing implements InternalService {
 
-    private HashMap<String, TextExtractor> fileFormatExtractorMap = createFileToExtractorMap();
+    private Map<String, TextExtractor> fileFormatExtractorMap = createFileToExtractorMap();
 
-    // TODO: return type may change as well as fileRef type
 
     /**
      * extracts text from a file using the right Extractor
      *
      * @param fileRef a reference to where the file can be found
+     * @return The extracted content from the file
      */
     @Override
     public InternallyProcessedFile processFile(String fileRef) {
         Log.d("InternalTextProcessing", "Not implemented yet!");
 
-        ExtractedText extractedText = new ExtractedText(null,null);
+        InternallyProcessedFile extractedText = new ExtractedText(null,null);
         String fileType = getMimeType(fileRef);
         TextExtractor extractor = fileFormatExtractorMap.get(fileType);
         if (extractor != null) {
@@ -49,8 +50,8 @@ public class InternalTextProcessing implements InternalService {
     /**
      * @return the mapping of fileTypes to the related extractor
      */
-    private HashMap<String, TextExtractor> createFileToExtractorMap() {
-        HashMap<String, TextExtractor> map = new HashMap<>();
+    private Map<String, TextExtractor> createFileToExtractorMap() {
+        Map<String, TextExtractor> map = new HashMap<>();
         map.put("txt", new TextExtractorTXT());
         map.put("pdf", new TextExtractorPDF());
         return map;
