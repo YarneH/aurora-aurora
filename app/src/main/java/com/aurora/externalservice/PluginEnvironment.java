@@ -45,8 +45,8 @@ public abstract class PluginEnvironment {
      * Delegates work to a certain pluginProcessor, upon returning calls the
      * resultProcessFileWithPluginProcessor method
      *
-     * @param pluginProcessor the pluginProcessor to process the file with
-     * @param fileRef a reference to the file to process
+     * @param pluginProcessor the pluginProcessor to processFile the file with
+     * @param fileRef a reference to the file to processFile
      */
     protected final void processFileWithPluginProcessor(PluginProcessor pluginProcessor, String fileRef) {
         Observable<ProcessedText> processedTextObservable =

@@ -22,7 +22,7 @@ public class InternalTextProcessing implements InternalService {
      * @param fileRef a reference to where the file can be found
      */
     @Override
-    public InternallyProcessedFile process(String fileRef) {
+    public InternallyProcessedFile processFile(String fileRef) {
         Log.d("InternalTextProcessing", "Not implemented yet!");
 
         ExtractedText extractedText = new ExtractedText(null,null);

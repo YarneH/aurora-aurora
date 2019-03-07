@@ -62,7 +62,7 @@ public class PluginCommunicator extends Communicator {
 
     /**
      * @param pluginName the name of the plugin to get the settings for
-     * @param fileRef    a reference to the file to process
+     * @param fileRef    a reference to the file to processFile
      */
     private void openFileWithPlugin(String pluginName, String fileRef) {
         // TODO: get file representation
@@ -74,8 +74,8 @@ public class PluginCommunicator extends Communicator {
     /**
      * Delegates work to a certain pluginProcessor and returns processed text when ready
      *
-     * @param pluginProcessor the pluginProcessor to process the file with
-     * @param fileRef         a reference to the file to process
+     * @param pluginProcessor the pluginProcessor to processFile the file with
+     * @param fileRef         a reference to the file to processFile
      * @return an observable containing the processed text
      */
     public Observable<ProcessedText> processFileWithPluginProcessor(PluginProcessor pluginProcessor, String fileRef) {

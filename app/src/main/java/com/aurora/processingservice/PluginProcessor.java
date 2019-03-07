@@ -19,7 +19,7 @@ public abstract class PluginProcessor {
     }
 
     /**
-     * This method will be called by the ProcessingCommunicator when a Environment asks to process
+     * This method will be called by the ProcessingCommunicator when a Environment asks to processFile
      * a file
      *
      * @param fileRef a reference to where the file can be found
