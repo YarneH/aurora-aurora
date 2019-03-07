@@ -50,7 +50,7 @@ public class PluginRegistryTest {
 
         // Create dummy plugins
         plugin1 = new DummyPlugin1(environment1, processor1);
-        plugin2 = new DummyPlugin2(environment1, processor2);
+        plugin2 = new DummyPlugin2(environment2, processor2);
 
         // Add dummy plugins
         mRegistry.registerPlugin(DUMMY_NAME_1, plugin1);
