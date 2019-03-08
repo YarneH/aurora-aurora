@@ -16,6 +16,9 @@ import java.net.URL;
 
 public class FeedbackActivity extends AppCompatActivity {
     private static final int OK_RESPONSE_CODE = 200;
+    private static final String FEEDBACK_MESSAGE_BASE = "*:fire::fire:New feedback:fire::fire:* \\n";
+    private static final String FEEDBACK_WEBHOOK_URL =
+            "https://hooks.slack.com/services/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";
     private EditText mEditTextFeedback = null;
 
     /**
@@ -27,6 +30,8 @@ public class FeedbackActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_feedback);
+
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         mEditTextFeedback = findViewById(R.id.et_feedback);
         mEditTextFeedback.setHint("Enter your feedback here");
@@ -45,7 +50,7 @@ public class FeedbackActivity extends AppCompatActivity {
         String input = mEditTextFeedback.getText().toString();
 
         if (!("").equals(input)) {
-            String stringWebHook = "*:fire::fire:New feedback:fire::fire:* \n" + input;
+            String stringWebHook = FEEDBACK_MESSAGE_BASE + input;
 
             try {
                 success = new SendFeedbackTask().execute(stringWebHook).get();
@@ -80,7 +85,7 @@ public class FeedbackActivity extends AppCompatActivity {
             boolean success = false;
 
             try {
-                URL url = new URL("https://hooks.slack.com/services/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");
+                URL url = new URL(FEEDBACK_WEBHOOK_URL);
                 HttpURLConnection conn = (HttpURLConnection) url.openConnection();
                 try (AutoCloseable conc = conn::disconnect) {
                     conn.setRequestMethod("POST");
