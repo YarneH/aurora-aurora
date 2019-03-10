@@ -73,7 +73,7 @@ public class PluginCommunicator extends Communicator {
         PluginEnvironment plugin = mPluginRegistry.loadPlugin(pluginName);
 
         // Get the settings from the plugin
-        Class<? extends Activity> settingsActivity = null;
+        Class<? extends Activity> settingsActivity;
 
         if (plugin != null) {
             settingsActivity = plugin.getSettingsActivity();
@@ -97,7 +97,7 @@ public class PluginCommunicator extends Communicator {
     private void openFileWithPlugin(String pluginName, String fileRef) {
         PluginEnvironment plugin =  mPluginRegistry.loadPlugin(pluginName);
 
-        Fragment pluginFragment = null;
+        Fragment pluginFragment;
 
         if (plugin != null) {
             pluginFragment = plugin.openFile(fileRef);

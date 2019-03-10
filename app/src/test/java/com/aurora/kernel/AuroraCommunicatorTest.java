@@ -87,6 +87,7 @@ public class AuroraCommunicatorTest {
         // Create dummy arguments
         String pluginName = "DummyPlugin";
         String pluginDescription = "this is a dummy description.";
+        String pluginVersion = "0.1";
 
         // Create observer to subscribe to observable
         TestObserver<List<BasicPlugin>> observer = new TestObserver<>();
@@ -98,7 +99,7 @@ public class AuroraCommunicatorTest {
         List<BasicPlugin> basicPluginList = new ArrayList<>();
 
         // Add fake basic plugin
-        basicPluginList.add(new BasicPlugin(pluginName, null, pluginDescription));
+        basicPluginList.add(new BasicPlugin(pluginName, null, pluginDescription, pluginVersion));
 
         // Make response containing the list
         ListPluginsResponse response = new ListPluginsResponse(basicPluginList);

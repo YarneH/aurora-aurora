@@ -10,11 +10,13 @@ public class BasicPlugin {
     // TODO: Datatype may change
     private File mPluginLogo;
     private String mDescription;
+    private String mVersion;
 
-    public BasicPlugin(String name, File pluginLogo, String description) {
+    public BasicPlugin(String name, File pluginLogo, String description, String version) {
         mName = name;
         mPluginLogo = pluginLogo;
         mDescription = description;
+        mVersion = version;
     }
 
     public String getName() {
@@ -27,5 +29,9 @@ public class BasicPlugin {
 
     public String getDescription() {
         return mDescription;
+    }
+
+    public String getVersion() {
+        return mVersion;
     }
 }

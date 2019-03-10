@@ -26,7 +26,7 @@ class PluginRegistry {
     private ProcessingCommunicator mProcessingCommunicator;
 
 
-    public PluginRegistry(ProcessingCommunicator processingCommunicator, String configFileRef) {
+    PluginRegistry(ProcessingCommunicator processingCommunicator, String configFileRef) {
         this.mProcessingCommunicator = processingCommunicator;
 
         // Load plugins
@@ -52,7 +52,7 @@ class PluginRegistry {
      * @param pluginName the name of the plugin to load
      * @return the PluginEnvironment associated with the plugin name or null if not found
      */
-    public PluginEnvironment loadPlugin(String pluginName) {
+    PluginEnvironment loadPlugin(String pluginName) {
         Plugin plugin = resolvePlugin(pluginName);
 
         if (plugin != null) {
@@ -74,7 +74,7 @@ class PluginRegistry {
      *
      * @return List of Plugin objects with basic information
      */
-    public List<BasicPlugin> getPlugins() {
+    List<BasicPlugin> getPlugins() {
         List<BasicPlugin> basicPlugins = new ArrayList<>();
 
         // Loop over all values and extract their basic info
@@ -93,7 +93,7 @@ class PluginRegistry {
      * @param plugin     the plugin object that contains the plugin
      * @return true if the plugin was added, false if the plugin could not be added (e.g. if it was already present)
      */
-    public boolean registerPlugin(String pluginName, Plugin plugin) {
+    boolean registerPlugin(String pluginName, Plugin plugin) {
         // TODO: write back config file immediately
         if (!mPluginsMap.containsKey(pluginName)) {
             // Add plugin to the map
@@ -110,7 +110,7 @@ class PluginRegistry {
      *
      * @param pluginName the name of the plugin to remove from the registry
      */
-    public void removePlugin(String pluginName) {
+    void removePlugin(String pluginName) {
         // TODO: write back config file immediately
         mPluginsMap.remove(pluginName);
     }
@@ -118,7 +118,7 @@ class PluginRegistry {
     /**
      * Removes all plugins from the registry
      */
-    public void removeAllPlugins() {
+    void removeAllPlugins() {
         // TODO: write back config file immediately
         mPluginsMap.clear();
     }

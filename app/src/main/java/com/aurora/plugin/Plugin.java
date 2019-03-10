@@ -13,6 +13,7 @@ public abstract class Plugin {
     protected String mName;
     protected File mPluginLogo;
     protected String mDescription;
+    protected String mVersion;
 
     /**
      * Reference to the plugin's environment
@@ -24,11 +25,12 @@ public abstract class Plugin {
      */
     protected PluginProcessor mPluginProcessor;
 
-    public Plugin(String name, File pluginLogo, String description,
+    public Plugin(String name, File pluginLogo, String description, String version,
                   PluginEnvironment pluginEnvironment, PluginProcessor pluginProcessor) {
         mName = name;
         mPluginLogo = pluginLogo;
         mDescription = description;
+        mVersion = version;
         mPluginEnvironment = pluginEnvironment;
         mPluginProcessor = pluginProcessor;
     }
@@ -48,6 +50,6 @@ public abstract class Plugin {
      * @return the Basic plugin information
      */
     public BasicPlugin getBasicPluginInfo() {
-        return new BasicPlugin(mName, mPluginLogo, mDescription);
+        return new BasicPlugin(mName, mPluginLogo, mDescription, mVersion);
     }
 }
