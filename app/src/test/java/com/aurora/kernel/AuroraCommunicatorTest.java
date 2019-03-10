@@ -3,7 +3,7 @@ package com.aurora.kernel;
 import android.app.Activity;
 import android.support.v4.app.Fragment;
 
-import com.aurora.kernel.event.ListPLuginsResponse;
+import com.aurora.kernel.event.ListPluginsResponse;
 import com.aurora.kernel.event.OpenFileWithPluginResponse;
 import com.aurora.kernel.event.PluginSettingsResponse;
 import com.aurora.plugin.BasicPlugin;
@@ -11,7 +11,6 @@ import com.aurora.plugin.BasicPlugin;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -87,6 +86,8 @@ public class AuroraCommunicatorTest {
     public void AuroraCommunicator_getListOfPLugins_shouldReturnListOfPLugins() {
         // Create dummy arguments
         String pluginName = "DummyPlugin";
+        String pluginDescription = "this is a dummy description.";
+        String pluginVersion = "0.1";
 
         // Create observer to subscribe to observable
         TestObserver<List<BasicPlugin>> observer = new TestObserver<>();
@@ -98,10 +99,10 @@ public class AuroraCommunicatorTest {
         List<BasicPlugin> basicPluginList = new ArrayList<>();
 
         // Add fake basic plugin
-        basicPluginList.add(new BasicPlugin(pluginName, null));
+        basicPluginList.add(new BasicPlugin(pluginName, null, pluginDescription, pluginVersion));
 
         // Make response containing the list
-        ListPLuginsResponse response = new ListPLuginsResponse(basicPluginList);
+        ListPluginsResponse response = new ListPluginsResponse(basicPluginList);
 
         // Subscribe to observable and assert that list is what expected
         listObservable.subscribe(observer);

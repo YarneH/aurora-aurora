@@ -17,9 +17,11 @@ import io.reactivex.Observable;
 public abstract class PluginEnvironment {
 
     private PluginCommunicator mPluginCommunicator;
+    protected Class<? extends Activity> mPluginSettingsActivity;
 
-    public PluginEnvironment(PluginCommunicator pluginCommunicator) {
+    public PluginEnvironment(PluginCommunicator pluginCommunicator, Class<? extends Activity> pluginSettingsActivity) {
         this.mPluginCommunicator = pluginCommunicator;
+        this.mPluginSettingsActivity = pluginSettingsActivity;
     }
 
     /**
@@ -28,7 +30,9 @@ public abstract class PluginEnvironment {
      *
      * @return an activity that contains all the settings of the plugin that can be changed
      */
-    public abstract Class<? extends Activity> getSettingsActivity();
+    public Class<? extends Activity> getSettingsActivity() {
+        return mPluginSettingsActivity;
+    }
 
     /**
      * This method will be called by the PluginCommunicator to receive a view of the file generated
@@ -46,7 +50,7 @@ public abstract class PluginEnvironment {
      * resultProcessFileWithPluginProcessor method
      *
      * @param pluginProcessor the pluginProcessor to process the file with
-     * @param fileRef a reference to the file to process
+     * @param fileRef         a reference to the file to process
      */
     protected final void processFileWithPluginProcessor(PluginProcessor pluginProcessor, String fileRef) {
         Observable<ProcessedText> processedTextObservable =
@@ -62,5 +66,5 @@ public abstract class PluginEnvironment {
      *
      * @param processedText the object returned by the pluginProcessor
      */
-    abstract void resultProcessFileWithPluginProcessor(ProcessedText processedText);
+    protected abstract void resultProcessFileWithPluginProcessor(ProcessedText processedText);
 }

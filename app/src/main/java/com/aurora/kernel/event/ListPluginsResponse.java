@@ -7,10 +7,10 @@ import java.util.List;
 /**
  * Event containing a list of available plugins
  */
-public class ListPLuginsResponse extends Event {
+public class ListPluginsResponse extends Event {
     private List<BasicPlugin> plugins;
 
-    public ListPLuginsResponse(List<BasicPlugin> plugins) {
+    public ListPluginsResponse(List<BasicPlugin> plugins) {
         this.plugins = plugins;
     }
 

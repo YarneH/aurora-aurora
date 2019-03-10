@@ -3,7 +3,7 @@ package com.aurora.kernel;
 import android.app.Activity;
 import android.support.v4.app.Fragment;
 
-import com.aurora.kernel.event.ListPLuginsResponse;
+import com.aurora.kernel.event.ListPluginsResponse;
 import com.aurora.kernel.event.ListPluginsRequest;
 import com.aurora.kernel.event.OpenFileWithPluginRequest;
 import com.aurora.kernel.event.OpenFileWithPluginResponse;
@@ -54,7 +54,8 @@ public class AuroraCommunicator extends Communicator {
                 = this.mBus.register(PluginSettingsResponse.class);
         this.mBus.post(new PluginSettingsRequest(pluginName));
 
-        return mPluginSettingsResponse.map(PluginSettingsResponse::getActivity);
+        return mPluginSettingsResponse
+                .map(PluginSettingsResponse::getActivity);
     }
 
     /**
@@ -62,11 +63,11 @@ public class AuroraCommunicator extends Communicator {
      * @return a list of basic information on every plugin wrapped in an observable
      */
     public Observable<List<BasicPlugin>> getListOfPlugins() {
-        Observable<ListPLuginsResponse> mListPLuginsResponse
-                = this.mBus.register(ListPLuginsResponse.class);
+        Observable<ListPluginsResponse> mListPluginsResponse
+                = this.mBus.register(ListPluginsResponse.class);
         this.mBus.post(new ListPluginsRequest());
 
-        return mListPLuginsResponse.map(ListPLuginsResponse::getPlugins);
+        return mListPluginsResponse.map(ListPluginsResponse::getPlugins);
     }
 
 

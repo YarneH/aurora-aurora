@@ -1,5 +1,8 @@
 package com.aurora.kernel;
 
+/**
+ * Wrapper class that wraps all communicators and instantiates the unique event bus
+ */
 public final class Kernel {
     private Bus mBus;
 
@@ -11,6 +14,9 @@ public final class Kernel {
 
     private PluginRegistry mPluginRegistry;
 
+    // TODO: change this if necessary
+    private static final String PLUGINS_CFG = "plugins.cfg";
+
     /**
      * Starts and creates all communicators, keeping references
      * TODO Define test to check if all objects are unique and not null
@@ -21,7 +27,7 @@ public final class Kernel {
         this.mAuroraCommunicator = new AuroraCommunicator(mBus);
 
         this.mProcessingCommunicator = new ProcessingCommunicator(mBus);
-        this.mPluginRegistry = new PluginRegistry(mProcessingCommunicator);
+        this.mPluginRegistry = new PluginRegistry(mProcessingCommunicator, PLUGINS_CFG);
         this.mPluginCommunicator = new PluginCommunicator(mBus, mPluginRegistry);
 
         this.mPluginInternalServiceCommunicator = new PluginInternalServiceCommunicator(mBus);
