@@ -3,6 +3,7 @@ package com.aurora.internalservice.internalcache;
 import android.util.Log;
 
 import com.aurora.internalservice.InternalService;
+import com.aurora.internalservice.InternallyProcessedFile;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,11 +18,13 @@ public class InternalCache implements InternalService {
      * Checks if a file is in cache and if so return processed version
      *
      * @param fileRef a reference to where the file can be found
+     * @return The cached and already processed file
      */
     @Override
-    public void processFile(String fileRef) {
+    public InternallyProcessedFile processFile(String fileRef) {
         // TODO: implement this
         Log.d(CLASS_TAG, "Not implemented yet");
+        return null;
     }
 
     public void checkCacheForProcessedFile() {

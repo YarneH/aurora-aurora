@@ -2,6 +2,7 @@ package com.aurora.aurora;
 
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
@@ -9,7 +10,6 @@ import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
@@ -61,9 +61,9 @@ public class MainActivity extends AppCompatActivity
         toggle.syncState();
 
         /* Setup NavigationView and preselect 'Home' */
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
-        navigationView.setNavigationItemSelectedListener(this);
-        navigationView.getMenu().getItem(0).setChecked(true);
+        NavigationView mNavigationView = (NavigationView) findViewById(R.id.nav_view);
+        mNavigationView.setNavigationItemSelectedListener(this);
+        mNavigationView.getMenu().getItem(0).setChecked(true);
 
         /* Setup Main TextView */
         mTextViewMain = (TextView) findViewById(R.id.tv_main);
@@ -159,13 +159,16 @@ public class MainActivity extends AppCompatActivity
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
+        // TODO: Remove string and boolean if all activities are implemented
         // String for demo
         String text = "";
         boolean home = false;
         if (id == R.id.nav_about_us) {
             text = "About us";
         } else if (id == R.id.nav_help_feedback) {
-            text = "Help & Feedback";
+            Intent intent = new Intent(MainActivity.this, FeedbackActivity.class);
+            startActivity(intent);
+            home = true;
         } else if (id == R.id.nav_home) {
             text = "Home";
             home = true;
@@ -186,5 +189,6 @@ public class MainActivity extends AppCompatActivity
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
+
 }
 

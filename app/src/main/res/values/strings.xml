@@ -19,6 +19,6 @@
     <!-- Recycler View strings -->
     <string name="button_open">Open</string>
 
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <!-- Card File strings -->
+    <string name="file_details">Details about file</string>
 </resources>

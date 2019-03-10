@@ -5,7 +5,7 @@ This file defines a rounded button as a drawable
 <shape xmlns:android="http://schemas.android.com/apk/res/android"
     android:shape="rectangle">
 
-    <solid android:color="@color/colorPrimary"/>
+    <solid android:color="@color/colorButton"/>
     <corners android:radius="6dp"/>
 
 </shape>
