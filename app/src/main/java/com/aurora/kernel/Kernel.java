@@ -70,16 +70,16 @@ public final class Kernel {
 
         // If the file does not exist, create one and write an empty JSON array to it
         if (!file.exists()) {
-            try {
+            try (Writer writer = new BufferedWriter(new FileWriter(file))) {
                 Gson gson = new Gson();
                 String jsonPlugin = gson.toJson(new Plugin[]{}, Plugin[].class);
 
-                Writer writer = new BufferedWriter(new FileWriter(file));
                 writer.write(jsonPlugin);
                 writer.flush();
-                writer.close();
+
             } catch (IOException e) {
                 Log.e("Kernel", "Something went wrong trying to create the file " + PLUGINS_CFG + ".");
+                e.printStackTrace();
             }
         }
     }

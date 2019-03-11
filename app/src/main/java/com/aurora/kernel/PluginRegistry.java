@@ -175,16 +175,15 @@ class PluginRegistry {
         // Get file at specified path
         File pluginConfig = new File(mConfigFileRef);
 
-        BufferedReader reader = new BufferedReader(new FileReader(pluginConfig));
-        StringBuilder stringBuilder = new StringBuilder();
-        String currentLine;
+        StringBuilder stringBuilder;
+        try (BufferedReader reader = new BufferedReader(new FileReader(pluginConfig))) {
+            stringBuilder = new StringBuilder();
+            String currentLine;
 
-        while ((currentLine = reader.readLine()) != null) {
-            stringBuilder.append(currentLine);
+            while ((currentLine = reader.readLine()) != null) {
+                stringBuilder.append(currentLine);
+            }
         }
-
-        // Close reader
-        reader.close();
 
         return stringBuilder.toString();
     }
@@ -200,15 +199,13 @@ class PluginRegistry {
         Gson gson = new Gson();
         String pluginsJson = gson.toJson(plugins);
 
-        // Write to config file
-        Writer writer;
-        try {
-            writer = new BufferedWriter(new FileWriter(mConfigFileRef));
+        // Write to config file+
+        try (Writer writer = new BufferedWriter(new FileWriter(mConfigFileRef))) {
             writer.write(pluginsJson);
             writer.flush();
-            writer.close();
         } catch (IOException e) {
             Log.e("PluginRegistry", "Could not write to plugins config file.");
+            e.printStackTrace();
         }
     }
 }
