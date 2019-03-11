@@ -63,6 +63,7 @@ public class PluginCommunicatorTest {
         mPluginRegistry.removeAllPlugins();
 
         // Create name and description
+        String uniqueName = "DummyPlugin";
         String pluginName = "DummyPlugin";
         String description = "This is a dummy description.";
         String version = "0.1";
@@ -71,7 +72,7 @@ public class PluginCommunicatorTest {
         PluginProcessor processor = new DummyPluginProcessor(mProcessingCommunicator);
 
         // Create plugin using environment and processor
-        mPlugin = new DummyPlugin(pluginName, null, description, version,
+        mPlugin = new DummyPlugin(uniqueName, pluginName, null, description, version,
                 environment, processor);
 
         // Register plugin in registry
@@ -243,9 +244,9 @@ public class PluginCommunicatorTest {
      */
     private class DummyPlugin extends Plugin {
 
-        public DummyPlugin(String name, File pluginLogo, String description, String version,
+        public DummyPlugin(String uniqueName, String name, File pluginLogo, String description, String version,
                            PluginEnvironment pluginEnvironment, PluginProcessor pluginProcessor) {
-            super(name, pluginLogo, description, version, pluginEnvironment, pluginProcessor);
+            super(uniqueName, name, pluginLogo, description, version, pluginEnvironment, pluginProcessor);
         }
     }
 

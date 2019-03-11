@@ -5,7 +5,15 @@ import android.util.Log;
 import com.aurora.externalservice.PluginEnvironment;
 import com.aurora.plugin.BasicPlugin;
 import com.aurora.plugin.Plugin;
+import com.google.gson.Gson;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.Writer;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -21,6 +29,11 @@ class PluginRegistry {
     private Map<String, Plugin> mPluginsMap;
 
     /**
+     * A reference to where the plugin config file can be found
+     */
+    private String mConfigFileRef;
+
+    /**
      * A reference to the processing communicator
      */
     private ProcessingCommunicator mProcessingCommunicator;
@@ -29,8 +42,10 @@ class PluginRegistry {
     PluginRegistry(ProcessingCommunicator processingCommunicator, String configFileRef) {
         this.mProcessingCommunicator = processingCommunicator;
 
+        this.mConfigFileRef = configFileRef;
+
         // Load plugins
-        constructPluginMap(configFileRef);
+        constructPluginMap();
     }
 
 
@@ -98,6 +113,7 @@ class PluginRegistry {
         if (!mPluginsMap.containsKey(pluginName)) {
             // Add plugin to the map
             mPluginsMap.put(pluginName, plugin);
+            persistPluginsMap();
             return true;
         }
 
@@ -111,28 +127,87 @@ class PluginRegistry {
      * @param pluginName the name of the plugin to remove from the registry
      */
     void removePlugin(String pluginName) {
-        // TODO: write back config file immediately
         mPluginsMap.remove(pluginName);
+        persistPluginsMap();
     }
 
     /**
      * Removes all plugins from the registry
      */
     void removeAllPlugins() {
-        // TODO: write back config file immediately
         mPluginsMap.clear();
+        persistPluginsMap();
     }
 
     /**
      * Private helper method that reads the available plugins from a config file
-     *
-     * @param configFileRef a reference to where the config file can be found
      */
-    private void constructPluginMap(String configFileRef) {
+    private void constructPluginMap() {
         // Create map
         mPluginsMap = new HashMap<>();
 
-        Log.d("PluginRegistry", "This method should look for a file called "
-                + configFileRef + ", to load the plugins");
+        try {
+            // Read file
+            String pluginsJson = parsePluginFile();
+
+            // Read file as JSON
+            Gson gson = new Gson();
+            Plugin[] registeredPlugins = gson.fromJson(pluginsJson, Plugin[].class);
+
+            for (Plugin p : registeredPlugins) {
+                // Add the plugin to the map
+                mPluginsMap.put(p.getUniqueName(), p);
+            }
+        } catch (IOException e) {
+            Log.e("PluginRegistry", "Something went wrong when reading the plugins from the config file.");
+        }
+
+    }
+
+    /**
+     * Reads the file at a given location and attempts to parse it as a JSON array
+     *
+     * @return a JSONArray containing the various JSON objects representing plugins
+     * @throws IOException when the file does not exist or something went wrong during the file read
+     */
+    private String parsePluginFile() throws IOException {
+        // Get file at specified path
+        File pluginConfig = new File(mConfigFileRef);
+
+        BufferedReader reader = new BufferedReader(new FileReader(pluginConfig));
+        StringBuilder stringBuilder = new StringBuilder();
+        String currentLine;
+
+        while ((currentLine = reader.readLine()) != null) {
+            stringBuilder.append(currentLine);
+        }
+
+        // Close reader
+        reader.close();
+
+        return stringBuilder.toString();
+    }
+
+    /**
+     * Helper method that persists any changes to the plugin config
+     */
+    private void persistPluginsMap() {
+        // Get the values of the map into an array
+        Plugin[] plugins = mPluginsMap.values().toArray(new Plugin[0]);
+
+        // Serialize to json
+        Gson gson = new Gson();
+        String pluginsJson = gson.toJson(plugins);
+
+        // Write to config file
+        Writer writer;
+        try {
+            writer = new BufferedWriter(new FileWriter(mConfigFileRef));
+            writer.write(pluginsJson);
+            writer.flush();
+            writer.close();
+        } catch (IOException e) {
+            Log.e("PluginRegistry", "Could not write to plugins config file.");
+        }
     }
 }

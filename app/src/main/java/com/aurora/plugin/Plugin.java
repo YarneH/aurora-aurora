@@ -8,31 +8,55 @@ import java.io.File;
 /**
  * Class that maintains references to the environment and processor of plugin
  */
-public abstract class Plugin {
+public class Plugin {
 
-    protected String mName;
+    protected String mUniqueName;
+    protected String mDisplayName;
     protected File mPluginLogo;
     protected String mDescription;
     protected String mVersion;
 
     /**
      * Reference to the plugin's environment
+     * Not serialized along with plugin
      */
-    protected PluginEnvironment mPluginEnvironment;
+    protected transient PluginEnvironment mPluginEnvironment;
 
     /**
      * Reference to the plugin's processor
+     * Not serialized along with plugin
      */
-    protected PluginProcessor mPluginProcessor;
+    protected transient PluginProcessor mPluginProcessor;
 
-    public Plugin(String name, File pluginLogo, String description, String version,
+    public Plugin(String uniqueName, String displayName, File pluginLogo, String description, String version,
                   PluginEnvironment pluginEnvironment, PluginProcessor pluginProcessor) {
-        mName = name;
+        mUniqueName = uniqueName;
+        mDisplayName = displayName;
         mPluginLogo = pluginLogo;
         mDescription = description;
         mVersion = version;
         mPluginEnvironment = pluginEnvironment;
         mPluginProcessor = pluginProcessor;
+    }
+
+    public String getUniqueName() {
+        return mUniqueName;
+    }
+
+    public String getDisplayName() {
+        return mDisplayName;
+    }
+
+    public File getPluginLogo() {
+        return mPluginLogo;
+    }
+
+    public String getDescription() {
+        return mDescription;
+    }
+
+    public String getVersion() {
+        return mVersion;
     }
 
     public PluginEnvironment getPluginEnvironment() {
@@ -50,6 +74,6 @@ public abstract class Plugin {
      * @return the Basic plugin information
      */
     public BasicPlugin getBasicPluginInfo() {
-        return new BasicPlugin(mName, mPluginLogo, mDescription, mVersion);
+        return new BasicPlugin(mDisplayName, mPluginLogo, mDescription, mVersion);
     }
 }
