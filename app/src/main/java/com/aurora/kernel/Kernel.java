@@ -79,7 +79,6 @@ public final class Kernel {
 
             } catch (IOException e) {
                 Log.e("Kernel", "Something went wrong trying to create the file " + PLUGINS_CFG + ".");
-                e.printStackTrace();
             }
         }
     }

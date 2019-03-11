@@ -205,7 +205,6 @@ class PluginRegistry {
             writer.flush();
         } catch (IOException e) {
             Log.e("PluginRegistry", "Could not write to plugins config file.");
-            e.printStackTrace();
         }
     }
 }
