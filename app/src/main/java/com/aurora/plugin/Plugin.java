@@ -76,4 +76,5 @@ public class Plugin {
     public BasicPlugin getBasicPluginInfo() {
         return new BasicPlugin(mDisplayName, mPluginLogo, mDescription, mVersion);
     }
+
 }

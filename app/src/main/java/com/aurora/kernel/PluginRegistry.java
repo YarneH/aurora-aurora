@@ -155,6 +155,7 @@ class PluginRegistry {
             Plugin[] registeredPlugins = gson.fromJson(pluginsJson, Plugin[].class);
 
             for (Plugin p : registeredPlugins) {
+                // TODO: add appropriate pluginenvironment and processor to the plugin
                 // Add the plugin to the map
                 mPluginsMap.put(p.getUniqueName(), p);
             }
