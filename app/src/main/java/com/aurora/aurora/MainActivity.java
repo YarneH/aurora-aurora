@@ -147,10 +147,12 @@ public class MainActivity extends AppCompatActivity
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_search) {
+            // Create a LayoutInflater which will create the view for the pop-up
             LayoutInflater li = LayoutInflater.from(this);
             View promptView = li.inflate(R.layout.search_prompt, null);
             final EditText userInput = (EditText) promptView.findViewById(R.id.et_search_prompt);
 
+            // Create a builder to build the actual alertdialog from the previous inflated view
             AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
             alertDialogBuilder.setView(promptView);
             alertDialogBuilder.setCancelable(true)
@@ -166,7 +168,7 @@ public class MainActivity extends AppCompatActivity
                             mToast.show();
                         }
                     });
-
+            // Create and show the pop-up
             alertDialogBuilder.create().show();
         }
 

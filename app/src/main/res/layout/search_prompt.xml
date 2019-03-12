@@ -5,6 +5,7 @@
     android:orientation="vertical"
     android:padding="@dimen/sp_padding">
 
+    <!-- The main text for the prompt view -->
     <TextView
         android:id="@+id/tv_search_prompt"
         android:layout_width="wrap_content"
@@ -12,6 +13,7 @@
         android:text="@string/search_prompt"
         android:textAppearance="?android:attr/textAppearanceLarge" />
 
+    <!-- In this item, the user will be able to deliver input -->
     <EditText
         android:id="@+id/et_search_prompt"
         android:layout_width="match_parent"
