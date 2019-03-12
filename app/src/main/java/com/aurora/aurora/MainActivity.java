@@ -161,7 +161,8 @@ public class MainActivity extends AppCompatActivity
                             if (mToast != null) {
                                 mToast.cancel();
                             }
-                            mToast = Toast.makeText(mContext, "Search for " + userInput.getText().toString(), Toast.LENGTH_SHORT);
+                            mToast = Toast.makeText(mContext, "Search for "
+                                    + userInput.getText().toString(), Toast.LENGTH_SHORT);
                             mToast.show();
                         }
                     });
