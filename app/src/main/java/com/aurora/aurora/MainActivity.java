@@ -1,5 +1,7 @@
 package com.aurora.aurora;
 
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -9,13 +11,16 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -25,6 +30,7 @@ public class MainActivity extends AppCompatActivity
     private static final int REQUEST_FILE_GET = 1;
 
     // Toast and TextView used for demo and preventing queued Toasts
+    private Context mContext = this;
     private Toast mToast = null;
     private TextView mTextViewMain = null;
     private RecyclerView mRecyclerView = null;
@@ -141,13 +147,26 @@ public class MainActivity extends AppCompatActivity
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_search) {
-            // Toast for demo
-            if (mToast != null) {
-                mToast.cancel();
-            }
-            mToast = Toast.makeText(this, "Search for a file", Toast.LENGTH_SHORT);
-            mToast.show();
-            return true;
+            LayoutInflater li = LayoutInflater.from(this);
+            View promptView = li.inflate(R.layout.search_prompt, null);
+            final EditText userInput = (EditText) promptView.findViewById(R.id.et_search_prompt);
+
+            AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
+            alertDialogBuilder.setView(promptView);
+            alertDialogBuilder.setCancelable(true)
+                    .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            // Toast for demo
+                            if (mToast != null) {
+                                mToast.cancel();
+                            }
+                            mToast = Toast.makeText(mContext, "Search for " + userInput.getText().toString(), Toast.LENGTH_SHORT);
+                            mToast.show();
+                        }
+                    });
+
+            alertDialogBuilder.create().show();
         }
 
         return super.onOptionsItemSelected(item);
