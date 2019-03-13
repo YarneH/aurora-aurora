@@ -42,4 +42,7 @@ dependencies {
     // RxJava
     implementation 'io.reactivex.rxjava2:rxjava:2.2.0'
 
+    // auroralib
+    implementation project(':auroralib')
+
 }
