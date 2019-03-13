@@ -1,6 +1,7 @@
 package com.aurora.aurora;
 
 import android.content.Context;
+import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
@@ -10,6 +11,9 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import com.aurora.auroralib.Constants;
 
 import java.util.Locale;
 
@@ -159,6 +163,30 @@ public class CardFileAdapter extends RecyclerView.Adapter<CardFileAdapter.CardFi
                 // if the click happened on the open button
             }
             // TODO add the case that view.getId() is R.id.button_card_file
+            // TODO update this preliminary code for opening a plugin.
+            if (view.getId() == R.id.button_card_file) {
+                //index
+                String stubPluginText = "Here will be the text from file " + index + ".\nRandom sentence.";
+
+                //Context context = MainActivity.this;
+                Intent intent = new Intent(Constants.PLUGIN_ACTION);
+                intent.putExtra(Constants.PLUGIN_INPUT_TEXT, stubPluginText);
+
+                String title = "Select a plugin";
+                // Create intent to show the chooser dialog
+                Intent chooser = Intent.createChooser(intent, title);
+
+                // Verify the original intent will resolve to at least one activity
+                Context context = view.getContext();
+                if (intent.resolveActivity(context.getPackageManager()) != null) {
+                    context.startActivity(chooser);
+                } else {
+                    Toast.makeText(context, "No plugins available",
+                            Toast.LENGTH_LONG).show();
+                }
+
+
+            }
         }
     }
 

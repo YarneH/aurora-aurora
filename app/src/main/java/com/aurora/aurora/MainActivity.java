@@ -24,6 +24,8 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.aurora.auroralib.Constants;
+
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
@@ -113,7 +115,27 @@ public class MainActivity extends AppCompatActivity
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == REQUEST_FILE_GET && resultCode == RESULT_OK) {
             Uri textFile = data.getData();
-            Toast.makeText(this, "A file with uri \"" + textFile + "\" was selected.", Snackbar.LENGTH_LONG).show();
+
+            String stubPluginText = "Here will be the text from file " + textFile + ".\nRandom sentence.";
+
+            //Context context = MainActivity.this;
+            Intent intent = new Intent(Constants.PLUGIN_ACTION);
+            intent.putExtra(Constants.PLUGIN_INPUT_TEXT, stubPluginText);
+
+            String title = "Select a plugin";
+            // Create intent to show the chooser dialog
+            Intent chooser = Intent.createChooser(intent, title);
+
+            // Verify the original intent will resolve to at least one activity
+            Context context = this;
+            if (intent.resolveActivity(context.getPackageManager()) != null) {
+                context.startActivity(chooser);
+            } else {
+                Toast.makeText(context, "No plugins available",
+                        Toast.LENGTH_LONG).show();
+            }
+
+            //Toast.makeText(this, "A file with uri \"" + textFile + "\" was selected.", Snackbar.LENGTH_LONG).show();
             // Use File
         }
     }
