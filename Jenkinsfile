@@ -37,6 +37,9 @@ pipeline {
 
                     // Analyse the test results and update the build result as appropriate
                     junit allowEmptyResults: true, testResults: '**/TEST-*.xml'
+
+                    // Generate coverage info
+                    jacoco sourcePattern: '**/src/main/java/com.aurora/'
                 }
             }
 
