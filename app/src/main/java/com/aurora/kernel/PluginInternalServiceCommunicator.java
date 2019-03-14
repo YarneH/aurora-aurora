@@ -38,6 +38,6 @@ public class PluginInternalServiceCommunicator extends Communicator {
         InternalProcessorResponse response = new InternalProcessorResponse(extractedText);
 
         // Post response
-        mBus.post(response); 
+        mBus.post(response);
     }
 }
