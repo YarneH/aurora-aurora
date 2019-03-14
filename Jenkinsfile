@@ -41,7 +41,7 @@ pipeline {
                     // Analyze coverage info
                     jacoco sourcePattern: '**/src/main/java/com/aurora', 
                         classPattern: '**/classes/com/aurora', 
-                        exclusionPattern: '**/*Test*.class,  **/com/aurora/aurora/*.class'
+                        exclusionPattern: '**/*Test*.class,  **/aurora/*.class'
                 }
             }
 
