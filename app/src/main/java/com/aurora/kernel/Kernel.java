@@ -21,9 +21,8 @@ public final class Kernel {
 
     /**
      * Starts and creates all communicators, keeping references
-     * TODO Define test to check if all objects are unique and not null
      */
-    private Kernel() {
+    public Kernel() {
         this.mBus = new Bus();
 
         this.mAuroraCommunicator = new AuroraCommunicator(mBus);
@@ -48,9 +47,20 @@ public final class Kernel {
         return mAuroraCommunicator;
     }
 
-    public Bus getBus() {
-        return mBus;
+    public PluginCommunicator getPluginCommunicator() {
+        return mPluginCommunicator;
     }
 
+    public ProcessingCommunicator getProcessingCommunicator() {
+        return mProcessingCommunicator;
+    }
+
+    public PluginInternalServiceCommunicator getPluginInternalServiceCommunicator() {
+        return mPluginInternalServiceCommunicator;
+    }
+
+    public AuroraInternalServiceCommunicator getAuroraInternalServiceCommunicator() {
+        return mAuroraInternalServiceCommunicator;
+    }
 
 }
