@@ -13,10 +13,19 @@ import io.reactivex.Observable;
  */
 public class PluginInternalServiceCommunicator extends Communicator {
 
+    /**
+     * internal text processor
+     */
+    private InternalTextProcessing mProcessing;
+
+    /**
+     * Observable keeping track of internal processor requests
+     */
     private Observable<InternalProcessorRequest> internalProcessorEventObservable;
 
-    public PluginInternalServiceCommunicator(Bus mBus) {
+    public PluginInternalServiceCommunicator(Bus mBus, InternalTextProcessing processing) {
         super(mBus);
+        mProcessing = processing;
 
         internalProcessorEventObservable = mBus.register(InternalProcessorRequest.class);
         internalProcessorEventObservable.subscribe((InternalProcessorRequest internalProcessorRequest) ->
@@ -24,12 +33,10 @@ public class PluginInternalServiceCommunicator extends Communicator {
     }
 
     private void processFileWithInternalProcessor(String fileRef) {
-        InternalTextProcessing processor = new InternalTextProcessing();
-
         // Call internal processor
         ExtractedText extractedText = null;
         try {
-            extractedText = processor.processFile(fileRef);
+            extractedText = mProcessing.processFile(fileRef);
         } catch (FileTypeNotSupportedException e) {
             e.printStackTrace();
         }

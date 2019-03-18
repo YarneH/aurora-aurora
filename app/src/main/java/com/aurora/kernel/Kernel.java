@@ -1,5 +1,7 @@
 package com.aurora.kernel;
 
+import com.aurora.internalservice.internalprocessor.InternalTextProcessing;
+
 /**
  * Wrapper class that wraps all communicators and instantiates the unique event bus
  */
@@ -30,7 +32,9 @@ public final class Kernel {
         this.mPluginRegistry = new PluginRegistry(mProcessingCommunicator, PLUGINS_CFG);
         this.mPluginCommunicator = new PluginCommunicator(mBus, mPluginRegistry);
 
-        this.mPluginInternalServiceCommunicator = new PluginInternalServiceCommunicator(mBus);
+        // Create internal text processor for the PluginInternalServiceCommunicator
+        InternalTextProcessing internalTextProcessing = new InternalTextProcessing();
+        this.mPluginInternalServiceCommunicator = new PluginInternalServiceCommunicator(mBus, internalTextProcessing);
         this.mAuroraInternalServiceCommunicator = new AuroraInternalServiceCommunicator(mBus);
     }
 
