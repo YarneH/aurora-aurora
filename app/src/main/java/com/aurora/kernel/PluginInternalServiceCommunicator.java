@@ -29,7 +29,7 @@ public class PluginInternalServiceCommunicator extends Communicator {
         // Call internal processor
         ExtractedText extractedText = null;
         try {
-            extractedText = (ExtractedText) processor.processFile(fileRef);
+            extractedText = processor.processFile(fileRef);
         } catch (FileTypeNotSupportedException e) {
             e.printStackTrace();
         }
