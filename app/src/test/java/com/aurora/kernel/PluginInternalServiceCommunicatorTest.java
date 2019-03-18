@@ -63,6 +63,10 @@ public class PluginInternalServiceCommunicatorTest {
         testObserver.assertValue(mExtractedText);
     }
 
+    /**
+     * Private dummy processing class for testing purposes.
+     * Acts as a stub for a real internal text processor.
+     */
     private static class DummyInternalTextProcessing extends InternalTextProcessing {
 
         /**
