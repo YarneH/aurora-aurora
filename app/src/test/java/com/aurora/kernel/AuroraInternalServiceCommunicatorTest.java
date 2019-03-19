@@ -4,6 +4,8 @@ import com.aurora.internalservice.internalcache.CachedProcessedFile;
 import com.aurora.internalservice.internalcache.InternalCache;
 import com.aurora.kernel.event.CacheFileRequest;
 import com.aurora.kernel.event.CacheFileResponse;
+import com.aurora.kernel.event.QueryCacheRequest;
+import com.aurora.kernel.event.QueryCacheResponse;
 import com.aurora.plugin.ProcessedText;
 
 import org.junit.BeforeClass;
@@ -20,6 +22,9 @@ public class AuroraInternalServiceCommunicatorTest {
     private static Bus mBus;
     private static InternalCache mInternalCache;
     private static AuroraInternalServiceCommunicator mAuroraInternalServiceCommunicator;
+
+    private static List<CachedProcessedFile> dummyList = new ArrayList<>();
+    private static CachedProcessedFile dummyCachedFile = new CachedProcessedFile();
 
     @BeforeClass
     public static void initialize() {
@@ -56,6 +61,48 @@ public class AuroraInternalServiceCommunicatorTest {
         testObserver.assertValue(true);
     }
 
+    @Test
+    public void AuroraInternalServiceCommunicator_shouldReturnAllCachedFilesOnEmptyRequest() {
+        // Subscribe to QueryCacheResponse
+        Observable<QueryCacheResponse> observable = mBus.register(QueryCacheResponse.class);
+
+        // Create test observer for response
+        TestObserver<List<CachedProcessedFile>> testObserver = new TestObserver<>();
+
+        // Subscribe to observable
+        observable.map(QueryCacheResponse::getResults).subscribe(testObserver);
+
+        // Create query request and post on the bus
+        QueryCacheRequest queryCacheRequest = new QueryCacheRequest();
+        mBus.post(queryCacheRequest);
+
+        // Check if cache returned list
+        testObserver.assertSubscribed();
+        testObserver.assertValue(dummyList);
+    }
+
+    @Test
+    public void AuroraInternalServiceCommunicator_shouldReturnSpecificFileOnRequest() {
+        // Subscribe to QueryCacheResponse
+        Observable<QueryCacheResponse> observable = mBus.register(QueryCacheResponse.class);
+
+        // Create test observer for response
+        TestObserver<CachedProcessedFile> testObserver = new TestObserver<>();
+
+        // Subscribe to observable
+        observable.map(queryCacheResponse -> queryCacheResponse.getResults().get(0)).subscribe(testObserver);
+
+        // Create query request and post on the bus
+        String fileRef = "dummy/file/ref.pdf";
+        String uniquePluginName = "DummyPlugin";
+        QueryCacheRequest queryCacheRequest = new QueryCacheRequest(fileRef, uniquePluginName);
+        mBus.post(queryCacheRequest);
+
+        // Check if cache returned specific plugin
+        testObserver.assertSubscribed();
+        testObserver.assertValue(dummyCachedFile);
+    }
+
     /**
      * Dummy class with stub implementations for the cache
      */
@@ -68,12 +115,12 @@ public class AuroraInternalServiceCommunicatorTest {
 
         @Override
         public CachedProcessedFile checkCacheForProcessedFile(String fileRef, String uniquePluginName) {
-            return null;
+            return dummyCachedFile;
         }
 
         @Override
-        public List<String> getFullCache() {
-            return new ArrayList<>();
+        public List<CachedProcessedFile> getFullCache() {
+            return dummyList;
         }
     }
 

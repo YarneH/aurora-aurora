@@ -45,7 +45,7 @@ public class InternalCache implements InternalService {
      *
      * @return a list of paths to cached files TODO: may change to CachedFile representation class!
      */
-    public List<String> getFullCache() {
+    public List<CachedProcessedFile> getFullCache() {
         Log.d(CLASS_TAG, "Not implemented yet!");
         return new ArrayList<>();
     }
