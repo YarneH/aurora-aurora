@@ -1,8 +1,10 @@
 package com.aurora.kernel;
 
-import android.util.Log;
-
+import com.aurora.internalservice.internalprocessor.ExtractedText;
+import com.aurora.internalservice.internalprocessor.FileTypeNotSupportedException;
+import com.aurora.internalservice.internalprocessor.InternalTextProcessing;
 import com.aurora.kernel.event.InternalProcessorRequest;
+import com.aurora.kernel.event.InternalProcessorResponse;
 
 import io.reactivex.Observable;
 
@@ -11,10 +13,19 @@ import io.reactivex.Observable;
  */
 public class PluginInternalServiceCommunicator extends Communicator {
 
+    /**
+     * internal text processor
+     */
+    private InternalTextProcessing mProcessing;
+
+    /**
+     * Observable keeping track of internal processor requests
+     */
     private Observable<InternalProcessorRequest> internalProcessorEventObservable;
 
-    public PluginInternalServiceCommunicator(Bus mBus) {
+    public PluginInternalServiceCommunicator(Bus mBus, InternalTextProcessing processing) {
         super(mBus);
+        mProcessing = processing;
 
         internalProcessorEventObservable = mBus.register(InternalProcessorRequest.class);
         internalProcessorEventObservable.subscribe((InternalProcessorRequest internalProcessorRequest) ->
@@ -22,7 +33,18 @@ public class PluginInternalServiceCommunicator extends Communicator {
     }
 
     private void processFileWithInternalProcessor(String fileRef) {
-        //TODO Call the internal processor
-        Log.d("InternalServiceComm", "Not implemented yet! " + fileRef);
+        // Call internal processor
+        ExtractedText extractedText = null;
+        try {
+            extractedText = mProcessing.processFile(fileRef);
+        } catch (FileTypeNotSupportedException e) {
+            e.printStackTrace();
+        }
+
+        // Create response
+        InternalProcessorResponse response = new InternalProcessorResponse(extractedText);
+
+        // Post response
+        mBus.post(response);
     }
 }

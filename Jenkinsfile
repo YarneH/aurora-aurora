@@ -39,9 +39,9 @@ pipeline {
                     junit allowEmptyResults: true, testResults: '**/TEST-*.xml'
 
                     // Analyze coverage info
-                    jacoco sourcePattern: '**/src/main/java/com/aurora', 
+                    jacoco sourcePattern: '**/src/*/java', 
                         classPattern: '**/classes/com/aurora', 
-                        exclusionPattern: '**/*Test*.class,  **/aurora/*.class'
+                        exclusionPattern: '**/*Test*.class,  **/aurora/*.class, **/src/test, **/src/androidTest'
                 }
             }
 
