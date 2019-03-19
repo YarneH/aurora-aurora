@@ -45,7 +45,7 @@ public class AuroraInternalServiceCommunicator extends Communicator {
 
         // Subscribe to incoming query requests
         mQueryCacheRequestObservable = mBus.register(QueryCacheRequest.class);
-        mQueryCacheRequestObservable.subscribe(queryCacheRequest -> {
+        mQueryCacheRequestObservable.subscribe((QueryCacheRequest queryCacheRequest) -> {
             if (queryCacheRequest.isFullCacheRequest()) {
                 queryFullCache();
             } else {
