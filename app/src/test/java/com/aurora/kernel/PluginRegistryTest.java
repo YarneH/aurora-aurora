@@ -13,7 +13,11 @@ import com.aurora.processingservice.PluginProcessor;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.Writer;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
@@ -24,7 +28,7 @@ public class PluginRegistryTest {
     private static PluginRegistry mRegistry;
     private static PluginCommunicator mPluginCommunicator;
 
-    private static String mConfigRef = "testConfigFile.cfg";
+    private static String mConfigRef = "testConfigFile.json";
 
     private static final String DUMMY_NAME_1 = "DummyPlugin1";
     private static final String DUMMY_NAME_2 = "DummyPlugin2";
@@ -41,8 +45,23 @@ public class PluginRegistryTest {
     public static void initialize() {
         mBus = new Bus();
         mProcessingCommunicator = new ProcessingCommunicator(mBus);
-        mRegistry = new PluginRegistry(mProcessingCommunicator, mConfigRef);
-        mPluginCommunicator = new PluginCommunicator(mBus, mRegistry);
+
+        // Create config file
+        File configFile = new File(mConfigRef);
+
+        try (Writer writer = new BufferedWriter(new FileWriter(configFile))) {
+            // Write to file
+            writer.write("[]");
+            writer.flush();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        mRegistry = new
+                PluginRegistry(mProcessingCommunicator, mConfigRef);
+
+        mPluginCommunicator = new
+                PluginCommunicator(mBus, mRegistry);
 
         // Clear the map of plugins
         mRegistry.removeAllPlugins();
@@ -55,8 +74,11 @@ public class PluginRegistryTest {
         PluginProcessor processor2 = new DummyPluginProcessor(mProcessingCommunicator);
 
         // Create dummy plugins
-        plugin1 = new DummyPlugin1(DUMMY_NAME_1, DUMMY_NAME_1, null, DESCRIPTION_1, VERSION_1, environment1, processor1);
-        plugin2 = new DummyPlugin2(DUMMY_NAME_2, DUMMY_NAME_2, null, DESCRIPTION_2, VERSION_2, environment2, processor2);
+        plugin1 = new
+                DummyPlugin1(DUMMY_NAME_1, DUMMY_NAME_1, null, DESCRIPTION_1, VERSION_1, environment1, processor1);
+
+        plugin2 = new
+                DummyPlugin2(DUMMY_NAME_2, DUMMY_NAME_2, null, DESCRIPTION_2, VERSION_2, environment2, processor2);
 
         // Add dummy plugins
         mRegistry.registerPlugin(DUMMY_NAME_1, plugin1);
