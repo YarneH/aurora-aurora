@@ -23,6 +23,7 @@ import java.util.Map;
  * Class that maintains link between a plugin name and plugin
  */
 class PluginRegistry {
+    private static final String PLUGINREGISTRY_LOG_TAG = "PluginRegistry";
     /**
      * Maintains a relation between a plugin name and a Plugin object
      */
@@ -77,7 +78,7 @@ class PluginRegistry {
             // Return the environment to the caller
             return plugin.getPluginEnvironment();
         } else {
-            Log.d("PluginRegistry", "Could not find the plugin with name " +
+            Log.d(PLUGINREGISTRY_LOG_TAG, "Could not find the plugin with name " +
                     pluginName + ".");
 
             return null;
@@ -114,12 +115,12 @@ class PluginRegistry {
             mPluginsMap.put(plugin.getUniqueName(), plugin);
             persistPluginsMap();
 
-            Log.d("PluginRegistry", "Plugin added to the registry.");
+            Log.d(PLUGINREGISTRY_LOG_TAG, "Plugin added to the registry.");
             return true;
         }
 
         // Return false because plugin was already present
-        Log.d("PluginRegistry", "Plugin already present in the registry.");
+        Log.d(PLUGINREGISTRY_LOG_TAG, "Plugin already present in the registry.");
         return false;
     }
 
@@ -162,7 +163,7 @@ class PluginRegistry {
                 mPluginsMap.put(p.getUniqueName(), p);
             }
         } catch (IOException e) {
-            Log.e("PluginRegistry", "Something went wrong when reading the plugins from the config file.");
+            Log.e(PLUGINREGISTRY_LOG_TAG, "Something went wrong when reading the plugins from the config file.");
         }
 
     }
@@ -206,7 +207,7 @@ class PluginRegistry {
             writer.write(pluginsJson);
             writer.flush();
         } catch (IOException e) {
-            Log.e("PluginRegistry", "Could not write to plugins config file.");
+            Log.e(PLUGINREGISTRY_LOG_TAG, "Could not write to plugins config file.");
         }
     }
 }
