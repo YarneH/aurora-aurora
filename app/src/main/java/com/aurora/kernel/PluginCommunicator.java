@@ -95,7 +95,7 @@ public class PluginCommunicator extends Communicator {
      * @param fileRef    a reference to the file to process
      */
     private void openFileWithPlugin(String pluginName, String fileRef) {
-        PluginEnvironment plugin =  mPluginRegistry.loadPlugin(pluginName);
+        PluginEnvironment plugin = mPluginRegistry.loadPlugin(pluginName);
 
         Fragment pluginFragment;
 
