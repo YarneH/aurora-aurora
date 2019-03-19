@@ -81,8 +81,8 @@ public class PluginRegistryTest {
                 DummyPlugin2(DUMMY_NAME_2, DUMMY_NAME_2, null, DESCRIPTION_2, VERSION_2, environment2, processor2);
 
         // Add dummy plugins
-        mRegistry.registerPlugin(DUMMY_NAME_1, plugin1);
-        mRegistry.registerPlugin(DUMMY_NAME_2, plugin2);
+        mRegistry.registerPlugin(plugin1);
+        mRegistry.registerPlugin(plugin2);
     }
 
 

@@ -104,20 +104,22 @@ class PluginRegistry {
     /**
      * Adds a plugin with a given name to the map and writes back the configuration file
      *
-     * @param pluginName the name of the plugin to add
      * @param plugin     the plugin object that contains the plugin
      * @return true if the plugin was added, false if the plugin could not be added (e.g. if it was already present)
      */
-    boolean registerPlugin(String pluginName, Plugin plugin) {
+    boolean registerPlugin(Plugin plugin) {
         // TODO: write back config file immediately
-        if (!mPluginsMap.containsKey(pluginName)) {
+        if (!mPluginsMap.containsKey(plugin.getUniqueName())) {
             // Add plugin to the map
-            mPluginsMap.put(pluginName, plugin);
+            mPluginsMap.put(plugin.getUniqueName(), plugin);
             persistPluginsMap();
+
+            Log.d("PluginRegistry", "Plugin added to the registry.");
             return true;
         }
 
         // Return false because plugin was already present
+        Log.d("PluginRegistry", "Plugin already present in the registry.");
         return false;
     }
 
