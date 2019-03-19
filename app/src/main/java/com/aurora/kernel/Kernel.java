@@ -75,6 +75,7 @@ public final class Kernel {
     public AuroraInternalServiceCommunicator getAuroraInternalServiceCommunicator() {
         return mAuroraInternalServiceCommunicator;
     }
+    
     /**
      * Private helper method that checks if the plugin-config file already exists, and creates one when necessary
      */

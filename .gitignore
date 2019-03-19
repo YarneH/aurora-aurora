@@ -4,3 +4,6 @@
 /captures
 .externalNativeBuild
 /app/release
+
+# plugin config
+app/plugin-config.json
