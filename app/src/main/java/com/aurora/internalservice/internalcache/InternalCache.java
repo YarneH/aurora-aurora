@@ -73,4 +73,39 @@ public class InternalCache implements InternalService {
         Log.d(CLASS_TAG, "This method hasn't been implemented" + fileRef + " " + uniquePluginName);
         return null;
     }
+
+    /**
+     * Removes a file from the cache given its path and plugin name
+     *
+     * @param fileRef a reference to the file that should be removed from the cache
+     * @param uniquePluginName the name of the plugin to remove the file from
+     *                         It could be that a file was processed by different plugins (or different versions)
+     *                         so it should be possible to only remove those for no longer supported versions.
+     * @return true if the file was successfully removed
+     */
+    public boolean removeFile(String fileRef, String uniquePluginName) {
+        Log.d(CLASS_TAG, "This method will be implemented later! " + fileRef + " " + uniquePluginName);
+        return false;
+    }
+
+    /**
+     * Removes all files from the cache that were processed by a given plugin
+     *
+     * @param uniquePluginName the name of the plugin to remove the files from
+     * @return true if the operation was successful
+     */
+    public boolean removeFilesFromPlugin(String uniquePluginName) {
+        Log.d(CLASS_TAG, "This is not implemented yet! " + uniquePluginName);
+        return false;
+    }
+
+    /**
+     * Clears the entire cache
+     *
+     * @return true if the operation was successful
+     */
+    public boolean clear() {
+        Log.d(CLASS_TAG, "Operation not implemented yet!");
+        return false;
+    }
 }
