@@ -6,6 +6,8 @@ import com.aurora.kernel.event.CacheFileRequest;
 import com.aurora.kernel.event.CacheFileResponse;
 import com.aurora.kernel.event.QueryCacheRequest;
 import com.aurora.kernel.event.QueryCacheResponse;
+import com.aurora.kernel.event.RemoveFromCacheRequest;
+import com.aurora.kernel.event.RemoveFromCacheResponse;
 import com.aurora.kernel.event.RetrieveFileFromCacheRequest;
 import com.aurora.kernel.event.RetrieveFileFromCacheResponse;
 import com.aurora.plugin.ProcessedText;
@@ -128,6 +130,69 @@ public class AuroraInternalServiceCommunicatorTest {
         testObserver.assertValue(dummyCachedFile);
     }
 
+    @Test
+    public void AuroraInternalServiceCommunicator_shouldRemoveFileOnRequest() {
+        // Subscribe to RemoveFromCacheResponse
+        Observable<RemoveFromCacheResponse> observable = mBus.register(RemoveFromCacheResponse.class);
+
+        // Create test observer for response
+        TestObserver<Boolean> testObserver = new TestObserver<>();
+
+        // Subscribe to observable
+        observable.map(RemoveFromCacheResponse::isSuccess).subscribe(testObserver);
+
+        // Create request file and post on bus
+        String fileRef = "dummy/file/ref.pdf";
+        String uniquePluginName = "DummyPlugin";
+        RemoveFromCacheRequest request = new RemoveFromCacheRequest(fileRef, uniquePluginName);
+        mBus.post(request);
+
+        // Check if cache removed the file correctly
+        testObserver.assertSubscribed();
+        testObserver.assertValue(true);
+    }
+
+    @Test
+    public void AuroraInternalServiceCommunicator_shouldRemoveAllFilesFromPluginOnRequest() {
+        // Subscribe to RemoveFromCacheResponse
+        Observable<RemoveFromCacheResponse> observable = mBus.register(RemoveFromCacheResponse.class);
+
+        // Create test observer for response
+        TestObserver<Boolean> testObserver = new TestObserver<>();
+
+        // Subscribe to observable
+        observable.map(RemoveFromCacheResponse::isSuccess).subscribe(testObserver);
+
+        // Create request file and post on bus
+        String uniquePluginName = "DummyPlugin";
+        RemoveFromCacheRequest request = new RemoveFromCacheRequest(uniquePluginName);
+        mBus.post(request);
+
+        // Check if cache removed the file correctly
+        testObserver.assertSubscribed();
+        testObserver.assertValue(true);
+    }
+
+    @Test
+    public void AuroraInternalServiceCommunicator_shouldClearCacheOnRequest() {
+        // Subscribe to RemoveFromCacheResponse
+        Observable<RemoveFromCacheResponse> observable = mBus.register(RemoveFromCacheResponse.class);
+
+        // Create test observer for response
+        TestObserver<Boolean> testObserver = new TestObserver<>();
+
+        // Subscribe to observable
+        observable.map(RemoveFromCacheResponse::isSuccess).subscribe(testObserver);
+
+        // Create request file and post on bus
+        RemoveFromCacheRequest request = new RemoveFromCacheRequest();
+        mBus.post(request);
+
+        // Check if cache removed the file correctly
+        testObserver.assertSubscribed();
+        testObserver.assertValue(true);
+    }
+
     /**
      * Dummy class with stub implementations for the cache
      */
@@ -156,6 +221,21 @@ public class AuroraInternalServiceCommunicatorTest {
         @Override
         public CachedProcessedFile retrieveFile(String fileRef, String uniquePluginName) {
             return dummyCachedFile;
+        }
+
+        @Override
+        public boolean removeFile(String fileRef, String uniquePluginName) {
+            return true;
+        }
+
+        @Override
+        public boolean removeFilesFromPlugin(String uniquePluginName) {
+            return true;
+        }
+
+        @Override
+        public boolean clear() {
+            return true;
         }
     }
 

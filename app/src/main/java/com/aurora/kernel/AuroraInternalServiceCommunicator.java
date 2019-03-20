@@ -6,6 +6,8 @@ import com.aurora.kernel.event.CacheFileRequest;
 import com.aurora.kernel.event.CacheFileResponse;
 import com.aurora.kernel.event.QueryCacheRequest;
 import com.aurora.kernel.event.QueryCacheResponse;
+import com.aurora.kernel.event.RemoveFromCacheRequest;
+import com.aurora.kernel.event.RemoveFromCacheResponse;
 import com.aurora.kernel.event.RetrieveFileFromCacheRequest;
 import com.aurora.kernel.event.RetrieveFileFromCacheResponse;
 import com.aurora.plugin.ProcessedText;
@@ -39,6 +41,11 @@ public class AuroraInternalServiceCommunicator extends Communicator {
      */
     private Observable<RetrieveFileFromCacheRequest> mRetrieveFileFromCacheRequestObservable;
 
+    /**
+     * Observable keeping track of incoming request to remove files from the cache
+     */
+    private Observable<RemoveFromCacheRequest> mRemoveFromCacheRequestObservable;
+
     public AuroraInternalServiceCommunicator(Bus bus, InternalCache internalCache) {
         super(bus);
         mInternalCache = internalCache;
@@ -70,6 +77,20 @@ public class AuroraInternalServiceCommunicator extends Communicator {
                 cacheRequest -> retrieveFileFromCache(cacheRequest.getFileRef(),
                         cacheRequest.getUniquePluginName())
         );
+
+        // Subscribe to incoming requests to remove files from the cache
+        mRemoveFromCacheRequestObservable = mBus.register(RemoveFromCacheRequest.class);
+
+        // Call appropriate handle method when request comes in
+        mRemoveFromCacheRequestObservable.subscribe((RemoveFromCacheRequest request) -> {
+            if (request.isClearCache()) {
+                clearCache();
+            } else if (request.getFileRef() == null) {
+                clearPluginCache(request.getUniquePluginName());
+            } else {
+                removeFileFromCache(request.getFileRef(), request.getUniquePluginName());
+            }
+        });
     }
 
     /**
@@ -134,6 +155,44 @@ public class AuroraInternalServiceCommunicator extends Communicator {
         RetrieveFileFromCacheResponse response = new RetrieveFileFromCacheResponse(processedFile);
 
         // Post response on bus
+        mBus.post(response);
+    }
+
+    /**
+     * Private handle method that removes a specific file from the cache
+     *
+     * @param fileRef          a reference to the file to remove
+     * @param uniquePluginName the name of the plugin that the file was processed with
+     */
+    private void removeFileFromCache(String fileRef, String uniquePluginName) {
+        boolean success = mInternalCache.removeFile(fileRef, uniquePluginName);
+
+        // Create response and post on bus
+        RemoveFromCacheResponse response = new RemoveFromCacheResponse(success);
+        mBus.post(response);
+    }
+
+    /**
+     * Private handle method that removes all files from a given plugin from the cache
+     *
+     * @param uniquePluginName the name of the plugin to remove the files from
+     */
+    private void clearPluginCache(String uniquePluginName) {
+        boolean success = mInternalCache.removeFilesFromPlugin(uniquePluginName);
+
+        // Create response and post on bus
+        RemoveFromCacheResponse response = new RemoveFromCacheResponse(success);
+        mBus.post(response);
+    }
+
+    /**
+     * Private handle method that clears the enire cache
+     */
+    private void clearCache() {
+        boolean success = mInternalCache.clear();
+
+        // Create response and post on bus
+        RemoveFromCacheResponse response = new RemoveFromCacheResponse(success);
         mBus.post(response);
     }
 }
