@@ -75,7 +75,7 @@ public class AuroraInternalServiceCommunicator extends Communicator {
      */
     private void queryFullCache() {
         // Get all files from cache
-        List<CachedProcessedFile> processedFiles = mInternalCache.getFullCache();
+        List<String> processedFiles = mInternalCache.getFullCache();
 
         // Wrap in response and post on the bus
         QueryCacheResponse response = new QueryCacheResponse(processedFiles);
@@ -89,10 +89,10 @@ public class AuroraInternalServiceCommunicator extends Communicator {
      * @param uniquePluginName the plugin that the file should be processed with
      */
     private void queryCache(String fileRef, String uniquePluginName) {
-        CachedProcessedFile processedFile = mInternalCache.checkCacheForProcessedFile(fileRef, uniquePluginName);
+        String processedFile = mInternalCache.checkCacheForProcessedFile(fileRef, uniquePluginName);
 
         // Create response event with result in list, or empty list if result was null
-        List<CachedProcessedFile> cachedProcessedFiles = new ArrayList<>();
+        List<String> cachedProcessedFiles = new ArrayList<>();
         if (processedFile != null) {
             cachedProcessedFiles.add(processedFile);
         }

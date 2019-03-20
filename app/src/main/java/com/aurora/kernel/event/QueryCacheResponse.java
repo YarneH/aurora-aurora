@@ -1,20 +1,18 @@
 package com.aurora.kernel.event;
 
-import com.aurora.internalservice.internalcache.CachedProcessedFile;
-
 import java.util.List;
 
 /**
  * This event contains the response (processed text) of a QueryCacheRequest.
  */
 public class QueryCacheResponse extends Event {
-    private List<CachedProcessedFile> mResults;
+    private List<String> mResults;
 
-    public QueryCacheResponse(List<CachedProcessedFile> results) {
+    public QueryCacheResponse(List<String> results) {
         mResults = results;
     }
 
-    public List<CachedProcessedFile> getResults() {
+    public List<String> getResults() {
         return mResults;
     }
 }

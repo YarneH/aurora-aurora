@@ -33,9 +33,9 @@ public class InternalCache implements InternalService {
      *
      * @param fileRef a reference to the file to check the cache for
      * @param uniquePluginName the name of the plugin to open the representation with
-     * @return the processed file if it is present, null otherwise
+     * @return the processed file name if it is present, null otherwise
      */
-    public CachedProcessedFile checkCacheForProcessedFile(String fileRef, String uniquePluginName) {
+    public String checkCacheForProcessedFile(String fileRef, String uniquePluginName) {
         Log.d(CLASS_TAG, "Not implemented yet!");
         return null;
     }
@@ -43,10 +43,21 @@ public class InternalCache implements InternalService {
     /**
      * Gets a list of already processed file representations
      *
-     * @return a list of paths to cached files TODO: may change to CachedFile representation class!
+     * @param amount the amount of files that should be retrieved, if 0 or negative, all files will be retrieved.
+     * @return a list of filenames of cached files TODO: may change to CachedFile representation class!
      */
-    public List<CachedProcessedFile> getFullCache() {
+    public List<String> getFullCache(int amount) {
         Log.d(CLASS_TAG, "Not implemented yet!");
         return new ArrayList<>();
+    }
+
+    /**
+     * Gets a list of already processed file representations
+     *
+     * @return a list of filenames of cached files TODO: may change to CachedFile representation class!
+     */
+    public List<String> getFullCache() {
+        Log.d(CLASS_TAG, "Not implemented yet!");
+        return getFullCache(0);
     }
 }
