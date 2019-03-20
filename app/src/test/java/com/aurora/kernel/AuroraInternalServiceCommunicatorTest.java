@@ -6,6 +6,8 @@ import com.aurora.kernel.event.CacheFileRequest;
 import com.aurora.kernel.event.CacheFileResponse;
 import com.aurora.kernel.event.QueryCacheRequest;
 import com.aurora.kernel.event.QueryCacheResponse;
+import com.aurora.kernel.event.RetrieveFileFromCacheRequest;
+import com.aurora.kernel.event.RetrieveFileFromCacheResponse;
 import com.aurora.plugin.ProcessedText;
 
 import org.junit.BeforeClass;
@@ -23,7 +25,8 @@ public class AuroraInternalServiceCommunicatorTest {
     private static InternalCache mInternalCache;
     private static AuroraInternalServiceCommunicator mAuroraInternalServiceCommunicator;
 
-    private static List<CachedProcessedFile> dummyList = new ArrayList<>();
+    private static List<String> dummyList = new ArrayList<>();
+    private static String dummyCachedFileString = "CachedFile";
     private static CachedProcessedFile dummyCachedFile = new CachedProcessedFile();
 
     @BeforeClass
@@ -62,12 +65,12 @@ public class AuroraInternalServiceCommunicatorTest {
     }
 
     @Test
-    public void AuroraInternalServiceCommunicator_shouldReturnAllCachedFilesOnEmptyRequest() {
+    public void AuroraInternalServiceCommunicator_shouldQueryAllCachedFilesOnEmptyRequest() {
         // Subscribe to QueryCacheResponse
         Observable<QueryCacheResponse> observable = mBus.register(QueryCacheResponse.class);
 
         // Create test observer for response
-        TestObserver<List<CachedProcessedFile>> testObserver = new TestObserver<>();
+        TestObserver<List<String>> testObserver = new TestObserver<>();
 
         // Subscribe to observable
         observable.map(QueryCacheResponse::getResults).subscribe(testObserver);
@@ -82,12 +85,12 @@ public class AuroraInternalServiceCommunicatorTest {
     }
 
     @Test
-    public void AuroraInternalServiceCommunicator_shouldReturnSpecificFileOnRequest() {
+    public void AuroraInternalServiceCommunicator_shouldQuerySpecificFileOnRequest() {
         // Subscribe to QueryCacheResponse
         Observable<QueryCacheResponse> observable = mBus.register(QueryCacheResponse.class);
 
         // Create test observer for response
-        TestObserver<CachedProcessedFile> testObserver = new TestObserver<>();
+        TestObserver<String> testObserver = new TestObserver<>();
 
         // Subscribe to observable
         observable.map(queryCacheResponse -> queryCacheResponse.getResults().get(0)).subscribe(testObserver);
@@ -99,6 +102,28 @@ public class AuroraInternalServiceCommunicatorTest {
         mBus.post(queryCacheRequest);
 
         // Check if cache returned specific plugin
+        testObserver.assertSubscribed();
+        testObserver.assertValue(dummyCachedFileString);
+    }
+
+    @Test
+    public void AuroraInternalServiceCommunicator_shouldRetrieveSpecificFileOnRequest() {
+        // Subscribe to RetrieveFileFromCacheResponse
+        Observable<RetrieveFileFromCacheResponse> observable = mBus.register(RetrieveFileFromCacheResponse.class);
+
+        // Create test observer for response
+        TestObserver<CachedProcessedFile> testObserver = new TestObserver<>();
+
+        // Subscribe to observable
+        observable.map(RetrieveFileFromCacheResponse::getProcessedFile).subscribe(testObserver);
+
+        // Create retrieve request and post on bus
+        String fileRef = "dummy/file/ref.pdf";
+        String uniquePluginName = "DummyPlugin";
+        RetrieveFileFromCacheRequest request = new RetrieveFileFromCacheRequest(fileRef, uniquePluginName);
+        mBus.post(request);
+
+        // Check if cache retrieved correct plugin
         testObserver.assertSubscribed();
         testObserver.assertValue(dummyCachedFile);
     }
@@ -114,13 +139,23 @@ public class AuroraInternalServiceCommunicatorTest {
         }
 
         @Override
-        public CachedProcessedFile checkCacheForProcessedFile(String fileRef, String uniquePluginName) {
-            return dummyCachedFile;
+        public String checkCacheForProcessedFile(String fileRef, String uniquePluginName) {
+            return dummyCachedFileString;
         }
 
         @Override
-        public List<CachedProcessedFile> getFullCache() {
+        public List<String> getFullCache() {
             return dummyList;
+        }
+
+        @Override
+        public List<String> getFullCache(int amount) {
+            return getFullCache();
+        }
+
+        @Override
+        public CachedProcessedFile retrieveFile(String fileRef, String uniquePluginName) {
+            return dummyCachedFile;
         }
     }
 
