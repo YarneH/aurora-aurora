@@ -1,5 +1,8 @@
 package com.aurora.kernel;
 
+import android.util.Log;
+
+import com.aurora.internalservice.internalprocessor.ExtractedText;
 import com.aurora.kernel.event.ListPluginsRequest;
 import com.aurora.kernel.event.ListPluginsResponse;
 import com.aurora.kernel.event.OpenFileWithPluginRequest;
@@ -17,6 +20,8 @@ import io.reactivex.Observable;
  * Communicator that communicates with Plugin environments
  */
 public class PluginCommunicator extends Communicator {
+    private static final String CLASS_TAG = "PluginCommunicator";
+
     private PluginRegistry mPluginRegistry;
 
     private Observable<OpenFileWithPluginRequest> mOpenFileWithPluginRequestObservable;
@@ -32,9 +37,9 @@ public class PluginCommunicator extends Communicator {
         mOpenFileWithPluginRequestObservable = mBus.register(OpenFileWithPluginRequest.class);
 
         // When a request comes in, call appropriate function
-        //mOpenFileWithPluginRequestObservable.subscribe((OpenFileWithPluginRequest openFileWithPluginRequest) ->
-        //         openFileWithPlugin(openFileWithPluginRequest.getPluginName(), openFileWithPluginRequest.getFileRef())
-        // );
+        mOpenFileWithPluginRequestObservable.subscribe((OpenFileWithPluginRequest openFileWithPluginRequest) ->
+                openFileWithPlugin(openFileWithPluginRequest.getExtractedText(), openFileWithPluginRequest.getPluginName())
+        );
 
         // Register for requests to list available plugins
         mListPluginsRequestObservable = mBus.register(ListPluginsRequest.class);
@@ -49,11 +54,14 @@ public class PluginCommunicator extends Communicator {
     /**
      * Opens a file with a given plugin
      *
-     * @param pluginName the name of the plugin to get the settings for
-     * @param fileRef    a reference to the file to process
+     * @param extractedText the extracted text of the file to open
+     * @param pluginName    the name of the plugin to open the file with
+     *                      TODO: change to other type when Android picker is used
+     * TODO: add tests for this method
      */
-    private void openFileWithPlugin(String fileRef, String pluginName) {
-        // TODO
+    private void openFileWithPlugin(ExtractedText extractedText, String pluginName) {
+        // TODO: fire intent to given plugin containing the extracted text
+        Log.d(CLASS_TAG, "Not implemented yet");
     }
 
     /**
