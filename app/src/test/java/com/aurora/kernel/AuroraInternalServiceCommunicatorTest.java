@@ -197,7 +197,7 @@ public class AuroraInternalServiceCommunicatorTest {
      */
     private static class DummyInternalCache extends InternalCache {
         @Override
-        public boolean cacheFile(String fileRef, PluginObject text, String uniquePluginName) {
+        public boolean cacheFile(String fileRef, PluginObject pluginObject, String uniquePluginName) {
             // Just return true
             return true;
         }

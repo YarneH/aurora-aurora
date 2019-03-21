@@ -14,16 +14,16 @@ public class CacheFileRequest extends Event {
     /**
      * The processed text to be cached
      */
-    private PluginObject mText;
+    private PluginObject mPluginObject;
 
     /**
      * The unique name of the plugin that built the representation of the text
      */
     private String mUniquePluginName;
 
-    public CacheFileRequest(String fileRef, PluginObject text, String uniquePluginName) {
+    public CacheFileRequest(String fileRef, PluginObject pluginObject, String uniquePluginName) {
         mFileRef = fileRef;
-        mText = text;
+        mPluginObject = pluginObject;
         mUniquePluginName = uniquePluginName;
     }
 
@@ -31,8 +31,8 @@ public class CacheFileRequest extends Event {
         return mFileRef;
     }
 
-    public PluginObject getText() {
-        return mText;
+    public PluginObject getPluginObject() {
+        return mPluginObject;
     }
 
     public String getUniquePluginName() {
