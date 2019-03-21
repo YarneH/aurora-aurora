@@ -1,19 +1,15 @@
 package com.aurora.kernel;
 
-import android.app.Activity;
 import android.support.v4.app.Fragment;
 
-import com.aurora.aurora.NotFoundActivity;
 import com.aurora.aurora.NotFoundFragment;
 import com.aurora.externalservice.PluginEnvironment;
-import com.aurora.kernel.event.ListPluginsResponse;
 import com.aurora.kernel.event.ListPluginsRequest;
+import com.aurora.kernel.event.ListPluginsResponse;
 import com.aurora.kernel.event.OpenFileWithPluginRequest;
 import com.aurora.kernel.event.OpenFileWithPluginResponse;
 import com.aurora.kernel.event.PluginProcessorRequest;
 import com.aurora.kernel.event.PluginProcessorResponse;
-import com.aurora.kernel.event.PluginSettingsRequest;
-import com.aurora.kernel.event.PluginSettingsResponse;
 import com.aurora.plugin.BasicPlugin;
 import com.aurora.plugin.ProcessedText;
 import com.aurora.processingservice.PluginProcessor;
@@ -29,7 +25,6 @@ public class PluginCommunicator extends Communicator {
     private PluginRegistry mPluginRegistry;
 
     private Observable<OpenFileWithPluginRequest> mOpenFileWithPluginRequestObservable;
-    private Observable<PluginSettingsRequest> mPluginSettingsRequestObservable;
     private Observable<ListPluginsRequest> mListPluginsRequestObservable;
 
 
@@ -46,14 +41,6 @@ public class PluginCommunicator extends Communicator {
                 openFileWithPlugin(openFileWithPluginRequest.getPluginName(), openFileWithPluginRequest.getFileRef())
         );
 
-        // Register for requests to show settings
-        mPluginSettingsRequestObservable = mBus.register(PluginSettingsRequest.class);
-
-        // When a request comes in, call the appropriate function
-        mPluginSettingsRequestObservable.subscribe((PluginSettingsRequest pluginSettingsRequest) ->
-                getSettingsActivity(pluginSettingsRequest.getPluginName())
-        );
-
         // Register for requests to list available plugins
         mListPluginsRequestObservable = mBus.register(ListPluginsRequest.class);
 
@@ -63,30 +50,6 @@ public class PluginCommunicator extends Communicator {
         );
     }
 
-    /**
-     * Requests the settings of a given plugin in the plugin registry
-     *
-     * @param pluginName the name of the plugin to get the settings for
-     */
-    private void getSettingsActivity(String pluginName) {
-        // Load the plugin
-        PluginEnvironment plugin = mPluginRegistry.loadPlugin(pluginName);
-
-        // Get the settings from the plugin
-        Class<? extends Activity> settingsActivity;
-
-        if (plugin != null) {
-            settingsActivity = plugin.getSettingsActivity();
-        } else {
-            // Create not found activity
-            settingsActivity = NotFoundActivity.class;
-        }
-
-        // Create a response and post it, response will contain null if plugin was not found
-        PluginSettingsResponse pluginSettingsResponse = new PluginSettingsResponse(settingsActivity);
-
-        mBus.post(pluginSettingsResponse);
-    }
 
     /**
      * Opens a file with a given plugin

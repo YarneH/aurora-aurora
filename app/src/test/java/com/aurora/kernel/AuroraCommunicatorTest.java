@@ -5,7 +5,6 @@ import android.support.v4.app.Fragment;
 
 import com.aurora.kernel.event.ListPluginsResponse;
 import com.aurora.kernel.event.OpenFileWithPluginResponse;
-import com.aurora.kernel.event.PluginSettingsResponse;
 import com.aurora.plugin.BasicPlugin;
 
 import org.junit.BeforeClass;
@@ -57,33 +56,7 @@ public class AuroraCommunicatorTest {
     }
 
     @Test
-    public void AuroraCommunicator_getSettingsOfPlugin_shouldReturnSettingsActivityClass() {
-        // Create dummy argument
-        String dummyPluginName = "Dummyplugin";
-
-        // Create test observer to subscribe to the observable
-        TestObserver<Class<? extends Activity>> activityObserver = new TestObserver<>();
-
-        // Call the method under test
-        Observable<Class<? extends Activity>> activityObservable = mAuroraCommunicator.getSettingsOfPlugin(dummyPluginName);
-
-        // Make dummy Class and response
-        Class<? extends Activity> className = DummyActivity.class;
-        PluginSettingsResponse response = new PluginSettingsResponse(className);
-
-        // Subscribe to observable and assert that activity is what expected
-        activityObservable.subscribe(activityObserver);
-
-        // Post response
-        mBus.post(response);
-
-        // Assert values
-        activityObserver.assertSubscribed();
-        activityObserver.assertValue(className);
-    }
-
-    @Test
-    public void AuroraCommunicator_getListOfPLugins_shouldReturnListOfPLugins() {
+    public void AuroraCommunicator_getListOfPlugins_shouldReturnListOfPlugins() {
         // Create dummy arguments
         String pluginName = "DummyPlugin";
         String pluginDescription = "this is a dummy description.";

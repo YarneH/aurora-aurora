@@ -3,7 +3,6 @@ package com.aurora.kernel;
 import android.app.Activity;
 import android.support.v4.app.Fragment;
 
-import com.aurora.aurora.NotFoundActivity;
 import com.aurora.aurora.NotFoundFragment;
 import com.aurora.externalservice.PluginEnvironment;
 import com.aurora.internalservice.internalprocessor.ExtractedText;
@@ -12,8 +11,6 @@ import com.aurora.kernel.event.ListPluginsResponse;
 import com.aurora.kernel.event.OpenFileWithPluginRequest;
 import com.aurora.kernel.event.OpenFileWithPluginResponse;
 import com.aurora.kernel.event.PluginProcessorResponse;
-import com.aurora.kernel.event.PluginSettingsRequest;
-import com.aurora.kernel.event.PluginSettingsResponse;
 import com.aurora.plugin.BasicProcessedText;
 import com.aurora.plugin.Plugin;
 import com.aurora.plugin.ProcessedText;
@@ -106,50 +103,6 @@ public class PluginCommunicatorTest {
         // Assert values
         observer.assertSubscribed();
         observer.assertValue(text);
-    }
-
-
-    @Test
-    public void PluginCommunicator_PluginSettingsObservable_shouldPostSettingsResponse() {
-        addPluginToRegistry();
-
-        // Create test observer to subscribe to the observable
-        TestObserver<Class<? extends Activity>> observer = new TestObserver<>();
-
-        // Register for PluginSettingsResponse events
-        Observable<PluginSettingsResponse> observable = mBus.register(PluginSettingsResponse.class);
-
-        // Subscribe to observable
-        observable.map(PluginSettingsResponse::getActivity).subscribe(observer);
-
-        // Post request event
-        mBus.post(new PluginSettingsRequest(PLUGIN_NAME));
-
-        // Assert values
-        observer.assertSubscribed();
-        observer.assertValue(DummyActivity.class);
-    }
-
-    @Test
-    public void PluginCommunicator_PluginSettingsObservable_shouldPostResponseContainingNotFoundActivity() {
-        addPluginToRegistry();
-
-        // Create test observer to subscribe to the observable
-        TestObserver<Class<? extends Activity>> observer = new TestObserver<>();
-
-        // Register for PluginSettingsResponse events
-        Observable<PluginSettingsResponse> observable = mBus.register(PluginSettingsResponse.class);
-
-        // Subscribe to observable
-        observable.map(PluginSettingsResponse::getActivity).subscribe(observer);
-
-        // Post request event
-        mBus.post(new PluginSettingsRequest(PLUGIN_NOT_IN_REGISTRY));
-
-        // Assert values
-        observer.assertSubscribed();
-        observer.assertValue(NotFoundActivity.class);
-
     }
 
     @Test

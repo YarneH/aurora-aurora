@@ -1,14 +1,11 @@
 package com.aurora.kernel;
 
-import android.app.Activity;
 import android.support.v4.app.Fragment;
 
-import com.aurora.kernel.event.ListPluginsResponse;
 import com.aurora.kernel.event.ListPluginsRequest;
+import com.aurora.kernel.event.ListPluginsResponse;
 import com.aurora.kernel.event.OpenFileWithPluginRequest;
 import com.aurora.kernel.event.OpenFileWithPluginResponse;
-import com.aurora.kernel.event.PluginSettingsRequest;
-import com.aurora.kernel.event.PluginSettingsResponse;
 import com.aurora.plugin.BasicPlugin;
 
 import java.util.List;
@@ -41,21 +38,6 @@ public class AuroraCommunicator extends Communicator {
         // The map function is called on the observable. Then, the getPluginFragment function
         // is called on the response event and the result is returned
         return mOpenFileWithPluginResponse.map(OpenFileWithPluginResponse::getPluginFragment);
-    }
-
-    /**
-     * Gets the settings of a plugin
-     *
-     * @param pluginName the name of the plugin to get the settings for
-     * @return the class reference to the activity to show wrapped in an observable
-     */
-    public Observable<Class<? extends Activity>> getSettingsOfPlugin(String pluginName) {
-        Observable<PluginSettingsResponse> mPluginSettingsResponse
-                = this.mBus.register(PluginSettingsResponse.class);
-        this.mBus.post(new PluginSettingsRequest(pluginName));
-
-        return mPluginSettingsResponse
-                .map(PluginSettingsResponse::getActivity);
     }
 
     /**
