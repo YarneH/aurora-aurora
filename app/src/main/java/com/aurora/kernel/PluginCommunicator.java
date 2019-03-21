@@ -34,7 +34,8 @@ public class PluginCommunicator extends Communicator {
 
         // When a request comes in, call appropriate function
         mOpenFileWithPluginRequestObservable.subscribe((OpenFileWithPluginRequest openFileWithPluginRequest) ->
-                openFileWithPlugin(openFileWithPluginRequest.getExtractedText(), openFileWithPluginRequest.getPluginName())
+                openFileWithPlugin(openFileWithPluginRequest.getExtractedText(),
+                        openFileWithPluginRequest.getPluginName())
         );
 
         // Register for requests to list available plugins
@@ -53,7 +54,7 @@ public class PluginCommunicator extends Communicator {
      * @param extractedText the extracted text of the file to open
      * @param pluginName    the name of the plugin to open the file with
      *                      TODO: change to other type when Android picker is used
-     * TODO: add tests for this method
+     *                      TODO: add tests for this method
      */
     private void openFileWithPlugin(ExtractedText extractedText, String pluginName) {
         // TODO: fire intent to given plugin containing the extracted text
