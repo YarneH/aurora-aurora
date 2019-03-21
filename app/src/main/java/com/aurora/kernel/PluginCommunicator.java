@@ -42,9 +42,7 @@ public class PluginCommunicator extends Communicator {
         mListPluginsRequestObservable = mBus.register(ListPluginsRequest.class);
 
         // When a request comes in, call the appropriate function
-        mListPluginsRequestObservable.subscribe((ListPluginsRequest listPluginsRequest) ->
-                listPlugins()
-        );
+        mListPluginsRequestObservable.subscribe((ListPluginsRequest listPluginsRequest) -> listPlugins());
     }
 
 

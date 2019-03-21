@@ -24,7 +24,8 @@ public class AuroraCommunicator extends Communicator {
     }
 
     /**
-     * Open file with a given plugin
+     * Open file with a given plugin. This method will first extract the text from the given file reference,
+     * then it will send a request to let the plugin make the representation.
      *
      * @param fileRef    a reference to the file that needs to be opened
      * @param pluginName the name of the plugin to open the file with, contains version number
