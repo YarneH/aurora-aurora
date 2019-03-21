@@ -178,7 +178,7 @@ public class AuroraInternalServiceCommunicator extends Communicator {
      * @param uniquePluginName the name of the plugin to remove the files from
      */
     private void clearPluginCache(String uniquePluginName) {
-        boolean success = mInternalCache.removeFilesFromPlugin(uniquePluginName);
+        boolean success = mInternalCache.removeFilesByPlugin(uniquePluginName);
 
         // Create response and post on bus
         RemoveFromCacheResponse response = new RemoveFromCacheResponse(success);

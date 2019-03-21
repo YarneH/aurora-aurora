@@ -94,7 +94,7 @@ public class InternalCache implements InternalService {
      * @param uniquePluginName the name of the plugin to remove the files from
      * @return true if the operation was successful
      */
-    public boolean removeFilesFromPlugin(String uniquePluginName) {
+    public boolean removeFilesByPlugin(String uniquePluginName) {
         Log.d(CLASS_TAG, "This is not implemented yet! " + uniquePluginName);
         return false;
     }

@@ -229,7 +229,7 @@ public class AuroraInternalServiceCommunicatorTest {
         }
 
         @Override
-        public boolean removeFilesFromPlugin(String uniquePluginName) {
+        public boolean removeFilesByPlugin(String uniquePluginName) {
             return true;
         }
 
