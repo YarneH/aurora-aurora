@@ -1,6 +1,6 @@
 package com.aurora.kernel;
 
-import com.aurora.internalservice.internalprocessor.ExtractedText;
+import com.aurora.auroralib.ExtractedText;
 import com.aurora.kernel.event.InternalProcessorRequest;
 import com.aurora.kernel.event.InternalProcessorResponse;
 import com.aurora.kernel.event.PluginProcessorRequest;

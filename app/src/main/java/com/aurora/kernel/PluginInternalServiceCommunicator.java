@@ -1,6 +1,6 @@
 package com.aurora.kernel;
 
-import com.aurora.internalservice.internalprocessor.ExtractedText;
+import com.aurora.auroralib.ExtractedText;
 import com.aurora.internalservice.internalprocessor.FileTypeNotSupportedException;
 import com.aurora.internalservice.internalprocessor.InternalTextProcessing;
 import com.aurora.kernel.event.InternalProcessorRequest;

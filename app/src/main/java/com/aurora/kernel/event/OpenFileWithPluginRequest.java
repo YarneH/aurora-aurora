@@ -1,6 +1,6 @@
 package com.aurora.kernel.event;
 
-import com.aurora.internalservice.internalprocessor.ExtractedText;
+import com.aurora.auroralib.ExtractedText;
 
 /**
  * Event to request that a file is opened with a plugin

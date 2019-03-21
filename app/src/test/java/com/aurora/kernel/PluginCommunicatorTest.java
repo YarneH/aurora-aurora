@@ -4,7 +4,7 @@ import android.app.Activity;
 import android.support.v4.app.Fragment;
 
 import com.aurora.externalservice.PluginEnvironment;
-import com.aurora.internalservice.internalprocessor.ExtractedText;
+import com.aurora.auroralib.ExtractedText;
 import com.aurora.kernel.event.ListPluginsRequest;
 import com.aurora.kernel.event.ListPluginsResponse;
 import com.aurora.kernel.event.PluginProcessorResponse;

@@ -1,6 +1,8 @@
 package com.aurora.internalservice.internalprocessor;
 
 
+import com.aurora.auroralib.ExtractedText;
+
 /**
  * Interface for different extractors, extracting text from different file formats
  */

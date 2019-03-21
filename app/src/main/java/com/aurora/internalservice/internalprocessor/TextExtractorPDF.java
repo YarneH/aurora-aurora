@@ -1,5 +1,7 @@
 package com.aurora.internalservice.internalprocessor;
 
+import com.aurora.auroralib.ExtractedText;
+
 public class TextExtractorPDF implements TextExtractor {
     /**
      * TODO: This method will extract the text using iText

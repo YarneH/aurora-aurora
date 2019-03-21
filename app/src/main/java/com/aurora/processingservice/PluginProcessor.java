@@ -1,6 +1,6 @@
 package com.aurora.processingservice;
 
-import com.aurora.internalservice.internalprocessor.ExtractedText;
+import com.aurora.auroralib.ExtractedText;
 import com.aurora.kernel.ProcessingCommunicator;
 import com.aurora.plugin.ProcessedText;
 

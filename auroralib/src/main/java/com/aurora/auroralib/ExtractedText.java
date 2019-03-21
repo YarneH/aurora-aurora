@@ -1,6 +1,4 @@
-package com.aurora.internalservice.internalprocessor;
-
-import com.aurora.internalservice.InternallyProcessedFile;
+package com.aurora.auroralib;
 
 import java.util.List;
 

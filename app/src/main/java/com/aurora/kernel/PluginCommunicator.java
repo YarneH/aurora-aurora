@@ -2,7 +2,7 @@ package com.aurora.kernel;
 
 import android.util.Log;
 
-import com.aurora.internalservice.internalprocessor.ExtractedText;
+import com.aurora.auroralib.ExtractedText;
 import com.aurora.kernel.event.ListPluginsRequest;
 import com.aurora.kernel.event.ListPluginsResponse;
 import com.aurora.kernel.event.OpenFileWithPluginRequest;
@@ -61,7 +61,7 @@ public class PluginCommunicator extends Communicator {
      */
     private void openFileWithPlugin(ExtractedText extractedText, String pluginName) {
         // TODO: fire intent to given plugin containing the extracted text
-        Log.d(CLASS_TAG, "Not implemented yet");
+        Log.d(CLASS_TAG, "Not implemented yet " + extractedText + " " + pluginName);
     }
 
     /**
