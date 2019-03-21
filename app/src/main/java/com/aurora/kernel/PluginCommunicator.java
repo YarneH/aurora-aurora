@@ -1,13 +1,8 @@
 package com.aurora.kernel;
 
-import android.support.v4.app.Fragment;
-
-import com.aurora.aurora.NotFoundFragment;
-import com.aurora.externalservice.PluginEnvironment;
 import com.aurora.kernel.event.ListPluginsRequest;
 import com.aurora.kernel.event.ListPluginsResponse;
 import com.aurora.kernel.event.OpenFileWithPluginRequest;
-import com.aurora.kernel.event.OpenFileWithPluginResponse;
 import com.aurora.kernel.event.PluginProcessorRequest;
 import com.aurora.kernel.event.PluginProcessorResponse;
 import com.aurora.plugin.BasicPlugin;
@@ -37,9 +32,9 @@ public class PluginCommunicator extends Communicator {
         mOpenFileWithPluginRequestObservable = mBus.register(OpenFileWithPluginRequest.class);
 
         // When a request comes in, call appropriate function
-        mOpenFileWithPluginRequestObservable.subscribe((OpenFileWithPluginRequest openFileWithPluginRequest) ->
-                openFileWithPlugin(openFileWithPluginRequest.getPluginName(), openFileWithPluginRequest.getFileRef())
-        );
+        //mOpenFileWithPluginRequestObservable.subscribe((OpenFileWithPluginRequest openFileWithPluginRequest) ->
+        //         openFileWithPlugin(openFileWithPluginRequest.getPluginName(), openFileWithPluginRequest.getFileRef())
+        // );
 
         // Register for requests to list available plugins
         mListPluginsRequestObservable = mBus.register(ListPluginsRequest.class);
@@ -57,22 +52,8 @@ public class PluginCommunicator extends Communicator {
      * @param pluginName the name of the plugin to get the settings for
      * @param fileRef    a reference to the file to process
      */
-    private void openFileWithPlugin(String pluginName, String fileRef) {
-        PluginEnvironment plugin =  mPluginRegistry.loadPlugin(pluginName);
-
-        Fragment pluginFragment;
-
-        if (plugin != null) {
-            pluginFragment = plugin.openFile(fileRef);
-        } else {
-            // Create not found fragment
-            pluginFragment = new NotFoundFragment();
-        }
-
-        // Create a response and post it, response will contain null if plugin was not found
-        OpenFileWithPluginResponse pluginResponse = new OpenFileWithPluginResponse(pluginFragment);
-
-        mBus.post(pluginResponse);
+    private void openFileWithPlugin(String fileRef, String pluginName) {
+        // TODO
     }
 
     /**

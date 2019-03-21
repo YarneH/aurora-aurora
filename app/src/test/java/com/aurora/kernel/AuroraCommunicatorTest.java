@@ -3,14 +3,18 @@ package com.aurora.kernel;
 import android.app.Activity;
 import android.support.v4.app.Fragment;
 
+import com.aurora.internalservice.internalprocessor.ExtractedText;
+import com.aurora.kernel.event.InternalProcessorRequest;
+import com.aurora.kernel.event.InternalProcessorResponse;
 import com.aurora.kernel.event.ListPluginsResponse;
-import com.aurora.kernel.event.OpenFileWithPluginResponse;
+import com.aurora.kernel.event.OpenFileWithPluginRequest;
 import com.aurora.plugin.BasicPlugin;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import io.reactivex.Observable;
@@ -29,30 +33,64 @@ public class AuroraCommunicatorTest {
     }
 
     @Test
-    public void AuroraCommunicator_openFileWithPlugin_shouldReturnPluginFragment() {
-        // Create dummy arguments
-        String dummyPluginName = "Dummyplugin";
-        String fileRef = "/path/to/file";
+    public void AuroraCommunicator_openFileWithPlugin_shouldSendProcessRequest() {
+        // Subscribe to request
+        Observable<InternalProcessorRequest> requestObservable = mBus.register(InternalProcessorRequest.class);
 
-        // Create test observer to subscribe to the observable
-        TestObserver<Fragment> subscriber = new TestObserver<>();
+        // Create test observer
+        TestObserver<String> fileRefObserver = new TestObserver<>();
 
-        // Call the method
-        Observable<Fragment> fragmentObservable = mAuroraCommunicator.openFileWithPlugin(dummyPluginName, fileRef);
+        // Subscribe to observable
+        requestObservable.map(InternalProcessorRequest::getFileRef).subscribe(fileRefObserver);
 
-        // Make dummy fragment and response
-        Fragment dummyFragment = new DummyFragment();
-        OpenFileWithPluginResponse response = new OpenFileWithPluginResponse(dummyFragment);
+        // Call method under test
+        String fileRef = "Dummy/file/ref";
+        String pluginName = "DummyPlugin";
+        mAuroraCommunicator.openFileWithPlugin(fileRef, pluginName);
 
-        // Subscribe to observable and assert fragment is what expected
-        fragmentObservable.subscribe(subscriber);
+        // Assert that arguments passed are as expected
+        fileRefObserver.assertSubscribed();
+        fileRefObserver.assertValue(fileRef);
+    }
 
-        // Post response
-        mBus.post(response);
+    @Test
+    public void AuroraCommunicator_openFileWithPlugin_shouldSendOpenFileWithPluginRequestAfterExtractingText() {
+        // Create observable of internal processor request
+        Observable<InternalProcessorRequest> internalProcessorRequestObservable = mBus.register(InternalProcessorRequest.class);
 
-        // Assert values
-        subscriber.assertSubscribed();
-        subscriber.assertValue(dummyFragment);
+        // Subscribe to observable to send response event
+        ExtractedText dummyExtractedText = new ExtractedText("Bla", Arrays.asList("Dummy", "Paragraph"));
+        internalProcessorRequestObservable.subscribe(internalProcessorRequest ->
+                mBus.post(new InternalProcessorResponse(dummyExtractedText)));
+
+        // Create observable of open file with plugin request
+        Observable<OpenFileWithPluginRequest> openFileWithPluginRequestObservable =
+                mBus.register(OpenFileWithPluginRequest.class);
+
+        // Create test observers
+        TestObserver<ExtractedText> extractedTextObserver = new TestObserver<>();
+        TestObserver<String> pluginNameObserver = new TestObserver<>();
+
+        // Subscribe to observable
+        openFileWithPluginRequestObservable
+                .map(OpenFileWithPluginRequest::getExtractedText)
+                .subscribe(extractedTextObserver);
+
+        openFileWithPluginRequestObservable
+                .map(OpenFileWithPluginRequest::getPluginName)
+                .subscribe(pluginNameObserver);
+
+        // Call the method under test
+        String dummyFileRef = "dummy/path/to/file";
+        String dummyPluginName = "DummyPlugin";
+        mAuroraCommunicator.openFileWithPlugin(dummyFileRef, dummyPluginName);
+
+        // Assure that the correct values are contained in request event
+        extractedTextObserver.assertSubscribed();
+        extractedTextObserver.assertValue(dummyExtractedText);
+
+        pluginNameObserver.assertSubscribed();
+        pluginNameObserver.assertValue(dummyPluginName);
     }
 
     @Test

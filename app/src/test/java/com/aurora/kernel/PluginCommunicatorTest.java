@@ -3,13 +3,10 @@ package com.aurora.kernel;
 import android.app.Activity;
 import android.support.v4.app.Fragment;
 
-import com.aurora.aurora.NotFoundFragment;
 import com.aurora.externalservice.PluginEnvironment;
 import com.aurora.internalservice.internalprocessor.ExtractedText;
 import com.aurora.kernel.event.ListPluginsRequest;
 import com.aurora.kernel.event.ListPluginsResponse;
-import com.aurora.kernel.event.OpenFileWithPluginRequest;
-import com.aurora.kernel.event.OpenFileWithPluginResponse;
 import com.aurora.kernel.event.PluginProcessorResponse;
 import com.aurora.plugin.BasicProcessedText;
 import com.aurora.plugin.Plugin;
@@ -103,49 +100,6 @@ public class PluginCommunicatorTest {
         // Assert values
         observer.assertSubscribed();
         observer.assertValue(text);
-    }
-
-    @Test
-    public void PluginCommunicator_OpenFileWithPluginRequest_shouldPostResponseEvent() {
-        addPluginToRegistry();
-
-        // Create test observer to subscribe to observable
-        TestObserver<Fragment> observer = new TestObserver<>();
-
-        // Register for OpenFileWithPluginResponse events
-        Observable<OpenFileWithPluginResponse> observable = mBus.register(OpenFileWithPluginResponse.class);
-
-        // Subscribe to observable
-        observable.map(OpenFileWithPluginResponse::getPluginFragment).subscribe(observer);
-
-        // Post request event
-        mBus.post(new OpenFileWithPluginRequest(PLUGIN_NAME, FILE_PATH));
-
-        // Assert values
-        observer.assertSubscribed();
-        observer.assertValue(mDummyFragment);
-    }
-
-    @Test
-    public void PluginCommunicator_OpenFileWithPluginRequest_shouldPostResponseEventContainingNotFoundFragment() {
-        addPluginToRegistry();
-
-        // Create test observer to subscribe to observable
-        TestObserver<Class<? extends Fragment>> observer = new TestObserver<>();
-
-        // Register for OpenFileWithPluginResponse events
-        Observable<OpenFileWithPluginResponse> observable = mBus.register(OpenFileWithPluginResponse.class);
-
-        // Subscribe to observable
-        observable.map(openFileWithPluginResponse -> openFileWithPluginResponse.getPluginFragment().getClass())
-                .subscribe(observer);
-
-        // Post request event
-        mBus.post(new OpenFileWithPluginRequest(PLUGIN_NOT_IN_REGISTRY, FILE_PATH));
-
-        // Assert values
-        observer.assertSubscribed();
-        observer.assertValue(NotFoundFragment.class);
     }
 
     @Test

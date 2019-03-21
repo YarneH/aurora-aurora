@@ -1,23 +1,31 @@
 package com.aurora.kernel.event;
 
+import com.aurora.internalservice.internalprocessor.ExtractedText;
+
 /**
  * Event to request that a file is opened with a plugin
  */
 public class OpenFileWithPluginRequest extends Event {
-    private String mPluginName;
-    private String mFileRef;
+    /**
+     * The extracted text from the file to represent
+     */
+    private ExtractedText mExtractedText;
 
-    public OpenFileWithPluginRequest(String pluginName, String fileRef){
-        super();
-        this.mPluginName = pluginName;
-        this.mFileRef = fileRef;
+    /**
+     * The name of the plugin to open the file with
+     */
+    private String mPluginName;
+
+    public OpenFileWithPluginRequest(ExtractedText extractedText, String pluginName) {
+        mExtractedText = extractedText;
+        mPluginName = pluginName;
+    }
+
+    public ExtractedText getExtractedText() {
+        return mExtractedText;
     }
 
     public String getPluginName() {
         return mPluginName;
-    }
-
-    public String getFileRef() {
-        return mFileRef;
     }
 }
