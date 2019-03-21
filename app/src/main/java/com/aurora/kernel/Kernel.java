@@ -1,5 +1,6 @@
 package com.aurora.kernel;
 
+import com.aurora.internalservice.internalcache.InternalCache;
 import com.aurora.internalservice.internalprocessor.InternalTextProcessing;
 
 /**
@@ -34,7 +35,10 @@ public final class Kernel {
         // Create internal text processor for the PluginInternalServiceCommunicator
         InternalTextProcessing internalTextProcessing = new InternalTextProcessing();
         this.mPluginInternalServiceCommunicator = new PluginInternalServiceCommunicator(mBus, internalTextProcessing);
-        this.mAuroraInternalServiceCommunicator = new AuroraInternalServiceCommunicator(mBus);
+
+        // Create cache
+        InternalCache internalCache = new InternalCache();
+        this.mAuroraInternalServiceCommunicator = new AuroraInternalServiceCommunicator(mBus, internalCache);
     }
 
 
