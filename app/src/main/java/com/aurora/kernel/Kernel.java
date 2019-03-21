@@ -2,6 +2,7 @@ package com.aurora.kernel;
 
 import android.util.Log;
 
+import com.aurora.internalservice.internalcache.InternalCache;
 import com.aurora.internalservice.internalprocessor.InternalTextProcessing;
 import com.aurora.plugin.Plugin;
 import com.google.gson.Gson;
@@ -44,7 +45,10 @@ public final class Kernel {
         // Create internal text processor for the PluginInternalServiceCommunicator
         InternalTextProcessing internalTextProcessing = new InternalTextProcessing();
         this.mPluginInternalServiceCommunicator = new PluginInternalServiceCommunicator(mBus, internalTextProcessing);
-        this.mAuroraInternalServiceCommunicator = new AuroraInternalServiceCommunicator(mBus);
+
+        // Create cache
+        InternalCache internalCache = new InternalCache();
+        this.mAuroraInternalServiceCommunicator = new AuroraInternalServiceCommunicator(mBus, internalCache);
 
         // Initialize plugin config
         initializePluginConfig();
