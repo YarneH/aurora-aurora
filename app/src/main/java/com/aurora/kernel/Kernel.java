@@ -1,5 +1,8 @@
 package com.aurora.kernel;
 
+import com.aurora.internalservice.internalcache.InternalCache;
+import com.aurora.internalservice.internalprocessor.InternalTextProcessing;
+
 /**
  * Wrapper class that wraps all communicators and instantiates the unique event bus
  */
@@ -19,9 +22,8 @@ public final class Kernel {
 
     /**
      * Starts and creates all communicators, keeping references
-     * TODO Define test to check if all objects are unique and not null
      */
-    private Kernel() {
+    public Kernel() {
         this.mBus = new Bus();
 
         this.mAuroraCommunicator = new AuroraCommunicator(mBus);
@@ -30,8 +32,13 @@ public final class Kernel {
         this.mPluginRegistry = new PluginRegistry(mProcessingCommunicator, PLUGINS_CFG);
         this.mPluginCommunicator = new PluginCommunicator(mBus, mPluginRegistry);
 
-        this.mPluginInternalServiceCommunicator = new PluginInternalServiceCommunicator(mBus);
-        this.mAuroraInternalServiceCommunicator = new AuroraInternalServiceCommunicator(mBus);
+        // Create internal text processor for the PluginInternalServiceCommunicator
+        InternalTextProcessing internalTextProcessing = new InternalTextProcessing();
+        this.mPluginInternalServiceCommunicator = new PluginInternalServiceCommunicator(mBus, internalTextProcessing);
+
+        // Create cache
+        InternalCache internalCache = new InternalCache();
+        this.mAuroraInternalServiceCommunicator = new AuroraInternalServiceCommunicator(mBus, internalCache);
     }
 
 
@@ -44,9 +51,20 @@ public final class Kernel {
         return mAuroraCommunicator;
     }
 
-    public Bus getBus() {
-        return mBus;
+    public PluginCommunicator getPluginCommunicator() {
+        return mPluginCommunicator;
     }
 
+    public ProcessingCommunicator getProcessingCommunicator() {
+        return mProcessingCommunicator;
+    }
+
+    public PluginInternalServiceCommunicator getPluginInternalServiceCommunicator() {
+        return mPluginInternalServiceCommunicator;
+    }
+
+    public AuroraInternalServiceCommunicator getAuroraInternalServiceCommunicator() {
+        return mAuroraInternalServiceCommunicator;
+    }
 
 }
