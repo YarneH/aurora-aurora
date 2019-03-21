@@ -6,11 +6,7 @@ import com.aurora.auroralib.ExtractedText;
 import com.aurora.kernel.event.ListPluginsRequest;
 import com.aurora.kernel.event.ListPluginsResponse;
 import com.aurora.kernel.event.OpenFileWithPluginRequest;
-import com.aurora.kernel.event.PluginProcessorRequest;
-import com.aurora.kernel.event.PluginProcessorResponse;
 import com.aurora.plugin.BasicPlugin;
-import com.aurora.plugin.ProcessedText;
-import com.aurora.processingservice.PluginProcessor;
 
 import java.util.List;
 
@@ -76,22 +72,4 @@ public class PluginCommunicator extends Communicator {
         ListPluginsResponse response = new ListPluginsResponse(pluginList);
         mBus.post(response);
     }
-
-
-    /**
-     * Delegates work to a certain pluginProcessor and returns processed text when ready
-     *
-     * @param pluginProcessor the pluginProcessor to process the file with
-     * @param fileRef         a reference to the file to process
-     * @return an observable containing the processed text
-     */
-    public Observable<ProcessedText> processFileWithPluginProcessor(PluginProcessor pluginProcessor, String fileRef) {
-        Observable<PluginProcessorResponse> mPluginProcessorResponseObservable
-                = mBus.register(PluginProcessorResponse.class);
-        this.mBus.post(new PluginProcessorRequest(pluginProcessor, fileRef));
-
-        return mPluginProcessorResponseObservable.map(PluginProcessorResponse::getProcessedText);
-    }
-
-
 }

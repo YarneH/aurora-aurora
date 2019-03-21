@@ -2,8 +2,8 @@ package com.aurora.internalservice.internalcache;
 
 import android.util.Log;
 
+import com.aurora.auroralib.PluginObject;
 import com.aurora.internalservice.InternalService;
-import com.aurora.plugin.ProcessedText;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,7 +22,7 @@ public class InternalCache implements InternalService {
      * @param uniquePluginName the name of the plugin that built the processed text
      * @return true if the text was successfully processed
      */
-    public boolean cacheFile(String fileRef, ProcessedText text, String uniquePluginName) {
+    public boolean cacheFile(String fileRef, PluginObject text, String uniquePluginName) {
         // TODO: implement this
         Log.d(CLASS_TAG, "Not implemented yet");
         return false;

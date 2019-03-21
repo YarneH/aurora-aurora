@@ -1,5 +1,6 @@
 package com.aurora.kernel;
 
+import com.aurora.auroralib.PluginObject;
 import com.aurora.internalservice.internalcache.CachedProcessedFile;
 import com.aurora.internalservice.internalcache.InternalCache;
 import com.aurora.kernel.event.CacheFileRequest;
@@ -10,7 +11,6 @@ import com.aurora.kernel.event.RemoveFromCacheRequest;
 import com.aurora.kernel.event.RemoveFromCacheResponse;
 import com.aurora.kernel.event.RetrieveFileFromCacheRequest;
 import com.aurora.kernel.event.RetrieveFileFromCacheResponse;
-import com.aurora.plugin.ProcessedText;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -100,7 +100,7 @@ public class AuroraInternalServiceCommunicator extends Communicator {
      * @param processedText    the processed text representation that needs to be cached
      * @param uniquePluginName the name of the plugin that built the representation
      */
-    private void cacheFile(String fileRef, ProcessedText processedText, String uniquePluginName) {
+    private void cacheFile(String fileRef, PluginObject processedText, String uniquePluginName) {
         // Cache file
         boolean cacheSuccess = mInternalCache.cacheFile(fileRef, processedText, uniquePluginName);
 

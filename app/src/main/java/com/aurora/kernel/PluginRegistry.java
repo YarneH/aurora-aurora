@@ -2,7 +2,6 @@ package com.aurora.kernel;
 
 import android.util.Log;
 
-import com.aurora.externalservice.PluginEnvironment;
 import com.aurora.plugin.BasicPlugin;
 import com.aurora.plugin.Plugin;
 
@@ -33,40 +32,14 @@ class PluginRegistry {
         constructPluginMap(configFileRef);
     }
 
-
     /**
-     * private helper method to find a plugin based on the plugin name
-     *
-     * @param pluginName the name of the plugin
-     * @return the plugin object associated with the name or null if not found
-     */
-    private Plugin resolvePlugin(String pluginName) {
-        // Returns the plugin if found, null otherwise
-        return mPluginsMap.get(pluginName);
-    }
-
-
-    /**
-     * Finds the PluginEnvironment to load given a pluginName
+     * Returns metadata of the selected plugin
      *
      * @param pluginName the name of the plugin to load
      * @return the PluginEnvironment associated with the plugin name or null if not found
      */
-    PluginEnvironment loadPlugin(String pluginName) {
-        Plugin plugin = resolvePlugin(pluginName);
-
-        if (plugin != null) {
-            // Set plugin processor in the processing communicator
-            mProcessingCommunicator.setActivePluginProcessor(plugin.getPluginProcessor());
-
-            // Return the environment to the caller
-            return plugin.getPluginEnvironment();
-        } else {
-            Log.d("PluginRegistry", "Could not find the plugin with name " +
-                    pluginName + ".");
-
-            return null;
-        }
+    public Plugin loadPlugin(String pluginName) {
+        return mPluginsMap.get(pluginName);
     }
 
     /**
@@ -74,7 +47,7 @@ class PluginRegistry {
      *
      * @return List of Plugin objects with basic information
      */
-    List<BasicPlugin> getPlugins() {
+    public List<BasicPlugin> getPlugins() {
         List<BasicPlugin> basicPlugins = new ArrayList<>();
 
         // Loop over all values and extract their basic info

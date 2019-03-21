@@ -1,5 +1,6 @@
 package com.aurora.kernel;
 
+import com.aurora.auroralib.PluginObject;
 import com.aurora.internalservice.internalcache.CachedProcessedFile;
 import com.aurora.internalservice.internalcache.InternalCache;
 import com.aurora.kernel.event.CacheFileRequest;
@@ -10,13 +11,11 @@ import com.aurora.kernel.event.RemoveFromCacheRequest;
 import com.aurora.kernel.event.RemoveFromCacheResponse;
 import com.aurora.kernel.event.RetrieveFileFromCacheRequest;
 import com.aurora.kernel.event.RetrieveFileFromCacheResponse;
-import com.aurora.plugin.ProcessedText;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import io.reactivex.Observable;
@@ -56,9 +55,9 @@ public class AuroraInternalServiceCommunicatorTest {
 
         // Create cache file request and post on bus
         String fileRef = "Dummy/file/path.pdf";
-        ProcessedText text = new DummyProcessedText("Title", Arrays.asList("Hello", "There"));
+        PluginObject dummyPluginObject = new DummyPluginObject();
         String uniquePluginName = "DummyPlugin";
-        CacheFileRequest request = new CacheFileRequest(fileRef, text, uniquePluginName);
+        CacheFileRequest request = new CacheFileRequest(fileRef, dummyPluginObject, uniquePluginName);
         mBus.post(request);
 
         // Check if cache returned true
@@ -198,7 +197,7 @@ public class AuroraInternalServiceCommunicatorTest {
      */
     private static class DummyInternalCache extends InternalCache {
         @Override
-        public boolean cacheFile(String fileRef, ProcessedText text, String uniquePluginName) {
+        public boolean cacheFile(String fileRef, PluginObject text, String uniquePluginName) {
             // Just return true
             return true;
         }
@@ -242,10 +241,6 @@ public class AuroraInternalServiceCommunicatorTest {
     /**
      * Dummy implementation for testing purposes
      */
-    private class DummyProcessedText extends ProcessedText {
-
-        public DummyProcessedText(String title, List<String> paragraphs) {
-            super(title, paragraphs);
-        }
+    private class DummyPluginObject extends PluginObject {
     }
 }
