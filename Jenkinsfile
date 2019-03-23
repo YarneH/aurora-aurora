@@ -87,7 +87,18 @@ pipeline {
             }
             steps {
                 // Generate javadoc
-                sh "javadoc -d -/var/www/aurora/${env.BRANCH_NAME} -sourcepath ${WORKSPACE}/app/src/main/java -subpackages com -private"
+                script {
+                    def classPath = ""
+
+                    if (env.BRANCH_NAME == 'master' || enc.BRANCH_NAME == 'dev') {
+                        classPath = "release/compileReleaseJavaWithJavac"
+                    } else {
+                        classPath = "debug/compileDebugJavaWithJavac"
+                    }
+
+                    sh "javadoc -d -/var/www/javadoc/aurora/${env.BRANCH_NAME} -sourcepath ${WORKSPACE}/app/src/main/java -subpackages com -private \
+                    -classpath ${WORKSPACE}/app/build/intermediates/javac/${classPath}/classes"
+                }
             }
             post {
                 failure {
