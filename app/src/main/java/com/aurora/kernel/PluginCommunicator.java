@@ -1,7 +1,11 @@
 package com.aurora.kernel;
 
-import android.util.Log;
+import android.content.Context;
+import android.content.Intent;
+import android.widget.Toast;
 
+import com.aurora.aurora.R;
+import com.aurora.auroralib.Constants;
 import com.aurora.auroralib.ExtractedText;
 import com.aurora.kernel.event.ListPluginsRequest;
 import com.aurora.kernel.event.ListPluginsResponse;
@@ -33,9 +37,9 @@ public class PluginCommunicator extends Communicator {
         mOpenFileWithPluginRequestObservable = mBus.register(OpenFileWithPluginRequest.class);
 
         // When a request comes in, call appropriate function
-        mOpenFileWithPluginRequestObservable.subscribe((OpenFileWithPluginRequest openFileWithPluginRequest) ->
-                openFileWithPlugin(openFileWithPluginRequest.getExtractedText(),
-                        openFileWithPluginRequest.getPluginName())
+        mOpenFileWithPluginRequestObservable.subscribe((OpenFileWithPluginRequest request) ->
+                openFileWithPlugin(request.getExtractedText(),
+                        request.getTargetPlugin(), request.getContext())
         );
 
         // Register for requests to list available plugins
@@ -50,13 +54,24 @@ public class PluginCommunicator extends Communicator {
      * Opens a file with a given plugin
      *
      * @param extractedText the extracted text of the file to open
-     * @param pluginName    the name of the plugin to open the file with
-     *                      TODO: change to other type when Android picker is used
+     * @param targetPlugin  the plugin to open the file with
      *                      TODO: add tests for this method
+     * @param context       the android context
      */
-    private void openFileWithPlugin(ExtractedText extractedText, String pluginName) {
+    private void openFileWithPlugin(ExtractedText extractedText, Intent targetPlugin, Context context) {
         // TODO: fire intent to given plugin containing the extracted text
-        Log.d(CLASS_TAG, "Not implemented yet " + extractedText + " " + pluginName);
+
+        // Create chooser
+        Intent chooser = Intent.createChooser(targetPlugin, context.getString(R.string.select_plugin));
+
+        targetPlugin.putExtra(Constants.PLUGIN_INPUT_TEXT, extractedText);
+
+        if (targetPlugin.resolveActivity(context.getPackageManager()) != null) {
+            context.startActivity(chooser);
+        } else {
+            Toast.makeText(context, context.getString(R.string.no_plugins_available),
+                    Toast.LENGTH_LONG).show();
+        }
     }
 
     /**

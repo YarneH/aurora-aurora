@@ -25,6 +25,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.aurora.auroralib.Constants;
+import com.aurora.kernel.Kernel;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -36,6 +37,11 @@ public class MainActivity extends AppCompatActivity
     private Toast mToast = null;
     private TextView mTextViewMain = null;
     private RecyclerView mRecyclerView = null;
+
+    /**
+     * Create unique kernel instance
+     */
+    private Kernel mKernel = new Kernel();
 
     /**
      * Runs on startup of the activity, in this case on startup of the app
@@ -116,23 +122,12 @@ public class MainActivity extends AppCompatActivity
         if (requestCode == REQUEST_FILE_GET && resultCode == RESULT_OK) {
             Uri textFile = data.getData();
 
-            String stubPluginText = "Here will be the text from file " + textFile + ".\nRandom sentence.";
-
-            //Context context = MainActivity.this;
             Intent intent = new Intent(Constants.PLUGIN_ACTION);
-            intent.putExtra(Constants.PLUGIN_INPUT_TEXT, stubPluginText);
 
-            String title = "Select a plugin";
-            // Create intent to show the chooser dialog
-            Intent chooser = Intent.createChooser(intent, title);
-
-            // Verify the original intent will resolve to at least one activity
-            Context context = this;
-            if (intent.resolveActivity(context.getPackageManager()) != null) {
-                context.startActivity(chooser);
+            if (textFile != null) {
+                mKernel.getAuroraCommunicator().openFileWithPlugin(textFile.toString(), intent, this);
             } else {
-                Toast.makeText(context, "No plugins available",
-                        Toast.LENGTH_LONG).show();
+                Toast.makeText(this, "Invalid file was selected", Snackbar.LENGTH_LONG).show();
             }
 
             //Toast.makeText(this, "A file with uri \"" + textFile + "\" was selected.", Snackbar.LENGTH_LONG).show();

@@ -1,8 +1,9 @@
 package com.aurora.kernel;
 
-import android.app.Activity;
-import android.support.v4.app.Fragment;
+import android.content.Intent;
+import android.content.Context;
 
+import com.aurora.auroralib.Constants;
 import com.aurora.auroralib.ExtractedText;
 import com.aurora.kernel.event.InternalProcessorRequest;
 import com.aurora.kernel.event.InternalProcessorResponse;
@@ -45,8 +46,8 @@ public class AuroraCommunicatorTest {
 
         // Call method under test
         String fileRef = "Dummy/file/ref";
-        String pluginName = "DummyPlugin";
-        mAuroraCommunicator.openFileWithPlugin(fileRef, pluginName);
+        Intent targetPlugin = new Intent(Constants.PLUGIN_ACTION);
+        mAuroraCommunicator.openFileWithPlugin(fileRef, targetPlugin, new Context());
 
         // Assert that arguments passed are as expected
         fileRefObserver.assertSubscribed();
@@ -67,30 +68,24 @@ public class AuroraCommunicatorTest {
         Observable<OpenFileWithPluginRequest> openFileWithPluginRequestObservable =
                 mBus.register(OpenFileWithPluginRequest.class);
 
-        // Create test observers
+        // Create test observer
         TestObserver<ExtractedText> extractedTextObserver = new TestObserver<>();
-        TestObserver<String> pluginNameObserver = new TestObserver<>();
 
         // Subscribe to observable
         openFileWithPluginRequestObservable
                 .map(OpenFileWithPluginRequest::getExtractedText)
                 .subscribe(extractedTextObserver);
 
-        openFileWithPluginRequestObservable
-                .map(OpenFileWithPluginRequest::getPluginName)
-                .subscribe(pluginNameObserver);
 
         // Call the method under test
         String dummyFileRef = "dummy/path/to/file";
-        String dummyPluginName = "DummyPlugin";
-        mAuroraCommunicator.openFileWithPlugin(dummyFileRef, dummyPluginName);
+        Intent dummyPlugin = new Intent(Constants.PLUGIN_ACTION);
+        mAuroraCommunicator.openFileWithPlugin(dummyFileRef, dummyPlugin, new Context());
 
         // Assure that the correct values are contained in request event
         extractedTextObserver.assertSubscribed();
         extractedTextObserver.assertValue(dummyExtractedText);
 
-        pluginNameObserver.assertSubscribed();
-        pluginNameObserver.assertValue(dummyPluginName);
     }
 
     @Test
@@ -126,15 +121,4 @@ public class AuroraCommunicatorTest {
         observer.assertValue(basicPluginList);
     }
 
-    /**
-     * Private dummy activity class for testing purposes
-     */
-    private class DummyActivity extends Activity {
-    }
-
-    /**
-     * Private dummy fragment class for testing purposes
-     */
-    private class DummyFragment extends Fragment {
-    }
 }
