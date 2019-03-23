@@ -81,26 +81,15 @@ pipeline {
             when {
                 anyOf {
                     branch 'master';
-                    branch 'dev';
-                    branch 'javadoc-pipeline'
+                    branch 'dev'
                 }
             }
             steps {
-                script {
-                    def classPathName = ""
-
-                    if (env.BRANCH_NAME == 'master' || env.BRANCH_NAME == 'dev') {
-                        classPathName = "release/compileReleaseJavaWithJavac"
-                    } else {
-                        classPathName = "debug/compileDebugJavaWithJavac"
-                    }
-
-                    // Generate javadoc
-                    sh """
-                    javadoc -d /var/www/javadoc/aurora/${env.BRANCH_NAME} -sourcepath ${WORKSPACE}/app/src/main/java -subpackages com -private \
-                    -classpath ${WORKSPACE}/app/build/intermediates/javac/${classPathName}/classes
-                    """
-                }
+                // Generate javadoc
+                sh """
+                javadoc -d /var/www/javadoc/aurora/${env.BRANCH_NAME} -sourcepath ${WORKSPACE}/app/src/main/java -subpackages com -private \
+                -classpath ${WORKSPACE}/app/build/intermediates/javac/release/compileReleaseJavaWithJavac/classes
+                """
             }
             post {
                 failure {
