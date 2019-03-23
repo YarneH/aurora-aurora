@@ -98,8 +98,7 @@ pipeline {
                     // Generate javadoc
                     sh """
                     javadoc -d /var/www/javadoc/aurora/${env.BRANCH_NAME} -sourcepath ${WORKSPACE}/app/src/main/java -subpackages com -private \
-                    -classpath ${WORKSPACE}/app/build/intermediates/javac/${classPathName}/classes \
-                    --bootclasspath ${WORKSPACE}/app/build/intermediates/javac/${classPathName}/
+                    -classpath ${WORKSPACE}/app/build/intermediates/javac/${classPathName}/classes
                     """
                 }
             }
