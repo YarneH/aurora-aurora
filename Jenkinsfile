@@ -87,7 +87,7 @@ pipeline {
             }
             steps {
                 // Generate javadoc
-                sh "javadoc -d -/var/www/aurora/${env.BRANCH_NAME} -sourcepath ${WORKSPACE}/app -subpackages com"
+                sh "javadoc -d -/var/www/aurora/${env.BRANCH_NAME} -sourcepath ${WORKSPACE}/app/src/main/java -subpackages -private com"
             }
             post {
                 failure {
