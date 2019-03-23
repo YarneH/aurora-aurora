@@ -5,6 +5,7 @@ import android.util.Log;
 import com.aurora.internalservice.InternalService;
 import com.aurora.internalservice.InternallyProcessedFile;
 
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,7 +22,7 @@ public class InternalCache implements InternalService {
      * @return The cached and already processed file
      */
     @Override
-    public InternallyProcessedFile processFile(String fileRef) {
+    public InternallyProcessedFile processFile(InputStream file, String fileRef) {
         // TODO: implement this
         Log.d(CLASS_TAG, "Not implemented yet");
         return null;

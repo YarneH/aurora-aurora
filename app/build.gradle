@@ -25,6 +25,21 @@ android {
         sourceCompatibility = '1.8'
         targetCompatibility = '1.8'
     }
+
+    // error about duplicates if some of these are not excluded
+    packagingOptions {
+        pickFirst 'META-INF/DEPENDENCIES.txt'
+        pickFirst 'META-INF/LICENSE.txt'
+        pickFirst 'META-INF/NOTICE.txt'
+        pickFirst 'META-INF/NOTICE'
+        pickFirst 'META-INF/LICENSE'
+        pickFirst 'META-INF/DEPENDENCIES'
+        pickFirst 'META-INF/notice.txt'
+        pickFirst 'META-INF/license.txt'
+        pickFirst 'META-INF/dependencies.txt'
+        pickFirst 'META-INF/LGPL2.1'
+    }
+
 }
 
 apply plugin: 'jacoco-android'
@@ -38,7 +53,7 @@ tasks.withType(Test) {
 }
 
 dependencies {
-    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
     implementation 'com.android.support:appcompat-v7:28.0.0'
     implementation 'com.android.support.constraint:constraint-layout:1.1.3'
     /Added for the DrawerLayout/
@@ -48,11 +63,19 @@ dependencies {
     testImplementation 'org.robolectric:robolectric:4.2'
     androidTestImplementation 'com.android.support.test:runner:1.0.2'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
-
     // RxJava
     implementation 'io.reactivex.rxjava2:rxjava:2.2.0'
-
     // auroralib
     implementation project(':auroralib')
+
+
+    // Apache POI for word files
+    // newer versions of xmlsec are compiled with JDK 8 which does not work in Android Studio 2.x!
+    implementation ('org.apache.santuario:xmlsec:2.0.0') {
+        // break compilation because it includes stax-api which is under forbidden package 'javax.xml.stream'
+        exclude group: 'org.codehaus.woodstox'
+    }
+
+    implementation files('libs/poishadow-all.jar')
 
 }

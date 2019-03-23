@@ -1,5 +1,7 @@
 package com.aurora.kernel;
 
+import java.io.InputStream;
+
 /**
  * Wrapper class that wraps all communicators and instantiates the unique event bus
  */
@@ -21,7 +23,7 @@ public final class Kernel {
      * Starts and creates all communicators, keeping references
      * TODO Define test to check if all objects are unique and not null
      */
-    private Kernel() {
+    public Kernel() {
         this.mBus = new Bus();
 
         this.mAuroraCommunicator = new AuroraCommunicator(mBus);
@@ -46,6 +48,11 @@ public final class Kernel {
 
     public Bus getBus() {
         return mBus;
+    }
+
+    // TODO remove this temporary hacky function
+    public void processFileHack(InputStream file, String fileRef) {
+        this.mPluginInternalServiceCommunicator.processFile(file, fileRef);
     }
 
 
