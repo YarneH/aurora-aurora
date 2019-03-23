@@ -81,7 +81,8 @@ pipeline {
             when {
                 anyOf {
                     branch 'master';
-                    branch 'dev'
+                    branch 'dev';
+                    branch 'javadoc-pipeline'
                 }
             }
             steps {
