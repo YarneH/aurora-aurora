@@ -89,7 +89,7 @@ pipeline {
                 script {
                     def classPathName = ""
 
-                    if (env.BRANCH_NAME == 'master' || enc.BRANCH_NAME == 'dev') {
+                    if (env.BRANCH_NAME == 'master' || env.BRANCH_NAME == 'dev') {
                         classPathName = "release/compileReleaseJavaWithJavac"
                     } else {
                         classPathName = "debug/compileDebugJavaWithJavac"
