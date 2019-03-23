@@ -35,7 +35,7 @@ public class PluginCommunicatorTest {
     private static ProcessingCommunicator mProcessingCommunicator;
     private static PluginRegistry mPluginRegistry;
     private static PluginCommunicator mPluginCommunicator;
-    private static final String PLUGINS_CFG = "plugins.cfg";
+    private static final String PLUGINS_CFG = "testConfigFile.json";
     private static final String PLUGIN_NAME = "DummyPlugin";
     private static final String PLUGIN_NOT_IN_REGISTRY = "You have found the candy, congratulations!";
     private static final String FILE_PATH = "/path/to/file";
@@ -63,7 +63,8 @@ public class PluginCommunicatorTest {
         mPluginRegistry.removeAllPlugins();
 
         // Create name and description
-        String pluginName = "DummyPlugin";
+        String uniqueName = PLUGIN_NAME;
+        String pluginName = PLUGIN_NAME;
         String description = "This is a dummy description.";
         String version = "0.1";
         // Create environment and processor
@@ -71,11 +72,11 @@ public class PluginCommunicatorTest {
         PluginProcessor processor = new DummyPluginProcessor(mProcessingCommunicator);
 
         // Create plugin using environment and processor
-        mPlugin = new DummyPlugin(pluginName, null, description, version,
+        mPlugin = new DummyPlugin(uniqueName, pluginName, null, description, version,
                 environment, processor);
 
         // Register plugin in registry
-        mPluginRegistry.registerPlugin(PLUGIN_NAME, mPlugin);
+        mPluginRegistry.registerPlugin(mPlugin);
     }
 
     @Test
@@ -243,9 +244,9 @@ public class PluginCommunicatorTest {
      */
     private class DummyPlugin extends Plugin {
 
-        public DummyPlugin(String name, File pluginLogo, String description, String version,
+        public DummyPlugin(String uniqueName, String name, File pluginLogo, String description, String version,
                            PluginEnvironment pluginEnvironment, PluginProcessor pluginProcessor) {
-            super(name, pluginLogo, description, version, pluginEnvironment, pluginProcessor);
+            super(uniqueName, name, pluginLogo, description, version, pluginEnvironment, pluginProcessor);
         }
     }
 

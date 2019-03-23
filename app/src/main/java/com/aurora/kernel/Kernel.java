@@ -1,7 +1,17 @@
 package com.aurora.kernel;
 
+import android.util.Log;
+
 import com.aurora.internalservice.internalcache.InternalCache;
 import com.aurora.internalservice.internalprocessor.InternalTextProcessing;
+import com.aurora.plugin.Plugin;
+import com.google.gson.Gson;
+
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.Writer;
 
 /**
  * Wrapper class that wraps all communicators and instantiates the unique event bus
@@ -18,7 +28,7 @@ public final class Kernel {
     private PluginRegistry mPluginRegistry;
 
     // TODO: change this if necessary
-    private static final String PLUGINS_CFG = "plugins.cfg";
+    private static final String PLUGINS_CFG = "plugin-config.json";
 
     /**
      * Starts and creates all communicators, keeping references
@@ -39,6 +49,9 @@ public final class Kernel {
         // Create cache
         InternalCache internalCache = new InternalCache();
         this.mAuroraInternalServiceCommunicator = new AuroraInternalServiceCommunicator(mBus, internalCache);
+
+        // Initialize plugin config
+        initializePluginConfig();
     }
 
 
@@ -67,4 +80,24 @@ public final class Kernel {
         return mAuroraInternalServiceCommunicator;
     }
 
+    /**
+     * Private helper method that checks if the plugin-config file already exists, and creates one when necessary
+     */
+    private void initializePluginConfig() {
+        File file = new File(PLUGINS_CFG);
+
+        // If the file does not exist, create one and write an empty JSON array to it
+        if (!file.exists()) {
+            try (Writer writer = new BufferedWriter(new FileWriter(file))) {
+                Gson gson = new Gson();
+                String jsonPlugin = gson.toJson(new Plugin[]{}, Plugin[].class);
+
+                writer.write(jsonPlugin);
+                writer.flush();
+
+            } catch (IOException e) {
+                Log.e("Kernel", "Something went wrong trying to create the file " + PLUGINS_CFG + ".");
+            }
+        }
+    }
 }

@@ -60,6 +60,7 @@ public class AuroraCommunicator extends Communicator {
 
     /**
      * Gets a list of all the available plugins
+     *
      * @return a list of basic information on every plugin wrapped in an observable
      */
     public Observable<List<BasicPlugin>> getListOfPlugins() {
