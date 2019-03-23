@@ -1,11 +1,12 @@
 package com.aurora.auroralib;
 
+import java.io.Serializable;
 import java.util.List;
 
 /**
  * Class to represent extracted text from an internal processor
  */
-public class ExtractedText implements InternallyProcessedFile {
+public class ExtractedText implements InternallyProcessedFile, Serializable {
     private String mTitle;
 
     private List<String> mParagraphs;
