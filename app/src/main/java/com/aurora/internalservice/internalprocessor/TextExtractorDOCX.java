@@ -3,6 +3,8 @@ package com.aurora.internalservice.internalprocessor;
 import android.util.Log;
 
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.apache.poi.xwpf.usermodel.XWPFParagraph;
@@ -17,23 +19,33 @@ public class TextExtractorDOCX implements TextExtractor {
      */
     @Override
     public ExtractedText extract(InputStream file, String fileRef) {
+        ExtractedText extractedText = null;
 
         try {
             try {
                 try (XWPFDocument doc = new XWPFDocument(file)) {
-                    for (XWPFParagraph paragraph : doc.getParagraphs()) {
+                    List<String> paragraphs = new ArrayList<>();
 
-                        Log.d("JEROEN", paragraph.getText());
+                    // TODO Write actual logic to extract the title and parse the file
+                    for (XWPFParagraph paragraph : doc.getParagraphs()) {
+                        paragraphs.add(paragraph.getText());
+
+                        // TODO Remove unnecessary Log
+                        Log.d("DOCX", paragraph.getText());
                     }
+
+                    // TODO Implement extracting images from .docx
+
+                    extractedText = new ExtractedText("", paragraphs);
                 }
             } finally {
                 file.close();
             }
         } catch (Exception e) {
-            // TODO Do something meaningfull
+            // TODO Do something meaningful
             e.printStackTrace();
         }
 
-        return null;
+        return extractedText;
     }
 }

@@ -102,6 +102,7 @@ public class PluginCommunicator extends Communicator {
         /*TODO: Unclear where InternalProcessing will be called from in the reworked Kernel.
         * Put it here because the plugin doesn't need to be known.
         * */
+        // TODO This will return an event, handle this
         this.mBus.post(new InternalProcessorRequest(file, fileRef));
 
         Fragment pluginFragment;
