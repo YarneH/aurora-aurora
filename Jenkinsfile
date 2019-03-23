@@ -87,7 +87,7 @@ pipeline {
             }
             steps {
                 // Generate javadoc
-                sh "javadoc -d /var/www/${env.BRANCH_NAME} ${WORKSPACE}/**.java"
+                sh "javadoc -d -/var/www/aurora/${env.BRANCH_NAME} -sourcepath ${WORKSPACE}/app -subpackages com"
             }
             post {
                 failure {
@@ -97,7 +97,7 @@ pipeline {
                     slack_success_doc()
                 }
             }
-        }
+        } // Javadoc stage
     } // Stages
 } // Pipeline
 
@@ -122,6 +122,13 @@ def slack_error_test() {
  */
 def slack_error_sonar() {
     slack_report(false, ':x: Sonar failed', null, 'SonarQube analysis')
+}
+
+/**
+ * Gets called when javadoc fails
+ */
+def slack_error_doc() {
+    slack_report(false, ':x: Javadoc failed', null, 'Javadoc')
 }
 
 
