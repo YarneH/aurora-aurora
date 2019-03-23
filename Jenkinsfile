@@ -88,16 +88,16 @@ pipeline {
             steps {
                 // Generate javadoc
                 script {
-                    def classPath = ""
+                    def classPathName = ""
 
                     if (env.BRANCH_NAME == 'master' || enc.BRANCH_NAME == 'dev') {
-                        classPath = "release/compileReleaseJavaWithJavac"
+                        classPathName = "release/compileReleaseJavaWithJavac"
                     } else {
-                        classPath = "debug/compileDebugJavaWithJavac"
+                        classPathName = "debug/compileDebugJavaWithJavac"
                     }
 
-                    sh "javadoc -d -/var/www/javadoc/aurora/${env.BRANCH_NAME} -sourcepath ${WORKSPACE}/app/src/main/java -subpackages com -private \
-                    -classpath ${WORKSPACE}/app/build/intermediates/javac/${classPath}/classes"
+                    sh """javadoc -d -/var/www/javadoc/aurora/${env.BRANCH_NAME} -sourcepath ${WORKSPACE}/app/src/main/java -subpackages com -private
+                    -classpath ${WORKSPACE}/app/build/intermediates/javac/${classPathName}/classes"""
                 }
             }
             post {
