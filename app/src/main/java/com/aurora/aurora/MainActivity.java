@@ -54,7 +54,6 @@ public class MainActivity extends AppCompatActivity
         setContentView(R.layout.activity_main);
 
         /* Set system properties for DOCX */
-        //Log.d("JEROEN", System.getProperty("javax.xml.stream.XMLInputFactory") );
         System.setProperty("org.apache.poi.javax.xml.stream.XMLInputFactory", "com.fasterxml.aalto.stax.InputFactoryImpl");
         System.setProperty("org.apache.poi.javax.xml.stream.XMLOutputFactory", "com.fasterxml.aalto.stax.OutputFactoryImpl");
         System.setProperty("org.apache.poi.javax.xml.stream.XMLEventFactory", "com.fasterxml.aalto.stax.EventFactoryImpl");

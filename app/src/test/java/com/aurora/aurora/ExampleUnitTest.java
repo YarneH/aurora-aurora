@@ -1,6 +1,7 @@
 package com.aurora.aurora;
 
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
@@ -16,6 +17,7 @@ public class ExampleUnitTest {
     /**
      * This test should check if the result of an addition is correct
      */
+    @Ignore
     @Test
     public void addition_should_be_correct() {
         assertEquals(4, 2 + 2);
