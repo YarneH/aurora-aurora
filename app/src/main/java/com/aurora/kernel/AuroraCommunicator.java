@@ -75,7 +75,8 @@ public class AuroraCommunicator extends Communicator {
      */
     private void sendOpenFileRequest(ExtractedText extractedText, Intent targetPlugin, Context context) {
         // Create request and post it on bus
-        OpenFileWithPluginRequest openFileWithPluginRequest = new OpenFileWithPluginRequest(extractedText, targetPlugin, context);
+        OpenFileWithPluginRequest openFileWithPluginRequest =
+                new OpenFileWithPluginRequest(extractedText, targetPlugin, context);
         mBus.post(openFileWithPluginRequest);
     }
 
