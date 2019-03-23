@@ -1,10 +1,10 @@
 package com.aurora.kernel;
 
-import android.util.Log;
-
+import com.aurora.internalservice.internalprocessor.ExtractedText;
 import com.aurora.internalservice.internalprocessor.FileTypeNotSupportedException;
 import com.aurora.internalservice.internalprocessor.InternalTextProcessor;
 import com.aurora.kernel.event.InternalProcessorRequest;
+import com.aurora.kernel.event.InternalProcessorResponse;
 
 import java.io.InputStream;
 
@@ -15,28 +15,45 @@ import io.reactivex.Observable;
  */
 public class PluginInternalServiceCommunicator extends Communicator {
 
+    /**
+     * internal text processor
+     */
+    private InternalTextProcessor mProcessor;
+
+    /**
+     * Observable keeping track of internal processor requests
+     */
     private Observable<InternalProcessorRequest> internalProcessorEventObservable;
-    private InternalTextProcessor internalTextProcessor;
 
-    public PluginInternalServiceCommunicator(Bus mBus) {
+    public PluginInternalServiceCommunicator(Bus mBus, InternalTextProcessor processor) {
         super(mBus);
-
-        internalTextProcessor = new InternalTextProcessor();
+        mProcessor = processor;
 
         internalProcessorEventObservable = mBus.register(InternalProcessorRequest.class);
         internalProcessorEventObservable.subscribe((InternalProcessorRequest internalProcessorRequest) ->
-                processFileWithInternalProcessor(internalProcessorRequest.getFileRef()));
+                processFileWithInternalProcessor(internalProcessorRequest.getFile(), internalProcessorRequest.getFileRef()));
     }
 
-    private void processFileWithInternalProcessor(String fileRef) {
-        //TODO Call the internal processor
-        Log.d("InternalServiceComm", "Not implemented yet! " + fileRef);
+    private void processFileWithInternalProcessor(InputStream file, String fileRef) {
+        // Call internal processor
+        ExtractedText extractedText = null;
+        try {
+            extractedText = mProcessor.processFile(file, fileRef);
+        } catch (FileTypeNotSupportedException e) {
+            e.printStackTrace();
+        }
+
+        // Create response
+        InternalProcessorResponse response = new InternalProcessorResponse(extractedText);
+
+        // Post response
+        mBus.post(response);
     }
 
     // TODO remove this temporary test method, should be passed through the Kernel instead of this
     public void processFile(InputStream file, String fileRef) {
         try {
-            internalTextProcessor.processFile(file, fileRef);
+            mProcessor.processFile(file, fileRef);
         } catch (FileTypeNotSupportedException e) {
             e.printStackTrace();
         }

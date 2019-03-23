@@ -4,6 +4,8 @@ import com.aurora.internalservice.internalprocessor.ExtractedText;
 import com.aurora.kernel.ProcessingCommunicator;
 import com.aurora.plugin.ProcessedText;
 
+import java.io.InputStream;
+
 import io.reactivex.Observable;
 
 /**
@@ -34,9 +36,9 @@ public abstract class PluginProcessor {
      *
      * @param fileRef a reference to where the file can be found
      */
-    protected final void processFileWithAuroraProcessor(String fileRef) {
+    protected final void processFileWithAuroraProcessor(InputStream file, String fileRef) {
         Observable<ExtractedText> extractedTextObservable =
-                mProcessingCommunicator.processFileWithAuroraProcessor(fileRef);
+                mProcessingCommunicator.processFileWithAuroraProcessor(file, fileRef);
 
 
         extractedTextObservable.subscribe(this::resultProcessFileWithAuroraProcessor);

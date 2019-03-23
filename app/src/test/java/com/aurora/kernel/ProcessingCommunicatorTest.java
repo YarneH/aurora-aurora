@@ -35,7 +35,7 @@ public class ProcessingCommunicatorTest {
 
         // Call method under test
         Observable<ExtractedText>
-                processedTextObservable = mProcessingCommunicator.processFileWithAuroraProcessor(fileRef);
+                processedTextObservable = mProcessingCommunicator.processFileWithAuroraProcessor(null, fileRef);
 
         // Make dummy processed text
         ExtractedText text = new ExtractedText(title, paragraphs);
