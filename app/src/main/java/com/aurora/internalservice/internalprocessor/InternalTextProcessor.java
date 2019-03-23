@@ -29,11 +29,7 @@ public class InternalTextProcessor implements InternalService {
         String fileType = getMimeType(fileRef);
         TextExtractor extractor = fileFormatExtractorMap.get(fileType);
         if (extractor != null) {
-            // TODO make this generic
-            extractedText = extractor.extract(fileRef);
-            if(extractor instanceof TextExtractorDOCX) {
-                ((TextExtractorDOCX) extractor).extract(file,fileRef);
-            }
+            extractedText = extractor.extract(file, fileRef);
         } else {
             Log.d("InternalTextProcessor", "File type not supported");
             throw new FileTypeNotSupportedException("");
