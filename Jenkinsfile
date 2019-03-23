@@ -71,15 +71,33 @@ pipeline {
                 failure {
                     slack_error_sonar()
                 }
+            success {
+                slack_success()
+            }
             }
         } // SonarQube stage
-    } // Stages
 
-    post {
-        success {
-            slack_success()
+        stage('Javadoc') {
+            when {
+                anyOf {
+                    branch 'master';
+                    branch 'dev'
+                }
+            }
+            steps {
+                // Generate javadoc
+                sh "javadoc -d /var/www/${env.BRANCH_NAME} ${WORKSPACE}/**.java"
+            }
+            post {
+                failure {
+                    slack_error_doc()
+                }
+                success {
+                    slack_success_doc()
+                }
+            }
         }
-    }
+    } // Stages
 } // Pipeline
 
 
@@ -114,6 +132,12 @@ def slack_success() {
 }
 
 
+/**
+ * Gets called when the javadoc is successfully generated
+ */
+def slack_success_doc() {
+    slack_report(true, ':heavy_check_mark: Javadoc generated', null, '')
+}
 
 /**
  * Find name of author
