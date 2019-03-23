@@ -43,7 +43,8 @@ public class AuroraCommunicator extends Communicator {
         // The subscribe will only be triggered after the file was processed internally
         internalProcessorResponse
                 .map(InternalProcessorResponse::getExtractedText)
-                .subscribe((ExtractedText extractedText) -> sendOpenFileRequest(extractedText, targetPlugin, context));
+                .subscribe((ExtractedText extractedText) ->
+                        sendOpenFileRequest(extractedText, targetPlugin, context));
 
         // First create internal processing
         InternalProcessorRequest internalProcessorRequest = new InternalProcessorRequest(fileRef);
