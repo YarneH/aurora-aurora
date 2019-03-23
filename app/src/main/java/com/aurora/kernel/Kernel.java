@@ -3,8 +3,6 @@ package com.aurora.kernel;
 import com.aurora.internalservice.internalcache.InternalCache;
 import com.aurora.internalservice.internalprocessor.InternalTextProcessor;
 
-import java.io.InputStream;
-
 /**
  * Wrapper class that wraps all communicators and instantiates the unique event bus
  */
@@ -68,11 +66,5 @@ public final class Kernel {
     public AuroraInternalServiceCommunicator getAuroraInternalServiceCommunicator() {
         return mAuroraInternalServiceCommunicator;
     }
-
-    // TODO remove this temporary hacky function
-    public void processFileHack(InputStream file, String fileRef) {
-        this.mPluginInternalServiceCommunicator.processFile(file, fileRef);
-    }
-
 
 }

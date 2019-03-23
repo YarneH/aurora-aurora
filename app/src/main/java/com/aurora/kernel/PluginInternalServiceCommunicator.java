@@ -50,12 +50,4 @@ public class PluginInternalServiceCommunicator extends Communicator {
         mBus.post(response);
     }
 
-    // TODO remove this temporary test method, should be passed through the Kernel instead of this
-    public void processFile(InputStream file, String fileRef) {
-        try {
-            mProcessor.processFile(file, fileRef);
-        } catch (FileTypeNotSupportedException e) {
-            e.printStackTrace();
-        }
-    }
 }
