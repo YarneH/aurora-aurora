@@ -43,7 +43,7 @@ public class TextExtractorDOCX implements TextExtractor {
             }
         } catch (Exception e) {
             // TODO Do something meaningful
-            e.printStackTrace();
+            Log.d("EXTRACT_DOCX", "extract in TextExtractorDOCX failed to parse: " + fileRef);
         }
 
         return extractedText;
