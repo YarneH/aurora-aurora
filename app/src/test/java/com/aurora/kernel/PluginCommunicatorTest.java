@@ -166,7 +166,7 @@ public class PluginCommunicatorTest {
         observable.map(OpenFileWithPluginResponse::getPluginFragment).subscribe(observer);
 
         // Post request event
-        mBus.post(new OpenFileWithPluginRequest(PLUGIN_NAME, FILE_PATH));
+        mBus.post(new OpenFileWithPluginRequest(PLUGIN_NAME, null, FILE_PATH));
 
         // Assert values
         observer.assertSubscribed();
@@ -188,7 +188,7 @@ public class PluginCommunicatorTest {
                 .subscribe(observer);
 
         // Post request event
-        mBus.post(new OpenFileWithPluginRequest(PLUGIN_NOT_IN_REGISTRY, FILE_PATH));
+        mBus.post(new OpenFileWithPluginRequest(PLUGIN_NOT_IN_REGISTRY, null, FILE_PATH));
 
         // Assert values
         observer.assertSubscribed();

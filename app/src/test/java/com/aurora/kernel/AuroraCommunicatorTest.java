@@ -39,7 +39,7 @@ public class AuroraCommunicatorTest {
         TestObserver<Fragment> subscriber = new TestObserver<>();
 
         // Call the method
-        Observable<Fragment> fragmentObservable = mAuroraCommunicator.openFileWithPlugin(dummyPluginName, fileRef);
+        Observable<Fragment> fragmentObservable = mAuroraCommunicator.openFileWithPlugin(dummyPluginName, null, fileRef);
 
         // Make dummy fragment and response
         Fragment dummyFragment = new DummyFragment();
