@@ -12,6 +12,7 @@ public class InternalProcessorRequest extends Event {
     //TODO: if needed add mechanism to add parameters to internal processor request
 
     public InternalProcessorRequest(InputStream file, String fileRef) {
+        this.mFile = file;
         this.mFileRef = fileRef;
     }
 

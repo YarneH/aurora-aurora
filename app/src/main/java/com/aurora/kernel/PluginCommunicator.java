@@ -6,6 +6,7 @@ import android.support.v4.app.Fragment;
 import com.aurora.aurora.NotFoundActivity;
 import com.aurora.aurora.NotFoundFragment;
 import com.aurora.externalservice.PluginEnvironment;
+import com.aurora.kernel.event.InternalProcessorRequest;
 import com.aurora.kernel.event.ListPluginsResponse;
 import com.aurora.kernel.event.ListPluginsRequest;
 import com.aurora.kernel.event.OpenFileWithPluginRequest;
@@ -18,6 +19,7 @@ import com.aurora.plugin.BasicPlugin;
 import com.aurora.plugin.ProcessedText;
 import com.aurora.processingservice.PluginProcessor;
 
+import java.io.InputStream;
 import java.util.List;
 
 import io.reactivex.Observable;
@@ -43,7 +45,7 @@ public class PluginCommunicator extends Communicator {
 
         // When a request comes in, call appropriate function
         mOpenFileWithPluginRequestObservable.subscribe((OpenFileWithPluginRequest openFileWithPluginRequest) ->
-                openFileWithPlugin(openFileWithPluginRequest.getPluginName(), openFileWithPluginRequest.getFileRef())
+                openFileWithPlugin(openFileWithPluginRequest.getPluginName(), openFileWithPluginRequest.getFile() ,openFileWithPluginRequest.getFileRef())
         );
 
         // Register for requests to show settings
@@ -94,8 +96,13 @@ public class PluginCommunicator extends Communicator {
      * @param pluginName the name of the plugin to get the settings for
      * @param fileRef    a reference to the file to process
      */
-    private void openFileWithPlugin(String pluginName, String fileRef) {
+    private void openFileWithPlugin(String pluginName, InputStream file, String fileRef) {
         PluginEnvironment plugin =  mPluginRegistry.loadPlugin(pluginName);
+
+        /*TODO: Unclear where InternalProcessing will be called from in the reworked Kernel.
+        * Put it here because the plugin doesn't need to be known.
+        * */
+        this.mBus.post(new InternalProcessorRequest(file, fileRef));
 
         Fragment pluginFragment;
 

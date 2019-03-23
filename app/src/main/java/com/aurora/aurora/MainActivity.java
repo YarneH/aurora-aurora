@@ -96,11 +96,11 @@ public class MainActivity extends AppCompatActivity
 
         /* Setup Kernel */
         kernel = new Kernel();
-        //auroraCommunicator = kernel.getAuroraCommunicator();
+        auroraCommunicator = kernel.getAuroraCommunicator();
 
         // TODO Remove this test code
         InputStream docFile = getResources().openRawResource(R.raw.apple_crisp);
-        kernel.processFileHack(docFile, "apple_crisp.docx");
+        auroraCommunicator.openFileWithPlugin("", docFile, "apple_crisp.docx");
 
     }
 
