@@ -40,8 +40,8 @@ public class MainActivity extends AppCompatActivity
     private TextView mTextViewMain = null;
     private RecyclerView mRecyclerView = null;
 
-    private Kernel kernel;
-    private AuroraCommunicator auroraCommunicator;
+    private Kernel kernel = null;
+    private AuroraCommunicator auroraCommunicator = null;
 
     /**
      * Runs on startup of the activity, in this case on startup of the app
@@ -54,9 +54,12 @@ public class MainActivity extends AppCompatActivity
         setContentView(R.layout.activity_main);
 
         /* Set system properties for DOCX */
-        System.setProperty("org.apache.poi.javax.xml.stream.XMLInputFactory", "com.fasterxml.aalto.stax.InputFactoryImpl");
-        System.setProperty("org.apache.poi.javax.xml.stream.XMLOutputFactory", "com.fasterxml.aalto.stax.OutputFactoryImpl");
-        System.setProperty("org.apache.poi.javax.xml.stream.XMLEventFactory", "com.fasterxml.aalto.stax.EventFactoryImpl");
+        System.setProperty("org.apache.poi.javax.xml.stream.XMLInputFactory",
+                "com.fasterxml.aalto.stax.InputFactoryImpl");
+        System.setProperty("org.apache.poi.javax.xml.stream.XMLOutputFactory",
+                "com.fasterxml.aalto.stax.OutputFactoryImpl");
+        System.setProperty("org.apache.poi.javax.xml.stream.XMLEventFactory",
+                "com.fasterxml.aalto.stax.EventFactoryImpl");
 
         /* Add toolbar when activity is created */
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);

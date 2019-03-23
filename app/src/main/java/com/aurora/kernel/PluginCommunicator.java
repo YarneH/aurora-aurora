@@ -45,7 +45,8 @@ public class PluginCommunicator extends Communicator {
 
         // When a request comes in, call appropriate function
         mOpenFileWithPluginRequestObservable.subscribe((OpenFileWithPluginRequest openFileWithPluginRequest) ->
-                openFileWithPlugin(openFileWithPluginRequest.getPluginName(), openFileWithPluginRequest.getFile() ,openFileWithPluginRequest.getFileRef())
+                openFileWithPlugin(openFileWithPluginRequest.getPluginName(),
+                        openFileWithPluginRequest.getFile() ,openFileWithPluginRequest.getFileRef())
         );
 
         // Register for requests to show settings
