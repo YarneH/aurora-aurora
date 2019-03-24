@@ -25,7 +25,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.aurora.auroralib.Constants;
+import com.aurora.kernel.AuroraCommunicator;
 import com.aurora.kernel.Kernel;
+
+import java.io.InputStream;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -42,6 +45,7 @@ public class MainActivity extends AppCompatActivity
      * Create unique kernel instance
      */
     private Kernel mKernel = new Kernel();
+    private AuroraCommunicator mAuroraCommunicator = mKernel.getAuroraCommunicator();
 
     /**
      * Runs on startup of the activity, in this case on startup of the app
@@ -52,6 +56,14 @@ public class MainActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        /* Set system properties for DOCX */
+        System.setProperty("org.apache.poi.javax.xml.stream.XMLInputFactory",
+                "com.fasterxml.aalto.stax.InputFactoryImpl");
+        System.setProperty("org.apache.poi.javax.xml.stream.XMLOutputFactory",
+                "com.fasterxml.aalto.stax.OutputFactoryImpl");
+        System.setProperty("org.apache.poi.javax.xml.stream.XMLEventFactory",
+                "com.fasterxml.aalto.stax.EventFactoryImpl");
 
         /* Add toolbar when activity is created */
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -87,6 +99,11 @@ public class MainActivity extends AppCompatActivity
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         CardFileAdapter adapter = new CardFileAdapter();
         mRecyclerView.setAdapter(adapter);
+
+        // TODO Remove this test code
+        InputStream docFile = getResources().openRawResource(R.raw.apple_crisp);
+        mAuroraCommunicator.openFileWithPlugin("apple_crisp.docx", docFile, "Souschef", this);
+
     }
 
     /**
@@ -125,7 +142,7 @@ public class MainActivity extends AppCompatActivity
             Intent intent = new Intent(Constants.PLUGIN_ACTION);
 
             if (textFile != null) {
-                mKernel.getAuroraCommunicator().openFileWithPlugin(textFile.toString(), intent, this);
+                mAuroraCommunicator.openFileWithPlugin(textFile.toString(), intent, this);
             } else {
                 Toast.makeText(this, "Invalid file was selected", Snackbar.LENGTH_LONG).show();
             }

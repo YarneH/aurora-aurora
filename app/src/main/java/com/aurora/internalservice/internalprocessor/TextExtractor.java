@@ -1,6 +1,8 @@
 package com.aurora.internalservice.internalprocessor;
 
 
+import java.io.InputStream;
+
 import com.aurora.auroralib.ExtractedText;
 
 /**
@@ -12,5 +14,5 @@ public interface TextExtractor {
      * @param fileRef a reference to where the file can be found
      * @return the extracted text, split in parts
      */
-    ExtractedText extract(String fileRef);
+    ExtractedText extract(InputStream file, String fileRef);
 }

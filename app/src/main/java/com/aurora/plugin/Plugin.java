@@ -27,4 +27,5 @@ public abstract class Plugin {
     public BasicPlugin getBasicPluginInfo() {
         return new BasicPlugin(mName, mPluginLogo, mDescription, mVersion);
     }
+
 }

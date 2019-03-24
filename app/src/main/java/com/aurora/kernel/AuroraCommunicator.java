@@ -11,6 +11,7 @@ import com.aurora.kernel.event.ListPluginsResponse;
 import com.aurora.kernel.event.OpenFileWithPluginRequest;
 import com.aurora.plugin.BasicPlugin;
 
+import java.io.InputStream;
 import java.util.List;
 
 import io.reactivex.Observable;
@@ -34,7 +35,7 @@ public class AuroraCommunicator extends Communicator {
      * @param targetPlugin the plugin to open the file with
      * @param context      the android context
      */
-    public void openFileWithPlugin(String fileRef, Intent targetPlugin, Context context) {
+    public void openFileWithPlugin(String fileRef, InputStream file, Intent targetPlugin, Context context) {
         // Create observable to listen to
         Observable<InternalProcessorResponse> internalProcessorResponse =
                 mBus.register(InternalProcessorResponse.class);
@@ -47,7 +48,7 @@ public class AuroraCommunicator extends Communicator {
                         sendOpenFileRequest(extractedText, targetPlugin, context));
 
         // First create internal processing
-        InternalProcessorRequest internalProcessorRequest = new InternalProcessorRequest(fileRef);
+        InternalProcessorRequest internalProcessorRequest = new InternalProcessorRequest(file, fileRef);
 
         // Post request on the bus
         mBus.post(internalProcessorRequest);

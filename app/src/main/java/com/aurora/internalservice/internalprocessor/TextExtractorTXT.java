@@ -2,6 +2,8 @@ package com.aurora.internalservice.internalprocessor;
 
 import com.aurora.auroralib.ExtractedText;
 
+import java.io.InputStream;
+
 public class TextExtractorTXT implements TextExtractor {
 
     /**
@@ -10,7 +12,7 @@ public class TextExtractorTXT implements TextExtractor {
      * @return an ExtractedText object without title and one line per paragraph.
      */
     @Override
-    public ExtractedText extract(String fileRef) {
+    public ExtractedText extract(InputStream file, String fileRef) {
         return new ExtractedText(fileRef, null);
     }
 }

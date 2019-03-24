@@ -85,7 +85,6 @@ public class AuroraCommunicatorTest {
         // Assure that the correct values are contained in request event
         extractedTextObserver.assertSubscribed();
         extractedTextObserver.assertValue(dummyExtractedText);
-
     }
 
     @Test

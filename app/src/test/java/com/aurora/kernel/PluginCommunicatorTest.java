@@ -21,7 +21,7 @@ public class PluginCommunicatorTest {
     private static ProcessingCommunicator mProcessingCommunicator;
     private static PluginRegistry mPluginRegistry;
     private static PluginCommunicator mPluginCommunicator;
-    private static final String PLUGINS_CFG = "plugins.cfg";
+    private static final String PLUGINS_CFG = "testConfigFile.json";
     private static final String PLUGIN_NAME = "DummyPlugin";
     private static final String PLUGIN_NOT_IN_REGISTRY = "You have found the candy, congratulations!";
     private static final String FILE_PATH = "/path/to/file";
@@ -49,7 +49,8 @@ public class PluginCommunicatorTest {
         mPluginRegistry.removeAllPlugins();
 
         // Create name and description
-        String pluginName = "DummyPlugin";
+        String uniqueName = PLUGIN_NAME;
+        String pluginName = PLUGIN_NAME;
         String description = "This is a dummy description.";
         String version = "0.1";
 
