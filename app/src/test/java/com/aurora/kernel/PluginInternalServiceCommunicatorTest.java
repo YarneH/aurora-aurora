@@ -2,13 +2,14 @@ package com.aurora.kernel;
 
 import com.aurora.internalservice.internalprocessor.ExtractedText;
 import com.aurora.internalservice.internalprocessor.FileTypeNotSupportedException;
-import com.aurora.internalservice.internalprocessor.InternalTextProcessing;
+import com.aurora.internalservice.internalprocessor.InternalTextProcessor;
 import com.aurora.kernel.event.InternalProcessorRequest;
 import com.aurora.kernel.event.InternalProcessorResponse;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import java.io.InputStream;
 import java.util.Arrays;
 import java.util.List;
 
@@ -18,7 +19,7 @@ import io.reactivex.observers.TestObserver;
 public class PluginInternalServiceCommunicatorTest {
 
     private static Bus mBus;
-    private static InternalTextProcessing mProcessing;
+    private static InternalTextProcessor mProcessor;
     private static PluginInternalServiceCommunicator mCommunicator;
 
     private static String mTitle = "Dummy Title";
@@ -31,10 +32,10 @@ public class PluginInternalServiceCommunicatorTest {
         mBus = new Bus();
 
         // Initialize processor
-        mProcessing = new DummyInternalTextProcessing();
+        mProcessor = new DummyInternalTextProcessing();
 
         // Initialize communicator
-        mCommunicator = new PluginInternalServiceCommunicator(mBus, mProcessing);
+        mCommunicator = new PluginInternalServiceCommunicator(mBus, mProcessor);
 
         // Initialize extracted text with dummy contents
         mExtractedText = new ExtractedText(mTitle, mParagraphs);
@@ -55,7 +56,7 @@ public class PluginInternalServiceCommunicatorTest {
         observable.map(InternalProcessorResponse::getExtractedText).subscribe(testObserver);
 
         // Create request to process file and put on bus
-        InternalProcessorRequest request = new InternalProcessorRequest(ref);
+        InternalProcessorRequest request = new InternalProcessorRequest(null ,ref);
         mBus.post(request);
 
         // Assert that dummy extracted text was received
@@ -67,7 +68,7 @@ public class PluginInternalServiceCommunicatorTest {
      * Private dummy processing class for testing purposes.
      * Acts as a stub for a real internal text processor.
      */
-    private static class DummyInternalTextProcessing extends InternalTextProcessing {
+    private static class DummyInternalTextProcessing extends InternalTextProcessor {
 
         /**
          * Dummy method that will just return a fake extracted text
@@ -77,7 +78,7 @@ public class PluginInternalServiceCommunicatorTest {
          * @throws FileTypeNotSupportedException
          */
         @Override
-        public ExtractedText processFile(String fileRef) throws FileTypeNotSupportedException {
+        public ExtractedText processFile(InputStream file, String fileRef) throws FileTypeNotSupportedException {
             // Just return the dummy extracted text
             return mExtractedText;
         }

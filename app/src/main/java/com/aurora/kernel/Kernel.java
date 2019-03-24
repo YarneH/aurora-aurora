@@ -3,7 +3,7 @@ package com.aurora.kernel;
 import android.util.Log;
 
 import com.aurora.internalservice.internalcache.InternalCache;
-import com.aurora.internalservice.internalprocessor.InternalTextProcessing;
+import com.aurora.internalservice.internalprocessor.InternalTextProcessor;
 import com.aurora.plugin.Plugin;
 import com.google.gson.Gson;
 
@@ -43,7 +43,7 @@ public final class Kernel {
         this.mPluginCommunicator = new PluginCommunicator(mBus, mPluginRegistry);
 
         // Create internal text processor for the PluginInternalServiceCommunicator
-        InternalTextProcessing internalTextProcessing = new InternalTextProcessing();
+        InternalTextProcessor internalTextProcessing = new InternalTextProcessor();
         this.mPluginInternalServiceCommunicator = new PluginInternalServiceCommunicator(mBus, internalTextProcessing);
 
         // Create cache
