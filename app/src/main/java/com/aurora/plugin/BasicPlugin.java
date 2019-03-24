@@ -6,17 +6,23 @@ import java.io.File;
  * Class that maintains some basic information on a plugin
  */
 public class BasicPlugin {
+    private String mUniqueName;
     private String mName;
     // TODO: Datatype may change
     private File mPluginLogo;
     private String mDescription;
     private String mVersion;
 
-    public BasicPlugin(String name, File pluginLogo, String description, String version) {
+    public BasicPlugin(String uniqueName, String name, File pluginLogo, String description, String version) {
+        mUniqueName = uniqueName;
         mName = name;
         mPluginLogo = pluginLogo;
         mDescription = description;
         mVersion = version;
+    }
+
+    public String getUniqueName() {
+        return mUniqueName;
     }
 
     public String getName() {

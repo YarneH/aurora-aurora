@@ -130,7 +130,7 @@ class PluginRegistry {
             for (Plugin p : registeredPlugins) {
                 // TODO: add appropriate pluginenvironment and processor to the plugin
                 // Add the plugin to the map
-                mPluginsMap.put(p.getUniqueName(), p);
+                mPluginsMap.put(p.getBasicPluginInfo().getUniqueName(), p);
             }
         } catch (IOException e) {
             Log.e(PLUGINREGISTRY_LOG_TAG, "Something went wrong when reading the plugins from the config file.");

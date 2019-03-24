@@ -7,12 +7,14 @@ import java.io.File;
  */
 public abstract class Plugin {
 
+    protected String mUniqueName;
     protected String mName;
     protected File mPluginLogo;
     protected String mDescription;
     protected String mVersion;
 
-    public Plugin(String name, File pluginLogo, String description, String version) {
+    public Plugin(String uniqueName, String name, File pluginLogo, String description, String version) {
+        mUniqueName = uniqueName;
         mName = name;
         mPluginLogo = pluginLogo;
         mDescription = description;
@@ -25,7 +27,7 @@ public abstract class Plugin {
      * @return the Basic plugin information
      */
     public BasicPlugin getBasicPluginInfo() {
-        return new BasicPlugin(mName, mPluginLogo, mDescription, mVersion);
+        return new BasicPlugin(mUniqueName, mName, mPluginLogo, mDescription, mVersion);
     }
 
 }

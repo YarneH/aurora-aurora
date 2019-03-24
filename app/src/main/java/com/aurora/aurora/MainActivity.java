@@ -99,11 +99,6 @@ public class MainActivity extends AppCompatActivity
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         CardFileAdapter adapter = new CardFileAdapter();
         mRecyclerView.setAdapter(adapter);
-
-        // TODO Remove this test code
-        InputStream docFile = getResources().openRawResource(R.raw.apple_crisp);
-        mAuroraCommunicator.openFileWithPlugin("apple_crisp.docx", docFile, "Souschef", this);
-
     }
 
     /**
@@ -141,10 +136,14 @@ public class MainActivity extends AppCompatActivity
 
             Intent intent = new Intent(Constants.PLUGIN_ACTION);
 
+            // TODO Remove this test code
+            // Note: this is basically mixed code as a result of a merge. This test code will be removed ASAP
+            InputStream docFile = getResources().openRawResource(R.raw.apple_crisp);
+
             if (textFile != null) {
-                mAuroraCommunicator.openFileWithPlugin(textFile.toString(), intent, this);
+                mAuroraCommunicator.openFileWithPlugin(textFile.toString(), docFile, intent, this);
             } else {
-                Toast.makeText(this, "Invalid file was selected", Snackbar.LENGTH_LONG).show();
+                Toast.makeText(this, "The selected file was null", Snackbar.LENGTH_LONG).show();
             }
 
             //Toast.makeText(this, "A file with uri \"" + textFile + "\" was selected.", Snackbar.LENGTH_LONG).show();

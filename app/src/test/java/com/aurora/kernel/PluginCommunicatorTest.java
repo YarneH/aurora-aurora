@@ -55,7 +55,7 @@ public class PluginCommunicatorTest {
         String version = "0.1";
 
         // Create plugin using environment and processor
-        mPlugin = new DummyPlugin(pluginName, null, description, version);
+        mPlugin = new DummyPlugin(pluginName, pluginName, null, description, version);
 
         // Register plugin in registry
         mPluginRegistry.registerPlugin(PLUGIN_NAME, mPlugin);
@@ -89,8 +89,8 @@ public class PluginCommunicatorTest {
      */
     private class DummyPlugin extends Plugin {
 
-        public DummyPlugin(String name, File pluginLogo, String description, String version) {
-            super(name, pluginLogo, description, version);
+        public DummyPlugin(String uniqueName, String name, File pluginLogo, String description, String version) {
+            super(uniqueName, name, pluginLogo, description, version);
         }
     }
 

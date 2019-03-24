@@ -14,6 +14,8 @@ import com.aurora.plugin.BasicPlugin;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -46,8 +48,9 @@ public class AuroraCommunicatorTest {
 
         // Call method under test
         String fileRef = "Dummy/file/ref";
+        InputStream file = new DummyInputStream();
         Intent targetPlugin = new Intent(Constants.PLUGIN_ACTION);
-        mAuroraCommunicator.openFileWithPlugin(fileRef, targetPlugin, new Context());
+        mAuroraCommunicator.openFileWithPlugin(fileRef, file, targetPlugin, new Context());
 
         // Assert that arguments passed are as expected
         fileRefObserver.assertSubscribed();
@@ -79,8 +82,9 @@ public class AuroraCommunicatorTest {
 
         // Call the method under test
         String dummyFileRef = "dummy/path/to/file";
+        InputStream file = new DummyInputStream();
         Intent dummyPlugin = new Intent(Constants.PLUGIN_ACTION);
-        mAuroraCommunicator.openFileWithPlugin(dummyFileRef, dummyPlugin, new Context());
+        mAuroraCommunicator.openFileWithPlugin(dummyFileRef, file, dummyPlugin, new Context());
 
         // Assure that the correct values are contained in request event
         extractedTextObserver.assertSubscribed();
@@ -104,7 +108,7 @@ public class AuroraCommunicatorTest {
         List<BasicPlugin> basicPluginList = new ArrayList<>();
 
         // Add fake basic plugin
-        basicPluginList.add(new BasicPlugin(pluginName, null, pluginDescription, pluginVersion));
+        basicPluginList.add(new BasicPlugin(pluginName, pluginName, null, pluginDescription, pluginVersion));
 
         // Make response containing the list
         ListPluginsResponse response = new ListPluginsResponse(basicPluginList);
@@ -118,6 +122,17 @@ public class AuroraCommunicatorTest {
         // Assert values
         observer.assertSubscribed();
         observer.assertValue(basicPluginList);
+    }
+
+    /**
+     * Dummy stub classs for testing purposes
+     */
+    private class DummyInputStream extends InputStream {
+
+        @Override
+        public int read() throws IOException {
+            return 0;
+        }
     }
 
 }

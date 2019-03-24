@@ -61,8 +61,8 @@ public class PluginRegistryTest {
         mRegistry.removeAllPlugins();
 
         // Create dummy plugins
-        plugin1 = new DummyPlugin1(DUMMY_NAME_1, null, DESCRIPTION_1, VERSION_1);
-        plugin2 = new DummyPlugin2(DUMMY_NAME_2, null, DESCRIPTION_2, VERSION_2);
+        plugin1 = new DummyPlugin1(DUMMY_NAME_1, DUMMY_NAME_1, null, DESCRIPTION_1, VERSION_1);
+        plugin2 = new DummyPlugin2(DUMMY_NAME_2, DUMMY_NAME_2, null, DESCRIPTION_2, VERSION_2);
 
         // Add dummy plugins
         mRegistry.registerPlugin(DUMMY_NAME_1, plugin1);
@@ -95,8 +95,8 @@ public class PluginRegistryTest {
      * Dummy plugin for testing purposes
      */
     private static class DummyPlugin1 extends Plugin {
-        public DummyPlugin1(String name, File pluginLogo, String description, String version) {
-            super(name, pluginLogo, description, version);
+        public DummyPlugin1(String uniqueName, String name, File pluginLogo, String description, String version) {
+            super(uniqueName, name, pluginLogo, description, version);
         }
     }
 
@@ -105,15 +105,9 @@ public class PluginRegistryTest {
      */
     private static class DummyPlugin2 extends Plugin {
 
-        public DummyPlugin2(String name, File pluginLogo, String description, String version) {
-            super(name, pluginLogo, description, version);
+        public DummyPlugin2(String uniqueName, String name, File pluginLogo, String description, String version) {
+            super(uniqueName, name, pluginLogo, description, version);
         }
     }
 
-    /**
-     * Dummy activity class for testing purposes
-     */
-    private class DummyActivity extends Activity {
-
-    }
 }

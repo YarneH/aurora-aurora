@@ -5,8 +5,6 @@ import android.content.Intent;
 
 import com.aurora.auroralib.ExtractedText;
 
-import java.io.InputStream;
-
 /**
  * Event to request that a file is opened with a plugin
  */
@@ -42,10 +40,6 @@ public class OpenFileWithPluginRequest extends Event {
 
     public Context getContext() {
         return mContext;
-    }
-
-    public InputStream getFile() {
-        return mFile;
     }
 
 }
