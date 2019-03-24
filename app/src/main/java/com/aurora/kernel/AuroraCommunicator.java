@@ -11,6 +11,7 @@ import com.aurora.kernel.event.PluginSettingsRequest;
 import com.aurora.kernel.event.PluginSettingsResponse;
 import com.aurora.plugin.BasicPlugin;
 
+import java.io.InputStream;
 import java.util.List;
 
 import io.reactivex.Observable;
@@ -33,10 +34,10 @@ public class AuroraCommunicator extends Communicator {
      * @param fileRef    a reference to the file that needs to be opened
      * @return the fragment to be shown wrapped in an observable
      */
-    public Observable<Fragment> openFileWithPlugin(String pluginName, String fileRef) {
+    public Observable<Fragment> openFileWithPlugin(String pluginName, InputStream file, String fileRef) {
         Observable<OpenFileWithPluginResponse> mOpenFileWithPluginResponse
                 = this.mBus.register(OpenFileWithPluginResponse.class);
-        this.mBus.post(new OpenFileWithPluginRequest(pluginName, fileRef));
+        this.mBus.post(new OpenFileWithPluginRequest(pluginName, file, fileRef));
 
         // The map function is called on the observable. Then, the getPluginFragment function
         // is called on the response event and the result is returned
@@ -60,6 +61,7 @@ public class AuroraCommunicator extends Communicator {
 
     /**
      * Gets a list of all the available plugins
+     *
      * @return a list of basic information on every plugin wrapped in an observable
      */
     public Observable<List<BasicPlugin>> getListOfPlugins() {

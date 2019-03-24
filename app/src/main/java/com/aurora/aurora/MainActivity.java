@@ -1,5 +1,7 @@
 package com.aurora.aurora;
 
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -9,15 +11,23 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.aurora.kernel.AuroraCommunicator;
+import com.aurora.kernel.Kernel;
+
+import java.io.InputStream;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -25,9 +35,13 @@ public class MainActivity extends AppCompatActivity
     private static final int REQUEST_FILE_GET = 1;
 
     // Toast and TextView used for demo and preventing queued Toasts
+    private Context mContext = this;
     private Toast mToast = null;
     private TextView mTextViewMain = null;
     private RecyclerView mRecyclerView = null;
+
+    private Kernel kernel = null;
+    private AuroraCommunicator auroraCommunicator = null;
 
     /**
      * Runs on startup of the activity, in this case on startup of the app
@@ -38,6 +52,14 @@ public class MainActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        /* Set system properties for DOCX */
+        System.setProperty("org.apache.poi.javax.xml.stream.XMLInputFactory",
+                "com.fasterxml.aalto.stax.InputFactoryImpl");
+        System.setProperty("org.apache.poi.javax.xml.stream.XMLOutputFactory",
+                "com.fasterxml.aalto.stax.OutputFactoryImpl");
+        System.setProperty("org.apache.poi.javax.xml.stream.XMLEventFactory",
+                "com.fasterxml.aalto.stax.EventFactoryImpl");
 
         /* Add toolbar when activity is created */
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -73,6 +95,15 @@ public class MainActivity extends AppCompatActivity
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         CardFileAdapter adapter = new CardFileAdapter();
         mRecyclerView.setAdapter(adapter);
+
+        /* Setup Kernel */
+        kernel = new Kernel();
+        auroraCommunicator = kernel.getAuroraCommunicator();
+
+        // TODO Remove this test code
+        InputStream docFile = getResources().openRawResource(R.raw.apple_crisp);
+        auroraCommunicator.openFileWithPlugin("", docFile, "apple_crisp.docx");
+
     }
 
     /**
@@ -141,13 +172,29 @@ public class MainActivity extends AppCompatActivity
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_search) {
-            // Toast for demo
-            if (mToast != null) {
-                mToast.cancel();
-            }
-            mToast = Toast.makeText(this, "Search for a file", Toast.LENGTH_SHORT);
-            mToast.show();
-            return true;
+            // Create a LayoutInflater which will create the view for the pop-up
+            LayoutInflater li = LayoutInflater.from(this);
+            View promptView = li.inflate(R.layout.search_prompt, null);
+            final EditText userInput = (EditText) promptView.findViewById(R.id.et_search_prompt);
+
+            // Create a builder to build the actual alertdialog from the previous inflated view
+            AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
+            alertDialogBuilder.setView(promptView);
+            alertDialogBuilder.setCancelable(true)
+                    .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            // Toast for demo
+                            if (mToast != null) {
+                                mToast.cancel();
+                            }
+                            mToast = Toast.makeText(mContext, "Search for "
+                                    + userInput.getText().toString(), Toast.LENGTH_SHORT);
+                            mToast.show();
+                        }
+                    });
+            // Create and show the pop-up
+            alertDialogBuilder.create().show();
         }
 
         return super.onOptionsItemSelected(item);
