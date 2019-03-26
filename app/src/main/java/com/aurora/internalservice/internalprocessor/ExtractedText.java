@@ -2,6 +2,7 @@ package com.aurora.internalservice.internalprocessor;
 
 import com.aurora.internalservice.InternallyProcessedFile;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -17,11 +18,24 @@ public class ExtractedText implements InternallyProcessedFile {
         mParagraphs = paragraphs;
     }
 
+    public ExtractedText() {
+        mTitle = null;
+        mParagraphs = new ArrayList<>();
+    }
+
     public String getTitle() {
         return mTitle;
     }
 
+    public void setTitle(String title) {
+        this.mTitle = title;
+    }
+
     public List<String> getParagraphs() {
         return mParagraphs;
+    }
+
+    public void addParagraph(String paragraph) {
+        this.mParagraphs.add(paragraph);
     }
 }
