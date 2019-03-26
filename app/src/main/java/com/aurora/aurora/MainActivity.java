@@ -101,7 +101,8 @@ public class MainActivity extends AppCompatActivity
         auroraCommunicator = kernel.getAuroraCommunicator();
 
         // TODO Remove this test code
-        InputStream docFile = getResources().openRawResource(R.raw.apple_crisp); // Works good with own parser
+        // Works good with own parser
+        InputStream docFile = getResources().openRawResource(R.raw.apple_crisp);
         //InputStream docFile = getResources().openRawResource(R.raw.chocolate_chip_cookies); // Works good with default
         //InputStream docFile = getResources().openRawResource(R.raw.corn_tortillas); // Has table, is broken
         auroraCommunicator.openFileWithPlugin("", docFile, "random.docx");

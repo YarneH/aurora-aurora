@@ -29,7 +29,6 @@ public class TextExtractorDOCX implements TextExtractor {
     public ExtractedText extract(InputStream file, String fileRef) {
         ExtractedText extractedText = new ExtractedText();
 
-        boolean titleFound = false;
         try {
             try (XWPFDocument doc = new XWPFDocument(file)) {
 
@@ -40,7 +39,6 @@ public class TextExtractorDOCX implements TextExtractor {
 
                 // TODO Implement extracting images from .docx
                 // TODO Write better logic to extract the title and parse the file
-                List<XWPFParagraph> paras = doc.getParagraphs();
                 for (XWPFParagraph paragraph : doc.getParagraphs()) {
                     Log.d("DOCX", paragraph.getText());
 
@@ -52,11 +50,10 @@ public class TextExtractorDOCX implements TextExtractor {
                             addParagraph(extractedText, split);
                         }
                     } else if (!textInParagraph.replaceAll("[\\r\\n]+", "").isEmpty()) {
-                        if (!titleFound) {
+                        if (extractedText.getTitle() == null) {
                             extractedText.setTitle(textInParagraph
                                     .replaceAll("[\\r\\n]+", "")
                                     .trim());
-                            titleFound = true;
                         } else {
                             addParagraph(extractedText, textInParagraph);
                         }
