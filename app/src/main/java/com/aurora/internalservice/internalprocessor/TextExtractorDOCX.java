@@ -19,7 +19,7 @@ import org.apache.poi.xwpf.usermodel.XWPFTableRow;
 
 public class TextExtractorDOCX implements TextExtractor {
 
-    boolean previousLineEmpty = false;
+    private boolean previousLineEmpty = false;
     /**
      * Extracts the text from a .docx file.
      * @param file      InputStream to the file
@@ -34,9 +34,9 @@ public class TextExtractorDOCX implements TextExtractor {
             try (XWPFDocument doc = new XWPFDocument(file)) {
 
                 // Code that might be useful for tables
-                //for (IBodyElement e : doc.getBodyElements()) {
-                  //  appendBodyElementText(extractedText, e);
-                //}
+                //for (IBodyElement e : doc.getBodyElements()) { //NOSONAR
+                  //  appendBodyElementText(extractedText, e); //NOSONAR
+                //} //NOSONAR
 
                 // TODO Implement extracting images from .docx
                 // TODO Write better logic to extract the title and parse the file
@@ -94,7 +94,7 @@ public class TextExtractorDOCX implements TextExtractor {
      * @param paragraph     the paragraph that needs to be formatted
      * @return              String that is formatted
      */
-    private String formatParagraph(String paragraph) {
+    private static String formatParagraph(String paragraph) {
         return paragraph.replaceAll("[\\r\\n]+", "").trim();
     }
 

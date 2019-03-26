@@ -102,13 +102,13 @@ public class MainActivity extends AppCompatActivity
 
         // TODO Remove this test code
         /* Perfect parsing */
-        InputStream docFile = getResources().openRawResource(R.raw.apple_crisp);
+        InputStream docFile = getResources().openRawResource(R.raw.apple_crisp); //NOSONAR
         /* Good enough parsing (too much newlines) */
-        //InputStream docFile = getResources().openRawResource(R.raw.chocolate_chip_cookies);
+        //InputStream docFile = getResources().openRawResource(R.raw.chocolate_chip_cookies); //NOSONAR
         /* Isn't properly parsed, because data is in a table*/
-        //InputStream docFile = getResources().openRawResource(R.raw.corn_tortillas);
+        //InputStream docFile = getResources().openRawResource(R.raw.corn_tortillas); //NOSONAR
         /* Research paper: parsed ok, but could be done better. No subtitle recognition */
-        //InputStream docFile = getResources().openRawResource(R.raw.rp_1);
+        //InputStream docFile = getResources().openRawResource(R.raw.rp_1); //NOSONAR
         auroraCommunicator.openFileWithPlugin("", docFile, "random.docx");
 
     }
