@@ -71,15 +71,36 @@ pipeline {
                 failure {
                     slack_error_sonar()
                 }
+            success {
+                slack_success()
+            }
             }
         } // SonarQube stage
-    } // Stages
 
-    post {
-        success {
-            slack_success()
-        }
-    }
+        stage('Javadoc') {
+            when {
+                anyOf {
+                    branch 'master';
+                    branch 'dev'
+                }
+            }
+            steps {
+                // Generate javadoc
+                sh """
+                javadoc -d /var/www/javadoc/aurora/${env.BRANCH_NAME} -sourcepath ${WORKSPACE}/app/src/main/java -subpackages com -private \
+                -classpath ${WORKSPACE}/app/build/intermediates/javac/release/compileReleaseJavaWithJavac/classes
+                """
+            }
+            post {
+                failure {
+                    slack_error_doc()
+                }
+                success {
+                    slack_success_doc()
+                }
+            }
+        } // Javadoc stage
+    } // Stages
 } // Pipeline
 
 
@@ -105,6 +126,13 @@ def slack_error_sonar() {
     slack_report(false, ':x: Sonar failed', null, 'SonarQube analysis')
 }
 
+/**
+ * Gets called when javadoc fails
+ */
+def slack_error_doc() {
+    slack_report(false, ':x: Javadoc failed', null, 'Javadoc')
+}
+
 
 /**
  * Gets called when build succeeds
@@ -114,6 +142,12 @@ def slack_success() {
 }
 
 
+/**
+ * Gets called when the javadoc is successfully generated
+ */
+def slack_success_doc() {
+    slack_report(true, ':heavy_check_mark: Javadoc generated', null, '')
+}
 
 /**
  * Find name of author
