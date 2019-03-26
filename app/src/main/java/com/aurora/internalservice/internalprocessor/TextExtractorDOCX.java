@@ -29,43 +29,36 @@ public class TextExtractorDOCX implements TextExtractor {
     public ExtractedText extract(InputStream file, String fileRef) {
         ExtractedText extractedText = new ExtractedText();
 
-        Boolean titleFound = false;
+        boolean titleFound = false;
         try {
-            try {
-                try (XWPFDocument doc = new XWPFDocument(file)) {
+            try (XWPFDocument doc = new XWPFDocument(file)) {
 
-                    // Process all body elements
-//                    for (IBodyElement e : doc.getBodyElements()) {
-//                        appendBodyElementText(extractedText, e, doc);
-//                    }
+                // Process all body elements
+                for (IBodyElement e : doc.getBodyElements()) {
+                    appendBodyElementText(extractedText, e);
+                }
 
-                    // TODO Implement extracting images from .docx
-                    // TODO Write better logic to extract the title and parse the file
-                    for (XWPFParagraph paragraph : doc.getParagraphs()) {
-                        String textInParagraph = paragraph.getText();
+                // TODO Implement extracting images from .docx
+                // TODO Write better logic to extract the title and parse the file
+                List<XWPFParagraph> paras = doc.getParagraphs();
+                for (XWPFParagraph paragraph : doc.getParagraphs()) {
+                    Log.d("DOCX", paragraph.getText());
 
-                        if(textInParagraph.contains("\t")){
-                            String[] splitted = textInParagraph.split("\t");
-                            for (String split : splitted) {
-                                if (!split.replaceAll("[\\r\\n]+", "").isEmpty()) {
-                                    extractedText.addParagraph(split.trim());
-                                }
-                            }
+                    String textInParagraph = paragraph.getText();
+
+                    if(textInParagraph.contains("\t")){
+                        String[] splitted = textInParagraph.split("\t");
+                        for (String split : splitted) {
+                            addParagraph(extractedText, split);
+                        }
+                    } else if (!textInParagraph.replaceAll("[\\r\\n]+", "").isEmpty()) {
+                        if (!titleFound) {
+                            extractedText.setTitle(textInParagraph
+                                    .replaceAll("[\\r\\n]+", "")
+                                    .trim());
+                            titleFound = true;
                         } else {
-                            if (!textInParagraph.replaceAll("[\\r\\n]+", "").isEmpty()) {
-
-                                if (!titleFound) {
-                                    extractedText.setTitle(textInParagraph
-                                            .replaceAll("[\\r\\n]+", "")
-                                            .trim());
-                                    titleFound = true;
-                                } else {
-                                    extractedText.addParagraph(
-                                            textInParagraph
-                                                    .replaceAll("[\\r\\n]+", "")
-                                                    .trim());
-                                }
-                            }
+                            addParagraph(extractedText, textInParagraph);
                         }
                     }
                 }
@@ -80,9 +73,15 @@ public class TextExtractorDOCX implements TextExtractor {
         return extractedText;
     }
 
-    private void appendBodyElementText(ExtractedText text, IBodyElement e, XWPFDocument document) {
+    private void addParagraph(ExtractedText extractedText, String paragraph) {
+        if (!paragraph.replaceAll("[\\r\\n]+", "").isEmpty()) {
+            extractedText.addParagraph(paragraph.trim());
+        }
+    }
+
+    private void appendBodyElementText(ExtractedText text, IBodyElement e) {
         if (e instanceof XWPFParagraph) {
-            appendParagraphText(text, (XWPFParagraph) e, document);
+            appendParagraphText(text, (XWPFParagraph) e);
         } else if (e instanceof XWPFTable) {
             appendTableText(text, (XWPFTable) e);
         } else if (e instanceof XWPFSDT) {
@@ -90,7 +89,7 @@ public class TextExtractorDOCX implements TextExtractor {
         }
     }
 
-    private void appendParagraphText(ExtractedText text, XWPFParagraph paragraph, XWPFDocument document) {
+    private void appendParagraphText(ExtractedText text, XWPFParagraph paragraph) {
         for (IRunElement run : paragraph.getRuns()) {
             if (run instanceof XWPFRun) {
                 text.addParagraph(((XWPFRun)run).text());
