@@ -14,15 +14,35 @@ import java.io.DataOutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
+/**
+ * <p>
+ * Activity responsible for handling the feedback function.
+ * </p>
+ * <p>
+ * The user can write some feedback in this activity and send it.
+ * It will automatically be pushed to the Slack channel of this project.
+ * This requires internet connection.
+ * </p>
+ */
 public class FeedbackActivity extends AppCompatActivity {
+    /**
+     * HTTP response code for a successful communication.
+     */
     private static final int OK_RESPONSE_CODE = 200;
+    /**
+     * Message prefixed to the actual feedback that arrives in the Slack.
+     */
     private static final String FEEDBACK_MESSAGE_BASE = "*:fire::fire:New feedback:fire::fire:* \\n";
+
+    /**
+     * @hide
+     */
     private static final String FEEDBACK_WEBHOOK_URL =
             "https://hooks.slack.com/services/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";
     private EditText mEditTextFeedback = null;
 
     /**
-     * Runs on startup of the activity, in this case on startup of the app
+     * Runs on startup of the activity, in this case when the user navigates to the feedback screen.
      *
      * @param savedInstanceState
      */
@@ -34,10 +54,7 @@ public class FeedbackActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         mEditTextFeedback = findViewById(R.id.et_feedback);
-        mEditTextFeedback.setHint("Enter your feedback here");
     }
-
-    // This will start a SendFeedbackTask and notice the user whether it succeeded or not
 
     /**
      * When the user clicks on the 'Send'-button,
@@ -71,7 +88,7 @@ public class FeedbackActivity extends AppCompatActivity {
     }
 
     /**
-     * A task which will run asynchronously and send the feedback to our Slack channel
+     * A task which will run asynchronously and send the feedback to the Slack channel
      */
     static class SendFeedbackTask extends AsyncTask<String, Void, Boolean> {
 
