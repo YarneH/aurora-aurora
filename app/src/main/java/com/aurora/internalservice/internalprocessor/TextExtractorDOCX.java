@@ -24,11 +24,11 @@ public class TextExtractorDOCX implements TextExtractor {
         try {
             try {
                 try (XWPFDocument doc = new XWPFDocument(file)) {
-                    List<String> paragraphs = new ArrayList<>();
+                    List<Section> sections = new ArrayList<>();
 
                     // TODO Write actual logic to extract the title and parse the file
                     for (XWPFParagraph paragraph : doc.getParagraphs()) {
-                        paragraphs.add(paragraph.getText());
+                        sections.add(new Section("",paragraph.getText(),null));
 
                         // TODO Remove unnecessary Log
                         Log.d("DOCX", paragraph.getText());
@@ -36,7 +36,8 @@ public class TextExtractorDOCX implements TextExtractor {
 
                     // TODO Implement extracting images from .docx
 
-                    extractedText = new ExtractedText("", paragraphs);
+                    extractedText = new ExtractedText();
+                    extractedText.setSections(sections);
                 }
             } finally {
                 file.close();
