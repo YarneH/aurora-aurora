@@ -101,10 +101,14 @@ public class MainActivity extends AppCompatActivity
         auroraCommunicator = kernel.getAuroraCommunicator();
 
         // TODO Remove this test code
-        // Works good with own parser
+        /* Perfect parsing */
         InputStream docFile = getResources().openRawResource(R.raw.apple_crisp);
-        //InputStream docFile = getResources().openRawResource(R.raw.chocolate_chip_cookies); // Works good with default
-        //InputStream docFile = getResources().openRawResource(R.raw.corn_tortillas); // Has table, is broken
+        /* Good enough parsing (too much newlines) */
+        //InputStream docFile = getResources().openRawResource(R.raw.chocolate_chip_cookies);
+        /* Isn't properly parsed, because data is in a table*/
+        //InputStream docFile = getResources().openRawResource(R.raw.corn_tortillas);
+        /* Research paper: parsed ok, but could be done better. No subtitle recognition */
+        //InputStream docFile = getResources().openRawResource(R.raw.rp_1);
         auroraCommunicator.openFileWithPlugin("", docFile, "random.docx");
 
     }

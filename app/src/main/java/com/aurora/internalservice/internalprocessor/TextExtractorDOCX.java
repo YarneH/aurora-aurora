@@ -19,6 +19,7 @@ import org.apache.poi.xwpf.usermodel.XWPFTableRow;
 
 public class TextExtractorDOCX implements TextExtractor {
 
+    boolean previousLineEmpty = false;
     /**
      * Extracts the text from a .docx file.
      * @param file      InputStream to the file
@@ -32,31 +33,26 @@ public class TextExtractorDOCX implements TextExtractor {
         try {
             try (XWPFDocument doc = new XWPFDocument(file)) {
 
-                // Process all body elements
-                for (IBodyElement e : doc.getBodyElements()) {
-                    appendBodyElementText(extractedText, e);
-                }
+                // Code that might be useful for tables
+                //for (IBodyElement e : doc.getBodyElements()) {
+                  //  appendBodyElementText(extractedText, e);
+                //}
 
                 // TODO Implement extracting images from .docx
                 // TODO Write better logic to extract the title and parse the file
                 for (XWPFParagraph paragraph : doc.getParagraphs()) {
-                    Log.d("DOCX", paragraph.getText());
+                    Log.d("DOCX", "Para: " + paragraph.getText());
 
                     String textInParagraph = paragraph.getText();
 
                     if(textInParagraph.contains("\t")){
-                        String[] splitted = textInParagraph.split("\t");
-                        for (String split : splitted) {
-                            addParagraph(extractedText, split);
+                        for (String split : textInParagraph.split("\t")) {
+                            addParagraph(extractedText, split, false);
                         }
-                    } else if (!textInParagraph.replaceAll("[\\r\\n]+", "").isEmpty()) {
-                        if (extractedText.getTitle() == null) {
-                            extractedText.setTitle(textInParagraph
-                                    .replaceAll("[\\r\\n]+", "")
-                                    .trim());
-                        } else {
-                            addParagraph(extractedText, textInParagraph);
-                        }
+                    } else if (extractedText.getTitle() == null && !formatParagraph(textInParagraph).isEmpty()) {
+                        extractedText.setTitle(formatParagraph(textInParagraph));
+                    } else {
+                        addParagraph(extractedText, textInParagraph, true);
                     }
                 }
             } finally {
@@ -70,10 +66,36 @@ public class TextExtractorDOCX implements TextExtractor {
         return extractedText;
     }
 
-    private void addParagraph(ExtractedText extractedText, String paragraph) {
-        if (!paragraph.replaceAll("[\\r\\n]+", "").isEmpty()) {
-            extractedText.addParagraph(paragraph.trim());
+    /**
+     * Appends the paragraph to the extractedtextobject and takes care of formatting
+     *
+     * @param extractedText     an extractedText object to append to
+     * @param paragraph         the paragraph that will be appended
+     * @param emptyLineAllowed    boolean that tells if adding an empty line is allowed
+     */
+    private void addParagraph(ExtractedText extractedText, String paragraph, boolean emptyLineAllowed) {
+        String formatted = formatParagraph(paragraph);
+
+        if(!previousLineEmpty || !formatted.isEmpty()) {
+            if(formatted.isEmpty() && !extractedText.getParagraphs().isEmpty() && emptyLineAllowed){
+                formatted = "\n";
+                previousLineEmpty = true;
+                extractedText.addParagraph(formatted);
+            } else if (!formatted.isEmpty()){
+                previousLineEmpty = false;
+                extractedText.addParagraph(formatted);
+            }
         }
+    }
+
+    /**
+     * Formats the paragraph to not contain leading and trailing spaces and carriage returns.
+     *
+     * @param paragraph     the paragraph that needs to be formatted
+     * @return              String that is formatted
+     */
+    private String formatParagraph(String paragraph) {
+        return paragraph.replaceAll("[\\r\\n]+", "").trim();
     }
 
     private void appendBodyElementText(ExtractedText text, IBodyElement e) {
