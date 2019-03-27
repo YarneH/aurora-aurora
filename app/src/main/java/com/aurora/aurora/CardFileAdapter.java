@@ -17,17 +17,13 @@ import java.util.Locale;
  * The adapter for the RecyclerView of the file-cards
  */
 public class CardFileAdapter extends RecyclerView.Adapter<CardFileAdapter.CardFileViewHolder> {
-    // Index when no file is selected.
     private static final int NO_DETAILS = -1;
-    // value of the currently selected file (file card that is expanded). Initialised unselected.
-    private int mSelectedIndex = NO_DETAILS;
-    // TODO: Remove dummy constant
+    // TODO: Remove dummy amount
     private static final int DUMMY_AMOUNT = 100;
     private int mAmount = DUMMY_AMOUNT;
+    // value of the currently selected file (file card that is expanded)
+    private int mSelectedIndex = NO_DETAILS;
 
-    /**
-     * The constructor for the CardFileAdapter
-     */
     public CardFileAdapter() {
         // TODO: This could take an argument as input (which contains the recent files)
     }
@@ -128,6 +124,7 @@ public class CardFileAdapter extends RecyclerView.Adapter<CardFileAdapter.CardFi
         // TODO: onClick for the open button, onClick for the open with different plugin button, delete button
         @Override
         public void onClick(View view) {
+            // If the click happened on the card itself
             if (view.getId() == R.id.cv_file) {
                 // If the click happened on the card itself
                 if (mSelectedIndex == NO_DETAILS) {
@@ -152,19 +149,18 @@ public class CardFileAdapter extends RecyclerView.Adapter<CardFileAdapter.CardFi
                     Set the index to the selected card, and expand that card.
                      */
                     RecyclerView recyclerView = (RecyclerView) view.getParent();
-                    CardFileViewHolder prev =(CardFileViewHolder) recyclerView.
-                            findViewHolderForLayoutPosition(mSelectedIndex);
+
+                    CardFileViewHolder prev = (CardFileViewHolder) recyclerView.findViewHolderForLayoutPosition(
+                            mSelectedIndex);
                     if (prev != null) {
                         collapse(prev.mCardView);
                     }
                     mSelectedIndex = index;
                     expand(view);
                 }
-            } else if (view.getId() == R.id.button_card_file) {
                 // if the click happened on the open button
-            } else {
-                // Normally not reachable.
             }
+            // TODO add the case that view.getId() is R.id.button_card_file
         }
     }
 

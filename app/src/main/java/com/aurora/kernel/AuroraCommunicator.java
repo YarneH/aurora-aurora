@@ -3,7 +3,7 @@ package com.aurora.kernel;
 import android.app.Activity;
 import android.support.v4.app.Fragment;
 
-import com.aurora.kernel.event.ListPLuginsResponse;
+import com.aurora.kernel.event.ListPluginsResponse;
 import com.aurora.kernel.event.ListPluginsRequest;
 import com.aurora.kernel.event.OpenFileWithPluginRequest;
 import com.aurora.kernel.event.OpenFileWithPluginResponse;
@@ -11,6 +11,7 @@ import com.aurora.kernel.event.PluginSettingsRequest;
 import com.aurora.kernel.event.PluginSettingsResponse;
 import com.aurora.plugin.BasicPlugin;
 
+import java.io.InputStream;
 import java.util.List;
 
 import io.reactivex.Observable;
@@ -33,10 +34,10 @@ public class AuroraCommunicator extends Communicator {
      * @param fileRef    a reference to the file that needs to be opened
      * @return the fragment to be shown wrapped in an observable
      */
-    public Observable<Fragment> openFileWithPlugin(String pluginName, String fileRef) {
+    public Observable<Fragment> openFileWithPlugin(String pluginName, InputStream file, String fileRef) {
         Observable<OpenFileWithPluginResponse> mOpenFileWithPluginResponse
                 = this.mBus.register(OpenFileWithPluginResponse.class);
-        this.mBus.post(new OpenFileWithPluginRequest(pluginName, fileRef));
+        this.mBus.post(new OpenFileWithPluginRequest(pluginName, file, fileRef));
 
         // The map function is called on the observable. Then, the getPluginFragment function
         // is called on the response event and the result is returned
@@ -54,19 +55,21 @@ public class AuroraCommunicator extends Communicator {
                 = this.mBus.register(PluginSettingsResponse.class);
         this.mBus.post(new PluginSettingsRequest(pluginName));
 
-        return mPluginSettingsResponse.map(PluginSettingsResponse::getActivity);
+        return mPluginSettingsResponse
+                .map(PluginSettingsResponse::getActivity);
     }
 
     /**
      * Gets a list of all the available plugins
+     *
      * @return a list of basic information on every plugin wrapped in an observable
      */
     public Observable<List<BasicPlugin>> getListOfPlugins() {
-        Observable<ListPLuginsResponse> mListPLuginsResponse
-                = this.mBus.register(ListPLuginsResponse.class);
+        Observable<ListPluginsResponse> mListPluginsResponse
+                = this.mBus.register(ListPluginsResponse.class);
         this.mBus.post(new ListPluginsRequest());
 
-        return mListPLuginsResponse.map(ListPLuginsResponse::getPlugins);
+        return mListPluginsResponse.map(ListPluginsResponse::getPlugins);
     }
 
 

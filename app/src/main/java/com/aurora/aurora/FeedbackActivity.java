@@ -11,12 +11,14 @@ import android.widget.EditText;
 import org.json.JSONObject;
 
 import java.io.DataOutputStream;
+import java.net.HttpURLConnection;
 import java.net.URL;
-
-import javax.net.ssl.HttpsURLConnection;
 
 public class FeedbackActivity extends AppCompatActivity {
     private static final int OK_RESPONSE_CODE = 200;
+    private static final String FEEDBACK_MESSAGE_BASE = "*:fire::fire:New feedback:fire::fire:* \n";
+    private static final String FEEDBACK_WEBHOOK_URL =
+            "https://hooks.slack.com/services/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";
     private EditText mEditTextFeedback = null;
 
     /**
@@ -28,6 +30,8 @@ public class FeedbackActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_feedback);
+
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         mEditTextFeedback = findViewById(R.id.et_feedback);
         mEditTextFeedback.setHint("Enter your feedback here");
@@ -46,7 +50,7 @@ public class FeedbackActivity extends AppCompatActivity {
         String input = mEditTextFeedback.getText().toString();
 
         if (!("").equals(input)) {
-            String stringWebHook = "*:fire::fire:New feedback:fire::fire:* \n" + input;
+            String stringWebHook = FEEDBACK_MESSAGE_BASE + input;
 
             try {
                 success = new SendFeedbackTask().execute(stringWebHook).get();
@@ -79,41 +83,36 @@ public class FeedbackActivity extends AppCompatActivity {
          */
         protected Boolean doInBackground(String... args) {
             boolean success = false;
-            HttpsURLConnection conn = null;
 
-            try (AutoCloseable conc = conn::disconnect){
-                // Setup the connection for the Slack Webhook
-                URL url = new URL("https://hooks.slack.com/services/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");
-                conn = (HttpsURLConnection) url.openConnection();
-                conn.setRequestMethod("POST");
-                conn.setRequestProperty("Content-Type", "application/json;charset=UTF-8");
-                conn.setRequestProperty("Accept", "application/json");
-                conn.setDoOutput(true);
+            try {
+                URL url = new URL(FEEDBACK_WEBHOOK_URL);
+                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                try (AutoCloseable conc = conn::disconnect) {
+                    conn.setRequestMethod("POST");
+                    conn.setRequestProperty("Content-Type", "application/json;charset=UTF-8");
+                    conn.setRequestProperty("Accept", "application/json");
+                    conn.setDoOutput(true);
 
-                // Add the stringWebHook to the JSONObject
-                JSONObject jsonParam = new JSONObject();
-                jsonParam.put("text", args[0]);
+                    // Add the stringWebHook to the JSONObject
+                    JSONObject jsonParam = new JSONObject();
+                    jsonParam.put("text", args[0]);
 
-                DataOutputStream os = new DataOutputStream(conn.getOutputStream());
-                os.writeBytes(jsonParam.toString());
+                    DataOutputStream os = new DataOutputStream(conn.getOutputStream());
+                    os.writeBytes(jsonParam.toString());
 
-                os.flush();
-                os.close();
+                    os.flush();
+                    os.close();
 
-                // Check if response is OK
-                int responseCode = conn.getResponseCode();
-                if (responseCode == OK_RESPONSE_CODE) {
-                    success = true;
+                    // Check if response is OK
+                    int responseCode = conn.getResponseCode();
+                    if (responseCode == OK_RESPONSE_CODE) {
+                        success = true;
+                    }
                 }
-
-                conn.disconnect();
             } catch (Exception e) {
                 Log.d("Feedback", "exception", e);
-            } finally {
-                if (conn != null) {
-                    conn.disconnect();
-                }
             }
+
             return success;
         }
     }

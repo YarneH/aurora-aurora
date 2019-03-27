@@ -37,6 +37,11 @@ pipeline {
 
                     // Analyse the test results and update the build result as appropriate
                     junit allowEmptyResults: true, testResults: '**/TEST-*.xml'
+
+                    // Analyze coverage info
+                    jacoco sourcePattern: '**/src/*/java', 
+                        classPattern: '**/classes/com/aurora', 
+                        exclusionPattern: '**/*Test*.class,  **/aurora/*.class, **/src/test, **/src/androidTest'
                 }
             }
 
@@ -49,10 +54,23 @@ pipeline {
 
         stage('SonarQube') {
             steps {
-                withSonarQubeEnv("Aurora SonarQube") {
-                    sh "${scannerHome}/bin/sonar-scanner -X -Dproject.settings=sonar-project.properties -Dsonar.branch=${env.BRANCH_NAME}"
-                }
                 script {
+                    if (env.BRANCH_NAME == 'master' || env.BRANCH_NAME == 'dev') {
+                        withSonarQubeEnv("Aurora SonarQube") {
+                        sh """
+                        ${scannerHome}/bin/sonar-scanner -X -Dproject.settings=sonar-project.properties -Dsonar.branch=${env.BRANCH_NAME} \
+                        -Dsonar.java.binaries=app/build/intermediates/javac/release/compileReleaseJavaWithJavac
+                        """
+                        }
+                    } else {
+                       withSonarQubeEnv("Aurora SonarQube") {
+                        sh """
+                        ${scannerHome}/bin/sonar-scanner -X -Dproject.settings=sonar-project.properties -Dsonar.branch=${env.BRANCH_NAME} \
+                        -Dsonar.java.binaries=app/build/intermediates/javac/debug/compileDebugJavaWithJavac
+                        """
+                        } 
+                    }
+
                     timeout(time: 1, unit: 'HOURS') {
                         def qg = waitForQualityGate()
                         if (qg.status != 'OK') {
@@ -66,15 +84,36 @@ pipeline {
                 failure {
                     slack_error_sonar()
                 }
+            success {
+                slack_success()
+            }
             }
         } // SonarQube stage
-    } // Stages
 
-    post {
-        success {
-            slack_success()
-        }
-    }
+        stage('Javadoc') {
+            when {
+                anyOf {
+                    branch 'master';
+                    branch 'dev'
+                }
+            }
+            steps {
+                // Generate javadoc
+                sh """
+                javadoc -d /var/www/javadoc/aurora/${env.BRANCH_NAME} -sourcepath ${WORKSPACE}/app/src/main/java -subpackages com -private \
+                -classpath ${WORKSPACE}/app/build/intermediates/javac/release/compileReleaseJavaWithJavac/classes
+                """
+            }
+            post {
+                failure {
+                    slack_error_doc()
+                }
+                success {
+                    slack_success_doc()
+                }
+            }
+        } // Javadoc stage
+    } // Stages
 } // Pipeline
 
 
@@ -100,6 +139,13 @@ def slack_error_sonar() {
     slack_report(false, ':x: Sonar failed', null, 'SonarQube analysis')
 }
 
+/**
+ * Gets called when javadoc fails
+ */
+def slack_error_doc() {
+    slack_report(false, ':x: Javadoc failed', null, 'Javadoc')
+}
+
 
 /**
  * Gets called when build succeeds
@@ -109,6 +155,12 @@ def slack_success() {
 }
 
 
+/**
+ * Gets called when the javadoc is successfully generated
+ */
+def slack_success_doc() {
+    slack_report(true, ':heavy_check_mark: Javadoc generated', null, '')
+}
 
 /**
  * Find name of author

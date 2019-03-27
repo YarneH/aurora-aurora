@@ -7,6 +7,8 @@ import com.aurora.kernel.event.PluginProcessorRequest;
 import com.aurora.kernel.event.PluginProcessorResponse;
 import com.aurora.processingservice.PluginProcessor;
 
+import java.io.InputStream;
+
 import io.reactivex.Observable;
 
 /**
@@ -14,7 +16,7 @@ import io.reactivex.Observable;
  */
 public class ProcessingCommunicator extends Communicator {
 
-    private PluginProcessor activePluginProcessor;
+    private PluginProcessor mActivePluginProcessor;
 
     private Observable<PluginProcessorRequest> mPluginProcessorRequestObservable;
 
@@ -48,11 +50,19 @@ public class ProcessingCommunicator extends Communicator {
      * @param fileRef a reference to where the file can be found
      * @return An observable that contains the processed text
      */
-    public Observable<ExtractedText> processFileWithAuroraProcessor(String fileRef) {
+    public Observable<ExtractedText> processFileWithAuroraProcessor(InputStream file, String fileRef) {
         Observable<InternalProcessorResponse> mInternalProcessorResponseObservable
                 = mBus.register(InternalProcessorResponse.class);
-        this.mBus.post(new InternalProcessorRequest(fileRef));
+        this.mBus.post(new InternalProcessorRequest(file, fileRef));
 
         return mInternalProcessorResponseObservable.map(InternalProcessorResponse::getExtractedText);
+    }
+
+    public PluginProcessor getActivePluginProcessor() {
+        return mActivePluginProcessor;
+    }
+
+    public void setActivePluginProcessor(PluginProcessor activePluginProcessor) {
+        this.mActivePluginProcessor = activePluginProcessor;
     }
 }
