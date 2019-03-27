@@ -157,7 +157,7 @@ public class CardFileAdapter extends RecyclerView.Adapter<CardFileAdapter.CardFi
                     RecyclerView recyclerView = (RecyclerView) view.getParent();
                     CardFileViewHolder prev = (CardFileViewHolder) recyclerView.findViewHolderForLayoutPosition(
                             mSelectedIndex);
-                    if (prev != null) collapse(prev.mCardView);
+                    if (prev != null) { collapse(prev.mCardView); }
                     mSelectedIndex = index;
                     expand(view);
                 }
