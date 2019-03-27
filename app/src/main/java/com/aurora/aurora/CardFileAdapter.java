@@ -157,9 +157,7 @@ public class CardFileAdapter extends RecyclerView.Adapter<CardFileAdapter.CardFi
                     RecyclerView recyclerView = (RecyclerView) view.getParent();
                     CardFileViewHolder prev = (CardFileViewHolder) recyclerView.findViewHolderForLayoutPosition(
                             mSelectedIndex);
-                    if (prev != null) {
-                        collapse(prev.mCardView);
-                    }
+                    if (prev != null) collapse(prev.mCardView);
                     mSelectedIndex = index;
                     expand(view);
                 }
@@ -170,8 +168,7 @@ public class CardFileAdapter extends RecyclerView.Adapter<CardFileAdapter.CardFi
             // TODO this should make an event to open the cached file.
             // BasicPlugin should probably still be able to open this, but Souschef probably not
             if (view.getId() == R.id.button_card_file) {
-                String stubPluginText =
-                        "Yield\n" +
+                String stubPluginText = "Yield\n" +
                         "    2 servings\n" +
                         "Active Time\n" +
                         "    30 minutes\n" +
