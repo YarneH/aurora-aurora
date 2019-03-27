@@ -1,8 +1,12 @@
 package com.aurora.kernel;
 
+import android.util.Log;
+
 import com.aurora.kernel.event.Event;
 
 import io.reactivex.Observable;
+import io.reactivex.Scheduler;
+import io.reactivex.schedulers.Schedulers;
 import io.reactivex.subjects.PublishSubject;
 import io.reactivex.subjects.Subject;
 
@@ -23,8 +27,11 @@ class Bus {
      */
     <T extends Event>
     Observable<T> register(final Class<T> eventClass) {
+        // observeOn function is used to set the thread on which the result is observed
         // Filter events based on class
+        // Finally, a map is used to cast it to the right type
         return mBusSubject
+                .observeOn(Schedulers.computation())
                 .filter((Event event) -> event.getClass().equals(eventClass))
                 .map((Event obj) -> {
                     if (eventClass.isInstance(obj)) {

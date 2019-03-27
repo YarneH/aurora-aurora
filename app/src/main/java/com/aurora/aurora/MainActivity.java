@@ -42,7 +42,7 @@ public class MainActivity extends AppCompatActivity
     private RecyclerView mRecyclerView = null;
 
     /**
-     * Create unique kernel instance
+     * Create unique kernel instance (should be passed to every activity, fragment, adapter,...) that needs it
      */
     private Kernel mKernel = new Kernel();
     private AuroraCommunicator mAuroraCommunicator = mKernel.getAuroraCommunicator();
@@ -66,38 +66,33 @@ public class MainActivity extends AppCompatActivity
                 "com.fasterxml.aalto.stax.EventFactoryImpl");
 
         /* Add toolbar when activity is created */
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
         /* The floating action button to add files */
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            /* Implementation of adding files in onClick */
-            @Override
-            public void onClick(View view) {
-                selectFile();
-            }
-        });
+        FloatingActionButton fab = findViewById(R.id.fab);
+        /* Implementation of adding files in onClick */
+        fab.setOnClickListener(view -> selectFile());
 
         /* Listener and sync are for navigationView functionality */
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        DrawerLayout drawer = findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.addDrawerListener(toggle);
         toggle.syncState();
 
         /* Setup NavigationView and preselect 'Home' */
-        NavigationView mNavigationView = (NavigationView) findViewById(R.id.nav_view);
+        NavigationView mNavigationView = findViewById(R.id.nav_view);
         mNavigationView.setNavigationItemSelectedListener(this);
         mNavigationView.getMenu().getItem(0).setChecked(true);
 
         /* Setup Main TextView */
-        mTextViewMain = (TextView) findViewById(R.id.tv_main);
+        mTextViewMain = findViewById(R.id.tv_main);
 
         /* Setup RecyclerView */
-        mRecyclerView = (RecyclerView) findViewById(R.id.rv_files);
+        mRecyclerView = findViewById(R.id.rv_files);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
-        CardFileAdapter adapter = new CardFileAdapter();
+        CardFileAdapter adapter = new CardFileAdapter(mKernel, this);
         mRecyclerView.setAdapter(adapter);
     }
 
@@ -153,7 +148,7 @@ public class MainActivity extends AppCompatActivity
      */
     @Override
     public void onBackPressed() {
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        DrawerLayout drawer = findViewById(R.id.drawer_layout);
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else {
@@ -180,7 +175,7 @@ public class MainActivity extends AppCompatActivity
             // Create a LayoutInflater which will create the view for the pop-up
             LayoutInflater li = LayoutInflater.from(this);
             View promptView = li.inflate(R.layout.search_prompt, null);
-            final EditText userInput = (EditText) promptView.findViewById(R.id.et_search_prompt);
+            final EditText userInput = promptView.findViewById(R.id.et_search_prompt);
 
             // Create a builder to build the actual alertdialog from the previous inflated view
             AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
@@ -237,7 +232,7 @@ public class MainActivity extends AppCompatActivity
             mTextViewMain.setVisibility(View.VISIBLE);
         }
 
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        DrawerLayout drawer = findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }

@@ -6,6 +6,7 @@ import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -31,8 +32,20 @@ public class CardFileAdapter extends RecyclerView.Adapter<CardFileAdapter.CardFi
     // value of the currently selected file (file card that is expanded)
     private int mSelectedIndex = NO_DETAILS;
 
-    public CardFileAdapter() {
+    /**
+     * A reference to the (unique) kernel instance
+     */
+    private Kernel mKernel;
+
+    /**
+     * context for testing purposes
+     */
+    private Context mContext;
+
+    public CardFileAdapter(Kernel kernel, Context context) {
         // TODO: This could take an argument as input (which contains the recent files)
+        mKernel = kernel;
+        mContext = context;
     }
 
     /**
@@ -91,9 +104,9 @@ public class CardFileAdapter extends RecyclerView.Adapter<CardFileAdapter.CardFi
          */
         public CardFileViewHolder(View itemView) {
             super(itemView);
-            mCardView = (CardView) itemView.findViewById(R.id.cv_file);
-            mTextView = (TextView) itemView.findViewById(R.id.tv_card_title);
-            mButton = (Button) itemView.findViewById(R.id.button_card_file);
+            mCardView = itemView.findViewById(R.id.cv_file);
+            mTextView = itemView.findViewById(R.id.tv_card_title);
+            mButton = itemView.findViewById(R.id.button_card_file);
             // The card itself is clickable (for details), but also the open button.
             mCardView.setOnClickListener(this);
             mButton.setOnClickListener(this);
@@ -214,38 +227,20 @@ public class CardFileAdapter extends RecyclerView.Adapter<CardFileAdapter.CardFi
                         "and emulsified, about 2 minutes. Flake tuna into pasta and toss to combine.\n" +
                         "        Divide pasta among plates. Top with fried capers.\n";
                 //"Here will be the text from file " + index + ".\nRandom sentence.";
-                //Context context = MainActivity.this;
-                Intent intent = new Intent(Constants.PLUGIN_ACTION);
-                intent.putExtra(Constants.PLUGIN_INPUT_TEXT, stubPluginText);
 
-                // Create intent to show the chooser dialog
-                Intent chooser = Intent.createChooser(intent, "Select a plugin");
-
-                // Verify the original intent will resolve to at least one activity
-                Context context = view.getContext();
-                if (intent.resolveActivity(context.getPackageManager()) != null) {
-                    context.startActivity(chooser);
-                } else {
-                    Toast.makeText(context, "No plugins available",
-                            Toast.LENGTH_LONG).show();
-                }
-
-                /*
                 Intent intent = new Intent(Constants.PLUGIN_ACTION);
 
-                // Note: this is basically mixed code as a result of a merge. This test code will be removed ASAP
-                InputStream docFile = view.getContext().getResources().openRawResource(R.raw.apple_crisp);
+                /* TODO Remove this test code
+                Eventually, here instead of opening a file, the cache will be called instead.
+                This is just a demonstration that it works.
+                TODO remove the 'mContext' variable from this class. It is used solely for demonstration purposes!
 
-                //if (textFile != null) {
-                new Kernel().getAuroraCommunicator().openFileWithPlugin("test", docFile, intent, view.getContext());
-                //} else {
-                //    Toast.makeText(this, "The selected file was null", Snackbar.LENGTH_LONG).show();
-                //}
-
-                //Toast.makeText(this, "A file with uri \"" + textFile + "\" was selected.",
-                Snackbar.LENGTH_LONG).show();
-                // Use File
+                Note: this is basically mixed code as a result of a merge. This test code will be removed ASAP
                 */
+                String textFile = "DummyTextFile.docx";
+                InputStream docFile = mContext.getResources().openRawResource(R.raw.apple_crisp);
+
+                mKernel.getAuroraCommunicator().openFileWithPlugin(textFile, docFile, intent, mContext);
             }
         }
     }
