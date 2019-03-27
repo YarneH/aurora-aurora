@@ -125,7 +125,7 @@ public class AuroraCommunicatorTest {
     }
 
     /**
-     * Dummy stub classs for testing purposes
+     * Dummy stub class for testing purposes
      */
     private class DummyInputStream extends InputStream {
 
