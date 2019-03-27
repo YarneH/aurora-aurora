@@ -3,6 +3,7 @@ package com.aurora.aurora;
 import android.content.Context;
 import android.content.Intent;
 import android.support.annotation.NonNull;
+import android.support.design.widget.Snackbar;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -14,7 +15,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.aurora.auroralib.Constants;
+import com.aurora.kernel.Kernel;
 
+import java.io.InputStream;
 import java.util.Locale;
 
 /**
@@ -164,9 +167,59 @@ public class CardFileAdapter extends RecyclerView.Adapter<CardFileAdapter.CardFi
             }
             // TODO add the case that view.getId() is R.id.button_card_file
             // TODO update this preliminary code for opening a plugin.
+
+            // TODO this should make an event to open the cached file.
+            // BasicPlugin should probably still be able to open this, but Souschef probably not
             if (view.getId() == R.id.button_card_file) {
+
                 //index
-                String stubPluginText = "Here will be the text from file " + index + ".\nRandom sentence.";
+                String stubPluginText =
+                        "Yield\n" +
+                        "    2 servings\n" +
+                        "Active Time\n" +
+                        "    30 minutes\n" +
+                        "Total Time\n" +
+                        "    35 minutes\n" +
+                        "\n" +
+                        "Ingredients\n" +
+                        "\n" +
+                        "        1 lb. linguine or other long pasta\n" +
+                        "        Kosher salt\n" +
+                        "        1 (14-oz.) can diced tomatoes\n" +
+                        "        1/2 cup extra-virgin olive oil, divided\n" +
+                        "        1/4 cup capers, drained\n" +
+                        "        6 oil-packed anchovy fillets\n" +
+                        "        1 Tbsp. tomato paste\n" +
+                        "        1/3 cup pitted Kalamata olives, halved\n" +
+                        "        2 tsp. dried oregano\n" +
+                        "        1/2 tsp. crushed red pepper flakes\n" +
+                        "        6 oz. oil-packed tuna\n" +
+                        "\n" +
+                        "Preparation\n" +
+                        "\n" +
+                        "        Cook pasta in a large pot of boiling salted water, stirring " +
+                        "occasionally, until al dente. Drain pasta, reserving 1 cup pasta cooking " +
+                        "liquid; return pasta to pot.\n" +
+                        "        While pasta cooks, pour tomatoes into a fine-mesh sieve set over " +
+                        "a medium bowl. Shake to release as much juice as possible, then let tomatoes " +
+                        "drain in sieve, collecting juices in bowl, until ready to use.\n" +
+                        "        Heat 1/4 cup oil in a large deep-sided skillet over medium-high. " +
+                        "Add capers and cook, swirling pan occasionally, until they burst and are " +
+                        "crisp, about 3 minutes. Using a slotted spoon, transfer capers to a paper " +
+                        "towel-lined plate, reserving oil in skillet.\n" +
+                        "        Combine anchovies, tomato paste, and drained tomatoes in skillet. " +
+                        "Cook over medium-high heat, stirring occasionally, until tomatoes begin " +
+                        "to caramelize and anchovies start to break down, about 5 minutes. Add " +
+                        "collected tomato juices, olives, oregano, and red pepper flakes and bring " +
+                        "to a simmer. Cook, stirring occasionally, until sauce is slightly thickened, " +
+                        "about 5 minutes. Add pasta, remaining 1/4 cup oil, and 3/4 cup pasta " +
+                        "cooking liquid to pan. Cook over medium heat, stirring and adding remaining " +
+                        "1/4 cup pasta cooking liquid to loosen if needed, until sauce is thickened " +
+                        "and emulsified, about 2 minutes. Flake tuna into pasta and toss to combine.\n" +
+                        "        Divide pasta among plates. Top with fried capers.\n";
+
+
+                        //"Here will be the text from file " + index + ".\nRandom sentence.";
 
                 //Context context = MainActivity.this;
                 Intent intent = new Intent(Constants.PLUGIN_ACTION);
@@ -184,6 +237,23 @@ public class CardFileAdapter extends RecyclerView.Adapter<CardFileAdapter.CardFi
                     Toast.makeText(context, "No plugins available",
                             Toast.LENGTH_LONG).show();
                 }
+
+                /*
+                Intent intent = new Intent(Constants.PLUGIN_ACTION);
+
+
+                // Note: this is basically mixed code as a result of a merge. This test code will be removed ASAP
+                InputStream docFile = view.getContext().getResources().openRawResource(R.raw.apple_crisp);
+
+                //if (textFile != null) {
+                new Kernel().getAuroraCommunicator().openFileWithPlugin("test", docFile, intent, view.getContext());
+                //} else {
+                //    Toast.makeText(this, "The selected file was null", Snackbar.LENGTH_LONG).show();
+                //}
+
+                //Toast.makeText(this, "A file with uri \"" + textFile + "\" was selected.", Snackbar.LENGTH_LONG).show();
+                // Use File
+                */
 
 
             }

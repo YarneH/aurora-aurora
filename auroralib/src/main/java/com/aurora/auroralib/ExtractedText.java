@@ -26,6 +26,19 @@ public class ExtractedText implements InternallyProcessedFile, Serializable {
         return mParagraphs;
     }
 
+    public String toString(){
+        String res = "";
+        if (mTitle != null){
+            res += mTitle;
+        }
+        if (mParagraphs != null) {
+            for (String s : mParagraphs) {
+                res += "\n\n" + s;
+            }
+        }
+        return res;
+    }
+
     /**
      * Turns the extracted text to a JSON string for easy passing to plugin.
      *
