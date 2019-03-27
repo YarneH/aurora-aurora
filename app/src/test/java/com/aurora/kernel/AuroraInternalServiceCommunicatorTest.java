@@ -20,6 +20,7 @@ import java.util.List;
 
 import io.reactivex.Observable;
 import io.reactivex.observers.TestObserver;
+import io.reactivex.schedulers.Schedulers;
 
 public class AuroraInternalServiceCommunicatorTest {
     private static Bus mBus;
@@ -33,7 +34,7 @@ public class AuroraInternalServiceCommunicatorTest {
     @BeforeClass
     public static void initialize() {
         // Create bus
-        mBus = new Bus();
+        mBus = new Bus(Schedulers.trampoline());
 
         // Create internal cache
         mInternalCache = new DummyInternalCache();

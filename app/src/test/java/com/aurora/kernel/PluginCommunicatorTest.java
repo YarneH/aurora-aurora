@@ -14,6 +14,7 @@ import java.io.File;
 
 import io.reactivex.Observable;
 import io.reactivex.observers.TestObserver;
+import io.reactivex.schedulers.Schedulers;
 
 public class PluginCommunicatorTest {
 
@@ -32,7 +33,7 @@ public class PluginCommunicatorTest {
 
     @BeforeClass
     public static void initialize() {
-        mBus = new Bus();
+        mBus = new Bus(Schedulers.trampoline());
 
         mProcessingCommunicator = new ProcessingCommunicator(mBus);
         mPluginRegistry = new PluginRegistry(mProcessingCommunicator, PLUGINS_CFG);

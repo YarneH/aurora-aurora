@@ -22,6 +22,7 @@ import java.util.List;
 
 import io.reactivex.Observable;
 import io.reactivex.observers.TestObserver;
+import io.reactivex.schedulers.Schedulers;
 
 
 public class AuroraCommunicatorTest {
@@ -31,7 +32,7 @@ public class AuroraCommunicatorTest {
 
     @BeforeClass
     public static void initialize() {
-        mBus = new Bus();
+        mBus = new Bus(Schedulers.trampoline());
         mAuroraCommunicator = new AuroraCommunicator(mBus);
     }
 

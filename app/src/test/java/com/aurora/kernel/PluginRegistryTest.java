@@ -1,7 +1,5 @@
 package com.aurora.kernel;
 
-import android.app.Activity;
-
 import com.aurora.plugin.Plugin;
 
 import org.junit.BeforeClass;
@@ -12,6 +10,8 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
+
+import io.reactivex.schedulers.Schedulers;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
@@ -37,7 +37,7 @@ public class PluginRegistryTest {
 
     @BeforeClass
     public static void initialize() {
-        mBus = new Bus();
+        mBus = new Bus(Schedulers.trampoline());
         mProcessingCommunicator = new ProcessingCommunicator(mBus);
 
         // Create config file

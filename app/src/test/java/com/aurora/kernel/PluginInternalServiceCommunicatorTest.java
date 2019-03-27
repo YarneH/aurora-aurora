@@ -15,6 +15,7 @@ import java.util.List;
 
 import io.reactivex.Observable;
 import io.reactivex.observers.TestObserver;
+import io.reactivex.schedulers.Schedulers;
 
 public class PluginInternalServiceCommunicatorTest {
 
@@ -29,7 +30,7 @@ public class PluginInternalServiceCommunicatorTest {
     @BeforeClass
     public static void initialize() {
         // Initialize bus
-        mBus = new Bus();
+        mBus = new Bus(Schedulers.trampoline());
 
         // Initialize processor
         mProcessor = new DummyInternalTextProcessing();
