@@ -145,9 +145,6 @@ public class MainActivity extends AppCompatActivity
             } else {
                 Toast.makeText(this, "The selected file was null", Snackbar.LENGTH_LONG).show();
             }
-
-            //Toast.makeText(this, "A file with uri \"" + textFile + "\" was selected.", Snackbar.LENGTH_LONG).show();
-            // Use File
         }
     }
 

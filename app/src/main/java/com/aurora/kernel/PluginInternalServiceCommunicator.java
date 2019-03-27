@@ -91,10 +91,7 @@ public class PluginInternalServiceCommunicator extends Communicator {
 
                     );
 
-                    ;
-
             extractedText = new ExtractedText("ExtractedTextTitle", paragraphs);
-
             e.printStackTrace();
         }
 

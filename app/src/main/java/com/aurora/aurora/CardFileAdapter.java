@@ -167,12 +167,9 @@ public class CardFileAdapter extends RecyclerView.Adapter<CardFileAdapter.CardFi
             }
             // TODO add the case that view.getId() is R.id.button_card_file
             // TODO update this preliminary code for opening a plugin.
-
             // TODO this should make an event to open the cached file.
             // BasicPlugin should probably still be able to open this, but Souschef probably not
             if (view.getId() == R.id.button_card_file) {
-
-                //index
                 String stubPluginText =
                         "Yield\n" +
                         "    2 servings\n" +
@@ -217,17 +214,13 @@ public class CardFileAdapter extends RecyclerView.Adapter<CardFileAdapter.CardFi
                         "1/4 cup pasta cooking liquid to loosen if needed, until sauce is thickened " +
                         "and emulsified, about 2 minutes. Flake tuna into pasta and toss to combine.\n" +
                         "        Divide pasta among plates. Top with fried capers.\n";
-
-
-                        //"Here will be the text from file " + index + ".\nRandom sentence.";
-
+                //"Here will be the text from file " + index + ".\nRandom sentence.";
                 //Context context = MainActivity.this;
                 Intent intent = new Intent(Constants.PLUGIN_ACTION);
                 intent.putExtra(Constants.PLUGIN_INPUT_TEXT, stubPluginText);
 
-                String title = "Select a plugin";
                 // Create intent to show the chooser dialog
-                Intent chooser = Intent.createChooser(intent, title);
+                Intent chooser = Intent.createChooser(intent, "Select a plugin");
 
                 // Verify the original intent will resolve to at least one activity
                 Context context = view.getContext();
@@ -241,7 +234,6 @@ public class CardFileAdapter extends RecyclerView.Adapter<CardFileAdapter.CardFi
                 /*
                 Intent intent = new Intent(Constants.PLUGIN_ACTION);
 
-
                 // Note: this is basically mixed code as a result of a merge. This test code will be removed ASAP
                 InputStream docFile = view.getContext().getResources().openRawResource(R.raw.apple_crisp);
 
@@ -251,11 +243,10 @@ public class CardFileAdapter extends RecyclerView.Adapter<CardFileAdapter.CardFi
                 //    Toast.makeText(this, "The selected file was null", Snackbar.LENGTH_LONG).show();
                 //}
 
-                //Toast.makeText(this, "A file with uri \"" + textFile + "\" was selected.", Snackbar.LENGTH_LONG).show();
+                //Toast.makeText(this, "A file with uri \"" + textFile + "\" was selected.",
+                Snackbar.LENGTH_LONG).show();
                 // Use File
                 */
-
-
             }
         }
     }
