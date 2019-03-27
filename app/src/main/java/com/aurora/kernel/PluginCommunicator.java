@@ -64,7 +64,8 @@ public class PluginCommunicator extends Communicator {
         // Create chooser
         Intent chooser = Intent.createChooser(targetPlugin, context.getString(R.string.select_plugin));
 
-        targetPlugin.putExtra(Constants.PLUGIN_INPUT_TEXT, extractedText);
+        String extractedTextInJSON = extractedText.toJSON();
+        targetPlugin.putExtra(Constants.PLUGIN_INPUT_EXTRACTED_TEXT, extractedTextInJSON);
 
         if (targetPlugin.resolveActivity(context.getPackageManager()) != null) {
             context.startActivity(chooser);
