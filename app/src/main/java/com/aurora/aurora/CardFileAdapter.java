@@ -2,6 +2,7 @@ package com.aurora.aurora;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
+import android.support.constraint.ConstraintLayout;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -175,8 +176,8 @@ public class CardFileAdapter extends RecyclerView.Adapter<CardFileAdapter.CardFi
      * @param v view to expand
      */
     public static void expand(final View v) {
-        FrameLayout detailView = v.findViewById(R.id.cv_fl_detail);
-        FrameLayout baseView = v.findViewById(R.id.cv_fl_base_card);
+        ConstraintLayout detailView = v.findViewById(R.id.cv_fl_detail);
+        TextView baseView = v.findViewById(R.id.tv_card_more_details);
         detailView.setVisibility(View.VISIBLE);
         baseView.setVisibility(View.GONE);
     }
@@ -188,8 +189,8 @@ public class CardFileAdapter extends RecyclerView.Adapter<CardFileAdapter.CardFi
      * @param v view to collapse
      */
     public static void collapse(final View v) {
-        FrameLayout detailView = v.findViewById(R.id.cv_fl_detail);
-        FrameLayout baseView = v.findViewById(R.id.cv_fl_base_card);
+        ConstraintLayout detailView = v.findViewById(R.id.cv_fl_detail);
+        TextView baseView = v.findViewById(R.id.tv_card_more_details);
         detailView.setVisibility(View.GONE);
         baseView.setVisibility(View.VISIBLE);
     }
