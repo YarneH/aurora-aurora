@@ -54,10 +54,12 @@ public class MainActivity extends AppCompatActivity
      * This will disappear after file-search is implemented.
      */
     private Toast mToast = null;
+
     /**
      * Contains placeholder-text when swapping between views via the NavigationView.
      */
     private TextView mTextViewMain = null;
+
     /**
      * Android view which is basically a scrollview, but efficiently
      * reuses the containers.
@@ -70,6 +72,7 @@ public class MainActivity extends AppCompatActivity
      * An instance of the {@link Kernel}.
      */
     private Kernel kernel = null;
+
     /**
      * Delivers the communication between the environment and the Kernel.
      */

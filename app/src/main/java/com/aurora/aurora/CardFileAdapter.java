@@ -17,11 +17,25 @@ import java.util.Locale;
  * The adapter for the RecyclerView of the file-cards
  */
 public class CardFileAdapter extends RecyclerView.Adapter<CardFileAdapter.CardFileViewHolder> {
+    /**
+     * The option to have no selected card in the RecyclerView
+     */
     private static final int NO_DETAILS = -1;
     // TODO: Remove dummy amount
+
+    /**
+     * A dummy amount for the amount of card that the RecyclerView manages
+     */
     private static final int DUMMY_AMOUNT = 100;
+
+    /**
+     * The amount of cards that the RecyclerView manages
+     */
     private int mAmount = DUMMY_AMOUNT;
-    // value of the currently selected file (file card that is expanded)
+
+    /**
+     * The index of the currently selected file (file card that is expanded)
+     */
     private int mSelectedIndex = NO_DETAILS;
 
     public CardFileAdapter() {
@@ -33,6 +47,7 @@ public class CardFileAdapter extends RecyclerView.Adapter<CardFileAdapter.CardFi
      *
      * @param viewGroup view that contains other views. Used to set layout (inflate) of card
      * @param i         not used, index of the card
+     *
      * @return the CardFileViewHolder
      */
     @NonNull
@@ -56,7 +71,7 @@ public class CardFileAdapter extends RecyclerView.Adapter<CardFileAdapter.CardFi
     }
 
     /**
-     * Retreive number of items in the list.
+     * Retrieve the number of items in the list.
      *
      * @return number of items in the list
      */
