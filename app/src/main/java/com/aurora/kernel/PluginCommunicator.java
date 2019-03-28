@@ -10,7 +10,7 @@ import com.aurora.auroralib.ExtractedText;
 import com.aurora.kernel.event.ListPluginsRequest;
 import com.aurora.kernel.event.ListPluginsResponse;
 import com.aurora.kernel.event.OpenFileWithPluginRequest;
-import com.aurora.plugin.BasicPlugin;
+import com.aurora.plugin.Plugin;
 
 import java.util.List;
 
@@ -81,7 +81,7 @@ public class PluginCommunicator extends Communicator {
      */
     private void listPlugins() {
         // Get available plugins from plugin registry
-        List<BasicPlugin> pluginList = mPluginRegistry.getPlugins();
+        List<Plugin> pluginList = mPluginRegistry.getPlugins();
 
         // Make a response event and post it
         ListPluginsResponse response = new ListPluginsResponse(pluginList);

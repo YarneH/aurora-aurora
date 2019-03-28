@@ -183,7 +183,7 @@ public class CardFileAdapter extends RecyclerView.Adapter<CardFileAdapter.CardFi
             // TODO add the case that view.getId() is R.id.button_card_file
             // TODO update this preliminary code for opening a plugin.
             // TODO this should make an event to open the cached file.
-            // BasicPlugin should probably still be able to open this, but Souschef probably not
+            // Plugin should probably still be able to open this, but Souschef probably not
             if (view.getId() == R.id.button_card_file) {
                 Intent intent = new Intent(Constants.PLUGIN_ACTION);
 

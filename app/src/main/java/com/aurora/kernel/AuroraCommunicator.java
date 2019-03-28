@@ -10,7 +10,7 @@ import com.aurora.kernel.event.ListPluginsRequest;
 import com.aurora.kernel.event.ListPluginsResponse;
 import com.aurora.kernel.event.OpenFileWithPluginRequest;
 import com.aurora.kernel.event.OpenFileWithPluginResponse;
-import com.aurora.plugin.BasicPlugin;
+import com.aurora.plugin.Plugin;
 
 import java.io.InputStream;
 import java.util.List;
@@ -69,7 +69,7 @@ public class AuroraCommunicator extends Communicator {
      *
      * @return a list of basic information on every plugin wrapped in an observable
      */
-    public Observable<List<BasicPlugin>> getListOfPlugins() {
+    public Observable<List<Plugin>> getListOfPlugins() {
         Observable<ListPluginsResponse> mListPluginsResponse
                 = this.mBus.register(ListPluginsResponse.class);
         this.mBus.post(new ListPluginsRequest());

@@ -81,7 +81,7 @@ public class PluginCommunicatorTest {
 
         // Assert values
         observer.assertSubscribed();
-        observer.assertValue(mPlugin.getBasicPluginInfo().getName());
+        observer.assertValue(mPlugin.getName());
     }
 
 

@@ -1,7 +1,7 @@
 package com.aurora.kernel;
 
-import android.content.Intent;
 import android.content.Context;
+import android.content.Intent;
 
 import com.aurora.auroralib.Constants;
 import com.aurora.auroralib.ExtractedText;
@@ -9,7 +9,7 @@ import com.aurora.kernel.event.InternalProcessorRequest;
 import com.aurora.kernel.event.InternalProcessorResponse;
 import com.aurora.kernel.event.ListPluginsResponse;
 import com.aurora.kernel.event.OpenFileWithPluginRequest;
-import com.aurora.plugin.BasicPlugin;
+import com.aurora.plugin.Plugin;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -100,19 +100,19 @@ public class AuroraCommunicatorTest {
         String pluginVersion = "0.1";
 
         // Create observer to subscribe to observable
-        TestObserver<List<BasicPlugin>> observer = new TestObserver<>();
+        TestObserver<List<Plugin>> observer = new TestObserver<>();
 
         // Call the method under test
-        Observable<List<BasicPlugin>> listObservable = mAuroraCommunicator.getListOfPlugins();
+        Observable<List<Plugin>> listObservable = mAuroraCommunicator.getListOfPlugins();
 
         // Make dummy list
-        List<BasicPlugin> basicPluginList = new ArrayList<>();
+        List<Plugin> pluginList = new ArrayList<>();
 
         // Add fake basic plugin
-        basicPluginList.add(new BasicPlugin(pluginName, pluginName, null, pluginDescription, pluginVersion));
+        pluginList.add(new Plugin(pluginName, pluginName, null, pluginDescription, pluginVersion));
 
         // Make response containing the list
-        ListPluginsResponse response = new ListPluginsResponse(basicPluginList);
+        ListPluginsResponse response = new ListPluginsResponse(pluginList);
 
         // Subscribe to observable and assert that list is what expected
         listObservable.subscribe(observer);
@@ -122,7 +122,7 @@ public class AuroraCommunicatorTest {
 
         // Assert values
         observer.assertSubscribed();
-        observer.assertValue(basicPluginList);
+        observer.assertValue(pluginList);
     }
 
     /**

@@ -2,7 +2,6 @@ package com.aurora.kernel;
 
 import android.util.Log;
 
-import com.aurora.plugin.BasicPlugin;
 import com.aurora.plugin.Plugin;
 import com.google.gson.Gson;
 
@@ -63,16 +62,11 @@ class PluginRegistry {
      *
      * @return List of Plugin objects with basic information
      */
-    public List<BasicPlugin> getPlugins() {
-        List<BasicPlugin> basicPlugins = new ArrayList<>();
+    public List<Plugin> getPlugins() {
+        // Create list from the values
+        List<Plugin> plugins = new ArrayList<>(mPluginsMap.values());
 
-        // Loop over all values and extract their basic info
-        for (Plugin p : mPluginsMap.values()) {
-            // Create basic plugin
-            basicPlugins.add(p.getBasicPluginInfo());
-        }
-
-        return basicPlugins;
+        return plugins;
     }
 
     /**
@@ -130,7 +124,7 @@ class PluginRegistry {
             for (Plugin p : registeredPlugins) {
                 // TODO: add appropriate pluginenvironment and processor to the plugin
                 // Add the plugin to the map
-                mPluginsMap.put(p.getBasicPluginInfo().getUniqueName(), p);
+                mPluginsMap.put(p.getUniqueName(), p);
             }
         } catch (IOException e) {
             Log.e(PLUGINREGISTRY_LOG_TAG, "Something went wrong when reading the plugins from the config file.");
