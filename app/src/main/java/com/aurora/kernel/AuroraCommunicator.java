@@ -23,9 +23,10 @@ import io.reactivex.Observable;
 public class AuroraCommunicator extends Communicator {
     private static final String CLASS_TAG = "AuroraCommunicator";
 
-
-    // Subscribe to response event
-    Observable<OpenFileWithPluginResponse> mOpenFileWithPluginResponseObservable;
+    /**
+     * Response event for opening file
+     */
+    private Observable<OpenFileWithPluginResponse> mOpenFileWithPluginResponseObservable;
 
     public AuroraCommunicator(Bus mBus) {
         super(mBus);
@@ -42,7 +43,8 @@ public class AuroraCommunicator extends Communicator {
      * @param targetPlugin the plugin to open the file with
      * @param context      the android context
      */
-    public Observable<Boolean> openFileWithPlugin(String fileRef, InputStream file, Intent targetPlugin, Context context) {
+    public Observable<Boolean> openFileWithPlugin(String fileRef,
+                                                  InputStream file, Intent targetPlugin, Context context) {
         // Create observable to listen to
         Observable<InternalProcessorResponse> internalProcessorResponse =
                 mBus.register(InternalProcessorResponse.class);

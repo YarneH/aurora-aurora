@@ -143,7 +143,7 @@ public class MainActivity extends AppCompatActivity
                         mAuroraCommunicator.openFileWithPlugin(textFile.toString(), docFile, intent, this);
 
                 // Check the result when it comes
-                result.subscribe(res -> {
+                result.subscribe((Boolean res) -> {
                     if (!res) {
                         Toast.makeText(this, "Could not open plugin", Snackbar.LENGTH_LONG).show();
                     }

@@ -200,7 +200,7 @@ public class CardFileAdapter extends RecyclerView.Adapter<CardFileAdapter.CardFi
                 Observable<Boolean> result =
                         mKernel.getAuroraCommunicator().openFileWithPlugin(textFile, docFile, intent, mContext);
 
-                result.subscribe(res -> {
+                result.subscribe((Boolean res) -> {
                     if (!res) {
                         Toast.makeText(mContext, "The plugin could not be opened", Snackbar.LENGTH_LONG);
                     }

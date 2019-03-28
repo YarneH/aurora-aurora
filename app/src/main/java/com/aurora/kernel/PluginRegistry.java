@@ -64,9 +64,7 @@ class PluginRegistry {
      */
     public List<Plugin> getPlugins() {
         // Create list from the values
-        List<Plugin> plugins = new ArrayList<>(mPluginsMap.values());
-
-        return plugins;
+        return new ArrayList<>(mPluginsMap.values());
     }
 
     /**
