@@ -56,6 +56,7 @@ public class AuroraCommunicatorTest {
         // Assert that arguments passed are as expected
         fileRefObserver.assertSubscribed();
         fileRefObserver.assertValue(fileRef);
+        fileRefObserver.dispose();
     }
 
     @Test
@@ -90,7 +91,9 @@ public class AuroraCommunicatorTest {
         // Assure that the correct values are contained in request event
         extractedTextObserver.assertSubscribed();
         extractedTextObserver.assertValue(dummyExtractedText);
+        extractedTextObserver.dispose();
     }
+
 
     @Test
     public void AuroraCommunicator_getListOfPlugins_shouldReturnListOfPlugins() {
@@ -123,6 +126,7 @@ public class AuroraCommunicatorTest {
         // Assert values
         observer.assertSubscribed();
         observer.assertValue(pluginList);
+        observer.dispose();
     }
 
     /**

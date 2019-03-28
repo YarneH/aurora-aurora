@@ -64,6 +64,7 @@ public class AuroraInternalServiceCommunicatorTest {
         // Check if cache returned true
         testObserver.assertSubscribed();
         testObserver.assertValue(true);
+        testObserver.dispose();
     }
 
     @Test
@@ -84,6 +85,7 @@ public class AuroraInternalServiceCommunicatorTest {
         // Check if cache returned list
         testObserver.assertSubscribed();
         testObserver.assertValue(dummyList);
+        testObserver.dispose();
     }
 
     @Test
@@ -106,6 +108,7 @@ public class AuroraInternalServiceCommunicatorTest {
         // Check if cache returned specific plugin
         testObserver.assertSubscribed();
         testObserver.assertValue(dummyCachedFileString);
+        testObserver.dispose();
     }
 
     @Test
@@ -128,6 +131,7 @@ public class AuroraInternalServiceCommunicatorTest {
         // Check if cache retrieved correct plugin
         testObserver.assertSubscribed();
         testObserver.assertValue(dummyCachedFile);
+        testObserver.dispose();
     }
 
     @Test
@@ -150,6 +154,7 @@ public class AuroraInternalServiceCommunicatorTest {
         // Check if cache removed the file correctly
         testObserver.assertSubscribed();
         testObserver.assertValue(true);
+        testObserver.dispose();
     }
 
     @Test
@@ -171,6 +176,7 @@ public class AuroraInternalServiceCommunicatorTest {
         // Check if cache removed the file correctly
         testObserver.assertSubscribed();
         testObserver.assertValue(true);
+        testObserver.dispose();
     }
 
     @Test
@@ -191,6 +197,7 @@ public class AuroraInternalServiceCommunicatorTest {
         // Check if cache removed the file correctly
         testObserver.assertSubscribed();
         testObserver.assertValue(true);
+        testObserver.dispose();
     }
 
     /**

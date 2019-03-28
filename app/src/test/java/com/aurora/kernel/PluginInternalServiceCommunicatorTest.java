@@ -63,6 +63,7 @@ public class PluginInternalServiceCommunicatorTest {
         // Assert that dummy extracted text was received
         testObserver.assertSubscribed();
         testObserver.assertValue(mExtractedText);
+        testObserver.dispose();
     }
 
     /**

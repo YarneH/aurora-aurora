@@ -3,7 +3,6 @@ package com.aurora.aurora;
 import android.content.Context;
 import android.content.Intent;
 import android.support.annotation.NonNull;
-import android.support.design.widget.Snackbar;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -12,15 +11,12 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.aurora.auroralib.Constants;
 import com.aurora.kernel.Kernel;
 
 import java.io.InputStream;
 import java.util.Locale;
-
-import io.reactivex.Observable;
 
 /**
  * The adapter for the RecyclerView of the file-cards
@@ -197,14 +193,7 @@ public class CardFileAdapter extends RecyclerView.Adapter<CardFileAdapter.CardFi
                 String textFile = "DummyTextFile.docx";
                 InputStream docFile = mContext.getResources().openRawResource(R.raw.apple_crisp);
 
-                Observable<Boolean> result =
-                        mKernel.getAuroraCommunicator().openFileWithPlugin(textFile, docFile, intent, mContext);
-
-                result.subscribe((Boolean res) -> {
-                    if (!res) {
-                        Toast.makeText(mContext, "The plugin could not be opened", Snackbar.LENGTH_LONG);
-                    }
-                });
+                mKernel.getAuroraCommunicator().openFileWithPlugin(textFile, docFile, intent, mContext);
             }
         }
     }

@@ -67,7 +67,10 @@ public class PluginCommunicator extends Communicator {
         String extractedTextInJSON = extractedText.toJSON();
         targetPlugin.putExtra(Constants.PLUGIN_INPUT_EXTRACTED_TEXT, extractedTextInJSON);
 
-        if (targetPlugin.resolveActivity(context.getPackageManager()) != null) {
+        boolean pluginOpens = targetPlugin.resolveActivity(context.getPackageManager()) != null;
+
+
+        if (pluginOpens) {
             context.startActivity(chooser);
         } else {
             Toast.makeText(context, context.getString(R.string.no_plugins_available),
