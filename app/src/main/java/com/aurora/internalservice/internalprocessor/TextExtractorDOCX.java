@@ -20,16 +20,15 @@ public class TextExtractorDOCX implements TextExtractor {
      */
     @Override
     public ExtractedText extract(InputStream file, String fileRef) {
-        ExtractedText extractedText = null;
+        ExtractedText extractedText = new ExtractedText(fileRef,Calendar.getInstance().getTime());
 
         try {
             try {
                 try (XWPFDocument doc = new XWPFDocument(file)) {
-                    List<Section> sections = new ArrayList<>();
 
                     // TODO Write actual logic to extract the title and parse the file
                     for (XWPFParagraph paragraph : doc.getParagraphs()) {
-                        sections.add(new Section("",paragraph.getText(),null));
+                        extractedText.addSection(new Section("",paragraph.getText(),null));
 
                         // TODO Remove unnecessary Log
                         Log.d("DOCX", paragraph.getText());
@@ -38,7 +37,6 @@ public class TextExtractorDOCX implements TextExtractor {
                     // TODO Implement extracting images from .docx
 
                     extractedText = new ExtractedText(fileRef, Calendar.getInstance().getTime());
-                    extractedText.setSections(sections);
                 }
             } finally {
                 file.close();

@@ -85,7 +85,10 @@ public class ExtractedText implements InternallyProcessedFile {
      *
      * @param section the section to add
      */
-    public void addSection(Section section) {
+    void addSection(Section section) {
+        if(sections == null){
+            sections = new ArrayList<>();
+        }
         sections.add(section);
     }
 
