@@ -30,6 +30,8 @@ import com.aurora.kernel.Kernel;
 
 import java.io.InputStream;
 
+import io.reactivex.Observable;
+
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
@@ -99,12 +101,12 @@ public class MainActivity extends AppCompatActivity
     /**
      * Creates an intent to open the file manager. Can currently only select pdf files;
      * If more filetypes need to be opened, use a final String[], for example:
-     *
+     * <p>
      * final String[] ACCEPT_MIME_TYPES = {
-     *         "application/pdf",
-     *         "image/*"
-     *   };
-     *
+     * "application/pdf",
+     * "image/*"
+     * };
+     * <p>
      * Intent intent = new Intent();
      * intent.setType("* / *");
      * intent.setAction(Intent.ACTION_GET_CONTENT);
@@ -120,9 +122,10 @@ public class MainActivity extends AppCompatActivity
 
     /**
      * In this case when selectFile()'s intent returns
+     *
      * @param requestCode code used to send the intent
-     * @param resultCode status code
-     * @param data resulting data, a Uri in case of fileselector
+     * @param resultCode  status code
+     * @param data        resulting data, a Uri in case of fileselector
      */
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -136,7 +139,15 @@ public class MainActivity extends AppCompatActivity
             InputStream docFile = getResources().openRawResource(R.raw.apple_crisp);
 
             if (textFile != null) {
-                mAuroraCommunicator.openFileWithPlugin(textFile.toString(), docFile, intent, this);
+                Observable<Boolean> result =
+                        mAuroraCommunicator.openFileWithPlugin(textFile.toString(), docFile, intent, this);
+
+                // Check the result when it comes
+                result.subscribe(res -> {
+                    if (!res) {
+                        Toast.makeText(this, "Could not open plugin", Snackbar.LENGTH_LONG).show();
+                    }
+                });
             } else {
                 Toast.makeText(this, "The selected file was null", Snackbar.LENGTH_LONG).show();
             }
