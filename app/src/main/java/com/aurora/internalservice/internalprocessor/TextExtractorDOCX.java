@@ -4,6 +4,7 @@ import android.util.Log;
 
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
@@ -36,7 +37,7 @@ public class TextExtractorDOCX implements TextExtractor {
 
                     // TODO Implement extracting images from .docx
 
-                    extractedText = new ExtractedText();
+                    extractedText = new ExtractedText(fileRef, Calendar.getInstance().getTime());
                     extractedText.setSections(sections);
                 }
             } finally {

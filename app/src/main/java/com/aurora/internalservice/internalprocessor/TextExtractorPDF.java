@@ -1,6 +1,7 @@
 package com.aurora.internalservice.internalprocessor;
 
 import java.io.InputStream;
+import java.util.Calendar;
 
 public class TextExtractorPDF implements TextExtractor {
     /**
@@ -10,6 +11,6 @@ public class TextExtractorPDF implements TextExtractor {
      */
     @Override
     public ExtractedText extract(InputStream file, String fileRef) {
-        return new ExtractedText();
+        return new ExtractedText(fileRef, Calendar.getInstance().getTime());
     }
 }

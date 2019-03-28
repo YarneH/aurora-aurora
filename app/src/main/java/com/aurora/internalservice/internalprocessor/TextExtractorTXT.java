@@ -2,9 +2,12 @@ package com.aurora.internalservice.internalprocessor;
 
 import android.util.Log;
 
+import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
@@ -20,13 +23,13 @@ public class TextExtractorTXT implements TextExtractor {
     @Override
     public ExtractedText extract(InputStream file, String fileRef) {
         String content = extractStringFromTXT(file, fileRef);
-        String[] splitContent = content.split("\n");
+        String[] splitContent = content.split("\n\n");
         List<Section> sections = new ArrayList<>();
         String title = "";
-        if (splitContent.length > 3) {
+        if (splitContent.length > 1) {
             title = splitContent[0];
             for (int i = 1; i < splitContent.length; i++) {
-                sections.add(new Section("", splitContent[i], null));
+                sections.add(new Section("", splitContent[i], new ArrayList<>()));
             }
         }
         return new ExtractedText(fileRef, Calendar.getInstance().getTime(), title, new ArrayList<>(), sections);
@@ -41,15 +44,17 @@ public class TextExtractorTXT implements TextExtractor {
      */
     private String extractStringFromTXT(InputStream inputStream, String fileRef) {
         try {
-            // Use this for reading the data.
-            byte[] buffer = new byte[1000];
             // read fills buffer with data and returns
-            StringBuilder outcome = new StringBuilder();
-            while (inputStream.read(buffer) != -1) {
-                outcome.append(new String(buffer));
-            }
+            Reader reader = new InputStreamReader(inputStream);
+            BufferedReader br = new BufferedReader(reader);
 
-            inputStream.close();
+            StringBuilder outcome = new StringBuilder();
+            String line;
+            while ((line = br.readLine()) != null) {
+                outcome.append(line);
+                outcome.append('\n');
+            }
+            br.close();
             Log.d("TXT", outcome.toString());
             return outcome.toString();
         } catch (FileNotFoundException ex) {
@@ -60,4 +65,5 @@ public class TextExtractorTXT implements TextExtractor {
         return null;
 
     }
+
 }
