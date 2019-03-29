@@ -1,6 +1,6 @@
 package com.aurora.kernel;
 
-import com.aurora.internalservice.internalprocessor.ExtractedText;
+import com.aurora.auroralib.ExtractedText;
 import com.aurora.internalservice.internalprocessor.FileTypeNotSupportedException;
 import com.aurora.internalservice.internalprocessor.InternalTextProcessor;
 import com.aurora.kernel.event.InternalProcessorRequest;
@@ -15,6 +15,7 @@ import java.util.List;
 
 import io.reactivex.Observable;
 import io.reactivex.observers.TestObserver;
+import io.reactivex.schedulers.Schedulers;
 
 public class PluginInternalServiceCommunicatorTest {
 
@@ -29,7 +30,7 @@ public class PluginInternalServiceCommunicatorTest {
     @BeforeClass
     public static void initialize() {
         // Initialize bus
-        mBus = new Bus();
+        mBus = new Bus(Schedulers.trampoline());
 
         // Initialize processor
         mProcessor = new DummyInternalTextProcessing();
@@ -62,6 +63,7 @@ public class PluginInternalServiceCommunicatorTest {
         // Assert that dummy extracted text was received
         testObserver.assertSubscribed();
         testObserver.assertValue(mExtractedText);
+        testObserver.dispose();
     }
 
     /**

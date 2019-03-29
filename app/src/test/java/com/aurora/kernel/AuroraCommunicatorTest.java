@@ -1,21 +1,28 @@
 package com.aurora.kernel;
 
-import android.app.Activity;
-import android.support.v4.app.Fragment;
+import android.content.Context;
+import android.content.Intent;
 
+import com.aurora.auroralib.Constants;
+import com.aurora.auroralib.ExtractedText;
+import com.aurora.kernel.event.InternalProcessorRequest;
+import com.aurora.kernel.event.InternalProcessorResponse;
 import com.aurora.kernel.event.ListPluginsResponse;
-import com.aurora.kernel.event.OpenFileWithPluginResponse;
-import com.aurora.kernel.event.PluginSettingsResponse;
-import com.aurora.plugin.BasicPlugin;
+import com.aurora.kernel.event.OpenFileWithPluginRequest;
+import com.aurora.plugin.Plugin;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import io.reactivex.Observable;
 import io.reactivex.observers.TestObserver;
+import io.reactivex.schedulers.Schedulers;
 
 
 public class AuroraCommunicatorTest {
@@ -25,84 +32,90 @@ public class AuroraCommunicatorTest {
 
     @BeforeClass
     public static void initialize() {
-        mBus = new Bus();
+        mBus = new Bus(Schedulers.trampoline());
         mAuroraCommunicator = new AuroraCommunicator(mBus);
     }
 
     @Test
-    public void AuroraCommunicator_openFileWithPlugin_shouldReturnPluginFragment() {
-        // Create dummy arguments
-        String dummyPluginName = "Dummyplugin";
-        String fileRef = "/path/to/file";
+    public void AuroraCommunicator_openFileWithPlugin_shouldSendProcessRequest() {
+        // Subscribe to request
+        Observable<InternalProcessorRequest> requestObservable = mBus.register(InternalProcessorRequest.class);
 
-        // Create test observer to subscribe to the observable
-        TestObserver<Fragment> subscriber = new TestObserver<>();
+        // Create test observer
+        TestObserver<String> fileRefObserver = new TestObserver<>();
 
-        // Call the method
-        Observable<Fragment> fragmentObservable = mAuroraCommunicator.openFileWithPlugin(dummyPluginName, null, fileRef);
+        // Subscribe to observable
+        requestObservable.map(InternalProcessorRequest::getFileRef).subscribe(fileRefObserver);
 
-        // Make dummy fragment and response
-        Fragment dummyFragment = new DummyFragment();
-        OpenFileWithPluginResponse response = new OpenFileWithPluginResponse(dummyFragment);
+        // Call method under test
+        String fileRef = "Dummy/file/ref";
+        InputStream file = new DummyInputStream();
+        Intent targetPlugin = new Intent(Constants.PLUGIN_ACTION);
+        mAuroraCommunicator.openFileWithPlugin(fileRef, file, targetPlugin, new Context());
 
-        // Subscribe to observable and assert fragment is what expected
-        fragmentObservable.subscribe(subscriber);
-
-        // Post response
-        mBus.post(response);
-
-        // Assert values
-        subscriber.assertSubscribed();
-        subscriber.assertValue(dummyFragment);
+        // Assert that arguments passed are as expected
+        fileRefObserver.assertSubscribed();
+        fileRefObserver.assertValue(fileRef);
+        fileRefObserver.dispose();
     }
 
     @Test
-    public void AuroraCommunicator_getSettingsOfPlugin_shouldReturnSettingsActivityClass() {
-        // Create dummy argument
-        String dummyPluginName = "Dummyplugin";
+    public void AuroraCommunicator_openFileWithPlugin_shouldSendOpenFileWithPluginRequestAfterExtractingText() {
+        // Create observable of internal processor request
+        Observable<InternalProcessorRequest> internalProcessorRequestObservable = mBus.register(InternalProcessorRequest.class);
 
-        // Create test observer to subscribe to the observable
-        TestObserver<Class<? extends Activity>> activityObserver = new TestObserver<>();
+        // Subscribe to observable to send response event
+        ExtractedText dummyExtractedText = new ExtractedText("Bla", Arrays.asList("Dummy", "Paragraph"));
+        internalProcessorRequestObservable.subscribe(internalProcessorRequest ->
+                mBus.post(new InternalProcessorResponse(dummyExtractedText)));
+
+        // Create observable of open file with plugin request
+        Observable<OpenFileWithPluginRequest> openFileWithPluginRequestObservable =
+                mBus.register(OpenFileWithPluginRequest.class);
+
+        // Create test observer
+        TestObserver<ExtractedText> extractedTextObserver = new TestObserver<>();
+
+        // Subscribe to observable
+        openFileWithPluginRequestObservable
+                .map(OpenFileWithPluginRequest::getExtractedText)
+                .subscribe(extractedTextObserver);
+
 
         // Call the method under test
-        Observable<Class<? extends Activity>> activityObservable = mAuroraCommunicator.getSettingsOfPlugin(dummyPluginName);
+        String dummyFileRef = "dummy/path/to/file";
+        InputStream file = new DummyInputStream();
+        Intent dummyPlugin = new Intent(Constants.PLUGIN_ACTION);
+        mAuroraCommunicator.openFileWithPlugin(dummyFileRef, file, dummyPlugin, new Context());
 
-        // Make dummy Class and response
-        Class<? extends Activity> className = DummyActivity.class;
-        PluginSettingsResponse response = new PluginSettingsResponse(className);
-
-        // Subscribe to observable and assert that activity is what expected
-        activityObservable.subscribe(activityObserver);
-
-        // Post response
-        mBus.post(response);
-
-        // Assert values
-        activityObserver.assertSubscribed();
-        activityObserver.assertValue(className);
+        // Assure that the correct values are contained in request event
+        extractedTextObserver.assertSubscribed();
+        extractedTextObserver.assertValue(dummyExtractedText);
+        extractedTextObserver.dispose();
     }
 
+
     @Test
-    public void AuroraCommunicator_getListOfPLugins_shouldReturnListOfPLugins() {
+    public void AuroraCommunicator_getListOfPlugins_shouldReturnListOfPlugins() {
         // Create dummy arguments
         String pluginName = "DummyPlugin";
         String pluginDescription = "this is a dummy description.";
         String pluginVersion = "0.1";
 
         // Create observer to subscribe to observable
-        TestObserver<List<BasicPlugin>> observer = new TestObserver<>();
+        TestObserver<List<Plugin>> observer = new TestObserver<>();
 
         // Call the method under test
-        Observable<List<BasicPlugin>> listObservable = mAuroraCommunicator.getListOfPlugins();
+        Observable<List<Plugin>> listObservable = mAuroraCommunicator.getListOfPlugins();
 
         // Make dummy list
-        List<BasicPlugin> basicPluginList = new ArrayList<>();
+        List<Plugin> pluginList = new ArrayList<>();
 
         // Add fake basic plugin
-        basicPluginList.add(new BasicPlugin(pluginName, null, pluginDescription, pluginVersion));
+        pluginList.add(new Plugin(pluginName, pluginName, null, pluginDescription, pluginVersion));
 
         // Make response containing the list
-        ListPluginsResponse response = new ListPluginsResponse(basicPluginList);
+        ListPluginsResponse response = new ListPluginsResponse(pluginList);
 
         // Subscribe to observable and assert that list is what expected
         listObservable.subscribe(observer);
@@ -112,18 +125,19 @@ public class AuroraCommunicatorTest {
 
         // Assert values
         observer.assertSubscribed();
-        observer.assertValue(basicPluginList);
+        observer.assertValue(pluginList);
+        observer.dispose();
     }
 
     /**
-     * Private dummy activity class for testing purposes
+     * Dummy stub class for testing purposes
      */
-    private class DummyActivity extends Activity {
+    private class DummyInputStream extends InputStream {
+
+        @Override
+        public int read() throws IOException {
+            return 0;
+        }
     }
 
-    /**
-     * Private dummy fragment class for testing purposes
-     */
-    private class DummyFragment extends Fragment {
-    }
 }

@@ -1,25 +1,17 @@
 package com.aurora.kernel;
 
-import android.app.Activity;
-import android.support.v4.app.Fragment;
+import android.content.Context;
+import android.content.Intent;
+import android.widget.Toast;
 
-import com.aurora.aurora.NotFoundActivity;
-import com.aurora.aurora.NotFoundFragment;
-import com.aurora.externalservice.PluginEnvironment;
-import com.aurora.kernel.event.InternalProcessorRequest;
-import com.aurora.kernel.event.ListPluginsResponse;
+import com.aurora.aurora.R;
+import com.aurora.auroralib.Constants;
+import com.aurora.auroralib.ExtractedText;
 import com.aurora.kernel.event.ListPluginsRequest;
+import com.aurora.kernel.event.ListPluginsResponse;
 import com.aurora.kernel.event.OpenFileWithPluginRequest;
-import com.aurora.kernel.event.OpenFileWithPluginResponse;
-import com.aurora.kernel.event.PluginProcessorRequest;
-import com.aurora.kernel.event.PluginProcessorResponse;
-import com.aurora.kernel.event.PluginSettingsRequest;
-import com.aurora.kernel.event.PluginSettingsResponse;
-import com.aurora.plugin.BasicPlugin;
-import com.aurora.plugin.ProcessedText;
-import com.aurora.processingservice.PluginProcessor;
+import com.aurora.plugin.Plugin;
 
-import java.io.InputStream;
 import java.util.List;
 
 import io.reactivex.Observable;
@@ -28,10 +20,11 @@ import io.reactivex.Observable;
  * Communicator that communicates with Plugin environments
  */
 public class PluginCommunicator extends Communicator {
+    private static final String CLASS_TAG = "PluginCommunicator";
+
     private PluginRegistry mPluginRegistry;
 
     private Observable<OpenFileWithPluginRequest> mOpenFileWithPluginRequestObservable;
-    private Observable<PluginSettingsRequest> mPluginSettingsRequestObservable;
     private Observable<ListPluginsRequest> mListPluginsRequestObservable;
 
 
@@ -44,81 +37,45 @@ public class PluginCommunicator extends Communicator {
         mOpenFileWithPluginRequestObservable = mBus.register(OpenFileWithPluginRequest.class);
 
         // When a request comes in, call appropriate function
-        mOpenFileWithPluginRequestObservable.subscribe((OpenFileWithPluginRequest openFileWithPluginRequest) ->
-                openFileWithPlugin(openFileWithPluginRequest.getPluginName(),
-                        openFileWithPluginRequest.getFile() ,openFileWithPluginRequest.getFileRef())
-        );
-
-        // Register for requests to show settings
-        mPluginSettingsRequestObservable = mBus.register(PluginSettingsRequest.class);
-
-        // When a request comes in, call the appropriate function
-        mPluginSettingsRequestObservable.subscribe((PluginSettingsRequest pluginSettingsRequest) ->
-                getSettingsActivity(pluginSettingsRequest.getPluginName())
+        mOpenFileWithPluginRequestObservable.subscribe((OpenFileWithPluginRequest request) ->
+                openFileWithPlugin(request.getExtractedText(),
+                        request.getTargetPlugin(), request.getContext())
         );
 
         // Register for requests to list available plugins
         mListPluginsRequestObservable = mBus.register(ListPluginsRequest.class);
 
         // When a request comes in, call the appropriate function
-        mListPluginsRequestObservable.subscribe((ListPluginsRequest listPluginsRequest) ->
-                listPlugins()
-        );
+        mListPluginsRequestObservable.subscribe((ListPluginsRequest listPluginsRequest) -> listPlugins());
     }
 
-    /**
-     * Requests the settings of a given plugin in the plugin registry
-     *
-     * @param pluginName the name of the plugin to get the settings for
-     */
-    private void getSettingsActivity(String pluginName) {
-        // Load the plugin
-        PluginEnvironment plugin = mPluginRegistry.loadPlugin(pluginName);
-
-        // Get the settings from the plugin
-        Class<? extends Activity> settingsActivity;
-
-        if (plugin != null) {
-            settingsActivity = plugin.getSettingsActivity();
-        } else {
-            // Create not found activity
-            settingsActivity = NotFoundActivity.class;
-        }
-
-        // Create a response and post it, response will contain null if plugin was not found
-        PluginSettingsResponse pluginSettingsResponse = new PluginSettingsResponse(settingsActivity);
-
-        mBus.post(pluginSettingsResponse);
-    }
 
     /**
      * Opens a file with a given plugin
      *
-     * @param pluginName the name of the plugin to get the settings for
-     * @param fileRef    a reference to the file to process
+     * @param extractedText the extracted text of the file to open
+     * @param targetPlugin  the plugin to open the file with
+     *                      TODO: add tests for this method
+     * @param context       the android context
      */
-    private void openFileWithPlugin(String pluginName, InputStream file, String fileRef) {
-        PluginEnvironment plugin =  mPluginRegistry.loadPlugin(pluginName);
+    private void openFileWithPlugin(ExtractedText extractedText, Intent targetPlugin, Context context) {
+        // TODO: fire intent to given plugin containing the extracted text
 
-        /*TODO: Unclear where InternalProcessing will be called from in the reworked Kernel.
-        * Put it here because the plugin doesn't need to be known.
-        * */
-        // TODO This will return an event, handle this
-        this.mBus.post(new InternalProcessorRequest(file, fileRef));
+        // Create chooser
+        Intent chooser = Intent.createChooser(targetPlugin, context.getString(R.string.select_plugin));
 
-        Fragment pluginFragment;
+        String extractedTextInJSON = extractedText.toJSON();
+        targetPlugin.putExtra(Constants.PLUGIN_INPUT_EXTRACTED_TEXT, extractedTextInJSON);
 
-        if (plugin != null) {
-            pluginFragment = plugin.openFile(fileRef);
+        boolean pluginOpens = targetPlugin.resolveActivity(context.getPackageManager()) != null;
+
+
+        if (pluginOpens) {
+            context.startActivity(chooser);
         } else {
-            // Create not found fragment
-            pluginFragment = new NotFoundFragment();
+            Toast.makeText(context, context.getString(R.string.no_plugins_available),
+                    Toast.LENGTH_LONG).show();
         }
-
-        // Create a response and post it, response will contain null if plugin was not found
-        OpenFileWithPluginResponse pluginResponse = new OpenFileWithPluginResponse(pluginFragment);
-
-        mBus.post(pluginResponse);
     }
 
     /**
@@ -127,28 +84,10 @@ public class PluginCommunicator extends Communicator {
      */
     private void listPlugins() {
         // Get available plugins from plugin registry
-        List<BasicPlugin> pluginList = mPluginRegistry.getPlugins();
+        List<Plugin> pluginList = mPluginRegistry.getPlugins();
 
         // Make a response event and post it
         ListPluginsResponse response = new ListPluginsResponse(pluginList);
         mBus.post(response);
     }
-
-
-    /**
-     * Delegates work to a certain pluginProcessor and returns processed text when ready
-     *
-     * @param pluginProcessor the pluginProcessor to process the file with
-     * @param fileRef         a reference to the file to process
-     * @return an observable containing the processed text
-     */
-    public Observable<ProcessedText> processFileWithPluginProcessor(PluginProcessor pluginProcessor, String fileRef) {
-        Observable<PluginProcessorResponse> mPluginProcessorResponseObservable
-                = mBus.register(PluginProcessorResponse.class);
-        this.mBus.post(new PluginProcessorRequest(pluginProcessor, fileRef));
-
-        return mPluginProcessorResponseObservable.map(PluginProcessorResponse::getProcessedText);
-    }
-
-
 }

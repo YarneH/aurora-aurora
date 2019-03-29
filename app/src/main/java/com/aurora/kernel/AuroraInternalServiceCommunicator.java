@@ -1,5 +1,6 @@
 package com.aurora.kernel;
 
+import com.aurora.auroralib.PluginObject;
 import com.aurora.internalservice.internalcache.CachedProcessedFile;
 import com.aurora.internalservice.internalcache.InternalCache;
 import com.aurora.kernel.event.CacheFileRequest;
@@ -10,7 +11,6 @@ import com.aurora.kernel.event.RemoveFromCacheRequest;
 import com.aurora.kernel.event.RemoveFromCacheResponse;
 import com.aurora.kernel.event.RetrieveFileFromCacheRequest;
 import com.aurora.kernel.event.RetrieveFileFromCacheResponse;
-import com.aurora.plugin.ProcessedText;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -55,7 +55,7 @@ public class AuroraInternalServiceCommunicator extends Communicator {
 
         // When event comes in, call the appropriate handle method
         mCacheFileRequestObservable.subscribe(cacheFileRequest -> cacheFile(cacheFileRequest.getFileRef(),
-                cacheFileRequest.getText(), cacheFileRequest.getUniquePluginName()));
+                cacheFileRequest.getPluginObject(), cacheFileRequest.getUniquePluginName()));
 
         // Subscribe to incoming query requests
         mQueryCacheRequestObservable = mBus.register(QueryCacheRequest.class);
@@ -97,12 +97,12 @@ public class AuroraInternalServiceCommunicator extends Communicator {
      * Private handle method that handles CacheFileRequests
      *
      * @param fileRef          a reference to the file that needs to be cached
-     * @param processedText    the processed text representation that needs to be cached
+     * @param pluginObject    the processed text representation that needs to be cached
      * @param uniquePluginName the name of the plugin that built the representation
      */
-    private void cacheFile(String fileRef, ProcessedText processedText, String uniquePluginName) {
+    private void cacheFile(String fileRef, PluginObject pluginObject, String uniquePluginName) {
         // Cache file
-        boolean cacheSuccess = mInternalCache.cacheFile(fileRef, processedText, uniquePluginName);
+        boolean cacheSuccess = mInternalCache.cacheFile(fileRef, pluginObject, uniquePluginName);
 
         // Create response and post it
         CacheFileResponse response = new CacheFileResponse(cacheSuccess);

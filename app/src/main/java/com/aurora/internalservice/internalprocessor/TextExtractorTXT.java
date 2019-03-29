@@ -1,5 +1,7 @@
 package com.aurora.internalservice.internalprocessor;
 
+import com.aurora.auroralib.ExtractedText;
+
 import java.io.InputStream;
 
 public class TextExtractorTXT implements TextExtractor {
