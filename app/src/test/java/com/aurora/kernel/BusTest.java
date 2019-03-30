@@ -2,11 +2,11 @@ package com.aurora.kernel;
 
 import com.aurora.kernel.event.Event;
 
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 import io.reactivex.Observable;
+import io.reactivex.schedulers.Schedulers;
 
 import static org.junit.Assert.assertEquals;
 
@@ -17,7 +17,7 @@ public class BusTest {
     @BeforeClass
     public static void initialize() {
         // Allocate bus
-        mBus = new Bus();
+        mBus = new Bus(Schedulers.trampoline());
     }
 
     @Test

@@ -13,6 +13,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
 
+import io.reactivex.schedulers.Schedulers;
+
 /**
  * Wrapper class that wraps all communicators and instantiates the unique event bus
  */
@@ -34,7 +36,7 @@ public final class Kernel {
      * Starts and creates all communicators, keeping references
      */
     public Kernel() {
-        this.mBus = new Bus();
+        this.mBus = new Bus(Schedulers.computation());
 
         this.mAuroraCommunicator = new AuroraCommunicator(mBus);
 

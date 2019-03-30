@@ -2,6 +2,8 @@ package com.aurora.internalservice.internalprocessor;
 
 import android.util.Log;
 
+import com.aurora.auroralib.ExtractedText;
+
 import java.io.InputStream;
 import java.util.List;
 

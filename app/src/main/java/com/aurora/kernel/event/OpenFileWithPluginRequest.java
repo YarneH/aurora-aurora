@@ -1,31 +1,45 @@
 package com.aurora.kernel.event;
 
-import java.io.InputStream;
+import android.content.Context;
+import android.content.Intent;
+
+import com.aurora.auroralib.ExtractedText;
 
 /**
  * Event to request that a file is opened with a plugin
  */
 public class OpenFileWithPluginRequest extends Event {
-    private String mPluginName;
-    private InputStream mFile;
-    private String mFileRef;
+    /**
+     * The extracted text from the file to represent
+     */
+    private ExtractedText mExtractedText;
 
-    public OpenFileWithPluginRequest(String pluginName, InputStream file, String fileRef){
-        super();
-        this.mPluginName = pluginName;
-        this.mFile = file;
-        this.mFileRef = fileRef;
+    /**
+     * The plugin to open the file with
+     */
+    private Intent mTargetPlugin;
+
+    /**
+     * The android context
+     */
+    private Context mContext;
+
+    public OpenFileWithPluginRequest(ExtractedText extractedText, Intent targetPlugin, Context context) {
+        mExtractedText = extractedText;
+        mTargetPlugin = targetPlugin;
+        mContext = context;
     }
 
-    public String getPluginName() {
-        return mPluginName;
+    public ExtractedText getExtractedText() {
+        return mExtractedText;
     }
 
-    public InputStream getFile() {
-        return mFile;
+    public Intent getTargetPlugin() {
+        return mTargetPlugin;
     }
 
-    public String getFileRef() {
-        return mFileRef;
+    public Context getContext() {
+        return mContext;
     }
+
 }
