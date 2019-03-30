@@ -143,7 +143,8 @@ public class MainActivity extends AppCompatActivity
                     Toast.makeText(this, "The selected file was null", Snackbar.LENGTH_LONG).show();
                 }
             } catch (FileNotFoundException e) {
-                e.printStackTrace();
+                Toast.makeText(this, "The file could not be found", Snackbar.LENGTH_LONG).show();
+                Log.e("FILE_NOT_FOUND", "The file could not be found", e);
             }
 
 

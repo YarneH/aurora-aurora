@@ -100,6 +100,7 @@ public class TextExtractorDOCX implements TextExtractor {
         return paragraph.replaceAll("[\\r\\n]+", "").trim();
     }
 
+    // Not used
     private void appendBodyElementText(ExtractedText text, IBodyElement e) {
         if (e instanceof XWPFParagraph) {
             appendParagraphText(text, (XWPFParagraph) e);
@@ -110,6 +111,7 @@ public class TextExtractorDOCX implements TextExtractor {
         }
     }
 
+    // Not used
     private void appendParagraphText(ExtractedText text, XWPFParagraph paragraph) {
         for (IRunElement run : paragraph.getRuns()) {
             if (run instanceof XWPFRun) {
@@ -121,6 +123,7 @@ public class TextExtractorDOCX implements TextExtractor {
         }
     }
 
+    // Not used
     private void appendTableText(ExtractedText text, XWPFTable table) {
         //this works recursively to pull embedded tables from tables
         for (XWPFTableRow row : table.getRows()) {
