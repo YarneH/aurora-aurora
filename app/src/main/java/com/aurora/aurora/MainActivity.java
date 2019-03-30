@@ -16,6 +16,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -28,6 +29,7 @@ import com.aurora.auroralib.Constants;
 import com.aurora.kernel.AuroraCommunicator;
 import com.aurora.kernel.Kernel;
 
+import java.io.FileNotFoundException;
 import java.io.InputStream;
 
 public class MainActivity extends AppCompatActivity
@@ -132,15 +134,20 @@ public class MainActivity extends AppCompatActivity
 
             Intent intent = new Intent(Constants.PLUGIN_ACTION);
 
-            // TODO Remove this test code
-            // Note: this is basically mixed code as a result of a merge. This test code will be removed ASAP
-            InputStream docFile = getResources().openRawResource(R.raw.apple_crisp);
-
-            if (textFile != null) {
-                mAuroraCommunicator.openFileWithPlugin(textFile.toString(), docFile, intent, this);
-            } else {
-                Toast.makeText(this, "The selected file was null", Snackbar.LENGTH_LONG).show();
+            try {
+                if (textFile != null) {
+                    Log.i("URI", textFile.toString());
+                    InputStream read = getContentResolver().openInputStream(textFile);
+                    mAuroraCommunicator.openFileWithPlugin(textFile.toString(), read, intent, this);
+                } else {
+                    Toast.makeText(this, "The selected file was null", Snackbar.LENGTH_LONG).show();
+                }
+            } catch (FileNotFoundException e) {
+                Toast.makeText(this, "The file could not be found", Snackbar.LENGTH_LONG).show();
+                Log.e("FILE_NOT_FOUND", "The file could not be found", e);
             }
+
+
         }
     }
 
