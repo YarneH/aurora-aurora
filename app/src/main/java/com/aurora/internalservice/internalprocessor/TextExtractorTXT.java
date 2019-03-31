@@ -25,17 +25,19 @@ public class TextExtractorTXT implements TextExtractor {
      */
     @Override
     public ExtractedText extract(InputStream file, String fileRef) {
+        ExtractedText extractedText = new ExtractedText(fileRef, Calendar.getInstance().getTime());
         String content = extractStringFromTXT(file, fileRef);
-        String[] splitContent = content.split("\n\n");
-        List<Section> sections = new ArrayList<>();
-        String title = "";
+        String[] splitContent = new String[0];
+        if (content != null) {
+            splitContent = content.split("\n\n");
+        }
         if (splitContent.length > 1) {
-            title = splitContent[0];
+            extractedText.setTitle(splitContent[0]);
             for (int i = 1; i < splitContent.length; i++) {
-                sections.add(new Section("", splitContent[i], new ArrayList<>()));
+                extractedText.addSimpleSection(splitContent[i]);
             }
         }
-        return new ExtractedText(fileRef, Calendar.getInstance().getTime(), title, new ArrayList<>(), sections);
+        return extractedText;
     }
 
     /**
