@@ -30,6 +30,10 @@ public class Section {
 
     @Override
     public String toString() {
-        return title + "\n" + body + "\n";
+        if (title != null && body != null){
+            return title + "\n" + body + "\n";
+        } else if (body != null){
+            return body + "\n";
+        } else return "Empty paragraph.\n";
     }
 }
