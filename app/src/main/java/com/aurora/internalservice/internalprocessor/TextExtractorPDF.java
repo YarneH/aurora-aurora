@@ -13,6 +13,6 @@ public class TextExtractorPDF implements TextExtractor {
      */
     @Override
     public ExtractedText extract(InputStream file, String fileRef) {
-        return new ExtractedText(fileRef, Calendar.getInstance().getTime());
+        return new ExtractedText(fileRef, null);
     }
 }
