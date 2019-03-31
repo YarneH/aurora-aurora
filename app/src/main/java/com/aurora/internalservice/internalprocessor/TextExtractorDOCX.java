@@ -5,7 +5,6 @@ import android.util.Log;
 import com.aurora.auroralib.ExtractedText;
 
 import java.io.InputStream;
-import java.util.Calendar;
 import java.util.List;
 
 import org.apache.poi.xwpf.usermodel.IBodyElement;
@@ -31,7 +30,7 @@ public class TextExtractorDOCX implements TextExtractor {
      */
     @Override
     public ExtractedText extract(InputStream file, String fileRef) {
-        ExtractedText extractedText = new ExtractedText(fileRef, Calendar.getInstance().getTime());
+        ExtractedText extractedText = new ExtractedText(fileRef, null);
 
         try {
             try (XWPFDocument doc = new XWPFDocument(file)) {

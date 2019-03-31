@@ -1,7 +1,6 @@
 package com.aurora.internalservice.internalprocessor;
 
 import java.io.InputStream;
-import java.util.Calendar;
 
 import com.aurora.auroralib.ExtractedText;
 

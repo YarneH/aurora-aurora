@@ -3,7 +3,6 @@ package com.aurora.internalservice.internalprocessor;
 import android.util.Log;
 
 import com.aurora.auroralib.ExtractedText;
-import com.aurora.auroralib.Section;
 
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
@@ -11,9 +10,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.List;
 
 public class TextExtractorTXT implements TextExtractor {
 
@@ -25,7 +21,7 @@ public class TextExtractorTXT implements TextExtractor {
      */
     @Override
     public ExtractedText extract(InputStream file, String fileRef) {
-        ExtractedText extractedText = new ExtractedText(fileRef, Calendar.getInstance().getTime());
+        ExtractedText extractedText = new ExtractedText(fileRef, null);
         String content = extractStringFromTXT(file, fileRef);
         String[] splitContent = new String[0];
         if (content != null) {

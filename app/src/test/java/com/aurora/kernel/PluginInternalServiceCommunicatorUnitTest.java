@@ -11,7 +11,6 @@ import org.junit.Test;
 
 import java.io.InputStream;
 import java.util.Arrays;
-import java.util.Calendar;
 import java.util.List;
 
 import io.reactivex.Observable;
@@ -40,7 +39,7 @@ public class PluginInternalServiceCommunicatorUnitTest {
         mCommunicator = new PluginInternalServiceCommunicator(mBus, mProcessor);
 
         // Initialize extracted text with dummy contents
-        mExtractedText = new ExtractedText(mTitle, Calendar.getInstance().getTime(), mParagraphs);
+        mExtractedText = new ExtractedText(mTitle, null, mParagraphs);
     }
 
     @Test
