@@ -11,6 +11,7 @@ import org.junit.Test;
 
 import java.io.InputStream;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.List;
 
 import io.reactivex.Observable;
@@ -39,7 +40,7 @@ public class PluginInternalServiceCommunicatorUnitTest {
         mCommunicator = new PluginInternalServiceCommunicator(mBus, mProcessor);
 
         // Initialize extracted text with dummy contents
-        mExtractedText = new ExtractedText(mTitle, mParagraphs);
+        mExtractedText = new ExtractedText(mTitle, Calendar.getInstance().getTime(), mParagraphs);
     }
 
     @Test
@@ -57,7 +58,7 @@ public class PluginInternalServiceCommunicatorUnitTest {
         observable.map(InternalProcessorResponse::getExtractedText).subscribe(testObserver);
 
         // Create request to process file and put on bus
-        InternalProcessorRequest request = new InternalProcessorRequest(null ,ref);
+        InternalProcessorRequest request = new InternalProcessorRequest(null, ref);
         mBus.post(request);
 
         // Assert that dummy extracted text was received
@@ -77,7 +78,7 @@ public class PluginInternalServiceCommunicatorUnitTest {
          *
          * @param fileRef a reference to where the file can be found
          * @return dummy extracted text
-         * @throws FileTypeNotSupportedException
+         * @throws FileTypeNotSupportedException thrown when a file with an unsupported extension is opened
          */
         @Override
         public ExtractedText processFile(InputStream file, String fileRef) throws FileTypeNotSupportedException {

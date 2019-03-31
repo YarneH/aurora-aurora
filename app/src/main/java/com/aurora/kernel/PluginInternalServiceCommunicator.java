@@ -47,25 +47,25 @@ public class PluginInternalServiceCommunicator extends Communicator {
             // TODO remove this (added for testing PluginIntegration while extractors not finished)
             List<String> paragraphs = Arrays.asList(
                     "Yield\n" +
-                    "    6 servings\n" +
-                    "Active Time\n" +
-                    "    30 minutes\n" +
-                    "Total Time\n" +
-                    "    35 minutes\n" +
-                    "\n" +
-                    "Ingredients",
+                            "    6 servings\n" +
+                            "Active Time\n" +
+                            "    30 minutes\n" +
+                            "Total Time\n" +
+                            "    35 minutes\n" +
+                            "\n" +
+                            "Ingredients",
 
                     "        1 lb. linguine or other long pasta\n" +
-                    "        Kosher salt\n" +
-                    "        1 (14-oz.) can diced tomatoes\n" +
-                    "        1/2 cup extra-virgin olive oil, divided\n" +
-                    "        1/4 cup capers, drained\n" +
-                    "        6 oil-packed anchovy fillets\n" +
-                    "        1 Tbsp. tomato paste\n" +
-                    "        1/3 cup pitted Kalamata olives, halved\n" +
-                    "        2 tsp. dried oregano\n" +
-                    "        1/2 tsp. crushed red pepper flakes\n" +
-                    "        6 oz. oil-packed tuna",
+                            "        Kosher salt\n" +
+                            "        1 (14-oz.) can diced tomatoes\n" +
+                            "        1/2 cup extra-virgin olive oil, divided\n" +
+                            "        1/4 cup capers, drained\n" +
+                            "        6 oil-packed anchovy fillets\n" +
+                            "        1 Tbsp. tomato paste\n" +
+                            "        1/3 cup pitted Kalamata olives, halved\n" +
+                            "        2 tsp. dried oregano\n" +
+                            "        1/2 tsp. crushed red pepper flakes\n" +
+                            "        6 oz. oil-packed tuna",
 
                     "Preparation",
 
@@ -90,10 +90,10 @@ public class PluginInternalServiceCommunicator extends Communicator {
                             "and emulsified, about 2 minutes. Flake tuna into pasta and toss to combine.\n" +
                             "        Divide pasta among plates. Top with fried capers.\n"
 
-                    );
+            );
 
             extractedText = new ExtractedText("ExtractedTextTitle", Calendar.getInstance().getTime());
-            for (String section: paragraphs){
+            for (String section : paragraphs) {
                 extractedText.addSimpleSection(section);
             }
             e.printStackTrace();

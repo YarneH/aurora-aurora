@@ -30,37 +30,54 @@ public class ExtractedText implements InternallyProcessedFile, Serializable {
     }
 
     /**
+     * This constructor will create an empty extracted text
+     *
+     * @param filename     the name of the file
+     * @param dateLastEdit the moment the file was last edited
+     * @param sections     the sections in the file (only plain sections)
+     */
+    public ExtractedText(String filename, Date dateLastEdit, List<String> sections) {
+        this.mFilename = filename;
+        this.mDateLastEdit = dateLastEdit;
+        for (String section : sections) {
+            addSimpleSection(section);
+        }
+    }
+
+    /**
      * Constructor for an extracted text with all arguments
-     * @param mFilename the name of the file
+     *
+     * @param mFilename     the name of the file
      * @param mDateLastEdit the moment the file was last edited
-     * @param mTitle the title of the file
-     * @param mAuthors the authors of the file
-     * @param mSections the sections in the file
+     * @param mTitle        the title of the file
+     * @param mAuthors      the authors of the file
+     * @param mSections     the sections in the file
      */
     public ExtractedText(String mFilename, Date mDateLastEdit, String mTitle, List<String> mAuthors, List<Section> mSections) {
-        this(mFilename,mDateLastEdit);
+        this(mFilename, mDateLastEdit);
         this.mTitle = mTitle;
         this.mAuthors = mAuthors;
         this.mSections = mSections;
     }
 
-    public void addSection(Section section){
-        if(mSections == null){
+    public void addSection(Section section) {
+        if (mSections == null) {
             mSections = new ArrayList<>();
         }
         this.mSections.add(section);
     }
 
-    public List<Section> getSections(){
+    public List<Section> getSections() {
         return this.mSections;
     }
 
     /**
      * Adds a new section without images or title
+     *
      * @param sectionText the content of the section
      */
-    public void addSimpleSection(String sectionText){
-        addSection(new Section(null,sectionText,null));
+    public void addSimpleSection(String sectionText) {
+        addSection(new Section(sectionText));
     }
 
     public String getFilename() {
@@ -88,9 +105,9 @@ public class ExtractedText implements InternallyProcessedFile, Serializable {
     }
 
 
-    public String toString(){
+    public String toString() {
         StringBuilder res = new StringBuilder();
-        if (mTitle != null){
+        if (mTitle != null) {
             res.append(mTitle);
         }
         if (mSections != null) {
@@ -106,7 +123,7 @@ public class ExtractedText implements InternallyProcessedFile, Serializable {
      *
      * @return String (in JSON format)
      */
-    public String toJSON(){
+    public String toJSON() {
         Gson gson = new Gson();
         return gson.toJson(this);
     }
@@ -114,10 +131,10 @@ public class ExtractedText implements InternallyProcessedFile, Serializable {
     /**
      * Turn the JSON string back into an ExtractedText object, mainly for use by plugins.
      *
-     * @param json  The extracted JSON string of the ExtractedText object
+     * @param json The extracted JSON string of the ExtractedText object
      * @return ExtractedText
      */
-    public static ExtractedText fromJson(String json){
+    public static ExtractedText fromJson(String json) {
         Gson gson = new Gson();
         return gson.fromJson(json, ExtractedText.class);
     }

@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.List;
 
 import io.reactivex.Observable;
@@ -65,7 +66,7 @@ public class AuroraCommunicatorUnitTest {
         Observable<InternalProcessorRequest> internalProcessorRequestObservable = mBus.register(InternalProcessorRequest.class);
 
         // Subscribe to observable to send response event
-        ExtractedText dummyExtractedText = new ExtractedText("Bla", Arrays.asList("Dummy", "Paragraph"));
+        ExtractedText dummyExtractedText = new ExtractedText("Bla", Calendar.getInstance().getTime(), Arrays.asList("Dummy", "Paragraph"));
         internalProcessorRequestObservable.subscribe(internalProcessorRequest ->
                 mBus.post(new InternalProcessorResponse(dummyExtractedText)));
 
