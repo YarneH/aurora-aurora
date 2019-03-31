@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 
@@ -11,19 +12,58 @@ import java.util.List;
  * Class to represent extracted text from an internal processor
  */
 public class ExtractedText implements InternallyProcessedFile, Serializable {
+    private String mFilename;
+    private Date mDateLastEdit;
     private String mTitle;
-    private List<String> mParagraphs;
+    private List<String> mAuthors;
+    private List<Section> mSections;
 
-    public ExtractedText(String title, List<String> paragraphs) {
-        mTitle = title;
-        mParagraphs = paragraphs;
+    /**
+     * This constructor will create an empty extracted text
+     *
+     * @param filename     the name of the file
+     * @param dateLastEdit the moment the file was last edited
+     */
+    public ExtractedText(String filename, Date dateLastEdit) {
+        this.mFilename = filename;
+        this.mDateLastEdit = dateLastEdit;
     }
 
-    public ExtractedText() {
-        mTitle = null;
-        mParagraphs = new ArrayList<>();
+//    public ExtractedText(String title, List<String> paragraphs) {
+//        mTitle = title;
+//        mParagraphs = paragraphs;
+//    }
+
+    public void addSection(Section section){
+        if(mSections == null){
+            mSections = new ArrayList<>();
+        }
+        this.mSections.add(section);
     }
 
+    public List<Section> getSections(){
+        return this.mSections;
+    }
+
+    public void addSimpleSection(String string){
+        addSection(new Section(null,string,null));
+    }
+
+    public String getFilename() {
+        return mFilename;
+    }
+
+    public void setFilename(String mFilename) {
+        this.mFilename = mFilename;
+    }
+
+    public Date getDateLastEdit() {
+        return mDateLastEdit;
+    }
+
+    public void setDateLastEdit(Date mDateLastEdit) {
+        this.mDateLastEdit = mDateLastEdit;
+    }
 
     public String getTitle() {
         return mTitle;
@@ -33,25 +73,25 @@ public class ExtractedText implements InternallyProcessedFile, Serializable {
         this.mTitle = title;
     }
 
-    public List<String> getParagraphs() {
-        return mParagraphs;
-    }
+//    public List<String> getParagraphs() {
+//        return mParagraphs;
+//    }
 
-    public void addParagraph(String paragraph) {
-        this.mParagraphs.add(paragraph);
-    }
+//    public void addParagraph(String paragraph) {
+//        this.mParagraphs.add(paragraph);
+//    }
 
     public String toString(){
-        String res = "";
+        StringBuilder res = new StringBuilder();
         if (mTitle != null){
-            res += mTitle;
+            res.append(mTitle);
         }
-        if (mParagraphs != null) {
-            for (String s : mParagraphs) {
-                res += "\n\n" + s;
+        if (mSections != null) {
+            for (Section s : mSections) {
+                res.append("\n\n").append(s.toString());
             }
         }
-        return res;
+        return res.toString();
     }
 
     /**

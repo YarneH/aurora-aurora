@@ -8,6 +8,7 @@ import com.aurora.kernel.event.InternalProcessorResponse;
 
 import java.io.InputStream;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.List;
 
 import io.reactivex.Observable;
@@ -91,7 +92,10 @@ public class PluginInternalServiceCommunicator extends Communicator {
 
                     );
 
-            extractedText = new ExtractedText("ExtractedTextTitle", paragraphs);
+            extractedText = new ExtractedText("ExtractedTextTitle", Calendar.getInstance().getTime());
+            for (String section: paragraphs){
+                extractedText.addSimpleSection(section);
+            }
             e.printStackTrace();
         }
 
