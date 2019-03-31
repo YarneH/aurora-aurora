@@ -119,7 +119,7 @@ pipeline {
         stage('Integration tests') {
             steps {
                 script {
-                    if (encv.BRANCH_NAME == 'master' || env.BRANCH_NAME == 'dev') {
+                    if (env.BRANCH_NAME == 'master' || env.BRANCH_NAME == 'dev') {
                         sh "./gradlew testReleaseUnitTest --tests '*IntegTest'"
                     } else {
                         sh "./gradlew testDebugUnitTest --tests '*IntegTest'"
@@ -194,7 +194,7 @@ def slack_error_long_test() {
  * Gets called when the integration tests fail
  */
 def slack_error_integration_test() {
-    slack_report(false, ':xx Integration tests failed', null, 'Integration Tests')
+    slack_report(false, ':x: Integration tests failed', null, 'Integration Tests')
 }
 
 /**
