@@ -29,10 +29,20 @@ public class ExtractedText implements InternallyProcessedFile, Serializable {
         this.mDateLastEdit = dateLastEdit;
     }
 
-//    public ExtractedText(String title, List<String> paragraphs) {
-//        mTitle = title;
-//        mParagraphs = paragraphs;
-//    }
+    /**
+     * Constructor for an extracted text with all arguments
+     * @param mFilename the name of the file
+     * @param mDateLastEdit the moment the file was last edited
+     * @param mTitle the title of the file
+     * @param mAuthors the authors of the file
+     * @param mSections the sections in the file
+     */
+    public ExtractedText(String mFilename, Date mDateLastEdit, String mTitle, List<String> mAuthors, List<Section> mSections) {
+        this(mFilename,mDateLastEdit);
+        this.mTitle = mTitle;
+        this.mAuthors = mAuthors;
+        this.mSections = mSections;
+    }
 
     public void addSection(Section section){
         if(mSections == null){
@@ -45,8 +55,12 @@ public class ExtractedText implements InternallyProcessedFile, Serializable {
         return this.mSections;
     }
 
-    public void addSimpleSection(String string){
-        addSection(new Section(null,string,null));
+    /**
+     * Adds a new section without images or title
+     * @param sectionText the content of the section
+     */
+    public void addSimpleSection(String sectionText){
+        addSection(new Section(null,sectionText,null));
     }
 
     public String getFilename() {
@@ -73,13 +87,6 @@ public class ExtractedText implements InternallyProcessedFile, Serializable {
         this.mTitle = title;
     }
 
-//    public List<String> getParagraphs() {
-//        return mParagraphs;
-//    }
-
-//    public void addParagraph(String paragraph) {
-//        this.mParagraphs.add(paragraph);
-//    }
 
     public String toString(){
         StringBuilder res = new StringBuilder();
