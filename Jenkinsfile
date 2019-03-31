@@ -134,6 +134,11 @@ pipeline {
                         exclusionPattern: '**/*Test*.class,  **/souschef/*.class, **/R.class, **/R$*.class, **/BuildConfig'
                 }
             }
+            post {
+                failure {
+                    slack_error_integration_test()
+                }
+            }
         }
 
         stage('Javadoc') {
@@ -183,6 +188,13 @@ def slack_error_test() {
  */
 def slack_error_long_test() {
     slack_report(false, ':x: Long unit tests failed', null, 'Long Unit Tests')
+}
+
+/**
+ * Gets called when the integration tests fail
+ */
+def slack_error_integration_test() {
+    slack_report(false, ':xx Integration tests failed', null, 'Integration Tests')
 }
 
 /**
