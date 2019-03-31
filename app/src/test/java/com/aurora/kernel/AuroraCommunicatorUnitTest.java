@@ -25,7 +25,7 @@ import io.reactivex.observers.TestObserver;
 import io.reactivex.schedulers.Schedulers;
 
 
-public class AuroraCommunicatorTest {
+public class AuroraCommunicatorUnitTest {
 
     private static Bus mBus;
     private static AuroraCommunicator mAuroraCommunicator;

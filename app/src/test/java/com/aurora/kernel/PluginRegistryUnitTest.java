@@ -16,7 +16,7 @@ import io.reactivex.schedulers.Schedulers;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
-public class PluginRegistryTest {
+public class PluginRegistryUnitTest {
     private static Bus mBus;
     private static ProcessingCommunicator mProcessingCommunicator;
     private static PluginRegistry mRegistry;
