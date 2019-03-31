@@ -22,7 +22,7 @@ import io.reactivex.Observable;
 import io.reactivex.observers.TestObserver;
 import io.reactivex.schedulers.Schedulers;
 
-public class AuroraInternalServiceCommunicatorTest {
+public class AuroraInternalServiceCommunicatorUnitTest {
     private static Bus mBus;
     private static InternalCache mInternalCache;
     private static AuroraInternalServiceCommunicator mAuroraInternalServiceCommunicator;

@@ -17,7 +17,7 @@ import io.reactivex.Observable;
 import io.reactivex.observers.TestObserver;
 import io.reactivex.schedulers.Schedulers;
 
-public class PluginInternalServiceCommunicatorTest {
+public class PluginInternalServiceCommunicatorUnitTest {
 
     private static Bus mBus;
     private static InternalTextProcessor mProcessor;
