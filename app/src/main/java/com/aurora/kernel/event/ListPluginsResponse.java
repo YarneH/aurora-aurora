@@ -1,6 +1,6 @@
 package com.aurora.kernel.event;
 
-import com.aurora.plugin.BasicPlugin;
+import com.aurora.plugin.Plugin;
 
 import java.util.List;
 
@@ -8,13 +8,13 @@ import java.util.List;
  * Event containing a list of available plugins
  */
 public class ListPluginsResponse extends Event {
-    private List<BasicPlugin> plugins;
+    private List<Plugin> plugins;
 
-    public ListPluginsResponse(List<BasicPlugin> plugins) {
+    public ListPluginsResponse(List<Plugin> plugins) {
         this.plugins = plugins;
     }
 
-    public List<BasicPlugin> getPlugins() {
+    public List<Plugin> getPlugins() {
         return plugins;
     }
 }

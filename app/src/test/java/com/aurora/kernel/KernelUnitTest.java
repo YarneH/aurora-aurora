@@ -5,7 +5,7 @@ import org.junit.Test;
 import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertNotNull;
 
-public class KernelTest {
+public class KernelUnitTest {
 
     private static Kernel mKernel = new Kernel();
 

@@ -12,6 +12,12 @@ public class Constants {
     public static String PLUGIN_INPUT_TEXT = "PLUGIN_INPUT_TEXT";
 
     /**
+     * Key used for the Intent Extra to pass processed text to a plugin (in the form of an ExtractedText object)
+     */
+    public static String PLUGIN_INPUT_EXTRACTED_TEXT = "PLUGIN_INPUT_EXTRACTED_TEXT";
+
+
+    /**
      * Key used for the Intent Extra to pass processed text to a plugin
      */
     public static String PLUGIN_INPUT_OBJECT = "PLUGIN_INPUT_OBJECT";

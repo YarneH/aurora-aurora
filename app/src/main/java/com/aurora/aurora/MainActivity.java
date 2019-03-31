@@ -16,6 +16,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -24,9 +25,11 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.aurora.auroralib.Constants;
 import com.aurora.kernel.AuroraCommunicator;
 import com.aurora.kernel.Kernel;
 
+import java.io.FileNotFoundException;
 import java.io.InputStream;
 
 public class MainActivity extends AppCompatActivity
@@ -40,8 +43,11 @@ public class MainActivity extends AppCompatActivity
     private TextView mTextViewMain = null;
     private RecyclerView mRecyclerView = null;
 
-    private Kernel kernel = null;
-    private AuroraCommunicator auroraCommunicator = null;
+    /**
+     * Create unique kernel instance (should be passed to every activity, fragment, adapter,...) that needs it
+     */
+    private Kernel mKernel = new Kernel();
+    private AuroraCommunicator mAuroraCommunicator = mKernel.getAuroraCommunicator();
 
     /**
      * Runs on startup of the activity, in this case on startup of the app
@@ -62,59 +68,45 @@ public class MainActivity extends AppCompatActivity
                 "com.fasterxml.aalto.stax.EventFactoryImpl");
 
         /* Add toolbar when activity is created */
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
         /* The floating action button to add files */
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            /* Implementation of adding files in onClick */
-            @Override
-            public void onClick(View view) {
-                selectFile();
-            }
-        });
+        FloatingActionButton fab = findViewById(R.id.fab);
+        /* Implementation of adding files in onClick */
+        fab.setOnClickListener(view -> selectFile());
 
         /* Listener and sync are for navigationView functionality */
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        DrawerLayout drawer = findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.addDrawerListener(toggle);
         toggle.syncState();
 
         /* Setup NavigationView and preselect 'Home' */
-        NavigationView mNavigationView = (NavigationView) findViewById(R.id.nav_view);
+        NavigationView mNavigationView = findViewById(R.id.nav_view);
         mNavigationView.setNavigationItemSelectedListener(this);
         mNavigationView.getMenu().getItem(0).setChecked(true);
 
         /* Setup Main TextView */
-        mTextViewMain = (TextView) findViewById(R.id.tv_main);
+        mTextViewMain = findViewById(R.id.tv_main);
 
         /* Setup RecyclerView */
-        mRecyclerView = (RecyclerView) findViewById(R.id.rv_files);
+        mRecyclerView = findViewById(R.id.rv_files);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
-        CardFileAdapter adapter = new CardFileAdapter();
+        CardFileAdapter adapter = new CardFileAdapter(mKernel, this);
         mRecyclerView.setAdapter(adapter);
-
-        /* Setup Kernel */
-        kernel = new Kernel();
-        auroraCommunicator = kernel.getAuroraCommunicator();
-
-        // TODO Remove this test code
-        InputStream docFile = getResources().openRawResource(R.raw.apple_crisp);
-        auroraCommunicator.openFileWithPlugin("", docFile, "apple_crisp.docx");
-
     }
 
     /**
      * Creates an intent to open the file manager. Can currently only select pdf files;
      * If more filetypes need to be opened, use a final String[], for example:
-     *
+     * <p>
      * final String[] ACCEPT_MIME_TYPES = {
-     *         "application/pdf",
-     *         "image/*"
-     *   };
-     *
+     * "application/pdf",
+     * "image/*"
+     * };
+     * <p>
      * Intent intent = new Intent();
      * intent.setType("* / *");
      * intent.setAction(Intent.ACTION_GET_CONTENT);
@@ -130,16 +122,32 @@ public class MainActivity extends AppCompatActivity
 
     /**
      * In this case when selectFile()'s intent returns
+     *
      * @param requestCode code used to send the intent
-     * @param resultCode status code
-     * @param data resulting data, a Uri in case of fileselector
+     * @param resultCode  status code
+     * @param data        resulting data, a Uri in case of fileselector
      */
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == REQUEST_FILE_GET && resultCode == RESULT_OK) {
             Uri textFile = data.getData();
-            Toast.makeText(this, "A file with uri \"" + textFile + "\" was selected.", Snackbar.LENGTH_LONG).show();
-            // Use File
+
+            Intent intent = new Intent(Constants.PLUGIN_ACTION);
+
+            try {
+                if (textFile != null) {
+                    Log.i("URI", textFile.toString());
+                    InputStream read = getContentResolver().openInputStream(textFile);
+                    mAuroraCommunicator.openFileWithPlugin(textFile.toString(), read, intent, this);
+                } else {
+                    Toast.makeText(this, "The selected file was null", Snackbar.LENGTH_LONG).show();
+                }
+            } catch (FileNotFoundException e) {
+                Toast.makeText(this, "The file could not be found", Snackbar.LENGTH_LONG).show();
+                Log.e("FILE_NOT_FOUND", "The file could not be found", e);
+            }
+
+
         }
     }
 
@@ -148,7 +156,7 @@ public class MainActivity extends AppCompatActivity
      */
     @Override
     public void onBackPressed() {
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        DrawerLayout drawer = findViewById(R.id.drawer_layout);
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else {
@@ -175,7 +183,7 @@ public class MainActivity extends AppCompatActivity
             // Create a LayoutInflater which will create the view for the pop-up
             LayoutInflater li = LayoutInflater.from(this);
             View promptView = li.inflate(R.layout.search_prompt, null);
-            final EditText userInput = (EditText) promptView.findViewById(R.id.et_search_prompt);
+            final EditText userInput = promptView.findViewById(R.id.et_search_prompt);
 
             // Create a builder to build the actual alertdialog from the previous inflated view
             AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
@@ -212,18 +220,18 @@ public class MainActivity extends AppCompatActivity
         boolean home = false;
         if (id == R.id.nav_about_us) {
             text = "About us";
+            // Change text and visibility (Used for demo)
+            mTextViewMain.setText(text);
         } else if (id == R.id.nav_help_feedback) {
             Intent intent = new Intent(MainActivity.this, FeedbackActivity.class);
             startActivity(intent);
-            home = true;
         } else if (id == R.id.nav_home) {
-            text = "Home";
             home = true;
         } else {
             text = "Settings";
+            // Change text and visibility (Used for demo)
+            mTextViewMain.setText(text);
         }
-        // Change text and visibility (Used for demo)
-        mTextViewMain.setText(text);
         if (home) {
             mRecyclerView.setVisibility(View.VISIBLE);
             mTextViewMain.setVisibility(View.INVISIBLE);
@@ -232,7 +240,7 @@ public class MainActivity extends AppCompatActivity
             mTextViewMain.setVisibility(View.VISIBLE);
         }
 
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        DrawerLayout drawer = findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
