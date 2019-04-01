@@ -12,6 +12,6 @@ public class TextExtractorPDF implements TextExtractor {
      */
     @Override
     public ExtractedText extract(InputStream file, String fileRef) {
-        return new ExtractedText("",null);
+        return new ExtractedText(fileRef, null);
     }
 }

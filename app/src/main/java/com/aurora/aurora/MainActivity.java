@@ -100,21 +100,14 @@ public class MainActivity extends AppCompatActivity
 
     /**
      * Creates an intent to open the file manager. Can currently only select pdf files;
-     * If more filetypes need to be opened, use a final String[], for example:
-     * <p>
-     * final String[] ACCEPT_MIME_TYPES = {
-     * "application/pdf",
-     * "image/*"
-     * };
-     * <p>
-     * Intent intent = new Intent();
-     * intent.setType("* / *");
-     * intent.setAction(Intent.ACTION_GET_CONTENT);
-     * intent.putExtra(Intent.EXTRA_MIME_TYPES,ACCEPT_MIME_TYPES);
      */
     protected void selectFile() {
-        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-        intent.setType("application/pdf");
+        final String[] mimeTypes = {
+                "application/vnd.openxmlformats-officedocument.wordprocessingml.document", "text/plain"};
+        Intent intent = new Intent();
+        intent.setType("* / *");
+        intent.setAction(Intent.ACTION_GET_CONTENT);
+        intent.putExtra(Intent.EXTRA_MIME_TYPES, mimeTypes);
         if (intent.resolveActivity(getPackageManager()) != null) {
             startActivityForResult(intent, REQUEST_FILE_GET);
         }
