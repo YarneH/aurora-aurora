@@ -70,7 +70,6 @@ public class InternalCache implements InternalService {
      * @return true if the pluginObject was successfully processed
      */
     public boolean cacheFile(String fileRef, PluginObject pluginObject, String uniquePluginName) {
-        // TODO: implement this
         /*
         This method consists of two parts: We have to actually write the representation to a file.
         We should do this by mapping a file ref to another fileref that represents the cached representation.

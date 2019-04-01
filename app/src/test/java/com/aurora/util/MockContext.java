@@ -143,7 +143,7 @@ public class MockContext extends Context {
 
     @Override
     public File getFilesDir() {
-        return null;
+        return new File(".");
     }
 
     @Override
