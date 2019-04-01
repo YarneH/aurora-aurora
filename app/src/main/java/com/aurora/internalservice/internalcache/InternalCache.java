@@ -107,11 +107,11 @@ public class InternalCache implements InternalService {
     public String checkCacheForProcessedFile(String fileRef, String uniquePluginName) {
         // Check in the registry if the file is present under unique plugin name
         List<String> cachedFilesByPlugin = null;
-        if (uniquePluginName != null && (cachedFilesByPlugin = mCachedFiles.get(uniquePluginName)) != null) {
-            if (cachedFilesByPlugin.contains(fileRef)) {
-                // Return the file ref if it is present in the cache
-                return fileRef;
-            }
+        if (uniquePluginName != null
+                && (cachedFilesByPlugin = mCachedFiles.get(uniquePluginName)) != null
+                && cachedFilesByPlugin.contains(fileRef)) {
+            // Return the file ref if it is present in the cache
+            return fileRef;
         }
 
         // Return null if the parameters are invalid or if the file is not present
@@ -125,11 +125,12 @@ public class InternalCache implements InternalService {
      * @return a list of filenames of cached files TODO: may change to CachedFile representation class!
      */
     public List<String> getFullCache(int amount) {
-        List<String> cachedFiles = new ArrayList<>();
-
         if (amount <= 0) {
             return getFullCache();
         }
+
+        // Create an empty list where the results will be stored
+        List<String> cachedFiles = new ArrayList<>();
 
         for (Map.Entry<String, List<String>> entry : mCachedFiles.entrySet()) {
             if (entry.getValue().size() < amount - cachedFiles.size()) {
@@ -230,8 +231,7 @@ public class InternalCache implements InternalService {
             writeCacheRegistry();
         } catch (IOException e) {
             // If something goes wrong when reading the file, log the exception
-            Log.e(CLASS_TAG, "Something went wrong while reading the cache registry file");
-            e.printStackTrace();
+            Log.e(CLASS_TAG, "Something went wrong while reading the cache registry file", e);
         }
     }
 
@@ -251,8 +251,7 @@ public class InternalCache implements InternalService {
             // Write string to file
             writer.write(cachedElementsString);
         } catch (IOException e) {
-            Log.e(CLASS_TAG, "Something went wrong while writing the cache registry");
-            e.printStackTrace();
+            Log.e(CLASS_TAG, "Something went wrong while writing the cache registry", e);
         }
     }
 
@@ -304,10 +303,10 @@ public class InternalCache implements InternalService {
      * @param fileRef a reference to a file
      * @return the path to where the cached representation corresponding to this file can be found
      */
-    private String getCachedPath(String fileRef) {
+    private static String getCachedPath(String fileRef) {
         // Get the file ref to it without extension
         String cachedPath = null;
-        if (fileRef.indexOf('.') > 0) {
+        if (fileRef.contains(".")) {
             cachedPath = fileRef.substring(0, fileRef.indexOf('.'));
         } else {
             cachedPath = fileRef;
@@ -326,12 +325,11 @@ public class InternalCache implements InternalService {
     private boolean writeCacheFile(String path, PluginObject pluginObject) {
         File cacheFile = new File(mContext.getFilesDir(), path);
 
-        try(BufferedWriter writer = new BufferedWriter(new FileWriter(cacheFile))) {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(cacheFile))) {
             // Write json representation of plugin object to the file
             writer.write(pluginObject.toJSON());
         } catch (IOException e) {
-            Log.e(CLASS_TAG, "Something went wrong while writing a cache file!");
-            e.printStackTrace();
+            Log.e(CLASS_TAG, "Something went wrong while writing a cache file!", e);
 
             return false;
         }
@@ -341,7 +339,7 @@ public class InternalCache implements InternalService {
     /**
      * Inner helper class that helps with serializing the cache registry
      */
-    private class CacheRegistryElement {
+    private static class CacheRegistryElement {
         /**
          * The name of the plugin to which the cached files belong
          */
