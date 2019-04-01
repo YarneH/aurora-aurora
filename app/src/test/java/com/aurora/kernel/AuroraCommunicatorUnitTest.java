@@ -1,8 +1,8 @@
 package com.aurora.kernel;
 
-import android.content.Context;
 import android.content.Intent;
 
+import com.aurora.util.MockContext;
 import com.aurora.auroralib.Constants;
 import com.aurora.auroralib.ExtractedText;
 import com.aurora.kernel.event.InternalProcessorRequest;
@@ -51,7 +51,7 @@ public class AuroraCommunicatorUnitTest {
         String fileRef = "Dummy/file/ref";
         InputStream file = new DummyInputStream();
         Intent targetPlugin = new Intent(Constants.PLUGIN_ACTION);
-        mAuroraCommunicator.openFileWithPlugin(fileRef, file, targetPlugin, new Context());
+        mAuroraCommunicator.openFileWithPlugin(fileRef, file, targetPlugin, new MockContext());
 
         // Assert that arguments passed are as expected
         fileRefObserver.assertSubscribed();
@@ -86,7 +86,7 @@ public class AuroraCommunicatorUnitTest {
         String dummyFileRef = "dummy/path/to/file";
         InputStream file = new DummyInputStream();
         Intent dummyPlugin = new Intent(Constants.PLUGIN_ACTION);
-        mAuroraCommunicator.openFileWithPlugin(dummyFileRef, file, dummyPlugin, new Context());
+        mAuroraCommunicator.openFileWithPlugin(dummyFileRef, file, dummyPlugin, new MockContext());
 
         // Assure that the correct values are contained in request event
         extractedTextObserver.assertSubscribed();
@@ -139,5 +139,4 @@ public class AuroraCommunicatorUnitTest {
             return 0;
         }
     }
-
 }

@@ -46,7 +46,7 @@ public class MainActivity extends AppCompatActivity
     /**
      * Create unique kernel instance (should be passed to every activity, fragment, adapter,...) that needs it
      */
-    private Kernel mKernel = new Kernel();
+    private Kernel mKernel = new Kernel(this.getApplicationContext());
     private AuroraCommunicator mAuroraCommunicator = mKernel.getAuroraCommunicator();
 
     /**
@@ -138,7 +138,8 @@ public class MainActivity extends AppCompatActivity
                 if (textFile != null) {
                     Log.i("URI", textFile.toString());
                     InputStream read = getContentResolver().openInputStream(textFile);
-                    mAuroraCommunicator.openFileWithPlugin(textFile.toString(), read, intent, this);
+                    mAuroraCommunicator.openFileWithPlugin(textFile.toString(), read,
+                            intent, this.getApplicationContext());
                 } else {
                     Toast.makeText(this, "The selected file was null", Snackbar.LENGTH_LONG).show();
                 }

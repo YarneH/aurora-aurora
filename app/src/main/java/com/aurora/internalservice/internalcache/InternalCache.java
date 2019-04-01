@@ -1,5 +1,6 @@
 package com.aurora.internalservice.internalcache;
 
+import android.content.Context;
 import android.util.Log;
 
 import com.aurora.auroralib.PluginObject;
@@ -8,11 +9,11 @@ import com.google.gson.Gson;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -31,12 +32,24 @@ public class InternalCache implements InternalService {
     private static final String CACHE_LOCATION = "cached-files.json";
 
     /**
+     * A reference to the android application context (necessary for reading and writing files
+     */
+    private Context mContext;
+
+    /**
      * Data structure that keeps track of cached files per plugin
      * The key is a unique plugin name. The value is a list of file references associated with that plugin.
      */
     private Map<String, List<String>> mCachedFiles;
 
-    public InternalCache() {
+    /**
+     * Creates an instance of the internal cache
+     *
+     * @param applicationContext the android application context
+     */
+    public InternalCache(Context applicationContext) {
+        mContext = applicationContext;
+
         // Initialize cache registry
         initCacheRegistry();
     }
@@ -149,39 +162,22 @@ public class InternalCache implements InternalService {
      * If not, it will create a new one and write it to disk.
      */
     private void initCacheRegistry() {
-        File cacheFile = new File(CACHE_LOCATION);
-
-        if (cacheFile.exists()) {
-            // Read the file
-            mCachedFiles = readCacheRegistry(cacheFile);
-        } else {
-            // If the file does not exist, create new empty map
-            mCachedFiles = new HashMap<>();
-        }
-    }
-
-    /**
-     * This method will read the contents of the cache registry file
-     *
-     * @param cacheFile the file to read
-     */
-    private Map<String, List<String>> readCacheRegistry(File cacheFile) {
-        CacheRegistryElement[] cacheRegistryElements = null;
-
-        try(BufferedReader reader = new BufferedReader(new FileReader(cacheFile))) {
+        try (FileInputStream cacheRegistryFile = mContext.openFileInput(CACHE_LOCATION);
+        BufferedReader reader = new BufferedReader(new InputStreamReader(cacheRegistryFile))) {
             Gson gson = new Gson();
 
-             cacheRegistryElements = gson.fromJson(reader, CacheRegistryElement[].class);
+            CacheRegistryElement[] cacheRegistryElements = gson.fromJson(reader, CacheRegistryElement[].class);
+            mCachedFiles = convertToMap(cacheRegistryElements);
+
         } catch (FileNotFoundException e) {
-            Log.e(CLASS_TAG, "The file was not found!");
-            e.printStackTrace();
+            // If file not found, create a new file containing an empty map
+            mCachedFiles = new HashMap<>();
+            writeCacheRegistry();
         } catch (IOException e) {
-            Log.e(CLASS_TAG, "Something went wrong reading the file!");
+            // If something goes wrong when reading the file, log the exception
+            Log.e(CLASS_TAG, "Something went wrong while reading the cache registry file");
             e.printStackTrace();
         }
-
-        // Convert the elements to the appropriate data structure and return or return empty map otherwise
-        return (cacheRegistryElements != null) ? convertToMap(cacheRegistryElements) : new HashMap<>();
     }
 
     /**
@@ -191,7 +187,7 @@ public class InternalCache implements InternalService {
         // Convert map to array of CacheRegistryElements
         CacheRegistryElement[] elements = convertFromMap(mCachedFiles);
 
-        try(BufferedWriter writer = new BufferedWriter(new FileWriter(CACHE_LOCATION))) {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(CACHE_LOCATION))) {
             Gson gson = new Gson();
 
             // Convert array to json string
@@ -213,7 +209,7 @@ public class InternalCache implements InternalService {
      */
     private Map<String, List<String>> convertToMap(CacheRegistryElement[] elements) {
         Map<String, List<String>> cacheMap = new HashMap<>();
-        for (CacheRegistryElement el: elements) {
+        for (CacheRegistryElement el : elements) {
             // Convert cached filerefs to list
             List<String> fileRefs = Arrays.asList(el.cachedFileRefs);
 
@@ -236,7 +232,7 @@ public class InternalCache implements InternalService {
         List<CacheRegistryElement> cacheRegistryElements = new ArrayList<>();
 
         // Loop over all entries in the map to add them to the array
-        for (Map.Entry<String, List<String>> el: cacheMap.entrySet()) {
+        for (Map.Entry<String, List<String>> el : cacheMap.entrySet()) {
             // Convert the list to an array
             String[] fileRefs = el.getValue().toArray(new String[]{});
 

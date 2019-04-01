@@ -1,5 +1,7 @@
 package com.aurora.kernel;
 
+import android.content.Context;
+
 import com.aurora.auroralib.PluginObject;
 import com.aurora.internalservice.internalcache.CachedProcessedFile;
 import com.aurora.internalservice.internalcache.InternalCache;
@@ -11,6 +13,7 @@ import com.aurora.kernel.event.RemoveFromCacheRequest;
 import com.aurora.kernel.event.RemoveFromCacheResponse;
 import com.aurora.kernel.event.RetrieveFileFromCacheRequest;
 import com.aurora.kernel.event.RetrieveFileFromCacheResponse;
+import com.aurora.util.MockContext;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -37,7 +40,7 @@ public class AuroraInternalServiceCommunicatorUnitTest {
         mBus = new Bus(Schedulers.trampoline());
 
         // Create internal cache
-        mInternalCache = new DummyInternalCache();
+        mInternalCache = new DummyInternalCache(new MockContext());
 
         // Create Communicator
         mAuroraInternalServiceCommunicator = new AuroraInternalServiceCommunicator(mBus, mInternalCache);
@@ -204,6 +207,15 @@ public class AuroraInternalServiceCommunicatorUnitTest {
      * Dummy class with stub implementations for the cache
      */
     private static class DummyInternalCache extends InternalCache {
+        /**
+         * Creates an instance of the internal cache
+         *
+         * @param applicationContext the android application context
+         */
+        public DummyInternalCache(Context applicationContext) {
+            super(applicationContext);
+        }
+
         @Override
         public boolean cacheFile(String fileRef, PluginObject pluginObject, String uniquePluginName) {
             // Just return true
