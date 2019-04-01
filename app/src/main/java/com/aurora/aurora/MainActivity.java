@@ -44,12 +44,6 @@ public class MainActivity extends AppCompatActivity
     private RecyclerView mRecyclerView = null;
 
     /**
-     * The accepted file types
-     */
-    final private String[] ACCEPT_MIME_TYPES = {
-            "application/vnd.openxmlformats-officedocument.wordprocessingml.document", "text/plain"};
-
-    /**
      * Create unique kernel instance (should be passed to every activity, fragment, adapter,...) that needs it
      */
     private Kernel mKernel = new Kernel();
@@ -108,10 +102,12 @@ public class MainActivity extends AppCompatActivity
      * Creates an intent to open the file manager. Can currently only select pdf files;
      */
     protected void selectFile() {
+        String[] mimeTypes = {
+                "application/vnd.openxmlformats-officedocument.wordprocessingml.document", "text/plain"};
         Intent intent = new Intent();
         intent.setType("* / *");
         intent.setAction(Intent.ACTION_GET_CONTENT);
-        intent.putExtra(Intent.EXTRA_MIME_TYPES, ACCEPT_MIME_TYPES);
+        intent.putExtra(Intent.EXTRA_MIME_TYPES, mimeTypes);
         if (intent.resolveActivity(getPackageManager()) != null) {
             startActivityForResult(intent, REQUEST_FILE_GET);
         }
