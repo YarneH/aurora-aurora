@@ -1,6 +1,7 @@
 package com.aurora.kernel;
 
 import com.aurora.auroralib.ExtractedText;
+import com.aurora.auroralib.Section;
 import com.aurora.internalservice.internalnlp.InternalNLP;
 import com.aurora.internalservice.internalprocessor.FileTypeNotSupportedException;
 import com.aurora.internalservice.internalprocessor.InternalTextProcessor;
@@ -101,12 +102,12 @@ public class PluginInternalServiceCommunicator extends Communicator {
             e.printStackTrace();
         }
 
-        if(true) {
+        if(false) {
 
             InternalNLP internalNLP = new InternalNLP();
 
-            for (String paragraph : extractedText.getParagraphs()) {
-                Annotation annotatedParagraph = new Annotation(paragraph);
+            for (Section section : extractedText.getSections()) {
+                Annotation annotatedParagraph = new Annotation(section.getBody());
                 internalNLP.annotate(annotatedParagraph);
 
             }

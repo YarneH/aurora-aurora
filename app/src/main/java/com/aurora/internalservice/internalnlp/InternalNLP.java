@@ -4,11 +4,13 @@ import com.aurora.internalservice.InternalService;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 
 import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.pipeline.AnnotationPipeline;
 import edu.stanford.nlp.pipeline.MorphaAnnotator;
 import edu.stanford.nlp.pipeline.ParserAnnotator;
+import edu.stanford.nlp.pipeline.StanfordCoreNLP;
 import edu.stanford.nlp.pipeline.TokenizerAnnotator;
 import edu.stanford.nlp.pipeline.WordsToSentencesAnnotator;
 
@@ -33,12 +35,19 @@ public class InternalNLP implements InternalService {
      * @return
      */
     private AnnotationPipeline buildPipeline() {
-        AnnotationPipeline pipeline = new AnnotationPipeline();
+/*        AnnotationPipeline pipeline = new AnnotationPipeline();
         pipeline.addAnnotator(new TokenizerAnnotator(false, "en"));
         pipeline.addAnnotator(new WordsToSentencesAnnotator(false));
-
+        new ParserAnnotator()
         pipeline.addAnnotator(new ParserAnnotator(false, MAX_SENTENCES_FOR_PARSER));
-        pipeline.addAnnotator(new MorphaAnnotator(false));
+        //pipeline.addAnnotator(new MorphaAnnotator(false));
+        return pipeline;*/
+
+
+
+        Properties props = new Properties();
+        props.setProperty("annotators", "tokenize,ssplit,pos,lemma,ner,parse,depparse,coref,kbp,quote");
+        StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
         return pipeline;
     }
 
