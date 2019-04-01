@@ -65,7 +65,7 @@ public class AuroraCommunicatorUnitTest {
         Observable<InternalProcessorRequest> internalProcessorRequestObservable = mBus.register(InternalProcessorRequest.class);
 
         // Subscribe to observable to send response event
-        ExtractedText dummyExtractedText = new ExtractedText("Bla", Arrays.asList("Dummy", "Paragraph"));
+        ExtractedText dummyExtractedText = new ExtractedText("Bla", null, Arrays.asList("Dummy", "Paragraph"));
         internalProcessorRequestObservable.subscribe(internalProcessorRequest ->
                 mBus.post(new InternalProcessorResponse(dummyExtractedText)));
 

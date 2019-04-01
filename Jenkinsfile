@@ -84,9 +84,9 @@ pipeline {
                 failure {
                     slack_error_sonar()
                 }
-            success {
-                slack_success()
-            }
+                success {
+                    slack_success_part1()
+                }
             }
         } // SonarQube stage
 
@@ -165,6 +165,11 @@ pipeline {
             }
         } // Javadoc stage
     } // Stages
+    post {
+        success {
+            slack_success()
+        }
+    }
 } // Pipeline
 
 
@@ -219,6 +224,12 @@ def slack_success() {
     slack_report(true, ':heavy_check_mark: Build succeeded', null, '')
 }
 
+/**
+ * Gets called when first part of build succeeds
+ */
+def slack_success_part1() {
+    slack_report(true, ':white_check_mark: Part 1 of build succeeded', null, '')
+}
 
 /**
  * Gets called when the javadoc is successfully generated
