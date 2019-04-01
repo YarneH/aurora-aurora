@@ -1,6 +1,7 @@
 package com.aurora.kernel;
 
 import com.aurora.auroralib.ExtractedText;
+import com.aurora.internalservice.internalnlp.InternalNLP;
 import com.aurora.internalservice.internalprocessor.FileTypeNotSupportedException;
 import com.aurora.internalservice.internalprocessor.InternalTextProcessor;
 import com.aurora.kernel.event.InternalProcessorRequest;
@@ -10,6 +11,8 @@ import java.io.InputStream;
 import java.util.Arrays;
 import java.util.List;
 
+import edu.stanford.nlp.pipeline.Annotation;
+import edu.stanford.nlp.pipeline.AnnotationPipeline;
 import io.reactivex.Observable;
 
 /**
@@ -93,6 +96,17 @@ public class PluginInternalServiceCommunicator extends Communicator {
 
             extractedText = new ExtractedText("ExtractedTextTitle", paragraphs);
             e.printStackTrace();
+        }
+
+        if(true) {
+
+            InternalNLP internalNLP = new InternalNLP();
+
+            for (String paragraph : extractedText.getParagraphs()) {
+                Annotation annotatedParagraph = new Annotation(paragraph);
+                internalNLP.annotate(annotatedParagraph);
+
+            }
         }
 
         // Create response
