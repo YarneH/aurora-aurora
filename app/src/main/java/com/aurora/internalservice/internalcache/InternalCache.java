@@ -9,6 +9,7 @@ import com.google.gson.Gson;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
@@ -19,6 +20,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Class that interacts with cached file representations
@@ -30,6 +32,11 @@ public class InternalCache implements InternalService {
      * The location where the cached file registry will be stored.
      */
     private static final String CACHE_LOCATION = "cached-files.json";
+
+    /**
+     * The extension that is used for cached files
+     */
+    private static final String CACHE_EXTENSION = ".aur";
 
     /**
      * A reference to the android application context (necessary for reading and writing files
@@ -72,7 +79,22 @@ public class InternalCache implements InternalService {
         Secondly, we have to update the plugin registry as to keep track of which files are cached and which are not.
          */
 
-        Log.d(CLASS_TAG, "Not implemented yet");
+        // Get the path where to store the file
+        String cachedPath = getCachedPath(fileRef);
+
+        // Write the plugin object to the path
+        if (writeCacheFile(cachedPath, pluginObject)) {
+            // If writing was successful, add file to registry
+            if (!mCachedFiles.containsKey(uniquePluginName)) {
+                mCachedFiles.put(uniquePluginName, new ArrayList<>());
+            }
+
+            // Require non null not really necessary because of precondition above
+            Objects.requireNonNull(mCachedFiles.get(uniquePluginName)).add(fileRef);
+
+            return true;
+        }
+
         return false;
     }
 
@@ -84,7 +106,16 @@ public class InternalCache implements InternalService {
      * @return the processed file name if it is present, null otherwise
      */
     public String checkCacheForProcessedFile(String fileRef, String uniquePluginName) {
-        Log.d(CLASS_TAG, "Not implemented yet!");
+        // Check in the registry if the file is present under unique plugin name
+        List<String> cachedFilesByPlugin = null;
+        if (uniquePluginName != null && (cachedFilesByPlugin = mCachedFiles.get(uniquePluginName)) != null) {
+            if (cachedFilesByPlugin.contains(fileRef)) {
+                // Return the file ref if it is present in the cache
+                return fileRef;
+            }
+        }
+
+        // Return null if the parameters are invalid or if the file is not present
         return null;
     }
 
@@ -95,8 +126,27 @@ public class InternalCache implements InternalService {
      * @return a list of filenames of cached files TODO: may change to CachedFile representation class!
      */
     public List<String> getFullCache(int amount) {
-        Log.d(CLASS_TAG, "Not implemented yet! " + amount);
-        return new ArrayList<>();
+        List<String> cachedFiles = new ArrayList<>();
+
+        if (amount <= 0) {
+            return getFullCache();
+        }
+
+        for (Map.Entry<String, List<String>> entry : mCachedFiles.entrySet()) {
+            if (entry.getValue().size() < amount - cachedFiles.size()) {
+                // Add entire list
+                cachedFiles.addAll(entry.getValue());
+            } else {
+                // Add one by one until amount is reached
+                for (String fileRef : entry.getValue()) {
+                    if (cachedFiles.size() < amount) {
+                        cachedFiles.add(fileRef);
+                    }
+                }
+            }
+        }
+
+        return cachedFiles;
     }
 
     /**
@@ -105,8 +155,14 @@ public class InternalCache implements InternalService {
      * @return a list of filenames of cached files TODO: may change to CachedFile representation class!
      */
     public List<String> getFullCache() {
-        Log.d(CLASS_TAG, "Not implemented yet!");
-        return getFullCache(0);
+        List<String> cachedFiles = new ArrayList<>();
+
+        // Loop over all plugins and add all files to result list
+        for (Map.Entry<String, List<String>> entry : mCachedFiles.entrySet()) {
+            cachedFiles.addAll(entry.getValue());
+        }
+
+        return cachedFiles;
     }
 
 
@@ -163,7 +219,7 @@ public class InternalCache implements InternalService {
      */
     private void initCacheRegistry() {
         try (FileInputStream cacheRegistryFile = mContext.openFileInput(CACHE_LOCATION);
-        BufferedReader reader = new BufferedReader(new InputStreamReader(cacheRegistryFile))) {
+             BufferedReader reader = new BufferedReader(new InputStreamReader(cacheRegistryFile))) {
             Gson gson = new Gson();
 
             CacheRegistryElement[] cacheRegistryElements = gson.fromJson(reader, CacheRegistryElement[].class);
@@ -241,6 +297,46 @@ public class InternalCache implements InternalService {
 
         // Convert list to array
         return cacheRegistryElements.toArray(new CacheRegistryElement[0]);
+    }
+
+    /**
+     * Gets the path of the cached file given the fileRef
+     *
+     * @param fileRef a reference to a file
+     * @return the path to where the cached representation corresponding to this file can be found
+     */
+    private String getCachedPath(String fileRef) {
+        // Get the file ref to it without extension
+        String cachedPath = null;
+        if (fileRef.indexOf('.') > 0) {
+            cachedPath = fileRef.substring(0, fileRef.indexOf('.'));
+        } else {
+            cachedPath = fileRef;
+        }
+
+        // Concatenate .aur extension
+        return cachedPath + CACHE_EXTENSION;
+    }
+
+    /**
+     * Writes a cache file for a given plugin object
+     *
+     * @param path         the location where to write the file
+     * @param pluginObject the object to write to the cache
+     */
+    private boolean writeCacheFile(String path, PluginObject pluginObject) {
+        File cacheFile = new File(mContext.getFilesDir(), path);
+
+        try(BufferedWriter writer = new BufferedWriter(new FileWriter(cacheFile))) {
+            // Write json representation of plugin object to the file
+            writer.write(pluginObject.toJSON());
+        } catch (IOException e) {
+            Log.e(CLASS_TAG, "Something went wrong while writing a cache file!");
+            e.printStackTrace();
+
+            return false;
+        }
+        return true;
     }
 
     /**
