@@ -60,15 +60,23 @@ public class ExtractedText implements InternallyProcessedFile, Serializable {
         this.mSections = mSections;
     }
 
+    /**
+     * Get the sections of this ExtractedText
+     * @return the list of sections
+     */
+    public List<Section> getSections() {
+        return this.mSections;
+    }
+
+    /**
+     * Adds the section to the list of sections for this extractedText
+     * @param section the section to be added
+     */
     public void addSection(Section section) {
         if (mSections == null) {
             mSections = new ArrayList<>();
         }
         this.mSections.add(section);
-    }
-
-    public List<Section> getSections() {
-        return this.mSections;
     }
 
     /**

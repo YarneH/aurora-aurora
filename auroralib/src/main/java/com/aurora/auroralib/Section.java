@@ -3,17 +3,19 @@ package com.aurora.auroralib;
 import java.util.List;
 
 public class Section {
-
-    private String title;
-    private String body;
-    private List<String> images;
+    // The title of a Section
+    private String mTitle;
+    // The content/body of a Section (the text)
+    private String mBody;
+    // The images in a section, as a Base64 String
+    private List<String> mImages;
 
     /**
      * Constructor for creating a section without images or title
      * @param body the content of the section
      */
     public Section(String body) {
-        this.body = body;
+        this.mBody = body;
     }
 
     /**
@@ -23,17 +25,17 @@ public class Section {
      * @param images the images in the section
      */
     public Section(String title, String body, List<String> images) {
-        this.title = title;
-        this.body = body;
-        this.images = images;
+        this.mTitle = title;
+        this.mBody = body;
+        this.mImages = images;
     }
 
     @Override
     public String toString() {
-        if (title != null && body != null){
-            return title + "\n" + body + "\n";
-        } else if (body != null){
-            return body + "\n";
+        if (mTitle != null && mBody != null){
+            return mTitle + "\n" + mBody + "\n";
+        } else if (mBody != null){
+            return mBody + "\n";
         } else return "Empty paragraph.\n";
     }
 }

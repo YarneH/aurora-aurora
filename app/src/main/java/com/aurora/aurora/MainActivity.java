@@ -102,7 +102,7 @@ public class MainActivity extends AppCompatActivity
      * Creates an intent to open the file manager. Can currently only select pdf files;
      */
     protected void selectFile() {
-        String[] mimeTypes = {
+        final String[] mimeTypes = {
                 "application/vnd.openxmlformats-officedocument.wordprocessingml.document", "text/plain"};
         Intent intent = new Intent();
         intent.setType("* / *");
