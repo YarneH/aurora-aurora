@@ -30,7 +30,7 @@ public class TextExtractorDOCX implements TextExtractor {
      */
     @Override
     public ExtractedText extract(InputStream file, String fileRef) {
-        ExtractedText extractedText = new ExtractedText();
+        ExtractedText extractedText = new ExtractedText(fileRef, null);
 
         try {
             try (XWPFDocument doc = new XWPFDocument(file)) {
@@ -79,13 +79,13 @@ public class TextExtractorDOCX implements TextExtractor {
         String formatted = formatParagraph(paragraph);
 
         if(!previousLineEmpty || !formatted.isEmpty()) {
-            if(formatted.isEmpty() && !extractedText.getParagraphs().isEmpty() && emptyLineAllowed){
+            if(formatted.isEmpty() && !extractedText.getSections().isEmpty() && emptyLineAllowed){
                 formatted = "\n";
                 previousLineEmpty = true;
-                extractedText.addParagraph(formatted);
+                extractedText.addSimpleSection(formatted);
             } else if (!formatted.isEmpty()){
                 previousLineEmpty = false;
-                extractedText.addParagraph(formatted);
+                extractedText.addSimpleSection(formatted);
             }
         }
     }
@@ -107,7 +107,7 @@ public class TextExtractorDOCX implements TextExtractor {
         } else if (e instanceof XWPFTable) {
             appendTableText(text, (XWPFTable) e);
         } else if (e instanceof XWPFSDT) {
-            text.addParagraph(((XWPFSDT) e).getContent().getText());
+            text.addSimpleSection(((XWPFSDT) e).getContent().getText());
         }
     }
 
@@ -115,10 +115,10 @@ public class TextExtractorDOCX implements TextExtractor {
     private void appendParagraphText(ExtractedText text, XWPFParagraph paragraph) {
         for (IRunElement run : paragraph.getRuns()) {
             if (run instanceof XWPFRun) {
-                text.addParagraph(((XWPFRun)run).text());
+                text.addSimpleSection(((XWPFRun)run).text());
             } else {
                 Log.d("DOCX_RUN",run.toString());
-                text.addParagraph(run.toString());
+                text.addSimpleSection(run.toString());
             }
         }
     }
@@ -131,15 +131,15 @@ public class TextExtractorDOCX implements TextExtractor {
             for (int i = 0; i < cells.size(); i++) {
                 ICell cell = cells.get(i);
                 if (cell instanceof XWPFTableCell) {
-                    text.addParagraph(((XWPFTableCell) cell).getTextRecursively());
+                    text.addSimpleSection(((XWPFTableCell) cell).getTextRecursively());
                 } else if (cell instanceof XWPFSDTCell) {
-                    text.addParagraph(((XWPFSDTCell) cell).getContent().getText());
+                    text.addSimpleSection(((XWPFSDTCell) cell).getContent().getText());
                 }
                 if (i < cells.size() - 1) {
-                    text.addParagraph("\t");
+                    text.addSimpleSection("\t");
                 }
             }
-            text.addParagraph("\n");
+            text.addSimpleSection("\n");
         }
     }
 }
