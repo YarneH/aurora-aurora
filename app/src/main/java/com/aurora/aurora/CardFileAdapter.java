@@ -193,7 +193,7 @@ public class CardFileAdapter extends RecyclerView.Adapter<CardFileAdapter.CardFi
                 String textFile = "DummyTextFile.docx";
                 InputStream docFile = mContext.getResources().openRawResource(R.raw.apple_crisp);
 
-                mKernel.getAuroraCommunicator().openFileWithPlugin(textFile, docFile, intent, mContext);
+                mKernel.getAuroraCommunicator().openFileWithPlugin(textFile,"docx" , docFile, intent, mContext);
             }
         }
     }

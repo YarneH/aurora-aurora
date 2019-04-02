@@ -51,7 +51,7 @@ public class AuroraCommunicatorUnitTest {
         String fileRef = "Dummy/file/ref";
         InputStream file = new DummyInputStream();
         Intent targetPlugin = new Intent(Constants.PLUGIN_ACTION);
-        mAuroraCommunicator.openFileWithPlugin(fileRef, file, targetPlugin, new Context());
+        mAuroraCommunicator.openFileWithPlugin(fileRef, "docx" ,file, targetPlugin, new Context());
 
         // Assert that arguments passed are as expected
         fileRefObserver.assertSubscribed();
@@ -86,7 +86,7 @@ public class AuroraCommunicatorUnitTest {
         String dummyFileRef = "dummy/path/to/file";
         InputStream file = new DummyInputStream();
         Intent dummyPlugin = new Intent(Constants.PLUGIN_ACTION);
-        mAuroraCommunicator.openFileWithPlugin(dummyFileRef, file, dummyPlugin, new Context());
+        mAuroraCommunicator.openFileWithPlugin(dummyFileRef, "docx", file, dummyPlugin, new Context());
 
         // Assure that the correct values are contained in request event
         extractedTextObserver.assertSubscribed();
