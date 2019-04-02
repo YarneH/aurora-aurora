@@ -9,8 +9,6 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.FrameLayout;
 import android.widget.TextView;
 
 import com.aurora.auroralib.Constants;
@@ -87,10 +85,10 @@ public class CardFileAdapter extends RecyclerView.Adapter<CardFileAdapter.CardFi
     /**
      * ViewHolder for the recyclerview. Holds the file cards.
      */
-    public class CardFileViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+    public class CardFileViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener,
+            View.OnLongClickListener {
         private TextView mTextView;
         private CardView mCardView;
-        private Button mButton;
         private int index;
 
         // TODO: add fields for the details about the file
@@ -105,10 +103,9 @@ public class CardFileAdapter extends RecyclerView.Adapter<CardFileAdapter.CardFi
             super(itemView);
             mCardView = itemView.findViewById(R.id.cv_file);
             mTextView = itemView.findViewById(R.id.tv_card_title);
-            mButton = itemView.findViewById(R.id.button_card_file);
             // The card itself is clickable (for details), but also the open button.
             mCardView.setOnClickListener(this);
-            mButton.setOnClickListener(this);
+            mCardView.setOnLongClickListener(this);
         }
 
         /**
@@ -143,6 +140,30 @@ public class CardFileAdapter extends RecyclerView.Adapter<CardFileAdapter.CardFi
         // TODO: onClick for the open button, onClick for the open with different plugin button, delete button
         @Override
         public void onClick(View view) {
+            // TODO add the case that view.getId() is R.id.button_card_file
+            // TODO update this preliminary code for opening a plugin.
+            // TODO this should make an event to open the cached file.
+            // Plugin should probably still be able to open this, but Souschef probably not
+            if (view.getId() == R.id.cv_file) {
+                Intent intent = new Intent(Constants.PLUGIN_ACTION);
+
+                /* TODO Remove this test code
+                Eventually, here instead of opening a file, the cache will be called instead.
+                This is just a demonstration that it works.
+                TODO remove the 'mContext' variable from this class. It is used solely for demonstration purposes!
+
+                Note: this is basically mixed code as a result of a merge. This test code will be removed ASAP
+                */
+                String textFile = "DummyTextFile.docx";
+                InputStream docFile = mContext.getResources().openRawResource(R.raw.apple_crisp);
+
+                mKernel.getAuroraCommunicator().openFileWithPlugin(textFile, "docx", docFile, intent, mContext);
+            }
+        }
+
+        @Override
+        public boolean onLongClick(View view) {
+            boolean clickConsumed = false;
             // If the click happened on the card itself
             if (view.getId() == R.id.cv_file) {
                 // If the click happened on the card itself
@@ -152,6 +173,7 @@ public class CardFileAdapter extends RecyclerView.Adapter<CardFileAdapter.CardFi
                      */
                     mSelectedIndex = index;
                     expand(view);
+                    clickConsumed = true;
                 } else if (mSelectedIndex == index) {
                     /*
                     Case the clicked card is the expanded card.
@@ -159,6 +181,7 @@ public class CardFileAdapter extends RecyclerView.Adapter<CardFileAdapter.CardFi
                      */
                     mSelectedIndex = NO_DETAILS;
                     collapse(view);
+                    clickConsumed = true;
                 } else {
                     /*
                     Case where a card is selected but a different card is clicked.
@@ -176,28 +199,10 @@ public class CardFileAdapter extends RecyclerView.Adapter<CardFileAdapter.CardFi
                     }
                     mSelectedIndex = index;
                     expand(view);
+                    clickConsumed = true;
                 }
-                // if the click happened on the open button
             }
-            // TODO add the case that view.getId() is R.id.button_card_file
-            // TODO update this preliminary code for opening a plugin.
-            // TODO this should make an event to open the cached file.
-            // Plugin should probably still be able to open this, but Souschef probably not
-            if (view.getId() == R.id.button_card_file) {
-                Intent intent = new Intent(Constants.PLUGIN_ACTION);
-
-                /* TODO Remove this test code
-                Eventually, here instead of opening a file, the cache will be called instead.
-                This is just a demonstration that it works.
-                TODO remove the 'mContext' variable from this class. It is used solely for demonstration purposes!
-
-                Note: this is basically mixed code as a result of a merge. This test code will be removed ASAP
-                */
-                String textFile = "DummyTextFile.docx";
-                InputStream docFile = mContext.getResources().openRawResource(R.raw.apple_crisp);
-
-                mKernel.getAuroraCommunicator().openFileWithPlugin(textFile,"docx" , docFile, intent, mContext);
-            }
+            return clickConsumed;
         }
     }
 
@@ -205,6 +210,7 @@ public class CardFileAdapter extends RecyclerView.Adapter<CardFileAdapter.CardFi
 //    in view results in the card growing upwards instead of down.
 //    Scrolling down before expanding "solves" this.
 //    Fix This bug :)
+
     /**
      * Expand the view to show details.
      * Simply sets the visibility of the details to VISIBLE, while setting the original card to GONE

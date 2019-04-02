@@ -24,7 +24,7 @@
     <string name="file_description">\'Description of the file\'</string>
     <string name="file_last">Last opened on:</string>
     <string name="file_added_on">Added on:</string>
-    <string name="file_more_details">Click for more info...</string>
+    <string name="file_more_details">Hold for more info...</string>
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
