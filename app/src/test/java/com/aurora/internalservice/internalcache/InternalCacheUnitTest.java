@@ -76,7 +76,8 @@ public class InternalCacheUnitTest {
     @Test
     public void InternalCache_cacheFile_shouldReturnFalseOnFailure() {
         // Create arguments
-        String invalidFileRef = "test??File!.pdf";
+        // Invalid filename works on windows. Linux should also have a problem with the slashes
+        String invalidFileRef = "te///st??File!.pdf";
         String title = "title";
         String text = "text";
         PluginObject pluginObject = new DummyPluginObject1(title, text);
