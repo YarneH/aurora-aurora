@@ -1,15 +1,15 @@
 package com.aurora.kernel;
 
-import android.app.Activity;
-import android.support.v4.app.Fragment;
+import android.content.Context;
+import android.content.Intent;
 
-import com.aurora.kernel.event.ListPluginsResponse;
+import com.aurora.auroralib.ExtractedText;
+import com.aurora.kernel.event.InternalProcessorRequest;
+import com.aurora.kernel.event.InternalProcessorResponse;
 import com.aurora.kernel.event.ListPluginsRequest;
+import com.aurora.kernel.event.ListPluginsResponse;
 import com.aurora.kernel.event.OpenFileWithPluginRequest;
-import com.aurora.kernel.event.OpenFileWithPluginResponse;
-import com.aurora.kernel.event.PluginSettingsRequest;
-import com.aurora.kernel.event.PluginSettingsResponse;
-import com.aurora.plugin.BasicPlugin;
+import com.aurora.plugin.Plugin;
 
 import java.io.InputStream;
 import java.util.List;
@@ -22,41 +22,40 @@ import io.reactivex.Observable;
 public class AuroraCommunicator extends Communicator {
     private static final String CLASS_TAG = "AuroraCommunicator";
 
+
     public AuroraCommunicator(Bus mBus) {
         super(mBus);
-
     }
 
     /**
-     * Open file with a given plugin
+     * Open file with a given plugin. This method will first extract
+     * the text from the given file reference,
+     * then it will send a request to let the plugin make the representation.
      *
-     * @param pluginName the name of the plugin to open the file with, contains version number
-     * @param fileRef    a reference to the file that needs to be opened
-     * @return the fragment to be shown wrapped in an observable
+     * @param fileRef      a reference to the file that needs to be opened
+     * @param type         the type of the file, currently: "docx", "txt"
+     * @param targetPlugin the plugin to open the file with
+     * @param context      the android context
      */
-    public Observable<Fragment> openFileWithPlugin(String pluginName, InputStream file, String fileRef) {
-        Observable<OpenFileWithPluginResponse> mOpenFileWithPluginResponse
-                = this.mBus.register(OpenFileWithPluginResponse.class);
-        this.mBus.post(new OpenFileWithPluginRequest(pluginName, file, fileRef));
+    public void openFileWithPlugin(String fileRef, String type,
+                                   InputStream file, Intent targetPlugin, Context context) {
+        // Create observable to listen to
+        Observable<InternalProcessorResponse> internalProcessorResponse =
+                mBus.register(InternalProcessorResponse.class);
 
-        // The map function is called on the observable. Then, the getPluginFragment function
-        // is called on the response event and the result is returned
-        return mOpenFileWithPluginResponse.map(OpenFileWithPluginResponse::getPluginFragment);
-    }
+        // Subscribe to observable
+        // The subscribe will only be triggered after the file was processed internally
+        internalProcessorResponse
+                .map(InternalProcessorResponse::getExtractedText)
+                .subscribe((ExtractedText extractedText) ->
+                        sendOpenFileRequest(extractedText, targetPlugin, context));
 
-    /**
-     * Gets the settings of a plugin
-     *
-     * @param pluginName the name of the plugin to get the settings for
-     * @return the class reference to the activity to show wrapped in an observable
-     */
-    public Observable<Class<? extends Activity>> getSettingsOfPlugin(String pluginName) {
-        Observable<PluginSettingsResponse> mPluginSettingsResponse
-                = this.mBus.register(PluginSettingsResponse.class);
-        this.mBus.post(new PluginSettingsRequest(pluginName));
+        // First create internal processing
+        InternalProcessorRequest internalProcessorRequest =
+                new InternalProcessorRequest(file, fileRef, type);
 
-        return mPluginSettingsResponse
-                .map(PluginSettingsResponse::getActivity);
+        // Post request on the bus
+        mBus.post(internalProcessorRequest);
     }
 
     /**
@@ -64,7 +63,7 @@ public class AuroraCommunicator extends Communicator {
      *
      * @return a list of basic information on every plugin wrapped in an observable
      */
-    public Observable<List<BasicPlugin>> getListOfPlugins() {
+    public Observable<List<Plugin>> getListOfPlugins() {
         Observable<ListPluginsResponse> mListPluginsResponse
                 = this.mBus.register(ListPluginsResponse.class);
         this.mBus.post(new ListPluginsRequest());
@@ -72,5 +71,20 @@ public class AuroraCommunicator extends Communicator {
         return mListPluginsResponse.map(ListPluginsResponse::getPlugins);
     }
 
+    /**
+     * Private handle method to send request to plugin communicator to open file with plugin
+     *
+     * @param extractedText the extracted text of the file that was internally processed
+     * @param targetPlugin  the plugin to open the file with
+     * @param context       the android context
+     */
+    private void sendOpenFileRequest(ExtractedText extractedText,
+                                     Intent targetPlugin, Context context) {
+
+        // Create request and post it on bus
+        OpenFileWithPluginRequest openFileWithPluginRequest =
+                new OpenFileWithPluginRequest(extractedText, targetPlugin, context);
+        mBus.post(openFileWithPluginRequest);
+    }
 
 }
