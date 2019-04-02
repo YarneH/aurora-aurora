@@ -128,7 +128,9 @@ public class MockContext extends Context {
 
     @Override
     public boolean deleteFile(String name) {
-        return false;
+        File fileToDelete = new File(name);
+
+        return fileToDelete.delete();
     }
 
     @Override

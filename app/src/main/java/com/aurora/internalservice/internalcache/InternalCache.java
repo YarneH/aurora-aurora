@@ -175,22 +175,20 @@ public class InternalCache implements InternalService {
      */
     public CachedProcessedFile retrieveFile(String fileRef, String uniquePluginName) {
         // First, look up in the registry if the file is present
-        List<String> cachedFilesByPlugin;
-        if ((cachedFilesByPlugin = mCachedFiles.get(uniquePluginName)) != null &&
-                cachedFilesByPlugin.contains(fileRef)) {
+        if (isInCache(fileRef, uniquePluginName)) {
 
             // file is in cache, retrieve it
             String cachedPath = getCachedPath(fileRef);
 
             // Create a reader to read the file
             try (FileInputStream fileInputStream = mContext.openFileInput(cachedPath);
-            BufferedReader reader = new BufferedReader(new InputStreamReader(fileInputStream))) {
+                 BufferedReader reader = new BufferedReader(new InputStreamReader(fileInputStream))) {
                 // Read file in string, use string builder for speed
                 StringBuilder stringBuilder = new StringBuilder();
                 String currentLine;
 
                 // Have to read line by line because stream api is not supported
-                while((currentLine = reader.readLine()) != null) {
+                while ((currentLine = reader.readLine()) != null) {
                     stringBuilder.append(currentLine);
                 }
 
@@ -218,7 +216,13 @@ public class InternalCache implements InternalService {
      * @return true if the file was successfully removed
      */
     public boolean removeFile(String fileRef, String uniquePluginName) {
-        Log.d(CLASS_TAG, "This method will be implemented later! " + fileRef + " " + uniquePluginName);
+        // First check if the file is in the cache registry
+        if (isInCache(fileRef, uniquePluginName)) {
+            // File is in cache registry, remove it
+            return mContext.deleteFile(getCachedPath(fileRef));
+        }
+
+        // If file is not in cache, return false
         return false;
     }
 
@@ -226,21 +230,40 @@ public class InternalCache implements InternalService {
      * Removes all files from the cache that were processed by a given plugin
      *
      * @param uniquePluginName the name of the plugin to remove the files from
-     * @return true if the operation was successful
+     * @return true only if the entire operation was successful, false if plugin was not found
+     * or if at least one file could not be removed
      */
     public boolean removeFilesByPlugin(String uniquePluginName) {
-        Log.d(CLASS_TAG, "This is not implemented yet! " + uniquePluginName);
-        return false;
+        // Retrieve list of files cached for this plugin
+        List<String> cachedFilesByPlugin = mCachedFiles.get(uniquePluginName);
+        boolean successful = true;
+
+        // If list is not null, remove each of the files
+        if ((successful = (cachedFilesByPlugin != null))) {
+            for (String fileRef : cachedFilesByPlugin) {
+                // First call remove file to ensure that it is called even when 'successful' is already false
+                successful = removeFile(fileRef, uniquePluginName) && successful;
+            }
+        }
+
+        // This will be true if all files were successfully removed, false in all other cases
+        return successful;
     }
 
     /**
      * Clears the entire cache
      *
-     * @return true if the operation was successful
+     * @return true if the entire operation was successful or if the cache was empty, false otherwise
      */
     public boolean clear() {
-        Log.d(CLASS_TAG, "Operation not implemented yet!");
-        return false;
+        boolean successful = true;
+
+        // Call removeFilesByPlugin for each plugin in the registry
+        for (String uniquePluginName : mCachedFiles.keySet()) {
+            successful = removeFilesByPlugin(uniquePluginName) && successful;
+        }
+
+        return successful;
     }
 
     /**
@@ -294,7 +317,7 @@ public class InternalCache implements InternalService {
     private Map<String, List<String>> convertToMap(CacheRegistryElement[] elements) {
         Map<String, List<String>> cacheMap = new HashMap<>();
         for (CacheRegistryElement el : elements) {
-            // Convert cached filerefs to list
+            // Convert cached fileRefs to list
             List<String> fileRefs = Arrays.asList(el.cachedFileRefs);
 
             // Add element to map
@@ -335,7 +358,7 @@ public class InternalCache implements InternalService {
      */
     private static String getCachedPath(String fileRef) {
         // Get the file ref to it without extension
-        String cachedPath = null;
+        String cachedPath;
         if (fileRef.contains(".")) {
             cachedPath = fileRef.substring(0, fileRef.indexOf('.'));
         } else {
@@ -364,6 +387,19 @@ public class InternalCache implements InternalService {
             return false;
         }
         return true;
+    }
+
+    /**
+     * Helper method that checks if a file is in the cache registry
+     *
+     * @param fileRef          the reference to the file to check if it is in the cache registry
+     * @param uniquePluginName the name of the plugin that the file would be processed with
+     * @return true if the file is in the cache, false otherwise
+     */
+    private boolean isInCache(String fileRef, String uniquePluginName) {
+        List<String> cachedFilesByPlugin = mCachedFiles.get(uniquePluginName);
+
+        return cachedFilesByPlugin != null && cachedFilesByPlugin.contains(fileRef);
     }
 
     /**
