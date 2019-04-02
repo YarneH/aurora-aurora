@@ -24,7 +24,7 @@ import java.util.Locale;
 public class CardFileAdapter extends RecyclerView.Adapter<CardFileAdapter.CardFileViewHolder> {
     private static final int NO_DETAILS = -1;
     // TODO: Remove dummy amount
-    private static final int DUMMY_AMOUNT = 100;
+    private static final int DUMMY_AMOUNT = 0;
     private int mAmount = DUMMY_AMOUNT;
     // value of the currently selected file (file card that is expanded)
     private int mSelectedIndex = NO_DETAILS;

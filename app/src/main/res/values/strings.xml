@@ -19,6 +19,7 @@
 
     <!-- Recycler View strings -->
     <string name="button_open">Open</string>
+    <string name="empty_recent">No recent files found...\nUse the \'+\' button in the right bottom corner to open a file with Aurora!</string>
 
     <!-- Card File strings -->
     <string name="file_details">Details about file</string>

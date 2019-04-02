@@ -98,6 +98,11 @@ public class MainActivity extends AppCompatActivity
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         CardFileAdapter adapter = new CardFileAdapter(mKernel, this);
         mRecyclerView.setAdapter(adapter);
+
+        /* Show TextView when RecyclerView is empty */
+        if (adapter.getItemCount() == 0) {
+            findViewById(R.id.tv_empty_recent).setVisibility(View.VISIBLE);
+        }
     }
 
     /**
@@ -231,10 +236,12 @@ public class MainActivity extends AppCompatActivity
             mTextViewMain.setText(text);
         }
         if (home) {
-            mRecyclerView.setVisibility(View.VISIBLE);
+            //mRecyclerView.setVisibility(View.VISIBLE);
+            findViewById(R.id.cl_recycler_content).setVisibility(View.VISIBLE);
             mTextViewMain.setVisibility(View.INVISIBLE);
         } else {
-            mRecyclerView.setVisibility(View.INVISIBLE);
+            //mRecyclerView.setVisibility(View.INVISIBLE);
+            findViewById(R.id.cl_recycler_content).setVisibility(View.INVISIBLE);
             mTextViewMain.setVisibility(View.VISIBLE);
         }
 
