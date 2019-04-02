@@ -45,8 +45,8 @@ public class MainActivity extends AppCompatActivity
     /**
      * Create unique kernel instance (should be passed to every activity, fragment, adapter,...) that needs it
      */
-    private Kernel mKernel;
-    private AuroraCommunicator mAuroraCommunicator;
+    private Kernel mKernel = null;
+    private AuroraCommunicator mAuroraCommunicator = null;
 
     /**
      * Runs on startup of the activity, in this case on startup of the app
