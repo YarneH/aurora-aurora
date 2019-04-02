@@ -28,7 +28,8 @@ public class AuroraCommunicator extends Communicator {
     }
 
     /**
-     * Open file with a given plugin. This method will first extract the text from the given file reference,
+     * Open file with a given plugin. This method will first extract
+     * the text from the given file reference,
      * then it will send a request to let the plugin make the representation.
      *
      * @param fileRef      a reference to the file that needs to be opened
@@ -36,7 +37,8 @@ public class AuroraCommunicator extends Communicator {
      * @param targetPlugin the plugin to open the file with
      * @param context      the android context
      */
-    public void openFileWithPlugin(String fileRef, String type, InputStream file, Intent targetPlugin, Context context) {
+    public void openFileWithPlugin(String fileRef, String type,
+                                   InputStream file, Intent targetPlugin, Context context) {
         // Create observable to listen to
         Observable<InternalProcessorResponse> internalProcessorResponse =
                 mBus.register(InternalProcessorResponse.class);
@@ -49,7 +51,8 @@ public class AuroraCommunicator extends Communicator {
                         sendOpenFileRequest(extractedText, targetPlugin, context));
 
         // First create internal processing
-        InternalProcessorRequest internalProcessorRequest = new InternalProcessorRequest(file, fileRef, type);
+        InternalProcessorRequest internalProcessorRequest =
+                new InternalProcessorRequest(file, fileRef, type);
 
         // Post request on the bus
         mBus.post(internalProcessorRequest);
@@ -75,7 +78,8 @@ public class AuroraCommunicator extends Communicator {
      * @param targetPlugin  the plugin to open the file with
      * @param context       the android context
      */
-    private void sendOpenFileRequest(ExtractedText extractedText, Intent targetPlugin, Context context) {
+    private void sendOpenFileRequest(ExtractedText extractedText,
+                                     Intent targetPlugin, Context context) {
 
         // Create request and post it on bus
         OpenFileWithPluginRequest openFileWithPluginRequest =
