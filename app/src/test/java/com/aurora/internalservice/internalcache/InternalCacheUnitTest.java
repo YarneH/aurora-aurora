@@ -218,6 +218,24 @@ public class InternalCacheUnitTest {
         Assert.assertFalse(successful);
     }
 
+    @Test
+    public void InternalCache_clear_shouldRemoveAllFilesFromCache() {
+        // Add multiple files to the cache
+        addCacheFiles();
+
+        // Call clear method to clear the cache
+        boolean successful = mInternalCache.clear();
+
+        Assert.assertTrue(successful);
+    }
+
+    @Test
+    public void InternalCache_clear_shouldReturnTrueIfCacheAlreadyEmpty() {
+        boolean successful = mInternalCache.clear();
+
+        Assert.assertTrue(successful);
+    }
+
     // After every test, reset the cache
     @After
     public void resetCache() {
@@ -301,4 +319,5 @@ public class InternalCacheUnitTest {
             return mName;
         }
     }
+
 }
