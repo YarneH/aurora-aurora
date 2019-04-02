@@ -25,7 +25,6 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.aurora.auroralib.Constants;
 import com.aurora.kernel.AuroraCommunicator;
 import com.aurora.kernel.Kernel;
 
@@ -125,8 +124,6 @@ public class MainActivity extends AppCompatActivity
         if (requestCode == REQUEST_FILE_GET && resultCode == RESULT_OK) {
             Uri textFile = data.getData();
 
-            Intent intent = new Intent(Constants.PLUGIN_ACTION);
-
             try {
                 if (textFile != null) {
                     Log.i("URI", textFile.toString());
@@ -139,8 +136,6 @@ public class MainActivity extends AppCompatActivity
                 Toast.makeText(this, "The file could not be found", Snackbar.LENGTH_LONG).show();
                 Log.e("FILE_NOT_FOUND", "The file could not be found", e);
             }
-
-
         }
     }
 

@@ -73,7 +73,7 @@ public class AuroraCommunicator extends Communicator {
                 .map(RetrieveFileFromCacheResponse::getProcessedFile)
                 .map(CachedProcessedFile::getJsonRepresentation)
                 .subscribe((String jsonRepresentation) -> {
-                    if (jsonRepresentation.equals("{}")) {
+                    if ("{}".equals(jsonRepresentation)) {
                         // TODO extract text and all
                         Log.d(CLASS_TAG, "Not implemented yet!");
                     } else {

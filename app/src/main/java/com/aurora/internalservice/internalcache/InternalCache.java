@@ -325,7 +325,7 @@ public class InternalCache implements InternalService {
      * @param elements the elements to be converted to a map
      * @return a map with Strings (unique plugin names) as key and a list of associated file references as a value
      */
-    private Map<String, List<String>> convertToMap(CacheRegistryElement[] elements) {
+    private static Map<String, List<String>> convertToMap(CacheRegistryElement[] elements) {
         Map<String, List<String>> cacheMap = new HashMap<>();
         for (CacheRegistryElement el : elements) {
             // Convert cached fileRefs to list
@@ -345,7 +345,7 @@ public class InternalCache implements InternalService {
      * @param cacheMap the map to convert
      * @return an array of easier to serialize elements
      */
-    private CacheRegistryElement[] convertFromMap(Map<String, List<String>> cacheMap) {
+    private static CacheRegistryElement[] convertFromMap(Map<String, List<String>> cacheMap) {
         // Create list of cache registry elements
         List<CacheRegistryElement> cacheRegistryElements = new ArrayList<>();
 
