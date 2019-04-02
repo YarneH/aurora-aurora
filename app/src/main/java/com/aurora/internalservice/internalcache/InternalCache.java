@@ -306,7 +306,8 @@ public class InternalCache implements InternalService {
         // Convert map to array of CacheRegistryElements
         CacheRegistryElement[] elements = convertFromMap(mCachedFiles);
 
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(CACHE_LOCATION))) {
+        File cacheFile = new File(mContext.getFilesDir(), CACHE_LOCATION);
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(cacheFile))) {
             Gson gson = new Gson();
 
             // Convert array to json string

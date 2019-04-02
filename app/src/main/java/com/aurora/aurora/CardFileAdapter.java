@@ -13,7 +13,6 @@ import android.widget.TextView;
 
 import com.aurora.kernel.Kernel;
 
-import java.io.InputStream;
 import java.util.Locale;
 
 /**
@@ -188,9 +187,8 @@ public class CardFileAdapter extends RecyclerView.Adapter<CardFileAdapter.CardFi
                 Note: this is basically mixed code as a result of a merge. This test code will be removed ASAP
                 */
                 String textFile = "DummyTextFile.docx";
-                InputStream docFile = mContext.getResources().openRawResource(R.raw.apple_crisp);
 
-                mKernel.getAuroraCommunicator().openFileWithPlugin(textFile, docFile, mContext);
+                mKernel.getAuroraCommunicator().openFileWithCache(textFile, mContext);
             }
         }
     }

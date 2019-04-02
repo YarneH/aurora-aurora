@@ -46,7 +46,7 @@ public final class Kernel {
         this.mAuroraCommunicator = new AuroraCommunicator(mBus);
 
         this.mProcessingCommunicator = new ProcessingCommunicator(mBus);
-        this.mPluginRegistry = new PluginRegistry(mProcessingCommunicator, PLUGINS_CFG);
+        this.mPluginRegistry = new PluginRegistry(mProcessingCommunicator, PLUGINS_CFG, applicationContext);
         this.mPluginCommunicator = new PluginCommunicator(mBus, mPluginRegistry);
 
         // Create internal text processor for the PluginInternalServiceCommunicator

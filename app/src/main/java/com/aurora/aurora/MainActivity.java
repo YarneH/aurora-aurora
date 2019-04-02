@@ -45,8 +45,8 @@ public class MainActivity extends AppCompatActivity
     /**
      * Create unique kernel instance (should be passed to every activity, fragment, adapter,...) that needs it
      */
-    private Kernel mKernel = new Kernel(this.getApplicationContext());
-    private AuroraCommunicator mAuroraCommunicator = mKernel.getAuroraCommunicator();
+    private Kernel mKernel;
+    private AuroraCommunicator mAuroraCommunicator;
 
     /**
      * Runs on startup of the activity, in this case on startup of the app
@@ -57,6 +57,10 @@ public class MainActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        /* Set up kernel */
+        mKernel = new Kernel(this.getApplicationContext());
+        mAuroraCommunicator = mKernel.getAuroraCommunicator();
 
         /* Set system properties for DOCX */
         System.setProperty("org.apache.poi.javax.xml.stream.XMLInputFactory",

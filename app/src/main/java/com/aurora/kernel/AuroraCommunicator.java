@@ -12,6 +12,7 @@ import com.aurora.kernel.event.ListPluginsRequest;
 import com.aurora.kernel.event.ListPluginsResponse;
 import com.aurora.kernel.event.OpenCachedFileWithPluginRequest;
 import com.aurora.kernel.event.OpenFileWithPluginRequest;
+import com.aurora.kernel.event.RetrieveFileFromCacheRequest;
 import com.aurora.kernel.event.RetrieveFileFromCacheResponse;
 import com.aurora.plugin.Plugin;
 
@@ -19,6 +20,7 @@ import java.io.InputStream;
 import java.util.List;
 
 import io.reactivex.Observable;
+import io.reactivex.android.schedulers.AndroidSchedulers;
 
 /**
  * Communicator class that communicates to Aurora app environment
@@ -73,6 +75,7 @@ public class AuroraCommunicator extends Communicator {
         retrieveFileFromCacheResponse
                 .map(RetrieveFileFromCacheResponse::getProcessedFile)
                 .map(CachedProcessedFile::getJsonRepresentation)
+                .observeOn(AndroidSchedulers.mainThread())
                 .subscribe((String jsonRepresentation) -> {
                     if ("{}".equals(jsonRepresentation)) {
                         // TODO extract text and show plugin anyway
@@ -85,6 +88,10 @@ public class AuroraCommunicator extends Communicator {
                         sendOpenCachedFileRequest(jsonRepresentation, context);
                     }
                 });
+
+        // Send request to retrieve file from cache TODO change this!
+        RetrieveFileFromCacheRequest request = new RetrieveFileFromCacheRequest(fileRef, "DummyPlugin");
+        mBus.post(request);
     }
 
     /**
