@@ -35,7 +35,7 @@ public class AuroraCommunicator extends Communicator {
      * @param targetPlugin the plugin to open the file with
      * @param context      the android context
      */
-    public void openFileWithPlugin(String fileRef, InputStream file, Intent targetPlugin, Context context) {
+    public void openFileWithPlugin(String fileRef, String type,InputStream file, Intent targetPlugin, Context context) {
         // Create observable to listen to
         Observable<InternalProcessorResponse> internalProcessorResponse =
                 mBus.register(InternalProcessorResponse.class);
@@ -48,7 +48,7 @@ public class AuroraCommunicator extends Communicator {
                         sendOpenFileRequest(extractedText, targetPlugin, context));
 
         // First create internal processing
-        InternalProcessorRequest internalProcessorRequest = new InternalProcessorRequest(file, fileRef);
+        InternalProcessorRequest internalProcessorRequest = new InternalProcessorRequest(file, fileRef, type);
 
         // Post request on the bus
         mBus.post(internalProcessorRequest);

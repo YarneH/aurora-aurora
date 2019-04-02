@@ -23,12 +23,11 @@ public class InternalTextProcessor implements InternalService {
      * @param fileRef a reference to where the file can be found
      * @return The extracted content from the file
      */
-    public ExtractedText processFile(InputStream file, String fileRef) throws FileTypeNotSupportedException {
+    public ExtractedText processFile(InputStream file, String fileRef, String type) throws FileTypeNotSupportedException {
         Log.d("InternalTextProcessing", "Not implemented yet!");
 
         ExtractedText extractedText;
-        String fileType = getMimeType(fileRef);
-        TextExtractor extractor = fileFormatExtractorMap.get(fileType);
+        TextExtractor extractor = fileFormatExtractorMap.get(type);
         if (extractor != null) {
             extractedText = extractor.extract(file, fileRef);
         } else {
@@ -36,16 +35,6 @@ public class InternalTextProcessor implements InternalService {
             throw new FileTypeNotSupportedException("");
         }
         return extractedText;
-    }
-
-    /**
-     * @param fileRef the reference of the to be processed file
-     * @return the extension of the file
-     */
-    // TODO: implement for real
-    private static String getMimeType(String fileRef) {
-        String[] splitted = fileRef.split("\\.");
-        return splitted[splitted.length - 1];
     }
 
     /**

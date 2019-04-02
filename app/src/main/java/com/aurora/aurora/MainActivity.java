@@ -1,5 +1,6 @@
 package com.aurora.aurora;
 
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -21,6 +22,7 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.webkit.MimeTypeMap;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -130,8 +132,11 @@ public class MainActivity extends AppCompatActivity
             try {
                 if (textFile != null) {
                     Log.i("URI", textFile.toString());
+                    ContentResolver cR = getApplicationContext().getContentResolver();
+                    String type = MimeTypeMap.getSingleton().getExtensionFromMimeType(cR.getType(textFile));
+                    Log.i("MIME", type);
                     InputStream read = getContentResolver().openInputStream(textFile);
-                    mAuroraCommunicator.openFileWithPlugin(textFile.toString(), read, intent, this);
+                    mAuroraCommunicator.openFileWithPlugin(textFile.toString(), type, read, intent, this);
                 } else {
                     Toast.makeText(this, "The selected file was null", Snackbar.LENGTH_LONG).show();
                 }
