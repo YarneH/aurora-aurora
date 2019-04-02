@@ -19,8 +19,9 @@ public class InternalTextProcessor implements InternalService {
 
     /**
      * extracts text from a file using the right Extractor
-     *
+     * @param file the stream containing the file
      * @param fileRef a reference to where the file can be found
+     * @param type the mimetype of the file
      * @return The extracted content from the file
      */
     public ExtractedText processFile(InputStream file, String fileRef, String type)

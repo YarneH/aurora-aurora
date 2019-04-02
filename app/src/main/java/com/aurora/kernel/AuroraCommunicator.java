@@ -32,10 +32,11 @@ public class AuroraCommunicator extends Communicator {
      * then it will send a request to let the plugin make the representation.
      *
      * @param fileRef      a reference to the file that needs to be opened
+     * @param type         the type of the file
      * @param targetPlugin the plugin to open the file with
      * @param context      the android context
      */
-    public void openFileWithPlugin(String fileRef, String type,InputStream file, Intent targetPlugin, Context context) {
+    public void openFileWithPlugin(String fileRef, String type, InputStream file, Intent targetPlugin, Context context) {
         // Create observable to listen to
         Observable<InternalProcessorResponse> internalProcessorResponse =
                 mBus.register(InternalProcessorResponse.class);
