@@ -23,7 +23,8 @@ public class InternalTextProcessor implements InternalService {
      * @param fileRef a reference to where the file can be found
      * @return The extracted content from the file
      */
-    public ExtractedText processFile(InputStream file, String fileRef, String type) throws FileTypeNotSupportedException {
+    public ExtractedText processFile(InputStream file, String fileRef, String type)
+            throws FileTypeNotSupportedException {
         Log.d("InternalTextProcessing", "Not implemented yet!");
 
         ExtractedText extractedText;
