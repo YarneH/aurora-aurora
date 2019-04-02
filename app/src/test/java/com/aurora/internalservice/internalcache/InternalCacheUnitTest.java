@@ -147,6 +147,77 @@ public class InternalCacheUnitTest {
         Assert.assertEquals(object1.getText(), reconstructedObject.getText());
     }
 
+    @Test
+    public void InternalCache_removeFile_shouldRemoveFileIfFileInCache() {
+        // Add multiple files to cache
+        addCacheFiles();
+
+        // Add one yourself
+        String fileRef = "award-winning-text.pdf";
+        String title = "A Good Title";
+        String text = "This is a very good text. Nobel prize worthy, even!";
+        String pluginName = "DummyPlugin";
+
+        DummyPluginObject1 object1 = new DummyPluginObject1(title, text);
+        mInternalCache.cacheFile(fileRef, object1, pluginName);
+
+        // Now we want to remove this one file
+        boolean successful = mInternalCache.removeFile(fileRef, pluginName);
+
+        Assert.assertTrue(successful);
+    }
+
+    @Test
+    public void InternalCache_removeFile_shouldNotRemoveFileIfFileIsNotInCache() {
+        // Add multiple files to cache
+        addCacheFiles();
+
+        // Add one yourself
+        String fileRef = "award-winning-text.pdf";
+        String pluginName = "DummyPlugin";
+
+        // Now we want to remove this one file
+        boolean successful = mInternalCache.removeFile(fileRef, pluginName);
+
+        Assert.assertFalse(successful);
+    }
+
+    @Test
+    public void InternalCache_removeFilesByPlugin_shouldRemoveAllFilesByPlugin() {
+        // Add multiple files to cache
+        addCacheFiles();
+
+        // Add multiple files by another plugin
+        String fileRef1 = "award-winning-text.pdf";
+        String fileRef2 = "bad-text.pdf";
+        String title1 = "A Good Title";
+        String title2 = "A Bad Title";
+        String text1 = "This is a very good text. Nobel prize worthy, even!";
+        String text2 = "This text will never win any prize!";
+        String pluginName = "DummyPlugin";
+
+        DummyPluginObject1 object1 = new DummyPluginObject1(title1, text1);
+        DummyPluginObject1 object2 = new DummyPluginObject1(title2, text2);
+        mInternalCache.cacheFile(fileRef1, object1, pluginName);
+        mInternalCache.cacheFile(fileRef2, object2, pluginName);
+
+        // Remove all files with the given plugin name
+        boolean successful = mInternalCache.removeFilesByPlugin(pluginName);
+
+        Assert.assertTrue(successful);
+    }
+
+    @Test
+    public void InternalCache_removeFilesByPlugin_shouldNotRemoveFilesIfPluginNotInCache() {
+        // Add multiple files to the cache
+        addCacheFiles();
+        String pluginName = "DummyPlugin";
+        // Try to remove all files with the given plugin name
+        boolean successful = mInternalCache.removeFilesByPlugin(pluginName);
+
+        Assert.assertFalse(successful);
+    }
+
     // After every test, reset the cache
     @After
     public void resetCache() {

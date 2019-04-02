@@ -18,6 +18,7 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -216,10 +217,17 @@ public class InternalCache implements InternalService {
      * @return true if the file was successfully removed
      */
     public boolean removeFile(String fileRef, String uniquePluginName) {
-        // First check if the file is in the cache registry
-        if (isInCache(fileRef, uniquePluginName)) {
-            // File is in cache registry, remove it
-            return mContext.deleteFile(getCachedPath(fileRef));
+        // First check if the file is in the cache registry, if it is, remove it
+        if (isInCache(fileRef, uniquePluginName) && mContext.deleteFile(getCachedPath(fileRef))) {
+            // If file was successfully removed, remove the fileRef from the list
+            Objects.requireNonNull(mCachedFiles.get(uniquePluginName)).remove(fileRef);
+
+            // If list is now empty, remove entry from map
+            if (Objects.requireNonNull(mCachedFiles.get(uniquePluginName)).isEmpty()) {
+                mCachedFiles.remove(uniquePluginName);
+            }
+
+            return true;
         }
 
         // If file is not in cache, return false
@@ -234,16 +242,18 @@ public class InternalCache implements InternalService {
      * or if at least one file could not be removed
      */
     public boolean removeFilesByPlugin(String uniquePluginName) {
-        // Retrieve list of files cached for this plugin
+        // Retrieve copy of list of files cached for this plugin
         List<String> cachedFilesByPlugin = mCachedFiles.get(uniquePluginName);
-        boolean successful = true;
+        boolean successful = cachedFilesByPlugin != null;
 
-        // If list is not null, remove each of the files
-        if ((successful = (cachedFilesByPlugin != null))) {
-            for (String fileRef : cachedFilesByPlugin) {
-                // First call remove file to ensure that it is called even when 'successful' is already false
-                successful = removeFile(fileRef, uniquePluginName) && successful;
-            }
+        if (!successful) {
+            // Early return if the plugin does not exist
+            return false;
+        }
+
+        for (String fileRef : new ArrayList<>(cachedFilesByPlugin)) {
+            // First call remove file to ensure that it is called even when 'successful' is already false
+            successful = removeFile(fileRef, uniquePluginName) && successful;
         }
 
         // This will be true if all files were successfully removed, false in all other cases
@@ -259,7 +269,8 @@ public class InternalCache implements InternalService {
         boolean successful = true;
 
         // Call removeFilesByPlugin for each plugin in the registry
-        for (String uniquePluginName : mCachedFiles.keySet()) {
+        // Iterate over copy to avoid concurrent modification exceptions
+        for (String uniquePluginName : new HashSet<>(mCachedFiles.keySet())) {
             successful = removeFilesByPlugin(uniquePluginName) && successful;
         }
 
