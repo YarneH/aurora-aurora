@@ -151,8 +151,15 @@ public class AuroraInternalServiceCommunicator extends Communicator {
     private void retrieveFileFromCache(String fileRef, String uniquePluginName) {
         CachedProcessedFile processedFile = mInternalCache.retrieveFile(fileRef, uniquePluginName);
 
+
         // Create response event and post on bus
-        RetrieveFileFromCacheResponse response = new RetrieveFileFromCacheResponse(processedFile);
+        RetrieveFileFromCacheResponse response;
+
+        if (processedFile != null) {
+            response = new RetrieveFileFromCacheResponse(processedFile);
+        } else {
+            response = new RetrieveFileFromCacheResponse(new CachedProcessedFile("{}"));
+        }
 
         // Post response on bus
         mBus.post(response);

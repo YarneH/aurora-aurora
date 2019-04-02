@@ -1,14 +1,17 @@
 package com.aurora.kernel;
 
 import android.content.Context;
-import android.content.Intent;
+import android.util.Log;
 
 import com.aurora.auroralib.ExtractedText;
+import com.aurora.internalservice.internalcache.CachedProcessedFile;
 import com.aurora.kernel.event.InternalProcessorRequest;
 import com.aurora.kernel.event.InternalProcessorResponse;
 import com.aurora.kernel.event.ListPluginsRequest;
 import com.aurora.kernel.event.ListPluginsResponse;
+import com.aurora.kernel.event.OpenCachedFileWithPluginRequest;
 import com.aurora.kernel.event.OpenFileWithPluginRequest;
+import com.aurora.kernel.event.RetrieveFileFromCacheResponse;
 import com.aurora.plugin.Plugin;
 
 import java.io.InputStream;
@@ -32,10 +35,9 @@ public class AuroraCommunicator extends Communicator {
      * then it will send a request to let the plugin make the representation.
      *
      * @param fileRef      a reference to the file that needs to be opened
-     * @param targetPlugin the plugin to open the file with
      * @param context      the android context
      */
-    public void openFileWithPlugin(String fileRef, InputStream file, Intent targetPlugin, Context context) {
+    public void openFileWithPlugin(String fileRef, InputStream file, Context context) {
         // Create observable to listen to
         Observable<InternalProcessorResponse> internalProcessorResponse =
                 mBus.register(InternalProcessorResponse.class);
@@ -45,13 +47,39 @@ public class AuroraCommunicator extends Communicator {
         internalProcessorResponse
                 .map(InternalProcessorResponse::getExtractedText)
                 .subscribe((ExtractedText extractedText) ->
-                        sendOpenFileRequest(extractedText, targetPlugin, context));
+                        sendOpenFileRequest(extractedText, context));
 
         // First create internal processing
         InternalProcessorRequest internalProcessorRequest = new InternalProcessorRequest(file, fileRef);
 
         // Post request on the bus
         mBus.post(internalProcessorRequest);
+    }
+
+
+    /**
+     * Method to open an already cached file with the plugin
+     *
+     * @param fileRef      a reference to the file to open
+     * @param context      the android context
+     */
+    public void openFileWithCache(String fileRef, Context context) {
+        // Create observable to listen to
+        Observable<RetrieveFileFromCacheResponse> retrieveFileFromCacheResponse =
+                mBus.register(RetrieveFileFromCacheResponse.class);
+
+        // Subscribe to observable
+        retrieveFileFromCacheResponse
+                .map(RetrieveFileFromCacheResponse::getProcessedFile)
+                .map(CachedProcessedFile::getJsonRepresentation)
+                .subscribe((String jsonRepresentation) -> {
+                    if (jsonRepresentation.equals("{}")) {
+                        // TODO extract text and all
+                        Log.d(CLASS_TAG, "Not implemented yet!");
+                    } else {
+                        sendOpenCachedFileRequest(jsonRepresentation, context);
+                    }
+                });
     }
 
     /**
@@ -67,19 +95,32 @@ public class AuroraCommunicator extends Communicator {
         return mListPluginsResponse.map(ListPluginsResponse::getPlugins);
     }
 
+
     /**
      * Private handle method to send request to plugin communicator to open file with plugin
      *
      * @param extractedText the extracted text of the file that was internally processed
-     * @param targetPlugin  the plugin to open the file with
      * @param context       the android context
      */
-    private void sendOpenFileRequest(ExtractedText extractedText, Intent targetPlugin, Context context) {
+    private void sendOpenFileRequest(ExtractedText extractedText, Context context) {
 
         // Create request and post it on bus
         OpenFileWithPluginRequest openFileWithPluginRequest =
-                new OpenFileWithPluginRequest(extractedText, targetPlugin, context);
+                new OpenFileWithPluginRequest(extractedText, context);
         mBus.post(openFileWithPluginRequest);
     }
 
+    /**
+     * Private handle method to send request to plugin communicator to open an already cached file with plugin
+     *
+     * @param jsonRepresentation the representation of the object to represent
+     * @param context            the android context
+     */
+    private void sendOpenCachedFileRequest(String jsonRepresentation, Context context) {
+        // Create request and post it on bus
+
+        OpenCachedFileWithPluginRequest openCachedFileWithPluginRequest =
+                new OpenCachedFileWithPluginRequest(jsonRepresentation, context);
+        mBus.post(openCachedFileWithPluginRequest);
+    }
 }

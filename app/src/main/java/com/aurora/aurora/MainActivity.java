@@ -131,8 +131,7 @@ public class MainActivity extends AppCompatActivity
                 if (textFile != null) {
                     Log.i("URI", textFile.toString());
                     InputStream read = getContentResolver().openInputStream(textFile);
-                    mAuroraCommunicator.openFileWithPlugin(textFile.toString(), read,
-                            intent, this.getApplicationContext());
+                    mAuroraCommunicator.openFileWithPlugin(textFile.toString(), read, this.getApplicationContext());
                 } else {
                     Toast.makeText(this, "The selected file was null", Snackbar.LENGTH_LONG).show();
                 }
