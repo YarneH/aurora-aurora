@@ -32,7 +32,7 @@ public class AuroraInternalServiceCommunicatorUnitTest {
 
     private static List<String> dummyList = new ArrayList<>();
     private static String dummyCachedFileString = "CachedFile";
-    private static CachedProcessedFile dummyCachedFile = new CachedProcessedFile();
+    private static CachedProcessedFile dummyCachedFile = new CachedProcessedFile("{}");
 
     @BeforeClass
     public static void initialize() {

@@ -4,6 +4,7 @@ import com.aurora.auroralib.PluginObject;
 import com.aurora.util.MockContext;
 import com.google.gson.Gson;
 
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -13,6 +14,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.List;
 
 public class InternalCacheUnitTest {
 
@@ -29,7 +31,7 @@ public class InternalCacheUnitTest {
         String fileRef = "testFile.pdf";
         String title = "title";
         String text = "text";
-        PluginObject pluginObject = new DummyPluginObject(title, text);
+        PluginObject pluginObject = new DummyPluginObject1(title, text);
         String uniquePluginName = "DummyPlugin";
 
         // Call method under test
@@ -43,7 +45,7 @@ public class InternalCacheUnitTest {
         // Read file
         try (BufferedReader reader = new BufferedReader(new FileReader(cachedFile))) {
             Gson gson = new Gson();
-            DummyPluginObject readObject = gson.fromJson(reader, DummyPluginObject.class);
+            DummyPluginObject1 readObject = gson.fromJson(reader, DummyPluginObject1.class);
 
             Assert.assertEquals(title, readObject.getTitle());
             Assert.assertEquals(text, readObject.getText());
@@ -62,7 +64,7 @@ public class InternalCacheUnitTest {
         String fileRef = "testFile.pdf";
         String title = "title";
         String text = "text";
-        PluginObject pluginObject = new DummyPluginObject(title, text);
+        PluginObject pluginObject = new DummyPluginObject1(title, text);
         String uniquePluginName = "DummyPlugin";
 
         // Call method under test
@@ -77,7 +79,7 @@ public class InternalCacheUnitTest {
         String fileRef = "testFile.pdf";
         String title = "title";
         String text = "text";
-        PluginObject pluginObject = new DummyPluginObject(title, text);
+        PluginObject pluginObject = new DummyPluginObject1(title, text);
         String uniquePluginName = "DummyPlugin";
         mInternalCache.cacheFile(fileRef, pluginObject, uniquePluginName);
 
@@ -88,22 +90,144 @@ public class InternalCacheUnitTest {
         Assert.assertEquals(fileRef, cachedFile);
     }
 
-    private class DummyPluginObject extends PluginObject {
-        // Dummy attributes
-        String title;
-        String text;
+    @Test
+    public void InternalCache_getFullCache_shouldGetAtMostNCachedFiles() {
+        // Set amount
+        int amount = 3;
 
-        public DummyPluginObject(String title, String text) {
-            this.title = title;
-            this.text = text;
+        // Add 5 cached Files
+        addCacheFiles();
+
+        // Call the method under test
+        List<String> cachedFiles = mInternalCache.getFullCache(amount);
+
+        Assert.assertEquals(amount, cachedFiles.size());
+    }
+
+    @Test
+    public void InternalCache_getFullCache_shouldGetAllCachedFiles() {
+        // We will add 5 files
+        int amount = 5;
+
+        // Add 5 cached files
+        addCacheFiles();
+
+        // Call the method under test
+        List<String> cachedFiles = mInternalCache.getFullCache();
+
+        Assert.assertEquals(amount, cachedFiles.size());
+    }
+
+    @Test
+    public void InternalCache_retrieveFileFromCache_shouldGetFileRepresentation() {
+        // We will add 5 + 1 file
+        int amount = 6;
+
+        // Add 5 cached files
+        addCacheFiles();
+
+        // Add one yourself
+        String fileRef = "award-winning-text.pdf";
+        String title = "A Good Title";
+        String text = "This is a very good text. Nobel prize worthy, even!";
+        String pluginName = "DummyPlugin";
+
+        DummyPluginObject1 object1 = new DummyPluginObject1(title, text);
+        mInternalCache.cacheFile(fileRef, object1, pluginName);
+
+        // Now, we want to retrieve the text again
+        CachedProcessedFile cachedProcessedFile = mInternalCache.retrieveFile(fileRef, pluginName);
+
+        // Reconstruct the object from the json
+        DummyPluginObject1 reconstructedObject =
+                DummyPluginObject1.fromJson(cachedProcessedFile.getJsonRepresentation(), DummyPluginObject1.class);
+
+        // Assert that the two objects are equal
+        Assert.assertEquals(object1.getTitle(), reconstructedObject.getTitle());
+        Assert.assertEquals(object1.getText(), reconstructedObject.getText());
+    }
+
+    // After every test, reset the cache
+    @After
+    public void resetCache() {
+        mInternalCache.clear();
+    }
+
+    /**
+     * Helper method that adds 5 files to the cache of different types
+     */
+    private static void addCacheFiles() {
+        String[] filerefs1 = {"fileref1.pdf", "fileref2.docx", "fileref3.pdf"};
+        String[] titles1 = {"Title1", "Title2", "Title3"};
+        String[] texts1 = {"Text1", "Text2", "Text3"};
+        String pluginName1 = "DummyPlugin1";
+
+        for (int i = 0; i < titles1.length; i++) {
+            // Create plugin object
+            DummyPluginObject1 object1 = new DummyPluginObject1(titles1[i], texts1[i]);
+
+            // Add to cache
+            mInternalCache.cacheFile(filerefs1[i], object1, pluginName1);
+        }
+
+        String[] filerefs2 = {"fileref4.docx", "fileref5.txt"};
+        String[] titles2 = {"Title4", "Title5"};
+        int[] numbers = {2, 3};
+        String[] names = {"Name4", "Name 5"};
+        String pluginName2 = "DummyPlugin2";
+
+        for (int i = 0; i < titles2.length; i++) {
+            // Create plugin object
+            DummyPluginObject2 object2 = new DummyPluginObject2(titles1[i], numbers[i], names[i]);
+
+            // Add to cache
+            mInternalCache.cacheFile(filerefs2[i], object2, pluginName2);
+        }
+
+
+    }
+
+    private static class DummyPluginObject1 extends PluginObject {
+        // Dummy attributes
+        private String mTitle;
+        private String mText;
+
+        public DummyPluginObject1(String title, String text) {
+            mTitle = title;
+            mText = text;
         }
 
         public String getTitle() {
-            return title;
+            return mTitle;
         }
 
         public String getText() {
-            return text;
+            return mText;
+        }
+    }
+
+    private static class DummyPluginObject2 extends PluginObject {
+        // Dummy attributes
+        private String mTitle;
+        private int mNumber;
+        private String mName;
+
+        public DummyPluginObject2(String title, int number, String name) {
+            mTitle = title;
+            mNumber = number;
+            mName = name;
+        }
+
+        public String getTitle() {
+            return mTitle;
+        }
+
+        public int getNumber() {
+            return mNumber;
+        }
+
+        public String getName() {
+            return mName;
         }
     }
 }

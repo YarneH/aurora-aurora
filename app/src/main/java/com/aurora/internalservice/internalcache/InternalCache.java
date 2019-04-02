@@ -174,7 +174,37 @@ public class InternalCache implements InternalService {
      * @return the processed file if it was in the cache, null otherwise
      */
     public CachedProcessedFile retrieveFile(String fileRef, String uniquePluginName) {
-        Log.d(CLASS_TAG, "This method hasn't been implemented" + fileRef + " " + uniquePluginName);
+        // First, look up in the registry if the file is present
+        List<String> cachedFilesByPlugin;
+        if ((cachedFilesByPlugin = mCachedFiles.get(uniquePluginName)) != null &&
+                cachedFilesByPlugin.contains(fileRef)) {
+
+            // file is in cache, retrieve it
+            String cachedPath = getCachedPath(fileRef);
+
+            // Create a reader to read the file
+            try (FileInputStream fileInputStream = mContext.openFileInput(cachedPath);
+            BufferedReader reader = new BufferedReader(new InputStreamReader(fileInputStream))) {
+                // Read file in string, use string builder for speed
+                StringBuilder stringBuilder = new StringBuilder();
+                String currentLine;
+
+                // Have to read line by line because stream api is not supported
+                while((currentLine = reader.readLine()) != null) {
+                    stringBuilder.append(currentLine);
+                }
+
+                String cachedRepresentation = stringBuilder.toString();
+
+                return new CachedProcessedFile(cachedRepresentation);
+            } catch (FileNotFoundException e) {
+                Log.e(CLASS_TAG, "The cached file was not found!", e);
+            } catch (IOException e) {
+                Log.e(CLASS_TAG, "Something went wrong while reading the cached file", e);
+            }
+        }
+
+        // If file not in cache or exception occurred, return null
         return null;
     }
 
