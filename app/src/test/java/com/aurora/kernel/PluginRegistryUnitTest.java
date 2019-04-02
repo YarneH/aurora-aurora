@@ -1,6 +1,7 @@
 package com.aurora.kernel;
 
 import com.aurora.plugin.Plugin;
+import com.aurora.util.MockContext;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -52,7 +53,7 @@ public class PluginRegistryUnitTest {
         }
 
         mRegistry = new
-                PluginRegistry(mProcessingCommunicator, mConfigRef);
+                PluginRegistry(mProcessingCommunicator, mConfigRef, new MockContext());
 
         mPluginCommunicator = new
                 PluginCommunicator(mBus, mRegistry);
