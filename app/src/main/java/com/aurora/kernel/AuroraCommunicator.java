@@ -2,6 +2,7 @@ package com.aurora.kernel;
 
 import android.content.Context;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.aurora.auroralib.ExtractedText;
 import com.aurora.internalservice.internalcache.CachedProcessedFile;
@@ -74,7 +75,11 @@ public class AuroraCommunicator extends Communicator {
                 .map(CachedProcessedFile::getJsonRepresentation)
                 .subscribe((String jsonRepresentation) -> {
                     if ("{}".equals(jsonRepresentation)) {
-                        // TODO extract text and all
+                        // TODO extract text and show plugin anyway
+
+                        // Temporarily show toast
+                        Toast.makeText(context, "File was not cached", Toast.LENGTH_LONG).show();
+
                         Log.d(CLASS_TAG, "Not implemented yet!");
                     } else {
                         sendOpenCachedFileRequest(jsonRepresentation, context);
