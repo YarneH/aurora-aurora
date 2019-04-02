@@ -74,6 +74,21 @@ public class InternalCacheUnitTest {
     }
 
     @Test
+    public void InternalCache_cacheFile_shouldReturnFalseOnFailure() {
+        // Create arguments
+        String invalidFileRef = "test??File!.pdf";
+        String title = "title";
+        String text = "text";
+        PluginObject pluginObject = new DummyPluginObject1(title, text);
+        String uniquePluginName = "DummyPlugin";
+
+        // Call method under test
+        boolean cacheResult = mInternalCache.cacheFile(invalidFileRef, pluginObject, uniquePluginName);
+
+        Assert.assertFalse(cacheResult);
+    }
+
+    @Test
     public void InternalCache_checkCacheForProcessedFile_shouldReturnProcessedFileName() {
         // First cache an element
         String fileRef = "testFile.pdf";
