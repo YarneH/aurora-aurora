@@ -55,7 +55,7 @@ public class MainActivity extends AppCompatActivity
     /**
      * Firebase analytics
      */
-    private FirebaseAnalytics mFirebaseAnalytics;
+    private FirebaseAnalytics mFirebaseAnalytics = null;
 
     /**
      * Runs on startup of the activity, in this case on startup of the app
@@ -136,14 +136,7 @@ public class MainActivity extends AppCompatActivity
         if (requestCode == REQUEST_FILE_GET && resultCode == RESULT_OK) {
             Uri textFile = data.getData();
 
-            /**
-             * Firebase Analytics
-             * TODO: convert to custom event, see https://firebase.google.com/docs/analytics/android/events
-             */
-            Bundle bundle = new Bundle();
-            bundle.putString(FirebaseAnalytics.Param.ITEM_NAME, textFile.toString());
-            bundle.putString(FirebaseAnalytics.Param.CONTENT_TYPE, "file");
-            mFirebaseAnalytics.logEvent(FirebaseAnalytics.Event.SELECT_CONTENT, bundle);
+
 
             Intent intent = new Intent(Constants.PLUGIN_ACTION);
 
@@ -153,6 +146,16 @@ public class MainActivity extends AppCompatActivity
                     ContentResolver cR = getApplicationContext().getContentResolver();
                     String type = MimeTypeMap.getSingleton().getExtensionFromMimeType(cR.getType(textFile));
                     Log.i("MIME", type);
+
+                    /**
+                     * Firebase Analytics
+                     * TODO: convert to custom event, see https://firebase.google.com/docs/analytics/android/events
+                     */
+                    Bundle bundle = new Bundle();
+                    bundle.putString(FirebaseAnalytics.Param.ITEM_NAME, textFile.toString());
+                    bundle.putString(FirebaseAnalytics.Param.CONTENT_TYPE, type);
+                    mFirebaseAnalytics.logEvent("NEW_FILE_OPENED", bundle);
+
                     InputStream read = getContentResolver().openInputStream(textFile);
                     mAuroraCommunicator.openFileWithPlugin(textFile.toString(), type, read, intent, this);
                 } else {
