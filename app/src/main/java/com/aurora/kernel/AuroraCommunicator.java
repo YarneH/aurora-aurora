@@ -1,8 +1,7 @@
 package com.aurora.kernel;
 
 import android.content.Context;
-import android.util.Log;
-import android.widget.Toast;
+import android.net.Uri;
 
 import com.aurora.auroralib.ExtractedText;
 import com.aurora.internalservice.internalcache.CachedProcessedFile;
@@ -74,22 +73,20 @@ public class AuroraCommunicator extends Communicator {
         // Subscribe to observable
         retrieveFileFromCacheResponse
                 .map(RetrieveFileFromCacheResponse::getProcessedFile)
-                .map(CachedProcessedFile::getJsonRepresentation)
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe((String jsonRepresentation) -> {
-                    if ("{}".equals(jsonRepresentation)) {
-                        // TODO extract text and show plugin anyway
+                .subscribe((CachedProcessedFile processedFile) -> {
+                    if ("{}".equals(processedFile.getJsonRepresentation())) {
+                        // Create input stream from the uri
+                        Uri fileUri = Uri.parse(processedFile.getFileRef());
+                        InputStream read = context.getContentResolver().openInputStream(fileUri);
 
-                        // Temporarily show toast
-                        Toast.makeText(context, "File was not cached", Toast.LENGTH_LONG).show();
-
-                        Log.d(CLASS_TAG, "Not implemented yet!");
+                        openFileWithPlugin(processedFile.getFileRef(), read, context);
                     } else {
-                        sendOpenCachedFileRequest(jsonRepresentation, context);
+                        sendOpenCachedFileRequest(processedFile.getJsonRepresentation(), context);
                     }
                 });
 
-        // Send request to retrieve file from cache TODO change this!
+        // Send request to retrieve file from cache TODO change this (DummyPlugin)!
         RetrieveFileFromCacheRequest request = new RetrieveFileFromCacheRequest(fileRef, "DummyPlugin");
         mBus.post(request);
     }

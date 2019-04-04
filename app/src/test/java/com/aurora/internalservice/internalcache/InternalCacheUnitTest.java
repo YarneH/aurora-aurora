@@ -100,10 +100,13 @@ public class InternalCacheUnitTest {
         mInternalCache.cacheFile(fileRef, pluginObject, uniquePluginName);
 
         // Check if the cache has it
-        String cachedFile = mInternalCache.checkCacheForProcessedFile(fileRef, uniquePluginName);
+        CachedFileInfo cachedFile = mInternalCache.checkCacheForProcessedFile(fileRef, uniquePluginName);
+
+        // Create cached file info that is expected
+        CachedFileInfo expectedCachedFile = new CachedFileInfo(fileRef, uniquePluginName);
 
         // The file should be cached so the result should be equal to fileRef
-        Assert.assertEquals(fileRef, cachedFile);
+        Assert.assertEquals(expectedCachedFile, cachedFile);
     }
 
     @Test
@@ -115,7 +118,7 @@ public class InternalCacheUnitTest {
         addCacheFiles();
 
         // Call the method under test
-        List<String> cachedFiles = mInternalCache.getFullCache(amount);
+        List<CachedFileInfo> cachedFiles = mInternalCache.getFullCache(amount);
 
         Assert.assertEquals(amount, cachedFiles.size());
     }
@@ -129,7 +132,7 @@ public class InternalCacheUnitTest {
         addCacheFiles();
 
         // Call the method under test
-        List<String> cachedFiles = mInternalCache.getFullCache();
+        List<CachedFileInfo> cachedFiles = mInternalCache.getFullCache();
 
         Assert.assertEquals(amount, cachedFiles.size());
     }

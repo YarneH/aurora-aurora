@@ -3,6 +3,7 @@ package com.aurora.kernel;
 import android.content.Context;
 
 import com.aurora.auroralib.PluginObject;
+import com.aurora.internalservice.internalcache.CachedFileInfo;
 import com.aurora.internalservice.internalcache.CachedProcessedFile;
 import com.aurora.internalservice.internalcache.InternalCache;
 import com.aurora.kernel.event.CacheFileRequest;
@@ -30,9 +31,10 @@ public class AuroraInternalServiceCommunicatorUnitTest {
     private static InternalCache mInternalCache;
     private static AuroraInternalServiceCommunicator mAuroraInternalServiceCommunicator;
 
-    private static List<String> dummyList = new ArrayList<>();
-    private static String dummyCachedFileString = "CachedFile";
-    private static CachedProcessedFile dummyCachedFile = new CachedProcessedFile("{}");
+    private static List<CachedFileInfo> dummyList = new ArrayList<>();
+    private static String pluginName = "DummyPlugin";
+    private static CachedFileInfo dummyCachedFileInfo = new CachedFileInfo("CachedFile", pluginName);
+    private static CachedProcessedFile dummyCachedFile = new CachedProcessedFile("{}", pluginName);
 
     @BeforeClass
     public static void initialize() {
@@ -60,7 +62,7 @@ public class AuroraInternalServiceCommunicatorUnitTest {
         // Create cache file request and post on bus
         String fileRef = "Dummy/file/path.pdf";
         PluginObject dummyPluginObject = new DummyPluginObject();
-        String uniquePluginName = "DummyPlugin";
+        String uniquePluginName = pluginName;
         CacheFileRequest request = new CacheFileRequest(fileRef, dummyPluginObject, uniquePluginName);
         mBus.post(request);
 
@@ -76,7 +78,7 @@ public class AuroraInternalServiceCommunicatorUnitTest {
         Observable<QueryCacheResponse> observable = mBus.register(QueryCacheResponse.class);
 
         // Create test observer for response
-        TestObserver<List<String>> testObserver = new TestObserver<>();
+        TestObserver<List<CachedFileInfo>> testObserver = new TestObserver<>();
 
         // Subscribe to observable
         observable.map(QueryCacheResponse::getResults).subscribe(testObserver);
@@ -97,7 +99,7 @@ public class AuroraInternalServiceCommunicatorUnitTest {
         Observable<QueryCacheResponse> observable = mBus.register(QueryCacheResponse.class);
 
         // Create test observer for response
-        TestObserver<String> testObserver = new TestObserver<>();
+        TestObserver<CachedFileInfo> testObserver = new TestObserver<>();
 
         // Subscribe to observable
         observable.map(queryCacheResponse -> queryCacheResponse.getResults().get(0)).subscribe(testObserver);
@@ -110,7 +112,7 @@ public class AuroraInternalServiceCommunicatorUnitTest {
 
         // Check if cache returned specific plugin
         testObserver.assertSubscribed();
-        testObserver.assertValue(dummyCachedFileString);
+        testObserver.assertValue(dummyCachedFileInfo);
         testObserver.dispose();
     }
 
@@ -223,17 +225,17 @@ public class AuroraInternalServiceCommunicatorUnitTest {
         }
 
         @Override
-        public String checkCacheForProcessedFile(String fileRef, String uniquePluginName) {
-            return dummyCachedFileString;
+        public CachedFileInfo checkCacheForProcessedFile(String fileRef, String uniquePluginName) {
+            return dummyCachedFileInfo;
         }
 
         @Override
-        public List<String> getFullCache() {
+        public List<CachedFileInfo> getFullCache() {
             return dummyList;
         }
 
         @Override
-        public List<String> getFullCache(int amount) {
+        public List<CachedFileInfo> getFullCache(int amount) {
             return getFullCache();
         }
 
