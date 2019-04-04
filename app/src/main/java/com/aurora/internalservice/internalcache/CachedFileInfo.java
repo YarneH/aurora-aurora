@@ -63,7 +63,7 @@ public class CachedFileInfo {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        
+
         CachedFileInfo that = (CachedFileInfo) o;
         return Objects.equals(mFileRef, that.mFileRef) &&
                 Objects.equals(mUniquePluginName, that.mUniquePluginName);
