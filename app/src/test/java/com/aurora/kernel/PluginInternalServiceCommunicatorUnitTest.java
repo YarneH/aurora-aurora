@@ -57,7 +57,7 @@ public class PluginInternalServiceCommunicatorUnitTest {
         observable.map(InternalProcessorResponse::getExtractedText).subscribe(testObserver);
 
         // Create request to process file and put on bus
-        InternalProcessorRequest request = new InternalProcessorRequest(null, ref, null);
+        InternalProcessorRequest request = new InternalProcessorRequest(null, ref);
         mBus.post(request);
 
         // Assert that dummy extracted text was received

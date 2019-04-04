@@ -32,9 +32,10 @@ public class AuroraInternalServiceCommunicatorUnitTest {
     private static AuroraInternalServiceCommunicator mAuroraInternalServiceCommunicator;
 
     private static List<CachedFileInfo> dummyList = new ArrayList<>();
+    private static String fileRef = "CachedFile.pdf";
     private static String pluginName = "DummyPlugin";
-    private static CachedFileInfo dummyCachedFileInfo = new CachedFileInfo("CachedFile", pluginName);
-    private static CachedProcessedFile dummyCachedFile = new CachedProcessedFile("{}", pluginName);
+    private static CachedFileInfo dummyCachedFileInfo = new CachedFileInfo(fileRef, pluginName);
+    private static CachedProcessedFile dummyCachedFile = new CachedProcessedFile("{}", fileRef, pluginName);
 
     @BeforeClass
     public static void initialize() {
@@ -60,10 +61,8 @@ public class AuroraInternalServiceCommunicatorUnitTest {
         observable.map(CacheFileResponse::isSuccessful).subscribe(testObserver);
 
         // Create cache file request and post on bus
-        String fileRef = "Dummy/file/path.pdf";
         PluginObject dummyPluginObject = new DummyPluginObject();
-        String uniquePluginName = pluginName;
-        CacheFileRequest request = new CacheFileRequest(fileRef, dummyPluginObject, uniquePluginName);
+        CacheFileRequest request = new CacheFileRequest(fileRef, dummyPluginObject, pluginName);
         mBus.post(request);
 
         // Check if cache returned true
@@ -104,10 +103,8 @@ public class AuroraInternalServiceCommunicatorUnitTest {
         // Subscribe to observable
         observable.map(queryCacheResponse -> queryCacheResponse.getResults().get(0)).subscribe(testObserver);
 
-        // Create query request and post on the bus
-        String fileRef = "dummy/file/ref.pdf";
-        String uniquePluginName = "DummyPlugin";
-        QueryCacheRequest queryCacheRequest = new QueryCacheRequest(fileRef, uniquePluginName);
+        // Create query request and post on the bus-
+        QueryCacheRequest queryCacheRequest = new QueryCacheRequest(fileRef, pluginName);
         mBus.post(queryCacheRequest);
 
         // Check if cache returned specific plugin
@@ -151,9 +148,7 @@ public class AuroraInternalServiceCommunicatorUnitTest {
         observable.map(RemoveFromCacheResponse::isSuccess).subscribe(testObserver);
 
         // Create request file and post on bus
-        String fileRef = "dummy/file/ref.pdf";
-        String uniquePluginName = "DummyPlugin";
-        RemoveFromCacheRequest request = new RemoveFromCacheRequest(fileRef, uniquePluginName);
+        RemoveFromCacheRequest request = new RemoveFromCacheRequest(fileRef, pluginName);
         mBus.post(request);
 
         // Check if cache removed the file correctly
@@ -174,8 +169,7 @@ public class AuroraInternalServiceCommunicatorUnitTest {
         observable.map(RemoveFromCacheResponse::isSuccess).subscribe(testObserver);
 
         // Create request file and post on bus
-        String uniquePluginName = "DummyPlugin";
-        RemoveFromCacheRequest request = new RemoveFromCacheRequest(uniquePluginName);
+        RemoveFromCacheRequest request = new RemoveFromCacheRequest(pluginName);
         mBus.post(request);
 
         // Check if cache removed the file correctly
