@@ -204,7 +204,7 @@ public class InternalCache implements InternalService {
 
                 String cachedRepresentation = stringBuilder.toString();
 
-                return new CachedProcessedFile(cachedRepresentation, fileRef);
+                return new CachedProcessedFile(cachedRepresentation, fileRef, uniquePluginName);
             } catch (FileNotFoundException e) {
                 Log.e(CLASS_TAG, "The cached file was not found!", e);
             } catch (IOException e) {

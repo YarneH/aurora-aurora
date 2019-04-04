@@ -17,9 +17,15 @@ public class CachedProcessedFile implements InternallyProcessedFile {
      */
     private String mFileRef;
 
-    public CachedProcessedFile(String jsonRepresentation, String fileRef) {
+    /**
+     *
+     */
+    private String mUniquePluginName;
+
+    public CachedProcessedFile(String jsonRepresentation, String fileRef, String uniquePluginName) {
         mJsonRepresentation = jsonRepresentation;
         mFileRef = fileRef;
+        mUniquePluginName = uniquePluginName;
     }
 
     public String getJsonRepresentation() {
@@ -28,5 +34,9 @@ public class CachedProcessedFile implements InternallyProcessedFile {
 
     public String getFileRef() {
         return mFileRef;
+    }
+
+    public String getUniquePluginName() {
+        return mUniquePluginName;
     }
 }

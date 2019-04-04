@@ -83,4 +83,10 @@ dependencies {
 
     implementation files('libs/poishadow-all.jar')
 
+    // Firebase
+    implementation 'com.google.firebase:firebase-core:16.0.1'
+
 }
+
+// Firebase
+apply plugin: 'com.google.gms.google-services'

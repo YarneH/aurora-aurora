@@ -186,7 +186,7 @@ public class CardFileAdapter extends RecyclerView.Adapter<CardFileAdapter.CardFi
 
                 Note: this is basically mixed code as a result of a merge. This test code will be removed ASAP
                 */
-                String textFile = "DummyTextFile.docx";
+                String textFile = "android.resource://com.aurora.aurora/raw/apple_crisp";
 
                 mKernel.getAuroraCommunicator().openFileWithCache(textFile, "DummyPlugin", mContext);
             }

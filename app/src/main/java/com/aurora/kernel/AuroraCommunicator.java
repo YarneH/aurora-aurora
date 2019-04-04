@@ -33,7 +33,8 @@ public class AuroraCommunicator extends Communicator {
     }
 
     /**
-     * Open file with a given plugin. This method will first extract the text from the given file reference,
+     * Open file with a given plugin. This method will first extract
+     * the text from the given file reference,
      * then it will send a request to let the plugin make the representation.
      *
      * @param fileRef      a reference to the file that needs to be opened
@@ -53,6 +54,11 @@ public class AuroraCommunicator extends Communicator {
 
         // First create internal processing
         InternalProcessorRequest internalProcessorRequest = new InternalProcessorRequest(file, fileRef);
+
+        // TODO remove this! This is test code!
+        if (internalProcessorRequest.getType() == null) {
+            internalProcessorRequest.setType("docx");
+        }
 
         // Post request on the bus
         mBus.post(internalProcessorRequest);
@@ -87,6 +93,7 @@ public class AuroraCommunicator extends Communicator {
                     }
                 });
 
+
         // Send request to retrieve file from cache TODO change this (DummyPlugin)!
         RetrieveFileFromCacheRequest request = new RetrieveFileFromCacheRequest(fileRef, uniquePluginName);
         mBus.post(request);
@@ -104,7 +111,6 @@ public class AuroraCommunicator extends Communicator {
 
         return mListPluginsResponse.map(ListPluginsResponse::getPlugins);
     }
-
 
     /**
      * Private handle method to send request to plugin communicator to open file with plugin

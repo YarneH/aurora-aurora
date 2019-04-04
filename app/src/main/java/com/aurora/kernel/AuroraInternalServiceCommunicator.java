@@ -98,7 +98,7 @@ public class AuroraInternalServiceCommunicator extends Communicator {
      * Private handle method that handles CacheFileRequests
      *
      * @param fileRef          a reference to the file that needs to be cached
-     * @param pluginObject    the processed text representation that needs to be cached
+     * @param pluginObject     the processed text representation that needs to be cached
      * @param uniquePluginName the name of the plugin that built the representation
      */
     private void cacheFile(String fileRef, PluginObject pluginObject, String uniquePluginName) {
@@ -158,7 +158,8 @@ public class AuroraInternalServiceCommunicator extends Communicator {
         if (processedFile != null) {
             response = new RetrieveFileFromCacheResponse(processedFile);
         } else {
-            response = new RetrieveFileFromCacheResponse(new CachedProcessedFile("{}", uniquePluginName));
+            response = new RetrieveFileFromCacheResponse(
+                    new CachedProcessedFile("{}", fileRef, uniquePluginName));
         }
 
         // Post response on bus
