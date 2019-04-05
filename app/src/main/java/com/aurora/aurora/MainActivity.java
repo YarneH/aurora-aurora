@@ -135,9 +135,6 @@ public class MainActivity extends AppCompatActivity
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == REQUEST_FILE_GET && resultCode == RESULT_OK) {
             Uri textFile = data.getData();
-
-
-
             Intent intent = new Intent(Constants.PLUGIN_ACTION);
 
             try {
@@ -159,14 +156,12 @@ public class MainActivity extends AppCompatActivity
                     InputStream read = getContentResolver().openInputStream(textFile);
                     mAuroraCommunicator.openFileWithPlugin(textFile.toString(), type, read, intent, this);
                 } else {
-                    Toast.makeText(this, "The selected file was null", Snackbar.LENGTH_LONG).show();
+                    Toast.makeText(this, getString(R.string.null_file), Snackbar.LENGTH_LONG).show();
                 }
             } catch (FileNotFoundException e) {
-                Toast.makeText(this, "The file could not be found", Snackbar.LENGTH_LONG).show();
-                Log.e("FILE_NOT_FOUND", "The file could not be found", e);
+                Toast.makeText(this, getString(R.string.file_not_found), Snackbar.LENGTH_LONG).show();
+                Log.e("FILE_NOT_FOUND", getString(R.string.file_not_found), e);
             }
-
-
         }
     }
 
@@ -223,7 +218,6 @@ public class MainActivity extends AppCompatActivity
             // Create and show the pop-up
             alertDialogBuilder.create().show();
         }
-
         return super.onOptionsItemSelected(item);
     }
 
@@ -258,11 +252,9 @@ public class MainActivity extends AppCompatActivity
             mRecyclerView.setVisibility(View.INVISIBLE);
             mTextViewMain.setVisibility(View.VISIBLE);
         }
-
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
-
 }
 
