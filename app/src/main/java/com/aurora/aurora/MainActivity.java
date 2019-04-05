@@ -110,7 +110,7 @@ public class MainActivity extends AppCompatActivity
 
         /* Show TextView when RecyclerView is empty */
         if (adapter.getItemCount() == 0) {
-            findViewById(R.id.tv_empty_recent).setVisibility(View.VISIBLE);
+            findViewById(R.id.cl_empty_text).setVisibility(View.VISIBLE);
         }
     }
 
@@ -141,8 +141,6 @@ public class MainActivity extends AppCompatActivity
         if (requestCode == REQUEST_FILE_GET && resultCode == RESULT_OK) {
             Uri textFile = data.getData();
 
-
-
             Intent intent = new Intent(Constants.PLUGIN_ACTION);
 
             try {
@@ -170,8 +168,6 @@ public class MainActivity extends AppCompatActivity
                 Toast.makeText(this, "The file could not be found", Snackbar.LENGTH_LONG).show();
                 Log.e("FILE_NOT_FOUND", "The file could not be found", e);
             }
-
-
         }
     }
 
@@ -228,7 +224,6 @@ public class MainActivity extends AppCompatActivity
             // Create and show the pop-up
             alertDialogBuilder.create().show();
         }
-
         return super.onOptionsItemSelected(item);
     }
 
@@ -270,6 +265,5 @@ public class MainActivity extends AppCompatActivity
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
-
 }
 
