@@ -3,11 +3,18 @@ package com.aurora.auroralib;
 import java.util.List;
 
 public class Section {
-    // The title of a Section
+    
+    /**
+     * The title of a Section
+     */
     private String mTitle;
-    // The content/body of a Section (the text)
+    /**
+     * The content/body of a Section (the text)
+     */
     private String mBody;
-    // The images in a section, as a Base64 String
+    /**
+     * The images in a section, as a Base64 String
+     */
     private List<String> mImages;
 
     /**
@@ -37,5 +44,29 @@ public class Section {
         } else if (mBody != null){
             return mBody + "\n";
         } else return "Empty paragraph.\n";
+    }
+
+    public String getTitle() {
+        return mTitle;
+    }
+
+    public void setTitle(String mTitle) {
+        this.mTitle = mTitle;
+    }
+
+    public String getBody() {
+        return mBody;
+    }
+
+    public void setBody(String mBody) {
+        this.mBody = mBody;
+    }
+
+    public List<String> getImages() {
+        return mImages;
+    }
+
+    public void setImages(List<String> mImages) {
+        this.mImages = mImages;
     }
 }
