@@ -1,5 +1,6 @@
 package com.aurora.kernel;
 
+import android.content.Context;
 import android.util.Log;
 
 import com.aurora.plugin.Plugin;
@@ -37,11 +38,18 @@ class PluginRegistry {
      */
     private ProcessingCommunicator mProcessingCommunicator;
 
+    /**
+     * The android context
+     */
+    private Context mContext;
 
-    PluginRegistry(ProcessingCommunicator processingCommunicator, String configFileRef) {
+
+    PluginRegistry(ProcessingCommunicator processingCommunicator, String configFileRef, Context context) {
         this.mProcessingCommunicator = processingCommunicator;
 
         this.mConfigFileRef = configFileRef;
+
+        this.mContext = context;
 
         // Load plugins
         constructPluginMap();
@@ -138,7 +146,7 @@ class PluginRegistry {
      */
     private String parsePluginFile() throws IOException {
         // Get file at specified path
-        File pluginConfig = new File(mConfigFileRef);
+        File pluginConfig = new File(mContext.getFilesDir(), mConfigFileRef);
 
         StringBuilder stringBuilder;
         try (BufferedReader reader = new BufferedReader(new FileReader(pluginConfig))) {

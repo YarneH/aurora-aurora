@@ -9,6 +9,7 @@ import com.aurora.auroralib.Constants;
 import com.aurora.auroralib.ExtractedText;
 import com.aurora.kernel.event.ListPluginsRequest;
 import com.aurora.kernel.event.ListPluginsResponse;
+import com.aurora.kernel.event.OpenCachedFileWithPluginRequest;
 import com.aurora.kernel.event.OpenFileWithPluginRequest;
 import com.aurora.plugin.Plugin;
 
@@ -25,6 +26,7 @@ public class PluginCommunicator extends Communicator {
     private PluginRegistry mPluginRegistry;
 
     private Observable<OpenFileWithPluginRequest> mOpenFileWithPluginRequestObservable;
+    private Observable<OpenCachedFileWithPluginRequest> mOpenCachedFileWithPluginRequestObservable;
     private Observable<ListPluginsRequest> mListPluginsRequestObservable;
 
 
@@ -38,8 +40,15 @@ public class PluginCommunicator extends Communicator {
 
         // When a request comes in, call appropriate function
         mOpenFileWithPluginRequestObservable.subscribe((OpenFileWithPluginRequest request) ->
-                openFileWithPlugin(request.getExtractedText(),
-                        request.getTargetPlugin(), request.getContext())
+                openFileWithPlugin(request.getExtractedText(), request.getContext())
+        );
+
+        // Register for requests to open a cached file with plugin
+        mOpenCachedFileWithPluginRequestObservable = mBus.register(OpenCachedFileWithPluginRequest.class);
+
+        // When a request comes in, call appropriate function
+        mOpenCachedFileWithPluginRequestObservable.subscribe((OpenCachedFileWithPluginRequest request) ->
+                openCachedFileWithPlugin(request.getJsonRepresentation(), request.getContext())
         );
 
         // Register for requests to list available plugins
@@ -54,20 +63,18 @@ public class PluginCommunicator extends Communicator {
      * Opens a file with a given plugin
      *
      * @param extractedText the extracted text of the file to open
-     * @param targetPlugin  the plugin to open the file with
      *                      TODO: add tests for this method
      * @param context       the android context
      */
-    private void openFileWithPlugin(ExtractedText extractedText, Intent targetPlugin, Context context) {
-        // TODO: fire intent to given plugin containing the extracted text
-
+    private void openFileWithPlugin(ExtractedText extractedText, Context context) {
+        Intent pluginAction = new Intent(Constants.PLUGIN_ACTION);
         // Create chooser
-        Intent chooser = Intent.createChooser(targetPlugin, context.getString(R.string.select_plugin));
+        Intent chooser = Intent.createChooser(pluginAction, context.getString(R.string.select_plugin));
 
         String extractedTextInJSON = extractedText.toJSON();
-        targetPlugin.putExtra(Constants.PLUGIN_INPUT_EXTRACTED_TEXT, extractedTextInJSON);
+        pluginAction.putExtra(Constants.PLUGIN_INPUT_EXTRACTED_TEXT, extractedTextInJSON);
 
-        boolean pluginOpens = targetPlugin.resolveActivity(context.getPackageManager()) != null;
+        boolean pluginOpens = pluginAction.resolveActivity(context.getPackageManager()) != null;
 
 
         if (pluginOpens) {
@@ -76,6 +83,29 @@ public class PluginCommunicator extends Communicator {
             Toast.makeText(context, context.getString(R.string.no_plugins_available),
                     Toast.LENGTH_LONG).show();
         }
+    }
+
+    /**
+     * Opens a cached file with a given plugin
+     *
+     * @param jsonRepresentation the json representation of the plugin object to represent
+     * @param context            the android context
+     */
+    private void openCachedFileWithPlugin(String jsonRepresentation, Context context) {
+        Intent pluginAction = new Intent(Constants.PLUGIN_ACTION);
+
+        // Create chooser TODO: this is not necessary anymore, plugin should be known
+        Intent chooser = Intent.createChooser(pluginAction, context.getString(R.string.select_plugin));
+        pluginAction.putExtra(Constants.PLUGIN_INPUT_OBJECT, jsonRepresentation);
+
+        boolean cachedFileOpens = pluginAction.resolveActivity(context.getPackageManager()) != null;
+
+        if (cachedFileOpens) {
+            context.startActivity(chooser);
+        } else {
+            Toast.makeText(context, context.getString(R.string.no_plugins_available), Toast.LENGTH_LONG).show();
+        }
+
     }
 
     /**

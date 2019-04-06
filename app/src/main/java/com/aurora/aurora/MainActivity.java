@@ -27,7 +27,6 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.aurora.auroralib.Constants;
 import com.aurora.kernel.AuroraCommunicator;
 import com.aurora.kernel.Kernel;
 import com.google.firebase.analytics.FirebaseAnalytics;
@@ -49,8 +48,8 @@ public class MainActivity extends AppCompatActivity
     /**
      * Create unique kernel instance (should be passed to every activity, fragment, adapter,...) that needs it
      */
-    private Kernel mKernel = new Kernel();
-    private AuroraCommunicator mAuroraCommunicator = mKernel.getAuroraCommunicator();
+    private Kernel mKernel = null;
+    private AuroraCommunicator mAuroraCommunicator = null;
 
     /**
      * Firebase analytics
@@ -66,6 +65,10 @@ public class MainActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        /* Set up kernel */
+        mKernel = new Kernel(this.getApplicationContext());
+        mAuroraCommunicator = mKernel.getAuroraCommunicator();
 
         /* Initialize FirebaseAnalytics */
         mFirebaseAnalytics = FirebaseAnalytics.getInstance(this);
@@ -135,7 +138,6 @@ public class MainActivity extends AppCompatActivity
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == REQUEST_FILE_GET && resultCode == RESULT_OK) {
             Uri textFile = data.getData();
-            Intent intent = new Intent(Constants.PLUGIN_ACTION);
 
             try {
                 if (textFile != null) {
@@ -154,13 +156,13 @@ public class MainActivity extends AppCompatActivity
                     mFirebaseAnalytics.logEvent("NEW_FILE_OPENED", bundle);
 
                     InputStream read = getContentResolver().openInputStream(textFile);
-                    mAuroraCommunicator.openFileWithPlugin(textFile.toString(), type, read, intent, this);
+                    mAuroraCommunicator.openFileWithPlugin(textFile.toString(), read, this.getApplicationContext());
                 } else {
-                    Toast.makeText(this, getString(R.string.null_file), Snackbar.LENGTH_LONG).show();
+                    Toast.makeText(this, "The selected file was null", Snackbar.LENGTH_LONG).show();
                 }
             } catch (FileNotFoundException e) {
-                Toast.makeText(this, getString(R.string.file_not_found), Snackbar.LENGTH_LONG).show();
-                Log.e("FILE_NOT_FOUND", getString(R.string.file_not_found), e);
+                Toast.makeText(this, "The file could not be found", Snackbar.LENGTH_LONG).show();
+                Log.e("FILE_NOT_FOUND", "The file could not be found", e);
             }
         }
     }
@@ -218,6 +220,7 @@ public class MainActivity extends AppCompatActivity
             // Create and show the pop-up
             alertDialogBuilder.create().show();
         }
+
         return super.onOptionsItemSelected(item);
     }
 
@@ -252,6 +255,7 @@ public class MainActivity extends AppCompatActivity
             mRecyclerView.setVisibility(View.INVISIBLE);
             mTextViewMain.setVisibility(View.VISIBLE);
         }
+
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;

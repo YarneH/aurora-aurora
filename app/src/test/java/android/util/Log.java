@@ -8,8 +8,20 @@ public class Log {
         return 0;
     }
 
+    public static int d(String tag, String msg, Throwable throwable) {
+        d(tag, msg);
+        throwable.printStackTrace();
+        return 0;
+    }
+
     public static int i(String tag, String msg) {
         System.out.println("INFO: " + tag + ": " + msg);
+        return 0;
+    }
+
+    public static int i(String tag, String msg, Throwable throwable) {
+        i(tag, msg);
+        throwable.printStackTrace();
         return 0;
     }
 
@@ -18,8 +30,20 @@ public class Log {
         return 0;
     }
 
+    public static int w(String tag, String msg, Throwable throwable) {
+        w(tag, msg);
+        throwable.printStackTrace();
+        return 0;
+    }
+
     public static int e(String tag, String msg) {
         System.out.println("ERROR: " + tag + ": " + msg);
+        return 0;
+    }
+
+    public static int e(String tag, String msg, Throwable throwable) {
+        e(tag, msg);
+        throwable.printStackTrace();
         return 0;
     }
 }
