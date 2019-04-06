@@ -132,7 +132,7 @@ public class InternalCache implements InternalService {
      * Gets a list of already processed file representations
      *
      * @param amount the amount of files that should be retrieved, if 0 or negative, all files will be retrieved.
-     * @return a list of filenames of cached files TODO: may change to CachedFile representation class!
+     * @return a list of filenames of cached files
      */
     public List<CachedFileInfo> getFullCache(int amount) {
         if (amount <= 0) {
