@@ -79,11 +79,15 @@ public class TextExtractorDOCX implements TextExtractor {
         String formatted = formatParagraph(paragraph);
 
         if(!previousLineEmpty || !formatted.isEmpty()) {
-            if(formatted.isEmpty() && !extractedText.getSections().isEmpty() && emptyLineAllowed){
-                formatted = "\n";
-                previousLineEmpty = true;
-                extractedText.addSimpleSection(formatted);
-            } else if (!formatted.isEmpty()){
+            if(formatted.isEmpty()) {
+                if(extractedText.getSections() != null
+                        && !extractedText.getSections().isEmpty()
+                        && emptyLineAllowed) {
+                    formatted = "\n";
+                    previousLineEmpty = true;
+                    extractedText.addSimpleSection(formatted);
+                }
+            } else {
                 previousLineEmpty = false;
                 extractedText.addSimpleSection(formatted);
             }
