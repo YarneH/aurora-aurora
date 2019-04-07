@@ -8,3 +8,7 @@
 # plugin config
 app/plugin-config.json
 app/testConfigFile.json
+
+# Cache
+app/cached-files.json
+*.aur

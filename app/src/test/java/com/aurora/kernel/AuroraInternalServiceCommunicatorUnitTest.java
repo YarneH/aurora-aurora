@@ -1,5 +1,9 @@
 package com.aurora.kernel;
 
+import android.content.Context;
+
+import com.aurora.auroralib.PluginObject;
+import com.aurora.internalservice.internalcache.CachedFileInfo;
 import com.aurora.internalservice.internalcache.CachedProcessedFile;
 import com.aurora.internalservice.internalcache.InternalCache;
 import com.aurora.kernel.event.CacheFileRequest;
@@ -10,34 +14,36 @@ import com.aurora.kernel.event.RemoveFromCacheRequest;
 import com.aurora.kernel.event.RemoveFromCacheResponse;
 import com.aurora.kernel.event.RetrieveFileFromCacheRequest;
 import com.aurora.kernel.event.RetrieveFileFromCacheResponse;
-import com.aurora.plugin.ProcessedText;
+import com.aurora.util.MockContext;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import io.reactivex.Observable;
 import io.reactivex.observers.TestObserver;
+import io.reactivex.schedulers.Schedulers;
 
-public class AuroraInternalServiceCommunicatorTest {
+public class AuroraInternalServiceCommunicatorUnitTest {
     private static Bus mBus;
     private static InternalCache mInternalCache;
     private static AuroraInternalServiceCommunicator mAuroraInternalServiceCommunicator;
 
-    private static List<String> dummyList = new ArrayList<>();
-    private static String dummyCachedFileString = "CachedFile";
-    private static CachedProcessedFile dummyCachedFile = new CachedProcessedFile();
+    private static List<CachedFileInfo> dummyList = new ArrayList<>();
+    private static String fileRef = "CachedFile.pdf";
+    private static String pluginName = "DummyPlugin";
+    private static CachedFileInfo dummyCachedFileInfo = new CachedFileInfo(fileRef, pluginName);
+    private static CachedProcessedFile dummyCachedFile = new CachedProcessedFile("{}", fileRef, pluginName);
 
     @BeforeClass
     public static void initialize() {
         // Create bus
-        mBus = new Bus();
+        mBus = new Bus(Schedulers.trampoline());
 
         // Create internal cache
-        mInternalCache = new DummyInternalCache();
+        mInternalCache = new DummyInternalCache(new MockContext());
 
         // Create Communicator
         mAuroraInternalServiceCommunicator = new AuroraInternalServiceCommunicator(mBus, mInternalCache);
@@ -55,15 +61,14 @@ public class AuroraInternalServiceCommunicatorTest {
         observable.map(CacheFileResponse::isSuccessful).subscribe(testObserver);
 
         // Create cache file request and post on bus
-        String fileRef = "Dummy/file/path.pdf";
-        ProcessedText text = new DummyProcessedText("Title", Arrays.asList("Hello", "There"));
-        String uniquePluginName = "DummyPlugin";
-        CacheFileRequest request = new CacheFileRequest(fileRef, text, uniquePluginName);
+        PluginObject dummyPluginObject = new DummyPluginObject();
+        CacheFileRequest request = new CacheFileRequest(fileRef, dummyPluginObject, pluginName);
         mBus.post(request);
 
         // Check if cache returned true
         testObserver.assertSubscribed();
         testObserver.assertValue(true);
+        testObserver.dispose();
     }
 
     @Test
@@ -72,7 +77,7 @@ public class AuroraInternalServiceCommunicatorTest {
         Observable<QueryCacheResponse> observable = mBus.register(QueryCacheResponse.class);
 
         // Create test observer for response
-        TestObserver<List<String>> testObserver = new TestObserver<>();
+        TestObserver<List<CachedFileInfo>> testObserver = new TestObserver<>();
 
         // Subscribe to observable
         observable.map(QueryCacheResponse::getResults).subscribe(testObserver);
@@ -84,6 +89,7 @@ public class AuroraInternalServiceCommunicatorTest {
         // Check if cache returned list
         testObserver.assertSubscribed();
         testObserver.assertValue(dummyList);
+        testObserver.dispose();
     }
 
     @Test
@@ -92,20 +98,19 @@ public class AuroraInternalServiceCommunicatorTest {
         Observable<QueryCacheResponse> observable = mBus.register(QueryCacheResponse.class);
 
         // Create test observer for response
-        TestObserver<String> testObserver = new TestObserver<>();
+        TestObserver<CachedFileInfo> testObserver = new TestObserver<>();
 
         // Subscribe to observable
         observable.map(queryCacheResponse -> queryCacheResponse.getResults().get(0)).subscribe(testObserver);
 
-        // Create query request and post on the bus
-        String fileRef = "dummy/file/ref.pdf";
-        String uniquePluginName = "DummyPlugin";
-        QueryCacheRequest queryCacheRequest = new QueryCacheRequest(fileRef, uniquePluginName);
+        // Create query request and post on the bus-
+        QueryCacheRequest queryCacheRequest = new QueryCacheRequest(fileRef, pluginName);
         mBus.post(queryCacheRequest);
 
         // Check if cache returned specific plugin
         testObserver.assertSubscribed();
-        testObserver.assertValue(dummyCachedFileString);
+        testObserver.assertValue(dummyCachedFileInfo);
+        testObserver.dispose();
     }
 
     @Test
@@ -128,6 +133,7 @@ public class AuroraInternalServiceCommunicatorTest {
         // Check if cache retrieved correct plugin
         testObserver.assertSubscribed();
         testObserver.assertValue(dummyCachedFile);
+        testObserver.dispose();
     }
 
     @Test
@@ -142,14 +148,13 @@ public class AuroraInternalServiceCommunicatorTest {
         observable.map(RemoveFromCacheResponse::isSuccess).subscribe(testObserver);
 
         // Create request file and post on bus
-        String fileRef = "dummy/file/ref.pdf";
-        String uniquePluginName = "DummyPlugin";
-        RemoveFromCacheRequest request = new RemoveFromCacheRequest(fileRef, uniquePluginName);
+        RemoveFromCacheRequest request = new RemoveFromCacheRequest(fileRef, pluginName);
         mBus.post(request);
 
         // Check if cache removed the file correctly
         testObserver.assertSubscribed();
         testObserver.assertValue(true);
+        testObserver.dispose();
     }
 
     @Test
@@ -164,13 +169,13 @@ public class AuroraInternalServiceCommunicatorTest {
         observable.map(RemoveFromCacheResponse::isSuccess).subscribe(testObserver);
 
         // Create request file and post on bus
-        String uniquePluginName = "DummyPlugin";
-        RemoveFromCacheRequest request = new RemoveFromCacheRequest(uniquePluginName);
+        RemoveFromCacheRequest request = new RemoveFromCacheRequest(pluginName);
         mBus.post(request);
 
         // Check if cache removed the file correctly
         testObserver.assertSubscribed();
         testObserver.assertValue(true);
+        testObserver.dispose();
     }
 
     @Test
@@ -191,30 +196,40 @@ public class AuroraInternalServiceCommunicatorTest {
         // Check if cache removed the file correctly
         testObserver.assertSubscribed();
         testObserver.assertValue(true);
+        testObserver.dispose();
     }
 
     /**
      * Dummy class with stub implementations for the cache
      */
     private static class DummyInternalCache extends InternalCache {
+        /**
+         * Creates an instance of the internal cache
+         *
+         * @param applicationContext the android application context
+         */
+        public DummyInternalCache(Context applicationContext) {
+            super(applicationContext);
+        }
+
         @Override
-        public boolean cacheFile(String fileRef, ProcessedText text, String uniquePluginName) {
+        public boolean cacheFile(String fileRef, PluginObject pluginObject, String uniquePluginName) {
             // Just return true
             return true;
         }
 
         @Override
-        public String checkCacheForProcessedFile(String fileRef, String uniquePluginName) {
-            return dummyCachedFileString;
+        public CachedFileInfo checkCacheForProcessedFile(String fileRef, String uniquePluginName) {
+            return dummyCachedFileInfo;
         }
 
         @Override
-        public List<String> getFullCache() {
+        public List<CachedFileInfo> getFullCache() {
             return dummyList;
         }
 
         @Override
-        public List<String> getFullCache(int amount) {
+        public List<CachedFileInfo> getFullCache(int amount) {
             return getFullCache();
         }
 
@@ -242,10 +257,6 @@ public class AuroraInternalServiceCommunicatorTest {
     /**
      * Dummy implementation for testing purposes
      */
-    private class DummyProcessedText extends ProcessedText {
-
-        public DummyProcessedText(String title, List<String> paragraphs) {
-            super(title, paragraphs);
-        }
+    private class DummyPluginObject extends PluginObject {
     }
 }

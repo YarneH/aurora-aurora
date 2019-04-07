@@ -1,6 +1,8 @@
 package com.aurora.kernel;
 
-import com.aurora.internalservice.internalprocessor.ExtractedText;
+import android.util.Log;
+
+import com.aurora.auroralib.ExtractedText;
 import com.aurora.internalservice.internalprocessor.FileTypeNotSupportedException;
 import com.aurora.internalservice.internalprocessor.InternalTextProcessor;
 import com.aurora.kernel.event.InternalProcessorRequest;
@@ -32,17 +34,18 @@ public class PluginInternalServiceCommunicator extends Communicator {
         internalProcessorEventObservable = mBus.register(InternalProcessorRequest.class);
         internalProcessorEventObservable.subscribe((InternalProcessorRequest internalProcessorRequest) ->
                 processFileWithInternalProcessor(internalProcessorRequest.getFile(),
-                        internalProcessorRequest.getFileRef()));
+                        internalProcessorRequest.getFileRef(), internalProcessorRequest.getFileType()));
     }
 
-    private void processFileWithInternalProcessor(InputStream file, String fileRef) {
+    private void processFileWithInternalProcessor(InputStream file, String fileRef, String type) {
         // Call internal processor
         ExtractedText extractedText = null;
         try {
-            extractedText = mProcessor.processFile(file, fileRef);
+            extractedText = mProcessor.processFile(file, fileRef, type);
         } catch (FileTypeNotSupportedException e) {
-            e.printStackTrace();
+            Log.e("PluginIntSerComm", "File type is not supported!", e);
         }
+
 
         // Create response
         InternalProcessorResponse response = new InternalProcessorResponse(extractedText);

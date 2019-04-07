@@ -29,9 +29,9 @@ pipeline {
                 script {
                     // Compile and run the unit tests for the app and its dependencies
                     if (env.BRANCH_NAME == 'master' || env.BRANCH_NAME == 'dev') {
-                        sh './gradlew testReleaseUnitTest'
+                        sh "./gradlew testReleaseUnitTest --tests '*UnitTest'"
                     } else {
-                        sh './gradlew testDebugUnitTest'
+                        sh "./gradlew testDebugUnitTest --tests '*UnitTest'"
                     }
 
 
@@ -54,10 +54,23 @@ pipeline {
 
         stage('SonarQube') {
             steps {
-                withSonarQubeEnv("Aurora SonarQube") {
-                    sh "${scannerHome}/bin/sonar-scanner -X -Dproject.settings=sonar-project.properties -Dsonar.branch=${env.BRANCH_NAME}"
-                }
                 script {
+                    if (env.BRANCH_NAME == 'master' || env.BRANCH_NAME == 'dev') {
+                        withSonarQubeEnv("Aurora SonarQube") {
+                        sh """
+                        ${scannerHome}/bin/sonar-scanner -X -Dproject.settings=sonar-project.properties -Dsonar.branch=${env.BRANCH_NAME} \
+                        -Dsonar.java.binaries=app/build/intermediates/javac/release/compileReleaseJavaWithJavac
+                        """
+                        }
+                    } else {
+                       withSonarQubeEnv("Aurora SonarQube") {
+                        sh """
+                        ${scannerHome}/bin/sonar-scanner -X -Dproject.settings=sonar-project.properties -Dsonar.branch=${env.BRANCH_NAME} \
+                        -Dsonar.java.binaries=app/build/intermediates/javac/debug/compileDebugJavaWithJavac
+                        """
+                        } 
+                    }
+
                     timeout(time: 1, unit: 'HOURS') {
                         def qg = waitForQualityGate()
                         if (qg.status != 'OK') {
@@ -71,10 +84,87 @@ pipeline {
                 failure {
                     slack_error_sonar()
                 }
+                success {
+                    slack_success_part1()
+                }
             }
         } // SonarQube stage
-    } // Stages
 
+        stage('Long Unit tests') {
+            steps {
+                script {
+                    if (env.BRANCH_NAME == 'master' || env.BRANCH_NAME == 'dev') {
+                        sh "./gradlew testReleaseUnitTest --tests '*LongTest'"
+                    } else {
+                        sh "./gradlew testDebugUnitTest --tests '*LongTest'"
+                    }
+
+
+                    // Analyse the test results and update the build result as appropriate
+                    junit allowEmptyResults: true, testResults: '**/TEST-*.xml'
+
+                    // Analyze coverage info
+                    jacoco sourcePattern: '**/src/main/java/com/aurora', 
+                        classPattern: '**/classes/com/aurora', 
+                        exclusionPattern: '**/*Test*.class,  **/souschef/*.class, **/R.class, **/R$*.class, **/BuildConfig'
+                }
+            }
+            post {
+                failure {
+                    slack_error_long_test()
+                }
+            }
+        } // Long Unit tests stage
+
+        stage('Integration tests') {
+            steps {
+                script {
+                    if (env.BRANCH_NAME == 'master' || env.BRANCH_NAME == 'dev') {
+                        sh "./gradlew testReleaseUnitTest --tests '*IntegTest'"
+                    } else {
+                        sh "./gradlew testDebugUnitTest --tests '*IntegTest'"
+                    }
+
+                    // Analyse the test results and update the build result as appropriate
+                    junit allowEmptyResults: true, testResults: '**/TEST-*.xml'
+
+                    // Analyze coverage info
+                    jacoco sourcePattern: '**/src/main/java/com/aurora', 
+                        classPattern: '**/classes/com/aurora', 
+                        exclusionPattern: '**/*Test*.class,  **/souschef/*.class, **/R.class, **/R$*.class, **/BuildConfig'
+                }
+            }
+            post {
+                failure {
+                    slack_error_integration_test()
+                }
+            }
+        }
+
+        stage('Javadoc') {
+            when {
+                anyOf {
+                    branch 'master';
+                    branch 'dev'
+                }
+            }
+            steps {
+                // Generate javadoc
+                sh """
+                javadoc -d /var/www/javadoc/aurora/${env.BRANCH_NAME} -sourcepath ${WORKSPACE}/app/src/main/java -subpackages com -private \
+                -classpath ${WORKSPACE}/app/build/intermediates/javac/release/compileReleaseJavaWithJavac/classes
+                """
+            }
+            post {
+                failure {
+                    slack_error_doc()
+                }
+                success {
+                    slack_success_doc()
+                }
+            }
+        } // Javadoc stage
+    } // Stages
     post {
         success {
             slack_success()
@@ -99,10 +189,31 @@ def slack_error_test() {
 }
 
 /**
+ * Gets called when the long running unit tests fail
+ */
+def slack_error_long_test() {
+    slack_report(false, ':x: Long unit tests failed', null, 'Long Unit Tests')
+}
+
+/**
+ * Gets called when the integration tests fail
+ */
+def slack_error_integration_test() {
+    slack_report(false, ':x: Integration tests failed', null, 'Integration Tests')
+}
+
+/**
  * Gets called when sonar fails
  */
 def slack_error_sonar() {
     slack_report(false, ':x: Sonar failed', null, 'SonarQube analysis')
+}
+
+/**
+ * Gets called when javadoc fails
+ */
+def slack_error_doc() {
+    slack_report(false, ':x: Javadoc failed', null, 'Javadoc')
 }
 
 
@@ -113,7 +224,19 @@ def slack_success() {
     slack_report(true, ':heavy_check_mark: Build succeeded', null, '')
 }
 
+/**
+ * Gets called when first part of build succeeds
+ */
+def slack_success_part1() {
+    slack_report(true, ':white_check_mark: Part 1 of build succeeded', null, '')
+}
 
+/**
+ * Gets called when the javadoc is successfully generated
+ */
+def slack_success_doc() {
+    slack_report(true, ':heavy_check_mark: Javadoc generated', null, '')
+}
 
 /**
  * Find name of author

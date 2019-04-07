@@ -7,12 +7,15 @@ import java.io.InputStream;
  */
 public class InternalProcessorRequest extends Event {
 
-    private InputStream mFile;
     private String mFileRef;
+    private String mFileType;
+    private InputStream mFile;
+
     //TODO: if needed add mechanism to add parameters to internal processor request
 
-    public InternalProcessorRequest(InputStream file, String fileRef) {
+    public InternalProcessorRequest(String fileRef, String fileType, InputStream file) {
         this.mFile = file;
+        this.mFileType = fileType;
         this.mFileRef = fileRef;
     }
 
@@ -22,5 +25,9 @@ public class InternalProcessorRequest extends Event {
 
     public InputStream getFile() {
         return mFile;
+    }
+
+    public String getFileType() {
+        return mFileType;
     }
 }

@@ -1,5 +1,6 @@
 package com.aurora.aurora;
 
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -16,17 +17,21 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.webkit.MimeTypeMap;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.aurora.kernel.AuroraCommunicator;
 import com.aurora.kernel.Kernel;
+import com.google.firebase.analytics.FirebaseAnalytics;
 
+import java.io.FileNotFoundException;
 import java.io.InputStream;
 
 public class MainActivity extends AppCompatActivity
@@ -40,8 +45,16 @@ public class MainActivity extends AppCompatActivity
     private TextView mTextViewMain = null;
     private RecyclerView mRecyclerView = null;
 
-    private Kernel kernel = null;
-    private AuroraCommunicator auroraCommunicator = null;
+    /**
+     * Create unique kernel instance (should be passed to every activity, fragment, adapter,...) that needs it
+     */
+    private Kernel mKernel = null;
+    private AuroraCommunicator mAuroraCommunicator = null;
+
+    /**
+     * Firebase analytics
+     */
+    private FirebaseAnalytics mFirebaseAnalytics = null;
 
     /**
      * Runs on startup of the activity, in this case on startup of the app
@@ -53,6 +66,13 @@ public class MainActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        /* Set up kernel */
+        mKernel = new Kernel(this.getApplicationContext());
+        mAuroraCommunicator = mKernel.getAuroraCommunicator();
+
+        /* Initialize FirebaseAnalytics */
+        mFirebaseAnalytics = FirebaseAnalytics.getInstance(this);
+
         /* Set system properties for DOCX */
         System.setProperty("org.apache.poi.javax.xml.stream.XMLInputFactory",
                 "com.fasterxml.aalto.stax.InputFactoryImpl");
@@ -62,67 +82,46 @@ public class MainActivity extends AppCompatActivity
                 "com.fasterxml.aalto.stax.EventFactoryImpl");
 
         /* Add toolbar when activity is created */
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
         /* The floating action button to add files */
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            /* Implementation of adding files in onClick */
-            @Override
-            public void onClick(View view) {
-                selectFile();
-            }
-        });
+        FloatingActionButton fab = findViewById(R.id.fab);
+        /* Implementation of adding files in onClick */
+        fab.setOnClickListener(view -> selectFile());
 
         /* Listener and sync are for navigationView functionality */
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        DrawerLayout drawer = findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.addDrawerListener(toggle);
         toggle.syncState();
 
         /* Setup NavigationView and preselect 'Home' */
-        NavigationView mNavigationView = (NavigationView) findViewById(R.id.nav_view);
+        NavigationView mNavigationView = findViewById(R.id.nav_view);
         mNavigationView.setNavigationItemSelectedListener(this);
         mNavigationView.getMenu().getItem(0).setChecked(true);
 
         /* Setup Main TextView */
-        mTextViewMain = (TextView) findViewById(R.id.tv_main);
+        mTextViewMain = findViewById(R.id.tv_main);
 
         /* Setup RecyclerView */
-        mRecyclerView = (RecyclerView) findViewById(R.id.rv_files);
+        mRecyclerView = findViewById(R.id.rv_files);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
-        CardFileAdapter adapter = new CardFileAdapter();
+        CardFileAdapter adapter = new CardFileAdapter(mKernel, this);
         mRecyclerView.setAdapter(adapter);
-
-        /* Setup Kernel */
-        kernel = new Kernel();
-        auroraCommunicator = kernel.getAuroraCommunicator();
-
-        // TODO Remove this test code
-        InputStream docFile = getResources().openRawResource(R.raw.apple_crisp);
-        auroraCommunicator.openFileWithPlugin("", docFile, "apple_crisp.docx");
-
     }
 
     /**
-     * Creates an intent to open the file manager. Can currently only select pdf files;
-     * If more filetypes need to be opened, use a final String[], for example:
-     *
-     * final String[] ACCEPT_MIME_TYPES = {
-     *         "application/pdf",
-     *         "image/*"
-     *   };
-     *
-     * Intent intent = new Intent();
-     * intent.setType("* / *");
-     * intent.setAction(Intent.ACTION_GET_CONTENT);
-     * intent.putExtra(Intent.EXTRA_MIME_TYPES,ACCEPT_MIME_TYPES);
+     * Creates an intent to open the file manager.
      */
     protected void selectFile() {
-        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-        intent.setType("application/pdf");
+        final String[] mimeTypes = {
+                "application/vnd.openxmlformats-officedocument.wordprocessingml.document", "text/plain"};
+        Intent intent = new Intent();
+        intent.setType("* / *");
+        intent.setAction(Intent.ACTION_GET_CONTENT);
+        intent.putExtra(Intent.EXTRA_MIME_TYPES, mimeTypes);
         if (intent.resolveActivity(getPackageManager()) != null) {
             startActivityForResult(intent, REQUEST_FILE_GET);
         }
@@ -130,16 +129,42 @@ public class MainActivity extends AppCompatActivity
 
     /**
      * In this case when selectFile()'s intent returns
+     *
      * @param requestCode code used to send the intent
-     * @param resultCode status code
-     * @param data resulting data, a Uri in case of fileselector
+     * @param resultCode  status code
+     * @param data        resulting data, a Uri in case of fileselector
      */
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == REQUEST_FILE_GET && resultCode == RESULT_OK) {
             Uri textFile = data.getData();
-            Toast.makeText(this, "A file with uri \"" + textFile + "\" was selected.", Snackbar.LENGTH_LONG).show();
-            // Use File
+
+            try {
+                if (textFile != null) {
+                    Log.i("URI", textFile.toString());
+                    ContentResolver cR = getApplicationContext().getContentResolver();
+                    String type = MimeTypeMap.getSingleton().getExtensionFromMimeType(cR.getType(textFile));
+                    Log.i("MIME", type);
+
+                    /**
+                     * Firebase Analytics
+                     * TODO: convert to custom event, see https://firebase.google.com/docs/analytics/android/events
+                     */
+                    Bundle bundle = new Bundle();
+                    bundle.putString(FirebaseAnalytics.Param.ITEM_NAME, textFile.toString());
+                    bundle.putString(FirebaseAnalytics.Param.CONTENT_TYPE, type);
+                    mFirebaseAnalytics.logEvent("NEW_FILE_OPENED", bundle);
+
+                    InputStream read = getContentResolver().openInputStream(textFile);
+                    mAuroraCommunicator.openFileWithPlugin(textFile.toString(), type,
+                            read, this.getApplicationContext());
+                } else {
+                    Toast.makeText(this, "The selected file was null", Snackbar.LENGTH_LONG).show();
+                }
+            } catch (FileNotFoundException e) {
+                Toast.makeText(this, "The file could not be found", Snackbar.LENGTH_LONG).show();
+                Log.e("FILE_NOT_FOUND", "The file could not be found", e);
+            }
         }
     }
 
@@ -148,7 +173,7 @@ public class MainActivity extends AppCompatActivity
      */
     @Override
     public void onBackPressed() {
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        DrawerLayout drawer = findViewById(R.id.drawer_layout);
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else {
@@ -175,7 +200,7 @@ public class MainActivity extends AppCompatActivity
             // Create a LayoutInflater which will create the view for the pop-up
             LayoutInflater li = LayoutInflater.from(this);
             View promptView = li.inflate(R.layout.search_prompt, null);
-            final EditText userInput = (EditText) promptView.findViewById(R.id.et_search_prompt);
+            final EditText userInput = promptView.findViewById(R.id.et_search_prompt);
 
             // Create a builder to build the actual alertdialog from the previous inflated view
             AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
@@ -212,18 +237,18 @@ public class MainActivity extends AppCompatActivity
         boolean home = false;
         if (id == R.id.nav_about_us) {
             text = "About us";
+            // Change text and visibility (Used for demo)
+            mTextViewMain.setText(text);
         } else if (id == R.id.nav_help_feedback) {
             Intent intent = new Intent(MainActivity.this, FeedbackActivity.class);
             startActivity(intent);
-            home = true;
         } else if (id == R.id.nav_home) {
-            text = "Home";
             home = true;
         } else {
             text = "Settings";
+            // Change text and visibility (Used for demo)
+            mTextViewMain.setText(text);
         }
-        // Change text and visibility (Used for demo)
-        mTextViewMain.setText(text);
         if (home) {
             mRecyclerView.setVisibility(View.VISIBLE);
             mTextViewMain.setVisibility(View.INVISIBLE);
@@ -232,10 +257,9 @@ public class MainActivity extends AppCompatActivity
             mTextViewMain.setVisibility(View.VISIBLE);
         }
 
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        DrawerLayout drawer = findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
-
 }
 

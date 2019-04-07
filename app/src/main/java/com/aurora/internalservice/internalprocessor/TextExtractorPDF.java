@@ -2,6 +2,8 @@ package com.aurora.internalservice.internalprocessor;
 
 import java.io.InputStream;
 
+import com.aurora.auroralib.ExtractedText;
+
 public class TextExtractorPDF implements TextExtractor {
     /**
      * TODO: This method will extract the text using iText
@@ -10,6 +12,6 @@ public class TextExtractorPDF implements TextExtractor {
      */
     @Override
     public ExtractedText extract(InputStream file, String fileRef) {
-        return new ExtractedText("",null);
+        return new ExtractedText(fileRef, null);
     }
 }

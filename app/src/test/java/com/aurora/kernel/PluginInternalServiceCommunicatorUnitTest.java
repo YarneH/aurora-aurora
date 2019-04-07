@@ -1,6 +1,6 @@
 package com.aurora.kernel;
 
-import com.aurora.internalservice.internalprocessor.ExtractedText;
+import com.aurora.auroralib.ExtractedText;
 import com.aurora.internalservice.internalprocessor.FileTypeNotSupportedException;
 import com.aurora.internalservice.internalprocessor.InternalTextProcessor;
 import com.aurora.kernel.event.InternalProcessorRequest;
@@ -15,8 +15,9 @@ import java.util.List;
 
 import io.reactivex.Observable;
 import io.reactivex.observers.TestObserver;
+import io.reactivex.schedulers.Schedulers;
 
-public class PluginInternalServiceCommunicatorTest {
+public class PluginInternalServiceCommunicatorUnitTest {
 
     private static Bus mBus;
     private static InternalTextProcessor mProcessor;
@@ -29,7 +30,7 @@ public class PluginInternalServiceCommunicatorTest {
     @BeforeClass
     public static void initialize() {
         // Initialize bus
-        mBus = new Bus();
+        mBus = new Bus(Schedulers.trampoline());
 
         // Initialize processor
         mProcessor = new DummyInternalTextProcessing();
@@ -38,13 +39,14 @@ public class PluginInternalServiceCommunicatorTest {
         mCommunicator = new PluginInternalServiceCommunicator(mBus, mProcessor);
 
         // Initialize extracted text with dummy contents
-        mExtractedText = new ExtractedText(mTitle, mParagraphs);
+        mExtractedText = new ExtractedText(mTitle, null, mParagraphs);
     }
 
     @Test
     public void PluginInternalServiceCommunicator_processFileWithInternalProcessor_shouldPostExtractedTextResponse() {
         // Fake string ref
-        String ref = "Fake/path/to/file.pdf";
+        String ref = "Fake/path/to/file";
+        String type = "docx";
 
         // Listen for internal processor response
         Observable<InternalProcessorResponse> observable = mBus.register(InternalProcessorResponse.class);
@@ -56,12 +58,13 @@ public class PluginInternalServiceCommunicatorTest {
         observable.map(InternalProcessorResponse::getExtractedText).subscribe(testObserver);
 
         // Create request to process file and put on bus
-        InternalProcessorRequest request = new InternalProcessorRequest(null ,ref);
+        InternalProcessorRequest request = new InternalProcessorRequest(ref, type, null);
         mBus.post(request);
 
         // Assert that dummy extracted text was received
         testObserver.assertSubscribed();
         testObserver.assertValue(mExtractedText);
+        testObserver.dispose();
     }
 
     /**
@@ -75,10 +78,10 @@ public class PluginInternalServiceCommunicatorTest {
          *
          * @param fileRef a reference to where the file can be found
          * @return dummy extracted text
-         * @throws FileTypeNotSupportedException
+         * @throws FileTypeNotSupportedException thrown when a file with an unsupported extension is opened
          */
         @Override
-        public ExtractedText processFile(InputStream file, String fileRef) throws FileTypeNotSupportedException {
+        public ExtractedText processFile(InputStream file, String fileRef, String type) throws FileTypeNotSupportedException {
             // Just return the dummy extracted text
             return mExtractedText;
         }

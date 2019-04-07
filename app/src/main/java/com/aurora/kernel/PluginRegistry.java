@@ -1,9 +1,8 @@
 package com.aurora.kernel;
 
+import android.content.Context;
 import android.util.Log;
 
-import com.aurora.externalservice.PluginEnvironment;
-import com.aurora.plugin.BasicPlugin;
 import com.aurora.plugin.Plugin;
 import com.google.gson.Gson;
 
@@ -39,50 +38,31 @@ class PluginRegistry {
      */
     private ProcessingCommunicator mProcessingCommunicator;
 
+    /**
+     * The android context
+     */
+    private Context mContext;
 
-    PluginRegistry(ProcessingCommunicator processingCommunicator, String configFileRef) {
+
+    PluginRegistry(ProcessingCommunicator processingCommunicator, String configFileRef, Context context) {
         this.mProcessingCommunicator = processingCommunicator;
 
         this.mConfigFileRef = configFileRef;
+
+        this.mContext = context;
 
         // Load plugins
         constructPluginMap();
     }
 
-
     /**
-     * private helper method to find a plugin based on the plugin name
-     *
-     * @param pluginName the name of the plugin
-     * @return the plugin object associated with the name or null if not found
-     */
-    private Plugin resolvePlugin(String pluginName) {
-        // Returns the plugin if found, null otherwise
-        return mPluginsMap.get(pluginName);
-    }
-
-
-    /**
-     * Finds the PluginEnvironment to load given a pluginName
+     * Returns metadata of the selected plugin
      *
      * @param pluginName the name of the plugin to load
      * @return the PluginEnvironment associated with the plugin name or null if not found
      */
-    PluginEnvironment loadPlugin(String pluginName) {
-        Plugin plugin = resolvePlugin(pluginName);
-
-        if (plugin != null) {
-            // Set plugin processor in the processing communicator
-            mProcessingCommunicator.setActivePluginProcessor(plugin.getPluginProcessor());
-
-            // Return the environment to the caller
-            return plugin.getPluginEnvironment();
-        } else {
-            Log.d(PLUGINREGISTRY_LOG_TAG, "Could not find the plugin with name " +
-                    pluginName + ".");
-
-            return null;
-        }
+    public Plugin loadPlugin(String pluginName) {
+        return mPluginsMap.get(pluginName);
     }
 
     /**
@@ -90,37 +70,27 @@ class PluginRegistry {
      *
      * @return List of Plugin objects with basic information
      */
-    List<BasicPlugin> getPlugins() {
-        List<BasicPlugin> basicPlugins = new ArrayList<>();
-
-        // Loop over all values and extract their basic info
-        for (Plugin p : mPluginsMap.values()) {
-            // Create basic plugin
-            basicPlugins.add(p.getBasicPluginInfo());
-        }
-
-        return basicPlugins;
+    public List<Plugin> getPlugins() {
+        // Create list from the values
+        return new ArrayList<>(mPluginsMap.values());
     }
 
     /**
      * Adds a plugin with a given name to the map and writes back the configuration file
      *
+     * @param pluginName the name of the plugin to add
      * @param plugin     the plugin object that contains the plugin
      * @return true if the plugin was added, false if the plugin could not be added (e.g. if it was already present)
      */
-    boolean registerPlugin(Plugin plugin) {
+    boolean registerPlugin(String pluginName, Plugin plugin) {
         // TODO: write back config file immediately
-        if (!mPluginsMap.containsKey(plugin.getUniqueName())) {
+        if (!mPluginsMap.containsKey(pluginName)) {
             // Add plugin to the map
-            mPluginsMap.put(plugin.getUniqueName(), plugin);
-            persistPluginsMap();
-
-            Log.d(PLUGINREGISTRY_LOG_TAG, "Plugin added to the registry.");
+            mPluginsMap.put(pluginName, plugin);
             return true;
         }
 
         // Return false because plugin was already present
-        Log.d(PLUGINREGISTRY_LOG_TAG, "Plugin already present in the registry.");
         return false;
     }
 
@@ -176,7 +146,7 @@ class PluginRegistry {
      */
     private String parsePluginFile() throws IOException {
         // Get file at specified path
-        File pluginConfig = new File(mConfigFileRef);
+        File pluginConfig = new File(mContext.getFilesDir(), mConfigFileRef);
 
         StringBuilder stringBuilder;
         try (BufferedReader reader = new BufferedReader(new FileReader(pluginConfig))) {

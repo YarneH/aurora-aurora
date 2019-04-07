@@ -1,13 +1,15 @@
 package com.aurora.kernel;
 
+import com.aurora.util.MockContext;
+
 import org.junit.Test;
 
 import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertNotNull;
 
-public class KernelTest {
+public class KernelUnitTest {
 
-    private static Kernel mKernel = new Kernel();
+    private static Kernel mKernel = new Kernel(new MockContext());
 
     @Test
     public void Kernel_AllObjectsShouldBeMade() {

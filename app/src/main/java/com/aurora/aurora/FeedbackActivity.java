@@ -34,7 +34,7 @@ public class FeedbackActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         mEditTextFeedback = findViewById(R.id.et_feedback);
-        mEditTextFeedback.setHint("Enter your feedback here");
+        mEditTextFeedback.setHint(getString(R.string.enter_feedback));
     }
 
     // This will start a SendFeedbackTask and notice the user whether it succeeded or not
@@ -59,13 +59,13 @@ public class FeedbackActivity extends AppCompatActivity {
             }
 
             if (success) {
-                Snackbar.make(view, "Feedback sent, thank you!", Snackbar.LENGTH_SHORT).show();
+                Snackbar.make(view, R.string.feedback_sent, Snackbar.LENGTH_SHORT).show();
                 mEditTextFeedback.setText("");
             } else {
-                Snackbar.make(view, "Something went wrong. Please try again.", Snackbar.LENGTH_SHORT).show();
+                Snackbar.make(view, R.string.feedback_wrong, Snackbar.LENGTH_SHORT).show();
             }
         } else {
-            Snackbar.make(view, "Please enter your feedback first.", Snackbar.LENGTH_SHORT).show();
+            Snackbar.make(view, R.string.feedback_empty, Snackbar.LENGTH_SHORT).show();
         }
 
     }

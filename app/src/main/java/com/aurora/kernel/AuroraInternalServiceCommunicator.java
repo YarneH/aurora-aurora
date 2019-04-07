@@ -1,5 +1,7 @@
 package com.aurora.kernel;
 
+import com.aurora.auroralib.PluginObject;
+import com.aurora.internalservice.internalcache.CachedFileInfo;
 import com.aurora.internalservice.internalcache.CachedProcessedFile;
 import com.aurora.internalservice.internalcache.InternalCache;
 import com.aurora.kernel.event.CacheFileRequest;
@@ -10,7 +12,6 @@ import com.aurora.kernel.event.RemoveFromCacheRequest;
 import com.aurora.kernel.event.RemoveFromCacheResponse;
 import com.aurora.kernel.event.RetrieveFileFromCacheRequest;
 import com.aurora.kernel.event.RetrieveFileFromCacheResponse;
-import com.aurora.plugin.ProcessedText;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -55,7 +56,7 @@ public class AuroraInternalServiceCommunicator extends Communicator {
 
         // When event comes in, call the appropriate handle method
         mCacheFileRequestObservable.subscribe(cacheFileRequest -> cacheFile(cacheFileRequest.getFileRef(),
-                cacheFileRequest.getText(), cacheFileRequest.getUniquePluginName()));
+                cacheFileRequest.getPluginObject(), cacheFileRequest.getUniquePluginName()));
 
         // Subscribe to incoming query requests
         mQueryCacheRequestObservable = mBus.register(QueryCacheRequest.class);
@@ -97,12 +98,12 @@ public class AuroraInternalServiceCommunicator extends Communicator {
      * Private handle method that handles CacheFileRequests
      *
      * @param fileRef          a reference to the file that needs to be cached
-     * @param processedText    the processed text representation that needs to be cached
+     * @param pluginObject     the processed text representation that needs to be cached
      * @param uniquePluginName the name of the plugin that built the representation
      */
-    private void cacheFile(String fileRef, ProcessedText processedText, String uniquePluginName) {
+    private void cacheFile(String fileRef, PluginObject pluginObject, String uniquePluginName) {
         // Cache file
-        boolean cacheSuccess = mInternalCache.cacheFile(fileRef, processedText, uniquePluginName);
+        boolean cacheSuccess = mInternalCache.cacheFile(fileRef, pluginObject, uniquePluginName);
 
         // Create response and post it
         CacheFileResponse response = new CacheFileResponse(cacheSuccess);
@@ -114,7 +115,7 @@ public class AuroraInternalServiceCommunicator extends Communicator {
      */
     private void queryFullCache() {
         // Get all files from cache
-        List<String> processedFiles = mInternalCache.getFullCache();
+        List<CachedFileInfo> processedFiles = mInternalCache.getFullCache();
 
         // Wrap in response and post on the bus
         QueryCacheResponse response = new QueryCacheResponse(processedFiles);
@@ -128,10 +129,10 @@ public class AuroraInternalServiceCommunicator extends Communicator {
      * @param uniquePluginName the plugin that the file should be processed with
      */
     private void queryCache(String fileRef, String uniquePluginName) {
-        String processedFile = mInternalCache.checkCacheForProcessedFile(fileRef, uniquePluginName);
+        CachedFileInfo processedFile = mInternalCache.checkCacheForProcessedFile(fileRef, uniquePluginName);
 
         // Create response event with result in list, or empty list if result was null
-        List<String> cachedProcessedFiles = new ArrayList<>();
+        List<CachedFileInfo> cachedProcessedFiles = new ArrayList<>();
         if (processedFile != null) {
             cachedProcessedFiles.add(processedFile);
         }
@@ -152,7 +153,14 @@ public class AuroraInternalServiceCommunicator extends Communicator {
         CachedProcessedFile processedFile = mInternalCache.retrieveFile(fileRef, uniquePluginName);
 
         // Create response event and post on bus
-        RetrieveFileFromCacheResponse response = new RetrieveFileFromCacheResponse(processedFile);
+        RetrieveFileFromCacheResponse response;
+
+        if (processedFile != null) {
+            response = new RetrieveFileFromCacheResponse(processedFile);
+        } else {
+            response = new RetrieveFileFromCacheResponse(
+                    new CachedProcessedFile("{}", fileRef, uniquePluginName));
+        }
 
         // Post response on bus
         mBus.post(response);
