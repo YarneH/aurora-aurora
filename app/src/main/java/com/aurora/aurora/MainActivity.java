@@ -156,7 +156,8 @@ public class MainActivity extends AppCompatActivity
                     mFirebaseAnalytics.logEvent("NEW_FILE_OPENED", bundle);
 
                     InputStream read = getContentResolver().openInputStream(textFile);
-                    mAuroraCommunicator.openFileWithPlugin(textFile.toString(), type, read, this.getApplicationContext());
+                    mAuroraCommunicator.openFileWithPlugin(textFile.toString(), type,
+                            read, this.getApplicationContext());
                 } else {
                     Toast.makeText(this, "The selected file was null", Snackbar.LENGTH_LONG).show();
                 }
