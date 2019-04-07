@@ -43,6 +43,9 @@ public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
     private static final int REQUEST_FILE_GET = 1;
+    private static final int ANIMATION_DURATION = 500;
+    private static final float END_POINT_OF_ANIMATION = 0.2f;
+
 
     // Toast and TextView used for demo and preventing queued Toasts
     private Context mContext = this;
@@ -116,14 +119,14 @@ public class MainActivity extends AppCompatActivity
         if (adapter.getItemCount() == 0) {
             findViewById(R.id.cl_empty_text).setVisibility(View.VISIBLE);
             ImageView arrow = findViewById(R.id.img_arrow);
-            
+
             // Set the animation of the arrow in the startscreen
             TranslateAnimation mAnimation = new TranslateAnimation(
-                    TranslateAnimation.ABSOLUTE, 0f,
-                    TranslateAnimation.ABSOLUTE, 0f,
-                    TranslateAnimation.RELATIVE_TO_PARENT, 0f,
-                    TranslateAnimation.RELATIVE_TO_PARENT, 0.2f);
-            mAnimation.setDuration(500);
+                    TranslateAnimation.ABSOLUTE, 0F,
+                    TranslateAnimation.ABSOLUTE, 0F,
+                    TranslateAnimation.RELATIVE_TO_PARENT, 0F,
+                    TranslateAnimation.RELATIVE_TO_PARENT, END_POINT_OF_ANIMATION);
+            mAnimation.setDuration(ANIMATION_DURATION);
             mAnimation.setRepeatCount(-1);
             mAnimation.setRepeatMode(Animation.REVERSE);
             mAnimation.setInterpolator(new LinearInterpolator());
