@@ -37,10 +37,12 @@ public class AuroraCommunicator extends Communicator {
      * the text from the given file reference,
      * then it will send a request to let the plugin make the representation.
      *
-     * @param fileRef      a reference to the file that needs to be opened
-     * @param context      the android context
+     * @param fileRef  a reference to the file that needs to be opened
+     * @param fileType the file type
+     * @param file     the input stream of the file
+     * @param context  the android context
      */
-    public void openFileWithPlugin(String fileRef, InputStream file, Context context) {
+    public void openFileWithPlugin(String fileRef, String fileType, InputStream file, Context context) {
         // Create observable to listen to
         Observable<InternalProcessorResponse> internalProcessorResponse =
                 mBus.register(InternalProcessorResponse.class);
@@ -53,12 +55,7 @@ public class AuroraCommunicator extends Communicator {
                         sendOpenFileRequest(extractedText, context));
 
         // First create internal processing
-        InternalProcessorRequest internalProcessorRequest = new InternalProcessorRequest(file, fileRef);
-
-        // TODO remove this! This is test code!
-        if (internalProcessorRequest.getType() == null) {
-            internalProcessorRequest.setType("docx");
-        }
+        InternalProcessorRequest internalProcessorRequest = new InternalProcessorRequest(fileRef, fileType, file);
 
         // Post request on the bus
         mBus.post(internalProcessorRequest);
@@ -67,12 +64,12 @@ public class AuroraCommunicator extends Communicator {
 
     /**
      * Method to open an already cached file with the plugin
-     *
-     * @param fileRef      a reference to the file to open
+     *  @param fileRef          a reference to the file to open
+     * @param fileType
      * @param uniquePluginName the name of the plugin that the file was processed with
-     * @param context      the android context
+     * @param context          the android context
      */
-    public void openFileWithCache(String fileRef, String uniquePluginName, Context context) {
+    public void openFileWithCache(String fileRef, String fileType, String uniquePluginName, Context context) {
         // Create observable to listen to
         Observable<RetrieveFileFromCacheResponse> retrieveFileFromCacheResponse =
                 mBus.register(RetrieveFileFromCacheResponse.class);
@@ -87,7 +84,7 @@ public class AuroraCommunicator extends Communicator {
                         Uri fileUri = Uri.parse(processedFile.getFileRef());
                         InputStream read = context.getContentResolver().openInputStream(fileUri);
 
-                        openFileWithPlugin(processedFile.getFileRef(), read, context);
+                        openFileWithPlugin(processedFile.getFileRef(), fileType, read, context);
                     } else {
                         sendOpenCachedFileRequest(processedFile.getJsonRepresentation(), context);
                     }

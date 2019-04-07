@@ -45,7 +45,8 @@ public class PluginInternalServiceCommunicatorUnitTest {
     @Test
     public void PluginInternalServiceCommunicator_processFileWithInternalProcessor_shouldPostExtractedTextResponse() {
         // Fake string ref
-        String ref = "Fake/path/to/file.pdf";
+        String ref = "Fake/path/to/file";
+        String type = "docx";
 
         // Listen for internal processor response
         Observable<InternalProcessorResponse> observable = mBus.register(InternalProcessorResponse.class);
@@ -57,7 +58,7 @@ public class PluginInternalServiceCommunicatorUnitTest {
         observable.map(InternalProcessorResponse::getExtractedText).subscribe(testObserver);
 
         // Create request to process file and put on bus
-        InternalProcessorRequest request = new InternalProcessorRequest(null, ref);
+        InternalProcessorRequest request = new InternalProcessorRequest(ref, type, null);
         mBus.post(request);
 
         // Assert that dummy extracted text was received

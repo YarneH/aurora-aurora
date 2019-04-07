@@ -188,7 +188,8 @@ public class CardFileAdapter extends RecyclerView.Adapter<CardFileAdapter.CardFi
                 */
                 String textFile = "android.resource://com.aurora.aurora/raw/apple_crisp";
 
-                mKernel.getAuroraCommunicator().openFileWithCache(textFile, "DummyPlugin", mContext);
+                mKernel.getAuroraCommunicator().openFileWithCache(textFile, "docx",
+                        "DummyPlugin", mContext);
             }
         }
     }

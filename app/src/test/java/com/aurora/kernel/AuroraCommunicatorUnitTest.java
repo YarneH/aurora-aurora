@@ -46,8 +46,9 @@ public class AuroraCommunicatorUnitTest {
 
         // Call method under test
         String fileRef = "Dummy/file/ref";
+        String fileType = "txt";
         InputStream file = new DummyInputStream();
-        mAuroraCommunicator.openFileWithPlugin(fileRef, file, new MockContext());
+        mAuroraCommunicator.openFileWithPlugin(fileRef, fileType, file, new MockContext());
 
         // Assert that arguments passed are as expected
         fileRefObserver.assertSubscribed();
@@ -80,8 +81,9 @@ public class AuroraCommunicatorUnitTest {
 
         // Call the method under test
         String dummyFileRef = "dummy/path/to/file";
+        String fileType = "docx";
         InputStream file = new DummyInputStream();
-        mAuroraCommunicator.openFileWithPlugin(dummyFileRef, file, new MockContext());
+        mAuroraCommunicator.openFileWithPlugin(dummyFileRef, fileType, file, new MockContext());
 
         // Assure that the correct values are contained in request event
         extractedTextObserver.assertSubscribed();
