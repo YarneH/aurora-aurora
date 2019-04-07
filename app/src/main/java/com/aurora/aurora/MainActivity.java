@@ -116,6 +116,8 @@ public class MainActivity extends AppCompatActivity
         if (adapter.getItemCount() == 0) {
             findViewById(R.id.cl_empty_text).setVisibility(View.VISIBLE);
             ImageView arrow = findViewById(R.id.img_arrow);
+            
+            // Set the animation of the arrow in the startscreen
             TranslateAnimation mAnimation = new TranslateAnimation(
                     TranslateAnimation.ABSOLUTE, 0f,
                     TranslateAnimation.ABSOLUTE, 0f,
