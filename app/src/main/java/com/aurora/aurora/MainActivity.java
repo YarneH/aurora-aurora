@@ -1,5 +1,6 @@
 package com.aurora.aurora;
 
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -21,13 +22,14 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.webkit.MimeTypeMap;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.aurora.auroralib.Constants;
 import com.aurora.kernel.AuroraCommunicator;
 import com.aurora.kernel.Kernel;
+import com.google.firebase.analytics.FirebaseAnalytics;
 
 import java.io.FileNotFoundException;
 import java.io.InputStream;
@@ -46,8 +48,13 @@ public class MainActivity extends AppCompatActivity
     /**
      * Create unique kernel instance (should be passed to every activity, fragment, adapter,...) that needs it
      */
-    private Kernel mKernel = new Kernel();
-    private AuroraCommunicator mAuroraCommunicator = mKernel.getAuroraCommunicator();
+    private Kernel mKernel = null;
+    private AuroraCommunicator mAuroraCommunicator = null;
+
+    /**
+     * Firebase analytics
+     */
+    private FirebaseAnalytics mFirebaseAnalytics = null;
 
     /**
      * Runs on startup of the activity, in this case on startup of the app
@@ -58,6 +65,13 @@ public class MainActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        /* Set up kernel */
+        mKernel = new Kernel(this.getApplicationContext());
+        mAuroraCommunicator = mKernel.getAuroraCommunicator();
+
+        /* Initialize FirebaseAnalytics */
+        mFirebaseAnalytics = FirebaseAnalytics.getInstance(this);
 
         /* Set system properties for DOCX */
         System.setProperty("org.apache.poi.javax.xml.stream.XMLInputFactory",
@@ -125,13 +139,24 @@ public class MainActivity extends AppCompatActivity
         if (requestCode == REQUEST_FILE_GET && resultCode == RESULT_OK) {
             Uri textFile = data.getData();
 
-            Intent intent = new Intent(Constants.PLUGIN_ACTION);
-
             try {
                 if (textFile != null) {
                     Log.i("URI", textFile.toString());
+                    ContentResolver cR = getApplicationContext().getContentResolver();
+                    String type = MimeTypeMap.getSingleton().getExtensionFromMimeType(cR.getType(textFile));
+                    Log.i("MIME", type);
+
+                    /**
+                     * Firebase Analytics
+                     * TODO: convert to custom event, see https://firebase.google.com/docs/analytics/android/events
+                     */
+                    Bundle bundle = new Bundle();
+                    bundle.putString(FirebaseAnalytics.Param.ITEM_NAME, textFile.toString());
+                    bundle.putString(FirebaseAnalytics.Param.CONTENT_TYPE, type);
+                    mFirebaseAnalytics.logEvent("NEW_FILE_OPENED", bundle);
+
                     InputStream read = getContentResolver().openInputStream(textFile);
-                    mAuroraCommunicator.openFileWithPlugin(textFile.toString(), read, intent, this);
+                    mAuroraCommunicator.openFileWithPlugin(textFile.toString(), read, this.getApplicationContext());
                 } else {
                     Toast.makeText(this, "The selected file was null", Snackbar.LENGTH_LONG).show();
                 }
@@ -139,8 +164,6 @@ public class MainActivity extends AppCompatActivity
                 Toast.makeText(this, "The file could not be found", Snackbar.LENGTH_LONG).show();
                 Log.e("FILE_NOT_FOUND", "The file could not be found", e);
             }
-
-
         }
     }
 
@@ -237,6 +260,5 @@ public class MainActivity extends AppCompatActivity
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
-
 }
 

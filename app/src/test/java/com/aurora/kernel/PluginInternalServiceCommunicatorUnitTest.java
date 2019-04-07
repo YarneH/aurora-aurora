@@ -80,7 +80,7 @@ public class PluginInternalServiceCommunicatorUnitTest {
          * @throws FileTypeNotSupportedException thrown when a file with an unsupported extension is opened
          */
         @Override
-        public ExtractedText processFile(InputStream file, String fileRef) throws FileTypeNotSupportedException {
+        public ExtractedText processFile(InputStream file, String fileRef, String type) throws FileTypeNotSupportedException {
             // Just return the dummy extracted text
             return mExtractedText;
         }

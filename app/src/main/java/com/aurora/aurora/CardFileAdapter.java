@@ -1,7 +1,6 @@
 package com.aurora.aurora;
 
 import android.content.Context;
-import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
@@ -12,10 +11,8 @@ import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 
-import com.aurora.auroralib.Constants;
 import com.aurora.kernel.Kernel;
 
-import java.io.InputStream;
 import java.util.Locale;
 
 /**
@@ -181,7 +178,6 @@ public class CardFileAdapter extends RecyclerView.Adapter<CardFileAdapter.CardFi
             // TODO this should make an event to open the cached file.
             // Plugin should probably still be able to open this, but Souschef probably not
             if (view.getId() == R.id.button_card_file) {
-                Intent intent = new Intent(Constants.PLUGIN_ACTION);
 
                 /* TODO Remove this test code
                 Eventually, here instead of opening a file, the cache will be called instead.
@@ -190,10 +186,9 @@ public class CardFileAdapter extends RecyclerView.Adapter<CardFileAdapter.CardFi
 
                 Note: this is basically mixed code as a result of a merge. This test code will be removed ASAP
                 */
-                String textFile = "DummyTextFile.docx";
-                InputStream docFile = mContext.getResources().openRawResource(R.raw.apple_crisp);
+                String textFile = "android.resource://com.aurora.aurora/raw/apple_crisp";
 
-                mKernel.getAuroraCommunicator().openFileWithPlugin(textFile, docFile, intent, mContext);
+                mKernel.getAuroraCommunicator().openFileWithCache(textFile, "DummyPlugin", mContext);
             }
         }
     }

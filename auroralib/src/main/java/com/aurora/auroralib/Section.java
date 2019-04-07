@@ -3,6 +3,7 @@ package com.aurora.auroralib;
 import java.util.List;
 
 public class Section {
+
     /**
      * The title of a Section
      */
@@ -49,11 +50,23 @@ public class Section {
         return mTitle;
     }
 
+    public void setTitle(String mTitle) {
+        this.mTitle = mTitle;
+    }
+
     public String getBody() {
         return mBody;
     }
 
+    public void setBody(String mBody) {
+        this.mBody = mBody;
+    }
+
     public List<String> getImages() {
         return mImages;
+    }
+
+    public void setImages(List<String> mImages) {
+        this.mImages = mImages;
     }
 }

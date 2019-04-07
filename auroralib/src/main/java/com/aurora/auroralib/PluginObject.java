@@ -7,7 +7,7 @@ import java.io.Serializable;
  * Class to represent text processed by the plugin
  */
 public abstract class PluginObject implements Serializable {
-    static protected Gson mGson = new Gson();
+    protected static Gson sGson = new Gson();
 
     // TODO: check polymorphism
     /**
@@ -16,7 +16,7 @@ public abstract class PluginObject implements Serializable {
      * @return String (in JSON format)
      */
     public String toJSON(){
-        return mGson.toJson(this);
+        return sGson.toJson(this);
     }
 
     /**
@@ -26,8 +26,8 @@ public abstract class PluginObject implements Serializable {
      * @param json  The extracted JSON string of the PluginObject object
      * @return PluginObject
      */
-    public static PluginObject fromJson(String json){
-        return mGson.fromJson(json, PluginObject.class);
+    public static final <T extends PluginObject> T fromJson(String json, Class<T> type){
+        return sGson.fromJson(json, type);
     }
 
 }

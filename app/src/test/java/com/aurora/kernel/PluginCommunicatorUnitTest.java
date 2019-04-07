@@ -6,6 +6,7 @@ import android.support.v4.app.Fragment;
 import com.aurora.kernel.event.ListPluginsRequest;
 import com.aurora.kernel.event.ListPluginsResponse;
 import com.aurora.plugin.Plugin;
+import com.aurora.util.MockContext;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -36,7 +37,7 @@ public class PluginCommunicatorUnitTest {
         mBus = new Bus(Schedulers.trampoline());
 
         mProcessingCommunicator = new ProcessingCommunicator(mBus);
-        mPluginRegistry = new PluginRegistry(mProcessingCommunicator, PLUGINS_CFG);
+        mPluginRegistry = new PluginRegistry(mProcessingCommunicator, PLUGINS_CFG, new MockContext());
         mPluginCommunicator = new PluginCommunicator(mBus, mPluginRegistry);
 
         mDummyFragment = new DummyFragment();

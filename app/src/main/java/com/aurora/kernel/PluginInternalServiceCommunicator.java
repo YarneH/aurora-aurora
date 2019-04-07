@@ -38,14 +38,14 @@ public class PluginInternalServiceCommunicator extends Communicator {
         internalProcessorEventObservable = mBus.register(InternalProcessorRequest.class);
         internalProcessorEventObservable.subscribe((InternalProcessorRequest internalProcessorRequest) ->
                 processFileWithInternalProcessor(internalProcessorRequest.getFile(),
-                        internalProcessorRequest.getFileRef()));
+                        internalProcessorRequest.getFileRef(), internalProcessorRequest.getType()));
     }
 
-    private void processFileWithInternalProcessor(InputStream file, String fileRef) {
+    private void processFileWithInternalProcessor(InputStream file, String fileRef, String type) {
         // Call internal processor
         ExtractedText extractedText = null;
         try {
-            extractedText = mProcessor.processFile(file, fileRef);
+            extractedText = mProcessor.processFile(file, fileRef, type);
         } catch (FileTypeNotSupportedException e) {
             // TODO remove this (added for testing PluginIntegration while extractors not finished)
             List<String> paragraphs = Arrays.asList(
