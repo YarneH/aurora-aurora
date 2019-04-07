@@ -22,8 +22,12 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.LinearInterpolator;
+import android.view.animation.TranslateAnimation;
 import android.webkit.MimeTypeMap;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -111,6 +115,17 @@ public class MainActivity extends AppCompatActivity
         /* Show TextView when RecyclerView is empty */
         if (adapter.getItemCount() == 0) {
             findViewById(R.id.cl_empty_text).setVisibility(View.VISIBLE);
+            ImageView arrow = findViewById(R.id.img_arrow);
+            TranslateAnimation mAnimation = new TranslateAnimation(
+                    TranslateAnimation.ABSOLUTE, 0f,
+                    TranslateAnimation.ABSOLUTE, 0f,
+                    TranslateAnimation.RELATIVE_TO_PARENT, 0f,
+                    TranslateAnimation.RELATIVE_TO_PARENT, 0.2f);
+            mAnimation.setDuration(500);
+            mAnimation.setRepeatCount(-1);
+            mAnimation.setRepeatMode(Animation.REVERSE);
+            mAnimation.setInterpolator(new LinearInterpolator());
+            arrow.setAnimation(mAnimation);
         }
     }
 

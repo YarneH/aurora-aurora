@@ -57,6 +57,7 @@
                 app:layout_constraintTop_toTopOf="parent" />
 
             <ImageView
+                android:id="@+id/img_arrow"
                 android:layout_width="@dimen/arrow_icon"
                 android:layout_height="@dimen/arrow_icon"
                 android:layout_margin="@dimen/fab_margin"
