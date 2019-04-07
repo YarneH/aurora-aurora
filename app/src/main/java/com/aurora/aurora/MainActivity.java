@@ -113,7 +113,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     /**
-     * Creates an intent to open the file manager. Can currently only select pdf files;
+     * Creates an intent to open the file manager.
      */
     protected void selectFile() {
         final String[] mimeTypes = {
