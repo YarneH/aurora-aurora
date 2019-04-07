@@ -64,8 +64,9 @@ public class AuroraCommunicator extends Communicator {
 
     /**
      * Method to open an already cached file with the plugin
-     *  @param fileRef          a reference to the file to open
-     * @param fileType
+     *
+     * @param fileRef          a reference to the file to open
+     * @param fileType         the file type of the file to open
      * @param uniquePluginName the name of the plugin that the file was processed with
      * @param context          the android context
      */
