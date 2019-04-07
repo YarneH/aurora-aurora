@@ -76,6 +76,11 @@ public class PluginCommunicator extends Communicator {
 
         boolean pluginOpens = pluginAction.resolveActivity(context.getPackageManager()) != null;
 
+        // This is a bit of a hack, but it needs to be done because of trying to launch an
+        // activity outside of and activity context
+        // https://stackoverflow.com/questions/3918517/calling-startactivity-from-outside-of-an-activity-context
+        chooser.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+
 
         if (pluginOpens) {
             context.startActivity(chooser);
