@@ -17,11 +17,11 @@ public class TextExtractorTXTTest {
 
     @Before
     public void initialize() throws FileNotFoundException {
-        TextExtractorTXT mTextExtractorTXT = new TextExtractorTXT();
-        String mfileRef = "src/test/res/Pasta.txt";
-        File file = new File(mfileRef);
+        TextExtractorTXT textExtractorTXT = new TextExtractorTXT();
+        String fileRef = "src/test/res/Pasta.txt";
+        File file = new File(fileRef);
         InputStream inputStream = new FileInputStream(file);
-        mExtractedText = mTextExtractorTXT.extract(inputStream, mfileRef);
+        mExtractedText = textExtractorTXT.extract(inputStream, fileRef);
     }
 
 
