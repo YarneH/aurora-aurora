@@ -1,8 +1,5 @@
 package com.aurora.internalservice.internalprocessor;
 
-import android.content.Context;
-
-import com.aurora.aurora.MainActivity;
 import com.aurora.auroralib.ExtractedText;
 
 import org.junit.Test;
@@ -11,9 +8,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
-import java.net.URL;
-
-import androidx.test.InstrumentationRegistry;
 
 import static org.junit.Assert.*;
 
