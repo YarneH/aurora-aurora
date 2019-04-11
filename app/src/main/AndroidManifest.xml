@@ -1,7 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.aurora.aurora">
-
+    <!--
+    <permission
+        android:name="com.aurora.aurora.permission.AURORA_SERVICES"
+        android:label="@string/service_permission_label"
+        android:description="@string/service_permission_description" />
+    -->
     <application
         android:allowBackup="false"
         android:icon="@mipmap/ic_launcher"
@@ -32,8 +37,23 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-    </application>
 
-    <uses-permission android:name="android.permission.INTERNET" />
+
+        <!--
+        AuroraService
+        android:permission="com.aurora.aurora.permission.AURORA_SERVICES" in service definition for permission
+        -->
+        <service android:name="com.aurora.internalservice.internalcache.CacheService">
+
+
+            <intent-filter>
+                <!--
+                Did not use the full package name here to hide internal code/package structure
+                -->
+                <action android:name="com.aurora.internalservice.internalcache.ICache" />
+            </intent-filter>
+        </service>
+
+    </application>
 
 </manifest>
