@@ -13,49 +13,44 @@ import java.io.InputStream;
 
 import static org.junit.Assert.*;
 
-public class TextExtractorDOCXTest {
+public class TextExtractorPDFTest {
 
     private ExtractedText mExtractedText;
 
     // Extracts the text before the test so the tests can reuse the ExtractedText
+    @Ignore("PDF extraction is not yet implemented")
     @Before
     public void initialize() throws FileNotFoundException {
-        /* Set system properties for DOCX */
-        System.setProperty("org.apache.poi.javax.xml.stream.XMLInputFactory",
-                "com.fasterxml.aalto.stax.InputFactoryImpl");
-        System.setProperty("org.apache.poi.javax.xml.stream.XMLOutputFactory",
-                "com.fasterxml.aalto.stax.OutputFactoryImpl");
-        System.setProperty("org.apache.poi.javax.xml.stream.XMLEventFactory",
-                "com.fasterxml.aalto.stax.EventFactoryImpl");
         // Initialize the extractor
-        TextExtractorDOCX textExtractorDOCX = new TextExtractorDOCX();
-        String mfileRef = "src/test/res/Pasta.docx";
+        TextExtractorPDF textExtractorPDF = new TextExtractorPDF();
+        String mfileRef = "src/test/res/Pasta.pdf";
         File file = new File(mfileRef);
         InputStream inputStream = new FileInputStream(file);
         // Extract the text
-        mExtractedText = textExtractorDOCX.extract(inputStream, mfileRef);
+        mExtractedText = textExtractorPDF.extract(inputStream, mfileRef);
     }
 
+    @Ignore
     @Test
     public void extract_shouldReturnExtractedText() {
-        assertNotNull("DOCX text extraction: Failed to extract", mExtractedText);
+        assertNotNull("PDF text extraction: Failed to extract", mExtractedText);
     }
 
     // Checks if the title is extracted correctly
-    @Ignore("The implementation of DOCX extraction is not yet on this level")
+    @Ignore("The implementation of PDF extraction is not yet on this level")
     @Test
     public void extract_shouldExtractTitleCorrectly() {
 
-            assertEquals("DOCX text extraction:Title is not the correctly extracted",
-                    "Pasta puttanesca",
-                    mExtractedText.getTitle());
+        assertEquals("PDF text extraction:Title is not the correctly extracted",
+                "Pasta puttanesca",
+                mExtractedText.getTitle());
     }
 
     // Checks if the title of a section is extracted correctly
     @Ignore
     @Test
     public void extract_shouldExtractSectionTitleCorrectly() {
-        assertEquals("DOCX text extraction: SectionTitle is not extracted correctly",
+        assertEquals("PDF text extraction: SectionTitle is not extracted correctly",
                 "Yield",
                 mExtractedText.getSections().get(0).getTitle());
     }
@@ -64,7 +59,7 @@ public class TextExtractorDOCXTest {
     @Ignore
     @Test
     public void extract_shouldExtractSectionBodyCorrectly() {
-        assertEquals("DOCX text extraction: Section is not extracted correctly",
+        assertEquals("PDF text extraction: Section is not extracted correctly",
                 "4 servings", mExtractedText.getSections().get(0).getBody());
     }
 
