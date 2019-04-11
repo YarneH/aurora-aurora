@@ -16,6 +16,17 @@ public class Section {
      * The images in a section, as a Base64 String
      */
     private List<String> mImages;
+    /**
+     * The level of the section, default level is 0
+     */
+    private int mLevel;
+
+    /**
+     * Constructor for creating an empty section
+     */
+    public Section(){
+
+    }
 
     /**
      * Constructor for creating a section without images or title
@@ -43,7 +54,10 @@ public class Section {
             return mTitle + "\n" + mBody + "\n";
         } else if (mBody != null){
             return mBody + "\n";
-        } else return "Empty paragraph.\n";
+        } else if (mTitle != null) {
+            return (mTitle + "\n");
+        }
+        else return "Empty paragraph.\n";
     }
 
     public String getTitle() {
@@ -68,5 +82,13 @@ public class Section {
 
     public void setImages(List<String> mImages) {
         this.mImages = mImages;
+    }
+
+    public int getLevel() {
+        return mLevel;
+    }
+
+    public void setLevel(int mLevel) {
+        this.mLevel = mLevel;
     }
 }
