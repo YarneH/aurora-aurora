@@ -12,21 +12,21 @@ import java.io.InputStream;
 import static org.junit.Assert.*;
 
 
-public class InternalTextProcessorTest {
+public class InternalTextProcessorUnitTest {
     private static InternalTextProcessor mInternalTextProcessor = new InternalTextProcessor();
+    // The path with the test files
+    private final static String RES_PATH = "src/test/res/";
 
     // Test if an exception is thrown when a wrong file type is passed
     @Test(expected = FileTypeNotSupportedException.class)
     public void processFile_shouldThrowErrorUnsupportedExtension() throws FileTypeNotSupportedException {
-        String fileRef = "dummy/file/ref.pdf";
-
-        mInternalTextProcessor.processFile(null, fileRef, "jpg");
+        mInternalTextProcessor.processFile(null, null, "jpg");
     }
 
     // Test if, when a 'txt'-file is passed, text is extracted
     @Test
     public void processFile_shouldReturnExtractedTextTXT() throws FileTypeNotSupportedException {
-        String fileRef = "src/test/res/Pasta.txt";
+        String fileRef = RES_PATH + "Pasta.txt";
         File file = new File(fileRef);
         try {
             InputStream inputStream = new FileInputStream(file);
@@ -48,7 +48,7 @@ public class InternalTextProcessorTest {
         System.setProperty("org.apache.poi.javax.xml.stream.XMLEventFactory",
                 "com.fasterxml.aalto.stax.EventFactoryImpl");
 
-        String fileRef = "src/test/res/Pasta.docx";
+        String fileRef = RES_PATH + "Pasta.docx";
         File file = new File(fileRef);
         try {
             InputStream inputStream = new FileInputStream(file);
@@ -59,17 +59,17 @@ public class InternalTextProcessorTest {
         }
     }
 
-//    // Test if, when a 'pdf'-file is passed, text is extracted
-//    @Test
-//    public void processFile_shouldReturnExtractedTextPDF() throws FileTypeNotSupportedException {
-//        String fileRef = "src/test/res/Pasta.pdf";
-//        File file = new File(fileRef);
-//        try {
-//            InputStream inputStream = new FileInputStream(file);
-//            ExtractedText extractedText = mInternalTextProcessor.processFile(inputStream, fileRef, "pdf");
-//            assertNotNull("The extraction of the 'pdf'-file has failed" , extractedText);
-//        } catch (FileNotFoundException e) {
-//            e.printStackTrace();
-//        }
-//    }
+    // Test if, when a 'pdf'-file is passed, text is extracted
+    @Test
+    public void processFile_shouldReturnExtractedTextPDF() throws FileTypeNotSupportedException {
+        String fileRef = RES_PATH + "Pasta.pdf";
+        File file = new File(fileRef);
+        try {
+            InputStream inputStream = new FileInputStream(file);
+            ExtractedText extractedText = mInternalTextProcessor.processFile(inputStream, fileRef, "pdf");
+            assertNotNull("The extraction of the 'pdf'-file has failed" , extractedText);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+    }
 }

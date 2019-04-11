@@ -12,13 +12,14 @@ import java.io.InputStream;
 
 import static org.junit.Assert.*;
 
-public class TextExtractorTXTTest {
+public class TextExtractorTXTUnitTest {
     private ExtractedText mExtractedText;
+    private final static String RES_PATH = "src/test/res/";
 
     @Before
     public void initialize() throws FileNotFoundException {
         TextExtractorTXT textExtractorTXT = new TextExtractorTXT();
-        String fileRef = "src/test/res/Pasta.txt";
+        String fileRef = RES_PATH + "Pasta.txt";
         File file = new File(fileRef);
         InputStream inputStream = new FileInputStream(file);
         mExtractedText = textExtractorTXT.extract(inputStream, fileRef);
