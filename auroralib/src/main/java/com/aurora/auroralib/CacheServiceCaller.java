@@ -25,6 +25,7 @@ public class CacheServiceCaller implements ServiceConnection {
     // !!! Not sure yet if this is handled right by just passing an activity's context (See BasicPlugin_Old)
     private Context mAppContext = null;
     //PackageManager pm = getPackageManager();
+    private Object monitor = new Object();
 
     public CacheServiceCaller(Context context){
         mAppContext = context;
@@ -61,19 +62,15 @@ public class CacheServiceCaller implements ServiceConnection {
     }
 
     public int cache(String pluginObjectJSON){
-        Log.d("PLUGIN", "cache called");
-        int cacheResult = -1000;
-        try {
-            if (mBinding != null) {
-                cacheResult = mBinding.cache(pluginObjectJSON);
-            }
-        }
-        catch (RemoteException e) {
+        CacheThread cacheThread = new CacheThread(pluginObjectJSON);
+        cacheThread.start();
+        /*try {
+            cacheThread.join();
+        } catch (InterruptedException e){
             Log.e(getClass().getSimpleName(), "Exception requesting cache", e);
-            cacheResult = -1;
-        }
+        }*/
 
-        return cacheResult;
+        return cacheThread.getCacheResult();
     }
 
     /*
@@ -84,8 +81,12 @@ public class CacheServiceCaller implements ServiceConnection {
 
     @Override
     public void onServiceConnected(ComponentName className, IBinder binder) {
-        mBinding = ICache.Stub.asInterface(binder);
-        Log.d("PLUGIN", "Bound");
+        synchronized (monitor) {
+            mBinding = ICache.Stub.asInterface(binder);
+            Log.d("PLUGIN", "Bound");
+
+            monitor.notify();
+        }
     }
 
     @Override
@@ -97,6 +98,63 @@ public class CacheServiceCaller implements ServiceConnection {
     private void disconnect() {
         mBinding=null;
         Log.d("PLUGIN", "UnBound");
+    }
+
+    private class CacheThread extends Thread {
+        private int mCacheResult = -1000;
+        private String pluginObjectJSON;
+
+        protected CacheThread(String pluginObjectJSON){
+            this.pluginObjectJSON = pluginObjectJSON;
+        }
+
+        protected int getCacheResult() {
+            return mCacheResult;
+        }
+
+        public void run(){
+            Log.d("PLUGIN", "cache called");
+            try {
+                /*
+                int countSleepIterations = 0;
+                while (mBinding == null && countSleepIterations < 5){
+                    try {
+                        sleep(500);
+                        countSleepIterations++;
+                    } catch (InterruptedException e){
+                        break;
+                    }
+                }*/
+
+
+
+                if (mBinding == null) {
+                    synchronized (monitor) {
+                        Log.d("PLUGIN", "Entering sync block" + mCacheResult);
+                        try {
+                            monitor.wait();
+                        } catch (InterruptedException e) {
+                            Log.e(getClass().getSimpleName(), "Exception requesting cache", e);
+                        }
+                        mCacheResult = mBinding.cache(pluginObjectJSON);
+                        Log.d("PLUGIN", "" + mCacheResult);
+                    }
+
+                    //Log.e(getClass().getSimpleName(), "Number of sleep iterations exceeded");
+                }
+                // TODO remove
+                else {
+                    mCacheResult = mBinding.cache(pluginObjectJSON);
+                    Log.d("PLUGIN", "" + mCacheResult);
+
+                }
+
+            }
+            catch (RemoteException e) {
+                Log.e(getClass().getSimpleName(), "Exception requesting cache", e);
+                mCacheResult = -1;
+            }
+        }
     }
 
 }
