@@ -74,8 +74,7 @@ public class TextExtractorDOCX implements TextExtractor {
                     if (e instanceof XWPFParagraph) {
                         appendParagraphText((XWPFParagraph) e);
                     } else if (e instanceof XWPFTable) {
-                        //TODO Logic for tables
-                        //appendTableText(mExtractedText, (XWPFTable) e); //NOSONAR
+                        appendTableText((XWPFTable) e);
                     } else if (e instanceof XWPFSDT) {
                         mExtractedText.addSimpleSection(((XWPFSDT) e).getContent().getText());
                     }
@@ -166,7 +165,8 @@ public class TextExtractorDOCX implements TextExtractor {
     /**
      * Private method that is used to add the different runs of a paragraph to the extractedText
      * object. Runs in a paragraph can start and stop in the middle of words. So there is state
-     * maintained to add them back together.
+     * maintained to add them back together. New sections are started when a tab or newline is
+     * found.
      *
      * @param paragraph Object of Apache POI representing a docx paragraph.
      */
@@ -182,10 +182,16 @@ public class TextExtractorDOCX implements TextExtractor {
                 XWPFRun currentRun = (XWPFRun) run;
                 String runText = currentRun.text();
 
-                for (String text: runText.split("(?<=\n)")) {
-                    // Flush the progress when whitespace sentence is encountered
-                    if(runInProgress != null && text.trim().equals("")) {
-                        textInProgress.append(text);
+                for (String text: runText.split("(?<=\n|\t)")) {
+                    // A section ends with a tab or an newline.
+                    if((text.endsWith("\t") || text.endsWith("\n"))) {
+                        if(textInProgress != null) {
+                            textInProgress.append(text);
+                        } else {
+                            textInProgress = new StringBuilder(text);
+                            runInProgress = currentRun;
+                        }
+
                         addRun(textInProgress.toString(), getLevel(paragraph)
                                 , runInProgress.getFontSize());
 
@@ -194,21 +200,8 @@ public class TextExtractorDOCX implements TextExtractor {
                     }
 
                     // Build upon the previous run
-                    else if(runInProgress != null) {
-
-                        // If they have the same fontsize append them
-                        if(runInProgress.getFontSize() == currentRun.getFontSize()) {
-                            textInProgress.append(text);
-                        }
-                        // They do not have the same font size:
-                        // flush the old one and save the new one
-                        else {
-                            addRun(textInProgress.toString(), getLevel(paragraph)
-                                    , runInProgress.getFontSize());
-
-                            textInProgress = new StringBuilder(text);
-                            runInProgress = currentRun;
-                        }
+                    else if(textInProgress != null) {
+                        textInProgress.append(text);
                     }
                     // There is no previous run and the string is not empty, save it.
                     else if (!text.trim().equals("")) {
@@ -217,22 +210,12 @@ public class TextExtractorDOCX implements TextExtractor {
                     }
                     // The String is whitespace, just flush it, just in case
                     else {
-                        addRun(currentRun.text(), getLevel(paragraph)
-                                , currentRun.getFontSize());
-                    }
-
-                    // If the text ends with an \n, flush it
-                    if(textInProgress != null && textInProgress.toString().trim().endsWith("\n")) {
-                        addRun(textInProgress.toString(), getLevel(paragraph)
-                                , runInProgress.getFontSize());
-
-                        textInProgress = null;
-                        runInProgress = null;
+                        addRun(currentRun.text(), getLevel(paragraph), currentRun.getFontSize());
                     }
                 }
-
             } else {
-                //TODO
+                // The paragraph does not consist of runs.
+                addRun(run.toString(), getLevel(paragraph), -1);
             }
         }
         // Flush the last run
@@ -262,23 +245,31 @@ public class TextExtractorDOCX implements TextExtractor {
         return  -1;
     }
 
-    // Not used
-    private void appendTableText(ExtractedText text, XWPFTable table) {
+    /**
+     * Private method with very basic approach to extract all text from a table row by row. Every
+     * row is a new section and information extracted from rows is tab separated.
+     *
+     * @param table The table that needs to be extracted
+     */
+    private void appendTableText(XWPFTable table) {
         //this works recursively to pull embedded tables from tables
         for (XWPFTableRow row : table.getRows()) {
             List<ICell> cells = row.getTableICells();
+
+            StringBuilder line = new StringBuilder();
             for (int i = 0; i < cells.size(); i++) {
                 ICell cell = cells.get(i);
+
                 if (cell instanceof XWPFTableCell) {
-                    text.addSimpleSection(((XWPFTableCell) cell).getTextRecursively());
+                    line.append(((XWPFTableCell) cell).getTextRecursively());
                 } else if (cell instanceof XWPFSDTCell) {
-                    text.addSimpleSection(((XWPFSDTCell) cell).getContent().getText());
+                    line.append(((XWPFSDTCell) cell).getContent().getText());
                 }
                 if (i < cells.size() - 1) {
-                    text.addSimpleSection("\t");
+                    line.append("\t");
                 }
             }
-            text.addSimpleSection("\n");
+            mExtractedText.addSimpleSection(line.toString());
         }
     }
 }
