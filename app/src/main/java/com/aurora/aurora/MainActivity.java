@@ -27,6 +27,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.aurora.auroralib.Constants;
 import com.aurora.kernel.AuroraCommunicator;
 import com.aurora.kernel.Kernel;
 import com.google.firebase.analytics.FirebaseAnalytics;
@@ -155,9 +156,17 @@ public class MainActivity extends AppCompatActivity
                     bundle.putString(FirebaseAnalytics.Param.CONTENT_TYPE, type);
                     mFirebaseAnalytics.logEvent("NEW_FILE_OPENED", bundle);
 
+                    // Make inputstream reader for aurora communicator
                     InputStream read = getContentResolver().openInputStream(textFile);
+
+                    // Create intent to open file with a certain plugin
+                    Intent pluginAction = new Intent(Constants.PLUGIN_ACTION);
+
+                    // Create chooser to let user choose the plugin
+                    Intent chooser = Intent.createChooser(pluginAction, getString(R.string.select_plugin));
+
                     mAuroraCommunicator.openFileWithPlugin(textFile.toString(), type,
-                            read, this.getApplicationContext());
+                            read, pluginAction, chooser, getApplicationContext());
                 } else {
                     Toast.makeText(this, "The selected file was null", Snackbar.LENGTH_LONG).show();
                 }
