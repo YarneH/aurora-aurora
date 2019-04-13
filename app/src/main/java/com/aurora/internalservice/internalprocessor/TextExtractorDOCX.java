@@ -266,7 +266,10 @@ public class TextExtractorDOCX implements TextExtractor {
     }
 
     /**
-     * Private method to get heading level of a paragraph
+     * Private method to get heading level of a paragraph. Style of paragraph is used because
+     * there is no easy way to get the style of a run and only in very specific cases is the heading
+     * style specified in the run.
+     *
      * @param paragraph paragraph to determine level of
      * @return -1 if no level is found, otherwise level starting at 0 for title
      */
