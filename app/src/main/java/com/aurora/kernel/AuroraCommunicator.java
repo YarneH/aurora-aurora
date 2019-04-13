@@ -1,7 +1,9 @@
 package com.aurora.kernel;
 
+import android.content.ComponentName;
 import android.content.Context;
-import android.net.Uri;
+import android.content.Intent;
+import android.widget.Toast;
 
 import com.aurora.auroralib.ExtractedText;
 import com.aurora.internalservice.internalcache.CachedProcessedFile;
@@ -13,10 +15,12 @@ import com.aurora.kernel.event.OpenCachedFileWithPluginRequest;
 import com.aurora.kernel.event.OpenFileWithPluginRequest;
 import com.aurora.kernel.event.RetrieveFileFromCacheRequest;
 import com.aurora.kernel.event.RetrieveFileFromCacheResponse;
+import com.aurora.plugin.InternalServices;
 import com.aurora.plugin.Plugin;
 
 import java.io.InputStream;
 import java.util.List;
+import java.util.Set;
 
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -27,9 +31,11 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 public class AuroraCommunicator extends Communicator {
     private static final String CLASS_TAG = "AuroraCommunicator";
 
+    private PluginRegistry mPluginRegistry;
 
-    public AuroraCommunicator(Bus mBus) {
+    public AuroraCommunicator(Bus mBus, PluginRegistry pluginRegistry) {
         super(mBus);
+        mPluginRegistry = pluginRegistry;
     }
 
     /**
@@ -37,12 +43,15 @@ public class AuroraCommunicator extends Communicator {
      * the text from the given file reference,
      * then it will send a request to let the plugin make the representation.
      *
-     * @param fileRef  a reference to the file that needs to be opened
-     * @param fileType the file type
-     * @param file     the input stream of the file
-     * @param context  the android context
+     * @param fileRef            a reference to the file that needs to be opened
+     * @param fileType           the file type
+     * @param file               the input stream of the file
+     * @param pluginAction       the target plugin that was selected by the user
+     * @param chooser            the chooser intent used for opening the plugin
+     * @param applicationContext the android context
      */
-    public void openFileWithPlugin(String fileRef, String fileType, InputStream file, Context context) {
+    public void openFileWithPlugin(String fileRef, String fileType, InputStream file,
+                                   Intent pluginAction, Intent chooser, Context applicationContext) {
         // Create observable to listen to
         Observable<InternalProcessorResponse> internalProcessorResponse =
                 mBus.register(InternalProcessorResponse.class);
@@ -52,13 +61,26 @@ public class AuroraCommunicator extends Communicator {
         internalProcessorResponse
                 .map(InternalProcessorResponse::getExtractedText)
                 .subscribe((ExtractedText extractedText) ->
-                        sendOpenFileRequest(extractedText, context));
+                        sendOpenFileRequest(extractedText, pluginAction, chooser, applicationContext));
 
-        // First create internal processing
-        InternalProcessorRequest internalProcessorRequest = new InternalProcessorRequest(fileRef, fileType, file);
+        // Get internal processing parameters for the plugin from the plugin registry
+        String selectedPluginName = getChosenPlugin(pluginAction, applicationContext);
+        Plugin selectedPlugin = mPluginRegistry.getPlugin(selectedPluginName);
 
-        // Post request on the bus
-        mBus.post(internalProcessorRequest);
+        // If the plugin exists in the registry, get the set of supported internal services
+        if (selectedPlugin != null) {
+            Set<InternalServices> internalServices = selectedPlugin.getInternalServices();
+
+            InternalProcessorRequest internalProcessorRequest =
+                    new InternalProcessorRequest(fileRef, fileType, file, internalServices);
+
+            // Post request on the bus
+            mBus.post(internalProcessorRequest);
+        } else {
+            Toast.makeText(applicationContext,
+                    "The plugin was not found in the registry!", Toast.LENGTH_LONG).show();
+        }
+
     }
 
 
@@ -81,11 +103,8 @@ public class AuroraCommunicator extends Communicator {
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe((CachedProcessedFile processedFile) -> {
                     if ("{}".equals(processedFile.getJsonRepresentation())) {
-                        // Create input stream from the uri
-                        Uri fileUri = Uri.parse(processedFile.getFileRef());
-                        InputStream read = context.getContentResolver().openInputStream(fileUri);
-
-                        openFileWithPlugin(processedFile.getFileRef(), fileType, read, context);
+                        Toast.makeText(context, "The cached file was not found", Toast.LENGTH_LONG).show();
+                        // TODO: change this such that it processes the original file
                     } else {
                         sendOpenCachedFileRequest(processedFile.getJsonRepresentation(), context);
                     }
@@ -111,16 +130,43 @@ public class AuroraCommunicator extends Communicator {
     }
 
     /**
+     * Registers a plugin in the pluginRegistry
+     *
+     * @param plugin the plugin metadata object
+     * @return true if the plugin was successfully saved in the plugin registry, false otherwise
+     */
+    public boolean registerPlugin(Plugin plugin) {
+        return mPluginRegistry.registerPlugin(plugin.getUniqueName(), plugin);
+    }
+
+    /**
+     * Gets the name of the chosen plugin. This name is to be used for caching and other internal purposes.
+     *
+     * @param pluginAction An intent to open a file with a plugin
+     * @param context      the android context
+     * @return the name of the plugin that was selected by the user
+     */
+    private String getChosenPlugin(Intent pluginAction, Context context) {
+        // Get the component name of the selected option
+        ComponentName selectedPlugin = pluginAction.resolveActivity(context.getPackageManager());
+
+        return selectedPlugin.getPackageName();
+    }
+
+    /**
      * Private handle method to send request to plugin communicator to open file with plugin
      *
      * @param extractedText the extracted text of the file that was internally processed
+     * @param pluginAction  the target intent of the chooser
+     * @param chooser       the plugin that the user selected
      * @param context       the android context
      */
-    private void sendOpenFileRequest(ExtractedText extractedText, Context context) {
+    private void sendOpenFileRequest(ExtractedText extractedText, Intent pluginAction,
+                                     Intent chooser, Context context) {
 
         // Create request and post it on bus
         OpenFileWithPluginRequest openFileWithPluginRequest =
-                new OpenFileWithPluginRequest(extractedText, context);
+                new OpenFileWithPluginRequest(extractedText, pluginAction, chooser, context);
         mBus.post(openFileWithPluginRequest);
     }
 

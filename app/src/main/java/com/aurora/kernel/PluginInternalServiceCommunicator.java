@@ -7,8 +7,10 @@ import com.aurora.internalservice.internalprocessor.FileTypeNotSupportedExceptio
 import com.aurora.internalservice.internalprocessor.InternalTextProcessor;
 import com.aurora.kernel.event.InternalProcessorRequest;
 import com.aurora.kernel.event.InternalProcessorResponse;
+import com.aurora.plugin.InternalServices;
 
 import java.io.InputStream;
+import java.util.Set;
 
 import io.reactivex.Observable;
 
@@ -20,33 +22,42 @@ public class PluginInternalServiceCommunicator extends Communicator {
     /**
      * internal text processor
      */
-    private InternalTextProcessor mProcessor;
+    private InternalTextProcessor mInternalTextProcessor;
 
     /**
      * Observable keeping track of internal processor requests
      */
-    private Observable<InternalProcessorRequest> internalProcessorEventObservable;
+    private Observable<InternalProcessorRequest> mInternalProcessorRequestObservable;
 
     public PluginInternalServiceCommunicator(Bus mBus, InternalTextProcessor processor) {
         super(mBus);
-        mProcessor = processor;
+        mInternalTextProcessor = processor;
 
-        internalProcessorEventObservable = mBus.register(InternalProcessorRequest.class);
-        internalProcessorEventObservable.subscribe((InternalProcessorRequest internalProcessorRequest) ->
-                processFileWithInternalProcessor(internalProcessorRequest.getFile(),
-                        internalProcessorRequest.getFileRef(), internalProcessorRequest.getFileType()));
+        mInternalProcessorRequestObservable = mBus.register(InternalProcessorRequest.class);
+        mInternalProcessorRequestObservable.subscribe((InternalProcessorRequest request) ->
+                processFileWithInternalProcessor(request.getFile(),
+                        request.getFileRef(), request.getFileType(), request.getInternalServices()));
     }
 
-    private void processFileWithInternalProcessor(InputStream file, String fileRef, String type) {
-        // Call internal processor
+    private void processFileWithInternalProcessor(InputStream file, String fileRef, String type,
+                                                  Set<InternalServices> internalServices) {
+
         ExtractedText extractedText = null;
-        try {
-            extractedText = mProcessor.processFile(file, fileRef, type);
-        } catch (FileTypeNotSupportedException e) {
-            Log.e("PluginIntSerComm", "File type is not supported!", e);
+
+        // Perform internal services that are in the given set
+        if (internalServices.contains(InternalServices.TEXT_EXTRACTION)) {
+            // Call internal text processor
+            try {
+                extractedText = mInternalTextProcessor.processFile(file, fileRef, type);
+            } catch (FileTypeNotSupportedException e) {
+                Log.e("PluginIntSerComm", "File type is not supported!", e);
+            }
         }
 
-
+        // If extractedText is null for some reason: return default extracted text
+        if (extractedText == null) {
+            extractedText = new ExtractedText("", null);
+        }
         // Create response
         InternalProcessorResponse response = new InternalProcessorResponse(extractedText);
 
