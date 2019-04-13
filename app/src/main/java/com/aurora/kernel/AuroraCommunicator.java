@@ -4,6 +4,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+import android.widget.Toast;
 
 import com.aurora.auroralib.ExtractedText;
 import com.aurora.internalservice.internalcache.CachedProcessedFile;
@@ -15,10 +16,12 @@ import com.aurora.kernel.event.OpenCachedFileWithPluginRequest;
 import com.aurora.kernel.event.OpenFileWithPluginRequest;
 import com.aurora.kernel.event.RetrieveFileFromCacheRequest;
 import com.aurora.kernel.event.RetrieveFileFromCacheResponse;
+import com.aurora.plugin.InternalServices;
 import com.aurora.plugin.Plugin;
 
 import java.io.InputStream;
 import java.util.List;
+import java.util.Set;
 
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -29,9 +32,11 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 public class AuroraCommunicator extends Communicator {
     private static final String CLASS_TAG = "AuroraCommunicator";
 
+    private PluginRegistry mPluginRegistry;
 
-    public AuroraCommunicator(Bus mBus) {
+    public AuroraCommunicator(Bus mBus, PluginRegistry pluginRegistry) {
         super(mBus);
+        mPluginRegistry = pluginRegistry;
     }
 
     /**
@@ -59,11 +64,24 @@ public class AuroraCommunicator extends Communicator {
                 .subscribe((ExtractedText extractedText) ->
                         sendOpenFileRequest(extractedText, pluginAction, chooser, applicationContext));
 
-        // First create internal processing
-        InternalProcessorRequest internalProcessorRequest = new InternalProcessorRequest(fileRef, fileType, file);
+        // Get internal processing parameters for the plugin from the plugin registry
+        String selectedPluginName = getChosenPlugin(pluginAction, applicationContext);
+        Plugin selectedPlugin = mPluginRegistry.getPlugin(selectedPluginName);
 
-        // Post request on the bus
-        mBus.post(internalProcessorRequest);
+        // If the plugin exists in the registry, get the set of supported internal services
+        if (selectedPlugin != null) {
+            Set<InternalServices> internalServices = selectedPlugin.getInternalServices();
+
+            InternalProcessorRequest internalProcessorRequest =
+                    new InternalProcessorRequest(fileRef, fileType, file, internalServices);
+
+            // Post request on the bus
+            mBus.post(internalProcessorRequest);
+        } else {
+            Toast.makeText(applicationContext,
+                    "The plugin was not found in the registry!", Toast.LENGTH_LONG).show();
+        }
+
     }
 
 
@@ -113,6 +131,15 @@ public class AuroraCommunicator extends Communicator {
         this.mBus.post(new ListPluginsRequest());
 
         return mListPluginsResponse.map(ListPluginsResponse::getPlugins);
+    }
+
+    /**
+     * Registers a plugin in the pluginRegistry
+     * @param plugin the plugin metadata object
+     * @return true if the plugin was successfully saved in the plugin registry, false otherwise
+     */
+    public boolean registerPlugin(Plugin plugin) {
+        return mPluginRegistry.registerPlugin(plugin.getUniqueName(), plugin);
     }
 
     /**

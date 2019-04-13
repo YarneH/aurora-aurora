@@ -30,6 +30,7 @@ import android.widget.Toast;
 import com.aurora.auroralib.Constants;
 import com.aurora.kernel.AuroraCommunicator;
 import com.aurora.kernel.Kernel;
+import com.aurora.plugin.Plugin;
 import com.google.firebase.analytics.FirebaseAnalytics;
 
 import java.io.FileNotFoundException;
@@ -70,6 +71,13 @@ public class MainActivity extends AppCompatActivity
         /* Set up kernel */
         mKernel = new Kernel(this.getApplicationContext());
         mAuroraCommunicator = mKernel.getAuroraCommunicator();
+
+        /*
+        Set up plugins
+        TODO: Now this is static, later the pluginmarket should register new plugins.
+         */
+        registerPlugins();
+
 
         /* Initialize FirebaseAnalytics */
         mFirebaseAnalytics = FirebaseAnalytics.getInstance(this);
@@ -269,6 +277,41 @@ public class MainActivity extends AppCompatActivity
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    /**
+     * Helper method that register the plugins with their info in the pluginregistry
+     * TODO: when the pluginmarket is implemented, remove this method
+     */
+    private void registerPlugins() {
+        final Plugin basicPlugin = new Plugin(
+                "com.aurora.basicplugin",
+                "Basic Plugin",
+                null,
+                "Basic plugin to open any file and display extracted text.",
+                4,
+                "v0.4");
+
+        final Plugin souschefPlugin = new Plugin(
+                "com.aurora.souschef",
+                "Souschef",
+                null,
+                "Plugin to open recipes and display them in an enhanced way.",
+                4,
+                "v0.4");
+
+        final Plugin paperViewerPlugin = new Plugin(
+                "com.aurora.paperviewer",
+                "Paperviewer",
+                null,
+                "Plugin to open papers and display them in an enhanced way.",
+                4,
+                "v0.4");
+
+        // Register plugins in the registry
+        mAuroraCommunicator.registerPlugin(basicPlugin);
+        mAuroraCommunicator.registerPlugin(souschefPlugin);
+        mAuroraCommunicator.registerPlugin(paperViewerPlugin);
     }
 }
 

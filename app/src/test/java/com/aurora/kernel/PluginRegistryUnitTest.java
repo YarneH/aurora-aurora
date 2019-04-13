@@ -74,7 +74,7 @@ public class PluginRegistryUnitTest {
     @Test
     public void PluginRegistry_loadPlugin_shouldReturnNull() {
         // Call load plugin method with a name that is not in the map
-        Plugin plugin = mRegistry.loadPlugin(NOT_IN_MAP_PLUGIN);
+        Plugin plugin = mRegistry.getPlugin(NOT_IN_MAP_PLUGIN);
 
         // Assert that environment is indeed null
         assertNull(plugin);
@@ -83,8 +83,8 @@ public class PluginRegistryUnitTest {
     @Test
     public void PluginRegistry_loadPlugin_shouldReturnDummyPlugins() {
         // Call load plugin method with names that are in the map
-        Plugin pluginLoaded1 = mRegistry.loadPlugin(DUMMY_NAME_1);
-        Plugin pluginLoaded2 = mRegistry.loadPlugin(DUMMY_NAME_2);
+        Plugin pluginLoaded1 = mRegistry.getPlugin(DUMMY_NAME_1);
+        Plugin pluginLoaded2 = mRegistry.getPlugin(DUMMY_NAME_2);
 
         // Assert that the environments are what expected
         assertEquals(plugin1, pluginLoaded1);
