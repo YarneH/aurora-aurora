@@ -34,7 +34,9 @@ import com.aurora.plugin.Plugin;
 import com.google.firebase.analytics.FirebaseAnalytics;
 
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
+import java.util.Objects;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -155,7 +157,7 @@ public class MainActivity extends AppCompatActivity
                     String type = MimeTypeMap.getSingleton().getExtensionFromMimeType(cR.getType(textFile));
                     Log.i("MIME", type);
 
-                    /**
+                    /*
                      * Firebase Analytics
                      * TODO: convert to custom event, see https://firebase.google.com/docs/analytics/android/events
                      */
@@ -175,12 +177,16 @@ public class MainActivity extends AppCompatActivity
 
                     mAuroraCommunicator.openFileWithPlugin(textFile.toString(), type,
                             read, pluginAction, chooser, getApplicationContext());
+
+                    Objects.requireNonNull(read).close();
                 } else {
                     Toast.makeText(this, "The selected file was null", Snackbar.LENGTH_LONG).show();
                 }
             } catch (FileNotFoundException e) {
                 Toast.makeText(this, "The file could not be found", Snackbar.LENGTH_LONG).show();
                 Log.e("FILE_NOT_FOUND", "The file could not be found", e);
+            } catch (IOException e) {
+                Log.e("FILE_CLOSE", "Failed to close the file: " + textFile.toString(), e);
             }
         }
     }
