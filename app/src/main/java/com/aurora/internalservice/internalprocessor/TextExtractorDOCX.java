@@ -1,11 +1,13 @@
 package com.aurora.internalservice.internalprocessor;
 
+import android.util.Base64;
 import android.util.Log;
 
 import com.aurora.auroralib.ExtractedText;
 import com.aurora.auroralib.Section;
 
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -15,6 +17,8 @@ import org.apache.poi.xwpf.usermodel.ICell;
 import org.apache.poi.xwpf.usermodel.IRunElement;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.apache.poi.xwpf.usermodel.XWPFParagraph;
+import org.apache.poi.xwpf.usermodel.XWPFPicture;
+import org.apache.poi.xwpf.usermodel.XWPFPictureData;
 import org.apache.poi.xwpf.usermodel.XWPFRun;
 import org.apache.poi.xwpf.usermodel.XWPFSDT;
 import org.apache.poi.xwpf.usermodel.XWPFSDTCell;
@@ -49,6 +53,11 @@ public class TextExtractorDOCX implements TextExtractor {
      */
     private int mPreviousRunSize = 0;
 
+    /**
+     * List that contains all the pictures
+     */
+    List<XWPFPictureData> mPiclist;
+
 
     /**
      * Extracts the text from a .docx file.
@@ -69,6 +78,8 @@ public class TextExtractorDOCX implements TextExtractor {
 
         try {
             try (XWPFDocument doc = new XWPFDocument(file)) {
+
+                mPiclist=doc.getAllPictures();
 
                 for (IBodyElement e : doc.getBodyElements()) {
                     if (e instanceof XWPFParagraph) {
@@ -107,19 +118,36 @@ public class TextExtractorDOCX implements TextExtractor {
      *                          determine (sub)titles. Only one level of titles is supported in
      *                          this case.
      */
-    private void addRun(String run, int paragraphLevel, int runSize) {
+    private void addRun(String run, int paragraphLevel, int runSize, List<byte[]> images) {
         String formatted = run.trim();//formatParagraph(run);
 
+        // Convert the images to Base64
+
+        List<String> encodedImages = new ArrayList<>();
+        if(images  != null) {
+            for (byte[] image: images) {
+                encodedImages.add(Base64.encodeToString(image, Base64.DEFAULT));
+            }
+        }
+
         // No more than 2 empty sections in a row and not in the beginning of the document
-        if(mEmptySectionCount < 2 && formatted.isEmpty() && mExtractedText.getSections() != null) {
+        if(mEmptySectionCount < 2 && formatted.isEmpty() && mExtractedText.getSections() != null
+                && encodedImages.isEmpty()) {
             mExtractedText.addSimpleSection("");
             mEmptySectionCount++;
-        } else if(!formatted.isEmpty()) {
+        } else if(!formatted.isEmpty() || !encodedImages.isEmpty()) {
             mEmptySectionCount = 0;
 
             // Determine if a title, first line is always a title for simplicity
             if(mExtractedText.getTitle() == null) {
                 mExtractedText.setTitle(formatted);
+
+                if(!encodedImages.isEmpty()) {
+                    Section imageSection = new Section();
+                    imageSection.setImages(encodedImages);
+                    mExtractedText.addSection(imageSection);
+                }
+
                 if(runSize>0) {
                     mPreviousRunSize = runSize;
                 }
@@ -136,6 +164,7 @@ public class TextExtractorDOCX implements TextExtractor {
                 // Create a new Section
                 mSectionInProgress = new Section();
                 mSectionInProgress.setTitle(formatted);
+                mSectionInProgress.setImages(encodedImages);
                 if(paragraphLevel >= 0) {
                     mSectionInProgress.setLevel(paragraphLevel);
                     mLastSeenParagraphLevel = paragraphLevel;
@@ -151,9 +180,11 @@ public class TextExtractorDOCX implements TextExtractor {
             // Check if there is an already a section in progress
             if(mSectionInProgress != null) {
                 mSectionInProgress.setBody(formatted);
+                mSectionInProgress.getImages().addAll(encodedImages);
             } else {
                 mSectionInProgress = new Section(formatted);
                 mSectionInProgress.setLevel(mLastSeenParagraphLevel);
+                mSectionInProgress.setImages(encodedImages);
             }
             // Flush now
             mExtractedText.addSection(mSectionInProgress);
@@ -176,9 +207,20 @@ public class TextExtractorDOCX implements TextExtractor {
         StringBuilder textInProgress = null;
         XWPFRun runInProgress = null;
 
+        List<byte[]> images = null;
+
         for (IRunElement run : paragraph.getRuns()) {
             Log.d("DOCX_RUN",run.toString());
             if (run instanceof XWPFRun) {
+                List<XWPFPicture> piclist = ((XWPFRun) run).getEmbeddedPictures();
+                for (XWPFPicture image: piclist) {
+                    if(images == null) {
+                        images = new ArrayList<>();
+                    }
+                    images.add(image.getPictureData().getData());
+                }
+
+
                 XWPFRun currentRun = (XWPFRun) run;
                 String runText = currentRun.text();
 
@@ -193,7 +235,8 @@ public class TextExtractorDOCX implements TextExtractor {
                         }
 
                         addRun(textInProgress.toString(), getLevel(paragraph)
-                                , runInProgress.getFontSize());
+                                , runInProgress.getFontSize(), images);
+                        images =null;
 
                         textInProgress = null;
                         runInProgress = null;
@@ -210,19 +253,23 @@ public class TextExtractorDOCX implements TextExtractor {
                     }
                     // The String is whitespace, just flush it, just in case
                     else {
-                        addRun(currentRun.text(), getLevel(paragraph), currentRun.getFontSize());
+                        addRun(currentRun.text(), getLevel(paragraph), currentRun.getFontSize(),
+                                images);
+                        images = null;
                     }
                 }
             } else {
                 // The paragraph does not consist of runs.
-                addRun(run.toString(), getLevel(paragraph), -1);
+                addRun(run.toString(), getLevel(paragraph), -1, images);
+                images = null;
             }
         }
         // Flush the last run
         if(runInProgress != null) {
             addRun(textInProgress.toString(), getLevel(paragraph)
-                    , runInProgress.getFontSize());
+                    , runInProgress.getFontSize(), images);
         }
+        images = null;
     }
 
     /**
