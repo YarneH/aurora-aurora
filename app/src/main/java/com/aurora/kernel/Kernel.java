@@ -1,5 +1,6 @@
 package com.aurora.kernel;
 
+import android.content.Context;
 import android.util.Log;
 
 import com.aurora.internalservice.internalcache.InternalCache;
@@ -13,11 +14,14 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
 
+import io.reactivex.schedulers.Schedulers;
+
 /**
  * Wrapper class that wraps all communicators and instantiates the unique event bus
  */
 public final class Kernel {
     private Bus mBus;
+    private Context mContext;
 
     private AuroraCommunicator mAuroraCommunicator;
     private PluginCommunicator mPluginCommunicator;
@@ -32,14 +36,26 @@ public final class Kernel {
 
     /**
      * Starts and creates all communicators, keeping references
+     *
+     * @param applicationContext the android application context. Make sure this is the application context and not
+     *                           the context related to the activity (get with this.getApplicationContext) to avoid
+     *                           memory leaks.
      */
-    public Kernel() {
-        this.mBus = new Bus();
+    public Kernel(Context applicationContext) {
+        this.mContext = applicationContext;
 
-        this.mAuroraCommunicator = new AuroraCommunicator(mBus);
+        // Create 1 bus to be shared among all communicators
+        this.mBus = new Bus(Schedulers.computation());
 
+        // Initialize plugin config
+        initializePluginConfig();
+
+        // Create plugin registry that keeps info of the plugins
+        this.mPluginRegistry = new PluginRegistry(mProcessingCommunicator, PLUGINS_CFG, applicationContext);
+
+        // Create the different communicators
+        this.mAuroraCommunicator = new AuroraCommunicator(mBus, mPluginRegistry);
         this.mProcessingCommunicator = new ProcessingCommunicator(mBus);
-        this.mPluginRegistry = new PluginRegistry(mProcessingCommunicator, PLUGINS_CFG);
         this.mPluginCommunicator = new PluginCommunicator(mBus, mPluginRegistry);
 
         // Create internal text processor for the PluginInternalServiceCommunicator
@@ -47,11 +63,8 @@ public final class Kernel {
         this.mPluginInternalServiceCommunicator = new PluginInternalServiceCommunicator(mBus, internalTextProcessing);
 
         // Create cache
-        InternalCache internalCache = new InternalCache();
+        InternalCache internalCache = new InternalCache(applicationContext);
         this.mAuroraInternalServiceCommunicator = new AuroraInternalServiceCommunicator(mBus, internalCache);
-
-        // Initialize plugin config
-        initializePluginConfig();
     }
 
 
@@ -84,7 +97,7 @@ public final class Kernel {
      * Private helper method that checks if the plugin-config file already exists, and creates one when necessary
      */
     private void initializePluginConfig() {
-        File file = new File(PLUGINS_CFG);
+        File file = new File(mContext.getFilesDir(), PLUGINS_CFG);
 
         // If the file does not exist, create one and write an empty JSON array to it
         if (!file.exists()) {

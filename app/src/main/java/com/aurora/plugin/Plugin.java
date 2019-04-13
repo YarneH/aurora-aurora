@@ -1,50 +1,103 @@
 package com.aurora.plugin;
 
-import com.aurora.externalservice.PluginEnvironment;
-import com.aurora.processingservice.PluginProcessor;
+import android.support.annotation.NonNull;
 
 import java.io.File;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Class that maintains references to the environment and processor of plugin
  */
 public class Plugin {
 
-    protected String mUniqueName;
-    protected String mDisplayName;
-    protected File mPluginLogo;
-    protected String mDescription;
-    protected String mVersion;
+    /**
+     * The set of default supported internal services when the user does not provide his own set
+     */
+    private static final Set<InternalServices> DEFAULT_INTERNAL_SERVICES =
+            new HashSet<>(Collections.singletonList(InternalServices.TEXT_EXTRACTION));
 
     /**
-     * Reference to the plugin's environment
-     * Not serialized along with plugin
+     * The unique name for the plugin.
+     * For example, "com.aurora.souschef0.1"
      */
-    protected transient PluginEnvironment mPluginEnvironment;
+    private String mUniqueName;
 
     /**
-     * Reference to the plugin's processor
-     * Not serialized along with plugin
+     * The display name used for the plugin.
+     * For example, "Souschef"
      */
-    protected transient PluginProcessor mPluginProcessor;
+    private String mName;
 
-    public Plugin(String uniqueName, String displayName, File pluginLogo, String description, String version,
-                  PluginEnvironment pluginEnvironment, PluginProcessor pluginProcessor) {
+    /**
+     * A logo for the plugin
+     */
+    private File mPluginLogo;
+
+    /**
+     * A description of what the plugin is used for
+     */
+    private String mDescription;
+
+    /**
+     * A version number for the plugin.
+     */
+    private int mVersionNumber;
+
+    /**
+     * A version code for the plugin, For example "v1.0" or "v2.2.3"
+     */
+    private String mVersionCode;
+
+    /**
+     * The internal services needed by the plugin.
+     */
+    private Set<InternalServices> mInternalServices;
+
+    /**
+     * Constructs a plugin metadata object
+     *
+     * @param uniqueName       the unique name of the plugin. Preferably the domain + version number
+     * @param name             the display name of the plugin
+     * @param pluginLogo       the logo of the plugin
+     * @param description      the description of what the plugin is used for
+     * @param versionNumber    the version number for the plugin
+     * @param versionCode      the version code for the plugin
+     * @param internalServices the internal services needed by the plugin
+     */
+    public Plugin(@NonNull String uniqueName, @NonNull String name, File pluginLogo, @NonNull String description,
+                  int versionNumber, @NonNull String versionCode, @NonNull Set<InternalServices> internalServices) {
         mUniqueName = uniqueName;
-        mDisplayName = displayName;
+        mName = name;
         mPluginLogo = pluginLogo;
         mDescription = description;
-        mVersion = version;
-        mPluginEnvironment = pluginEnvironment;
-        mPluginProcessor = pluginProcessor;
+        mVersionNumber = versionNumber;
+        mVersionCode = versionCode;
+        mInternalServices = internalServices;
+    }
+
+    /**
+     * Constructs a plugin metadata object with the default supported services
+     *
+     * @param uniqueName    the unique name of the plugin. Preferably the domain + version number
+     * @param name          the display name of the plugin
+     * @param pluginLogo    the logo of the plugin
+     * @param description   the description of what the plugin is used for
+     * @param versionNumber the version number for the plugin
+     * @param versionCode   the version code for the plugin
+     */
+    public Plugin(String uniqueName, String name, File pluginLogo, String description,
+                  int versionNumber, String versionCode) {
+        this(uniqueName, name, pluginLogo, description, versionNumber, versionCode, DEFAULT_INTERNAL_SERVICES);
     }
 
     public String getUniqueName() {
         return mUniqueName;
     }
 
-    public String getDisplayName() {
-        return mDisplayName;
+    public String getName() {
+        return mName;
     }
 
     public File getPluginLogo() {
@@ -55,26 +108,19 @@ public class Plugin {
         return mDescription;
     }
 
-    public String getVersion() {
-        return mVersion;
+    public int getVersionNumber() {
+        return mVersionNumber;
     }
 
-    public PluginEnvironment getPluginEnvironment() {
-        return mPluginEnvironment;
+    public String getVersionCode() {
+        return mVersionCode;
     }
 
-
-    public PluginProcessor getPluginProcessor() {
-        return mPluginProcessor;
+    public Set<InternalServices> getInternalServices() {
+        return mInternalServices;
     }
 
-    /**
-     * Takes a plugin and only returns the basic information as a BasicPlugin type
-     *
-     * @return the Basic plugin information
-     */
-    public BasicPlugin getBasicPluginInfo() {
-        return new BasicPlugin(mDisplayName, mPluginLogo, mDescription, mVersion);
+    public static Set<InternalServices> getDefaultInternalServices() {
+        return DEFAULT_INTERNAL_SERVICES;
     }
-
 }
