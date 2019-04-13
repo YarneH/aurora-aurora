@@ -6,6 +6,7 @@ import android.util.Log;
 import com.aurora.auroralib.ExtractedText;
 import com.aurora.auroralib.Section;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
@@ -18,7 +19,6 @@ import org.apache.poi.xwpf.usermodel.IRunElement;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.apache.poi.xwpf.usermodel.XWPFParagraph;
 import org.apache.poi.xwpf.usermodel.XWPFPicture;
-import org.apache.poi.xwpf.usermodel.XWPFPictureData;
 import org.apache.poi.xwpf.usermodel.XWPFRun;
 import org.apache.poi.xwpf.usermodel.XWPFSDT;
 import org.apache.poi.xwpf.usermodel.XWPFSDTCell;
@@ -29,9 +29,14 @@ import org.apache.poi.xwpf.usermodel.XWPFTableRow;
 public class TextExtractorDOCX implements TextExtractor {
 
     /**
+     * Constant for the maximum number of empty paragraphs in a row
+     */
+    private static final int MAX_NUMBER_OF_EMPTY_SECTIONS = 2;
+
+    /**
      * Extracted text object
      */
-    private ExtractedText mExtractedText;
+    private ExtractedText mExtractedText = null;
 
     /**
      * A counter that keeps track of the number of empty sections in a row
@@ -52,11 +57,6 @@ public class TextExtractorDOCX implements TextExtractor {
      * Array that keeps track of the sizes of titles to determine the level
      */
     private int mPreviousRunSize = 0;
-
-    /**
-     * List that contains all the pictures
-     */
-    List<XWPFPictureData> mPiclist;
 
 
     /**
@@ -79,8 +79,6 @@ public class TextExtractorDOCX implements TextExtractor {
         try {
             try (XWPFDocument doc = new XWPFDocument(file)) {
 
-                mPiclist=doc.getAllPictures();
-
                 for (IBodyElement e : doc.getBodyElements()) {
                     if (e instanceof XWPFParagraph) {
                         appendParagraphText((XWPFParagraph) e);
@@ -90,8 +88,9 @@ public class TextExtractorDOCX implements TextExtractor {
                         mExtractedText.addSimpleSection(((XWPFSDT) e).getContent().getText());
                     }
                 }
-
-                // TODO Implement extracting images from .docx
+            } catch (IOException e) {
+                Log.e("EXTRACT_DOCX",
+                        "a problem occurred while reading the file as a docx: " + fileRef);
 
             } finally {
                 file.close();
@@ -100,8 +99,8 @@ public class TextExtractorDOCX implements TextExtractor {
                     mExtractedText.addSection(mSectionInProgress);
                 }
             }
-        } catch (Exception e) {
-            Log.e("EXTRACT_DOCX", "extract in TextExtractorDOCX failed to parse: " + fileRef);
+        } catch (IOException e) {
+            Log.e("EXTRACT_DOCX", "failed to close the file: " + fileRef);
         }
 
         return mExtractedText;
@@ -118,21 +117,21 @@ public class TextExtractorDOCX implements TextExtractor {
      *                          determine (sub)titles. Only one level of titles is supported in
      *                          this case.
      */
+    //I suppress these warnings because there is no easy way to simplify or split this logic into
+    // multiple methods without making it harder to understand.
+    @java.lang.SuppressWarnings({"squid:MethodCyclomaticComplexity","squid:S3776"})
     private void addRun(String run, int paragraphLevel, int runSize, List<byte[]> images) {
-        String formatted = run.trim();//formatParagraph(run);
+        String formatted = run.trim();
 
         // Convert the images to Base64
-
         List<String> encodedImages = new ArrayList<>();
-        if(images  != null) {
-            for (byte[] image: images) {
-                encodedImages.add(Base64.encodeToString(image, Base64.DEFAULT));
-            }
+        for (byte[] image: images) {
+            encodedImages.add(Base64.encodeToString(image, Base64.DEFAULT));
         }
 
         // No more than 2 empty sections in a row and not in the beginning of the document
-        if(mEmptySectionCount < 2 && formatted.isEmpty() && mExtractedText.getSections() != null
-                && encodedImages.isEmpty()) {
+        if(mEmptySectionCount < MAX_NUMBER_OF_EMPTY_SECTIONS && formatted.isEmpty()
+                && mExtractedText.getSections() != null && encodedImages.isEmpty()) {
             mExtractedText.addSimpleSection("");
             mEmptySectionCount++;
         } else if(!formatted.isEmpty() || !encodedImages.isEmpty()) {
@@ -201,30 +200,29 @@ public class TextExtractorDOCX implements TextExtractor {
      *
      * @param paragraph Object of Apache POI representing a docx paragraph.
      */
+    //I suppress these warnings because there is no easy way to simplify or split this logic into
+    // multiple methods without making it harder to understand.
+    @java.lang.SuppressWarnings({"squid:MethodCyclomaticComplexity","squid:S3776"})
     private void appendParagraphText(XWPFParagraph paragraph) {
         // For some reason runs can be split randomly, even in the middle of sentences or words.
         // This code is an attempt to combine such runs to one coherent piece of text.
         StringBuilder textInProgress = null;
         XWPFRun runInProgress = null;
 
-        List<byte[]> images = null;
+        List<byte[]> images = new ArrayList<>();
 
         for (IRunElement run : paragraph.getRuns()) {
             Log.d("DOCX_RUN",run.toString());
             if (run instanceof XWPFRun) {
+                // Extract the images from the run and add them to the list of yet to process images
                 List<XWPFPicture> piclist = ((XWPFRun) run).getEmbeddedPictures();
                 for (XWPFPicture image: piclist) {
-                    if(images == null) {
-                        images = new ArrayList<>();
-                    }
                     images.add(image.getPictureData().getData());
                 }
 
-
                 XWPFRun currentRun = (XWPFRun) run;
-                String runText = currentRun.text();
 
-                for (String text: runText.split("(?<=\n|\t)")) {
+                for (String text: currentRun.text().split("(?<=\n|\t)")) {
                     // A section ends with a tab or an newline.
                     if((text.endsWith("\t") || text.endsWith("\n"))) {
                         if(textInProgress != null) {
@@ -236,40 +234,35 @@ public class TextExtractorDOCX implements TextExtractor {
 
                         addRun(textInProgress.toString(), getLevel(paragraph)
                                 , runInProgress.getFontSize(), images);
-                        images =null;
 
+                        images = new ArrayList<>();
                         textInProgress = null;
                         runInProgress = null;
-                    }
-
-                    // Build upon the previous run
-                    else if(textInProgress != null) {
+                    } else if(textInProgress != null) {
+                        // Build upon the previous run
                         textInProgress.append(text);
-                    }
-                    // There is no previous run and the string is not empty, save it.
-                    else if (!text.trim().equals("")) {
+                    } else if (!"".equals(text.trim())) {
+                        // There is no previous run and the string is not empty, save it.
                         runInProgress = currentRun;
                         textInProgress = new StringBuilder(text);
-                    }
-                    // The String is whitespace, just flush it, just in case
-                    else {
+                    } else {
+                        // The String is whitespace
                         addRun(currentRun.text(), getLevel(paragraph), currentRun.getFontSize(),
-                                images);
-                        images = null;
+                                new ArrayList<>());
                     }
                 }
             } else {
                 // The paragraph does not consist of runs.
-                addRun(run.toString(), getLevel(paragraph), -1, images);
-                images = null;
+                addRun(run.toString(), getLevel(paragraph), -1, new ArrayList<>());
             }
         }
         // Flush the last run
         if(runInProgress != null) {
             addRun(textInProgress.toString(), getLevel(paragraph)
                     , runInProgress.getFontSize(), images);
+        } else if(!images.isEmpty()) {
+            addRun("",getLevel(paragraph), -1, images);
         }
-        images = null;
     }
 
     /**
@@ -280,16 +273,20 @@ public class TextExtractorDOCX implements TextExtractor {
     private int getLevel(XWPFParagraph paragraph) {
         String paragraphStyle = paragraph.getStyle();
 
-        if(paragraphStyle == null) return -1;
-        if(paragraphStyle.equals("Titel") || paragraphStyle.equals("Title")) return 0;
-        if(paragraphStyle.contains("Heading") || paragraphStyle.contains("Kop")) {
+        int level = -1;
+
+        if(paragraphStyle == null) {
+            return -1;
+        } else if("Titel".equals(paragraphStyle) || "Title".equals(paragraphStyle)) {
+            level = 0;
+        } else if(paragraphStyle.contains("Heading") || paragraphStyle.contains("Kop")) {
             Pattern p = Pattern.compile("[0-9]+$");
             Matcher m = p.matcher(paragraphStyle);
             if(m.find()) {
-                return Integer.parseInt(m.group());
+                level = Integer.parseInt(m.group());
             }
         }
-        return  -1;
+        return level;
     }
 
     /**
