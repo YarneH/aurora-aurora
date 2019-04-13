@@ -15,7 +15,7 @@ public class Plugin {
     /**
      * The set of default supported internal services when the user does not provide his own set
      */
-    public static final Set<InternalServices> DEFAULT_INTERNAL_SERVICES =
+    private static final Set<InternalServices> DEFAULT_INTERNAL_SERVICES =
             new HashSet<>(Collections.singletonList(InternalServices.TEXT_EXTRACTION));
 
     /**
@@ -118,5 +118,9 @@ public class Plugin {
 
     public Set<InternalServices> getInternalServices() {
         return mInternalServices;
+    }
+
+    public static Set<InternalServices> getDefaultInternalServices() {
+        return DEFAULT_INTERNAL_SERVICES;
     }
 }

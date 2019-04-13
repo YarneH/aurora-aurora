@@ -60,7 +60,7 @@ public class PluginInternalServiceCommunicatorUnitTest {
 
         // Create request to process file and put on bus
         InternalProcessorRequest request = new InternalProcessorRequest(ref, type, null,
-                Plugin.DEFAULT_INTERNAL_SERVICES);
+                Plugin.getDefaultInternalServices());
         mBus.post(request);
 
         // Assert that dummy extracted text was received

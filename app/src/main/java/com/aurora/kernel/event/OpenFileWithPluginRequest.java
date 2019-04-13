@@ -29,7 +29,8 @@ public class OpenFileWithPluginRequest extends Event {
      */
     private Context mContext;
 
-    public OpenFileWithPluginRequest(ExtractedText extractedText, Intent pluginAction, Intent chooser, Context context) {
+    public OpenFileWithPluginRequest(ExtractedText extractedText, Intent pluginAction,
+                                     Intent chooser, Context context) {
         mExtractedText = extractedText;
         mPluginAction = pluginAction;
         mChooser = chooser;
