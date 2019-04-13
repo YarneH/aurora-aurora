@@ -76,47 +76,32 @@ public class TextExtractorDOCX implements TextExtractor {
         mLastSeenParagraphLevel = 0;
         mPreviousRunSize = 0;
 
-
-        try {
-            parseFile(file, fileRef);
-        } catch (IOException e) {
-            Log.e("EXTRACT_DOCX", "failed to close the file: " + fileRef);
-        }
-
-        return mExtractedText;
-    }
-
-    /**
-     * Parses the file
-     *
-     * @param file      Inputstream to the file
-     * @param fileRef   Reference to the file used for error logging
-     * @throws IOException In case closing the file fails on completion
-     */
-    private void parseFile(InputStream file, String fileRef) throws IOException {
         try (XWPFDocument doc = new XWPFDocument(file)) {
 
-            for (IBodyElement e : doc.getBodyElements()) {
-                if (e instanceof XWPFParagraph) {
-                    appendParagraphText((XWPFParagraph) e);
-                } else if (e instanceof XWPFTable) {
-                    appendTableText((XWPFTable) e);
-                } else if (e instanceof XWPFSDT) {
-                    mExtractedText.addSimpleSection(((XWPFSDT) e).getContent().getText());
+            for (IBodyElement bodyElement : doc.getBodyElements()) {
+                if (bodyElement instanceof XWPFParagraph) {
+                    appendParagraphText((XWPFParagraph) bodyElement);
+                } else if (bodyElement instanceof XWPFTable) {
+                    appendTableText((XWPFTable) bodyElement);
+                } else if (bodyElement instanceof XWPFSDT) {
+                    mExtractedText.addSimpleSection(((XWPFSDT) bodyElement).getContent().getText());
                 }
             }
         } catch (IOException e) {
             Log.e("EXTRACT_DOCX",
-                    "a problem occurred while reading the file as a docx: " + fileRef);
+                    "a problem occurred while reading the file as a docx: " + fileRef, e);
 
         } finally {
-            file.close();
             // Flush section in progress
             if(mSectionInProgress != null) {
                 mExtractedText.addSection(mSectionInProgress);
             }
         }
+
+
+        return mExtractedText;
     }
+
 
     /**
      * Appends the String run to the extractedText object. State is maintained in order to
@@ -147,27 +132,35 @@ public class TextExtractorDOCX implements TextExtractor {
             mExtractedText.addSimpleSection("");
             mEmptySectionCount++;
         } else if(!formatted.isEmpty() || !encodedImages.isEmpty()) {
+            // This is the default flow. The section either contains text or images or both.
+
+            // Reset the empty section count
             mEmptySectionCount = 0;
 
             // Determine if a title, first line is always a title for simplicity
-            if(mExtractedText.getTitle() == null) {
+            if(mExtractedText.getTitle() == null && !formatted.isEmpty()) {
                 mExtractedText.setTitle(formatted);
 
+                // The title section contains images, add them to their own section.
                 if(!encodedImages.isEmpty()) {
                     Section imageSection = new Section();
                     imageSection.setImages(encodedImages);
                     mExtractedText.addSection(imageSection);
                 }
 
+                // If the font size is larger than 0 keep track of this. If the built in word
+                // headers are used, font size is -1 for some reason.
                 if(runSize>0) {
                     mPreviousRunSize = runSize;
                 }
                 return;
             }
 
-            // Check if we find a (sub)title
+            // Check if we find a (sub)title, when using default word headers most of the headers
+            // should be recognized. When not using this, it's more vague, some titels will be
+            // found, others not because we need to base us on what was seen previously.
             if (paragraphLevel >= 0 || mPreviousRunSize < runSize) {
-                // Flush the previous section
+                // Flush the previous section, a title will always create a new section
                 if (mSectionInProgress != null) {
                     mExtractedText.addSection(mSectionInProgress);
                 }
@@ -176,10 +169,15 @@ public class TextExtractorDOCX implements TextExtractor {
                 mSectionInProgress = new Section();
                 mSectionInProgress.setTitle(formatted);
                 mSectionInProgress.setImages(encodedImages);
+
+                // If the default headers of word are used, we can extract a paragraph level, non
+                // header sections will get the last seen paragraph level.
                 if(paragraphLevel >= 0) {
                     mSectionInProgress.setLevel(paragraphLevel);
                     mLastSeenParagraphLevel = paragraphLevel;
                 } else {
+                    // In case the default headers are not used, it is to hard to determine the
+                    // level of a paragraph. Just set them all to default level 0.
                     mSectionInProgress.setLevel(0);
                     mLastSeenParagraphLevel = 0;
                     mPreviousRunSize = runSize;
@@ -188,7 +186,7 @@ public class TextExtractorDOCX implements TextExtractor {
             }
 
             // Run is not a (sub) title
-            // Check if there is an already a section in progress
+            // Check if there is an already a section in progress because a title was found.
             if(mSectionInProgress != null) {
                 mSectionInProgress.setBody(formatted);
                 mSectionInProgress.getImages().addAll(encodedImages);
@@ -197,7 +195,7 @@ public class TextExtractorDOCX implements TextExtractor {
                 mSectionInProgress.setLevel(mLastSeenParagraphLevel);
                 mSectionInProgress.setImages(encodedImages);
             }
-            // Flush now
+            // Not title section are added immediately because nothing could be added anymore.
             mExtractedText.addSection(mSectionInProgress);
             mSectionInProgress = null;
             mPreviousRunSize = runSize;
@@ -218,13 +216,20 @@ public class TextExtractorDOCX implements TextExtractor {
     private void appendParagraphText(XWPFParagraph paragraph) {
         // For some reason runs can be split randomly, even in the middle of sentences or words.
         // This code is an attempt to combine such runs to one coherent piece of text.
+
+        /* Text that has yet to be added */
         StringBuilder textInProgress = null;
+        /* Parameters of the first run of textInProgress, assume the other runs have more or less
+         the same parameters */
         XWPFRun runInProgress = null;
 
+        /* List of images that has yet to be added */
         List<byte[]> images = new ArrayList<>();
 
+        // Loop over all the runs in a single paragraph.
         for (IRunElement run : paragraph.getRuns()) {
             Log.d("DOCX_RUN",run.toString());
+            // Normal flow
             if (run instanceof XWPFRun) {
                 // Extract the images from the run and add them to the list of yet to process images
                 List<XWPFPicture> piclist = ((XWPFRun) run).getEmbeddedPictures();
@@ -234,6 +239,7 @@ public class TextExtractorDOCX implements TextExtractor {
 
                 XWPFRun currentRun = (XWPFRun) run;
 
+                //Loop over all breaks and tabs. This certainly signifies the end of a section.
                 for (String text: currentRun.text().split("(?<=\n|\t)")) {
                     // A section ends with a tab or an newline.
                     if((text.endsWith("\t") || text.endsWith("\n"))) {
@@ -244,6 +250,7 @@ public class TextExtractorDOCX implements TextExtractor {
                             runInProgress = currentRun;
                         }
 
+                        // Add the section and reset the state variables
                         addRun(textInProgress.toString(), getLevel(paragraph)
                                 , runInProgress.getFontSize(), images);
 
@@ -251,24 +258,25 @@ public class TextExtractorDOCX implements TextExtractor {
                         textInProgress = null;
                         runInProgress = null;
                     } else if(textInProgress != null) {
-                        // Build upon the previous run
+                        // Build upon the previous run and the section has not ended.
                         textInProgress.append(text);
                     } else if (!"".equals(text.trim())) {
-                        // There is no previous run and the string is not empty, save it.
+                        // There is no previous run and the section has not ended.
                         runInProgress = currentRun;
                         textInProgress = new StringBuilder(text);
                     } else {
-                        // The String is whitespace
+                        // The String is whitespace and immediately added, state is maintained.
                         addRun(currentRun.text(), getLevel(paragraph), currentRun.getFontSize(),
                                 new ArrayList<>());
                     }
                 }
             } else {
-                // The paragraph does not consist of runs.
+                // The paragraph does not consist of runs. Not much can be done except the adding
+                // the raw text of the paragraph.
                 addRun(run.toString(), getLevel(paragraph), -1, new ArrayList<>());
             }
         }
-        // Flush the last run
+        // Flush the last run and any images that are not yet pushed.
         if(runInProgress != null) {
             addRun(textInProgress.toString(), getLevel(paragraph)
                     , runInProgress.getFontSize(), images);

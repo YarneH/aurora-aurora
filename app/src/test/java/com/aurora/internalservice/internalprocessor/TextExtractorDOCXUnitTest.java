@@ -44,7 +44,6 @@ public class TextExtractorDOCXUnitTest {
     }
 
     // Checks if the title is extracted correctly
-    //@Ignore("The implementation of DOCX extraction is not yet on this level")
     @Test
     public void extract_shouldExtractTitleCorrectly() {
 
