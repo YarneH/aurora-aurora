@@ -61,9 +61,10 @@ public class TextExtractorDOCX implements TextExtractor {
 
     /**
      * Extracts the text from a .docx file.
+     *
      * @param file      InputStream to the file
      * @param fileRef   a reference to where the file can be found
-     * @return an ExtractedText object without title and one line per paragraph.
+     * @return ExtractedText object with title and sections.
      */
     @Override
     public ExtractedText extract(InputStream file, String fileRef) {
@@ -77,33 +78,44 @@ public class TextExtractorDOCX implements TextExtractor {
 
 
         try {
-            try (XWPFDocument doc = new XWPFDocument(file)) {
-
-                for (IBodyElement e : doc.getBodyElements()) {
-                    if (e instanceof XWPFParagraph) {
-                        appendParagraphText((XWPFParagraph) e);
-                    } else if (e instanceof XWPFTable) {
-                        appendTableText((XWPFTable) e);
-                    } else if (e instanceof XWPFSDT) {
-                        mExtractedText.addSimpleSection(((XWPFSDT) e).getContent().getText());
-                    }
-                }
-            } catch (IOException e) {
-                Log.e("EXTRACT_DOCX",
-                        "a problem occurred while reading the file as a docx: " + fileRef);
-
-            } finally {
-                file.close();
-                // Flush section in progress
-                if(mSectionInProgress != null) {
-                    mExtractedText.addSection(mSectionInProgress);
-                }
-            }
+            parseFile(file, fileRef);
         } catch (IOException e) {
             Log.e("EXTRACT_DOCX", "failed to close the file: " + fileRef);
         }
 
         return mExtractedText;
+    }
+
+    /**
+     * Parses the file
+     *
+     * @param file      Inputstream to the file
+     * @param fileRef   Reference to the file used for error logging
+     * @throws IOException In case closing the file fails on completion
+     */
+    private void parseFile(InputStream file, String fileRef) throws IOException {
+        try (XWPFDocument doc = new XWPFDocument(file)) {
+
+            for (IBodyElement e : doc.getBodyElements()) {
+                if (e instanceof XWPFParagraph) {
+                    appendParagraphText((XWPFParagraph) e);
+                } else if (e instanceof XWPFTable) {
+                    appendTableText((XWPFTable) e);
+                } else if (e instanceof XWPFSDT) {
+                    mExtractedText.addSimpleSection(((XWPFSDT) e).getContent().getText());
+                }
+            }
+        } catch (IOException e) {
+            Log.e("EXTRACT_DOCX",
+                    "a problem occurred while reading the file as a docx: " + fileRef);
+
+        } finally {
+            file.close();
+            // Flush section in progress
+            if(mSectionInProgress != null) {
+                mExtractedText.addSection(mSectionInProgress);
+            }
+        }
     }
 
     /**
