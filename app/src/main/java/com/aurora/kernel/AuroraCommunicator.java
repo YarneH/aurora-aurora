@@ -3,7 +3,6 @@ package com.aurora.kernel;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.net.Uri;
 import android.widget.Toast;
 
 import com.aurora.auroralib.ExtractedText;
@@ -104,11 +103,8 @@ public class AuroraCommunicator extends Communicator {
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe((CachedProcessedFile processedFile) -> {
                     if ("{}".equals(processedFile.getJsonRepresentation())) {
-                        // Create input stream from the uri
-                        Uri fileUri = Uri.parse(processedFile.getFileRef());
-                        InputStream read = context.getContentResolver().openInputStream(fileUri);
-
-                        // openFileWithPlugin(processedFile.getFileRef(), fileType, read, context);
+                        Toast.makeText(context, "The cached file was not found", Toast.LENGTH_LONG).show();
+                        // TODO: change this such that it processes the original file
                     } else {
                         sendOpenCachedFileRequest(processedFile.getJsonRepresentation(), context);
                     }
@@ -135,6 +131,7 @@ public class AuroraCommunicator extends Communicator {
 
     /**
      * Registers a plugin in the pluginRegistry
+     *
      * @param plugin the plugin metadata object
      * @return true if the plugin was successfully saved in the plugin registry, false otherwise
      */

@@ -1,6 +1,7 @@
 package com.aurora.kernel;
 
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 
@@ -12,6 +13,7 @@ import com.aurora.kernel.event.OpenFileWithPluginRequest;
 import com.aurora.plugin.Plugin;
 import com.aurora.util.MockContext;
 
+import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -19,7 +21,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import androidx.annotation.NonNull;
 import io.reactivex.Observable;
@@ -30,7 +34,7 @@ import io.reactivex.schedulers.Schedulers;
 public class AuroraCommunicatorUnitTest {
 
     private static Bus sBus;
-    private static PluginRegistry sPluginRegistry;
+    private static DummyPluginRegistry sPluginRegistry;
     private static AuroraCommunicator sAuroraCommunicator;
 
     private static final String UNIQUE_PLUGIN_NAME_DUMMY = "com.aurora.dummyplugin";
@@ -43,7 +47,7 @@ public class AuroraCommunicatorUnitTest {
 
         ProcessingCommunicator processingCommunicator = new ProcessingCommunicator(sBus);
         final String pluginsCfg = "plugin-config.json";
-        sPluginRegistry = new PluginRegistry(processingCommunicator, pluginsCfg, new MockContext());
+        sPluginRegistry = new DummyPluginRegistry(processingCommunicator, pluginsCfg, new MockContext());
 
         sAuroraCommunicator = new AuroraCommunicator(sBus, sPluginRegistry);
 
@@ -149,6 +153,31 @@ public class AuroraCommunicatorUnitTest {
         observer.dispose();
     }
 
+    @Test
+    public void AuroraCommunicator_registerPlugin_shouldRegisterPLuginInPluginRegistry() {
+        // Create dummy plugin
+        String uniquePluginName = "com.aurora.dummyplugin2";
+        String pluginName = "Dummy Plugin";
+        String description = "Dummy plugin description";
+        int versionNumber = 1;
+        String versionCode = "v0.1";
+
+        Plugin dummyPlugin = new Plugin(uniquePluginName, pluginName, null,
+                description, versionNumber, versionCode);
+
+        // Call register plugin method
+        boolean registerResult = sAuroraCommunicator.registerPlugin(dummyPlugin);
+
+        // Assert that the returned result is true
+        Assert.assertTrue(registerResult);
+
+        // Assert that the plugins map actually contains the plugin
+        Assert.assertTrue(sPluginRegistry.mPluginMap.containsKey(uniquePluginName));
+
+        // Assert that the plugin info is equal to the one that was entered
+        Assert.assertEquals(dummyPlugin, sPluginRegistry.mPluginMap.get(uniquePluginName));
+    }
+
     /**
      * Dummy stub class for testing purposes
      */
@@ -167,6 +196,30 @@ public class AuroraCommunicatorUnitTest {
         @Override
         public ComponentName resolveActivity(@NonNull PackageManager pm) {
             return new ComponentName("com.aurora.dummyplugin", "MainActivity");
+        }
+    }
+
+    private static class DummyPluginRegistry extends PluginRegistry {
+
+        Map<String, Plugin> mPluginMap = new HashMap<>();
+
+        DummyPluginRegistry(ProcessingCommunicator processingCommunicator, String configFileRef, Context context) {
+            super(processingCommunicator, configFileRef, context);
+        }
+
+        @Override
+        boolean registerPlugin(String pluginName, Plugin plugin) {
+            if (!mPluginMap.containsKey(pluginName)) {
+                mPluginMap.put(pluginName, plugin);
+                return true;
+            }
+
+            return false;
+        }
+
+        @Override
+        public Plugin getPlugin(String pluginName) {
+            return mPluginMap.get(pluginName);
         }
     }
 }
