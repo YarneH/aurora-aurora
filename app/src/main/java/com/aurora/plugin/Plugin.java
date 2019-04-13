@@ -15,7 +15,7 @@ public class Plugin {
     /**
      * The set of default supported internal services when the user does not provide his own set
      */
-    private static final Set<InternalServices> DEFAULT_INTERNAL_SERVICES =
+    public static final Set<InternalServices> DEFAULT_INTERNAL_SERVICES =
             new HashSet<>(Collections.singletonList(InternalServices.TEXT_EXTRACTION));
 
     /**

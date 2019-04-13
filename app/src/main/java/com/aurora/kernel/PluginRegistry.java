@@ -44,7 +44,6 @@ class PluginRegistry {
      */
     private Context mContext;
 
-
     PluginRegistry(ProcessingCommunicator processingCommunicator, String configFileRef, Context context) {
         this.mProcessingCommunicator = processingCommunicator;
 

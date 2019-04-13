@@ -54,6 +54,8 @@ public class PluginInternalServiceCommunicator extends Communicator {
             }
         }
 
+        // If extractedText is null for some reason: return default extracted text
+        extractedText = extractedText == null ? new ExtractedText("",null) : extractedText;
 
         // Create response
         InternalProcessorResponse response = new InternalProcessorResponse(extractedText);

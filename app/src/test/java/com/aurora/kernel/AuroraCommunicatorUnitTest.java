@@ -1,5 +1,9 @@
 package com.aurora.kernel;
 
+import android.content.ComponentName;
+import android.content.Intent;
+import android.content.pm.PackageManager;
+
 import com.aurora.auroralib.ExtractedText;
 import com.aurora.kernel.event.InternalProcessorRequest;
 import com.aurora.kernel.event.InternalProcessorResponse;
@@ -17,6 +21,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import androidx.annotation.NonNull;
 import io.reactivex.Observable;
 import io.reactivex.observers.TestObserver;
 import io.reactivex.schedulers.Schedulers;
@@ -24,19 +29,32 @@ import io.reactivex.schedulers.Schedulers;
 
 public class AuroraCommunicatorUnitTest {
 
-    private static Bus mBus;
-    private static AuroraCommunicator mAuroraCommunicator;
+    private static Bus sBus;
+    private static PluginRegistry sPluginRegistry;
+    private static AuroraCommunicator sAuroraCommunicator;
+
+    private static final String UNIQUE_PLUGIN_NAME_DUMMY = "com.aurora.dummyplugin";
+    private static final Plugin DUMMY_PLUGIN = new Plugin(UNIQUE_PLUGIN_NAME_DUMMY, "DummyPlugin", null, "Dummy plugin",
+            1 ,"v0.1");
 
     @BeforeClass
     public static void initialize() {
-        mBus = new Bus(Schedulers.trampoline());
-        mAuroraCommunicator = new AuroraCommunicator(mBus);
+        sBus = new Bus(Schedulers.trampoline());
+
+        ProcessingCommunicator processingCommunicator = new ProcessingCommunicator(sBus);
+        final String pluginsCfg = "plugin-config.json";
+        sPluginRegistry = new PluginRegistry(processingCommunicator, pluginsCfg, new MockContext());
+
+        sAuroraCommunicator = new AuroraCommunicator(sBus, sPluginRegistry);
+
+        // Register dummy plugin in registry
+        sAuroraCommunicator.registerPlugin(DUMMY_PLUGIN);
     }
 
     @Test
     public void AuroraCommunicator_openFileWithPlugin_shouldSendProcessRequest() {
         // Subscribe to request
-        Observable<InternalProcessorRequest> requestObservable = mBus.register(InternalProcessorRequest.class);
+        Observable<InternalProcessorRequest> requestObservable = sBus.register(InternalProcessorRequest.class);
 
         // Create test observer
         TestObserver<String> fileRefObserver = new TestObserver<>();
@@ -48,7 +66,8 @@ public class AuroraCommunicatorUnitTest {
         String fileRef = "Dummy/file/ref";
         String fileType = "txt";
         InputStream file = new DummyInputStream();
-        mAuroraCommunicator.openFileWithPlugin(fileRef, fileType, file, new MockContext());
+        sAuroraCommunicator.openFileWithPlugin(fileRef, fileType, file,
+                new DummyIntent(), new DummyIntent(), new MockContext());
 
         // Assert that arguments passed are as expected
         fileRefObserver.assertSubscribed();
@@ -59,16 +78,16 @@ public class AuroraCommunicatorUnitTest {
     @Test
     public void AuroraCommunicator_openFileWithPlugin_shouldSendOpenFileWithPluginRequestAfterExtractingText() {
         // Create observable of internal processor request
-        Observable<InternalProcessorRequest> internalProcessorRequestObservable = mBus.register(InternalProcessorRequest.class);
+        Observable<InternalProcessorRequest> internalProcessorRequestObservable = sBus.register(InternalProcessorRequest.class);
 
         // Subscribe to observable to send response event
         ExtractedText dummyExtractedText = new ExtractedText("Bla", null, Arrays.asList("Dummy", "Paragraph"));
         internalProcessorRequestObservable.subscribe(internalProcessorRequest ->
-                mBus.post(new InternalProcessorResponse(dummyExtractedText)));
+                sBus.post(new InternalProcessorResponse(dummyExtractedText)));
 
         // Create observable of open file with plugin request
         Observable<OpenFileWithPluginRequest> openFileWithPluginRequestObservable =
-                mBus.register(OpenFileWithPluginRequest.class);
+                sBus.register(OpenFileWithPluginRequest.class);
 
         // Create test observer
         TestObserver<ExtractedText> extractedTextObserver = new TestObserver<>();
@@ -83,7 +102,8 @@ public class AuroraCommunicatorUnitTest {
         String dummyFileRef = "dummy/path/to/file";
         String fileType = "docx";
         InputStream file = new DummyInputStream();
-        mAuroraCommunicator.openFileWithPlugin(dummyFileRef, fileType, file, new MockContext());
+        sAuroraCommunicator.openFileWithPlugin(dummyFileRef, fileType, file,
+                new DummyIntent(), new DummyIntent(), new MockContext());
 
         // Assure that the correct values are contained in request event
         extractedTextObserver.assertSubscribed();
@@ -95,21 +115,24 @@ public class AuroraCommunicatorUnitTest {
     @Test
     public void AuroraCommunicator_getListOfPlugins_shouldReturnListOfPlugins() {
         // Create dummy arguments
+        String uniquePluginName = "com.aurora.dummyplugin";
         String pluginName = "DummyPlugin";
         String pluginDescription = "this is a dummy description.";
-        String pluginVersion = "0.1";
+        int pluginVersionNumber = 1;
+        String pluginVersionCode = "v0.1";
 
         // Create observer to subscribe to observable
         TestObserver<List<Plugin>> observer = new TestObserver<>();
 
         // Call the method under test
-        Observable<List<Plugin>> listObservable = mAuroraCommunicator.getListOfPlugins();
+        Observable<List<Plugin>> listObservable = sAuroraCommunicator.getListOfPlugins();
 
         // Make dummy list
         List<Plugin> pluginList = new ArrayList<>();
 
         // Add fake basic plugin
-        pluginList.add(new Plugin(pluginName, pluginName, null, pluginDescription, pluginVersion));
+        pluginList.add(new Plugin(uniquePluginName, pluginName, null,
+                pluginDescription, pluginVersionNumber, pluginVersionCode));
 
         // Make response containing the list
         ListPluginsResponse response = new ListPluginsResponse(pluginList);
@@ -118,7 +141,7 @@ public class AuroraCommunicatorUnitTest {
         listObservable.subscribe(observer);
 
         // Post response
-        mBus.post(response);
+        sBus.post(response);
 
         // Assert values
         observer.assertSubscribed();
@@ -134,6 +157,16 @@ public class AuroraCommunicatorUnitTest {
         @Override
         public int read() throws IOException {
             return 0;
+        }
+    }
+
+    /**
+     * Dummy stub class for testing purposes
+     */
+    private class DummyIntent extends Intent {
+        @Override
+        public ComponentName resolveActivity(@NonNull PackageManager pm) {
+            return new ComponentName("com.aurora.dummyplugin", "MainActivity");
         }
     }
 }
