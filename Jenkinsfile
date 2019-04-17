@@ -192,7 +192,7 @@ pipeline {
                         mkdir -p /var/www/javadoc/aurora/deploy;
                     fi
 
-                    mv app/build/outputs/apk/release/app-release-signed.apk /var/www/javadoc/aurora/deploy/aurora.apk
+                    mv app/build/outputs/apk/release/app-release.apk /var/www/javadoc/aurora/deploy/aurora.apk
                     """
                 }
             }
