@@ -170,7 +170,7 @@ pipeline {
             when {
                 anyOf {
                     branch 'master';
-                    branch 'ci-autotmatic-deployment' // testing purposes
+                    branch 'ci-automatic-deployment' // testing purposes
                 } 
             }
             steps {
