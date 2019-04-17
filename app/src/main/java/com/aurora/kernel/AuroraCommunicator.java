@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.widget.Toast;
 
+import com.aurora.aurora.R;
 import com.aurora.auroralib.ExtractedText;
 import com.aurora.internalservice.internalcache.CachedProcessedFile;
 import com.aurora.kernel.event.InternalProcessorRequest;
@@ -78,7 +79,7 @@ public class AuroraCommunicator extends Communicator {
             mBus.post(internalProcessorRequest);
         } else {
             Toast.makeText(applicationContext,
-                    "The plugin was not found in the registry!", Toast.LENGTH_LONG).show();
+                    applicationContext.getString(R.string.plugin_not_in_registry), Toast.LENGTH_LONG).show();
         }
 
     }
@@ -103,7 +104,7 @@ public class AuroraCommunicator extends Communicator {
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe((CachedProcessedFile processedFile) -> {
                     if ("{}".equals(processedFile.getJsonRepresentation())) {
-                        Toast.makeText(context, "The cached file was not found", Toast.LENGTH_LONG).show();
+                        Toast.makeText(context, context.getString(R.string.cached_file_not_found), Toast.LENGTH_LONG).show();
                         // TODO: change this such that it processes the original file
                     } else {
                         sendOpenCachedFileRequest(processedFile.getJsonRepresentation(), context);
