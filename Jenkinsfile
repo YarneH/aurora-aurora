@@ -175,40 +175,25 @@ pipeline {
             }
             steps {
                 script {
+                    // Create unsigned apk
+                    sh './gradlew assembleRelease'
+
+
                     // Sign the apk
-                    if (env.BRANCH_NAME == 'master') {
-                        signAndroidApks (
-                            keyStoreId: "key0aurora",
-                            keyAlias: "key0",
-                            apksToSign: "app/build/outputs/apk/release/app-release.apk"
-                        )
+                    signAndroidApks (
+                        keyStoreId: "key0aurora",
+                        keyAlias: "key0",
+                        apksToSign: "app/build/outputs/apk/release/app-release.apk"
+                    )
 
-                        // Move to right directory
-                        sh """
-                        if [ ! -d /var/www/javadoc/aurora/deploy/ ]; then
-                            mkdir -p /var/www/javadoc/aurora/deploy;
-                        fi
+                    // Move to right directory
+                    sh """
+                    if [ ! -d /var/www/javadoc/aurora/deploy/ ]; then
+                        mkdir -p /var/www/javadoc/aurora/deploy;
+                    fi
 
-                        mv app/build/outputs/apk/release/app-release-signed.apk /var/www/javadoc/aurora/deploy/aurora.apk
-                        """
-                    } else {
-                        signAndroidApks (
-                            keyStoreId: "key0aurora",
-                            keyAlias: "key0",
-                            apksToSign: "app/build/outputs/apk/debug/app-debug.apk"
-                        )
-
-                        // Move to right directory
-                        sh """
-                        if [ ! -d /var/www/javadoc/aurora/deploy/ ]; then
-                            mkdir -p /var/www/javadoc/aurora/deploy;
-                        fi
-
-                        mv app/build/outputs/apk/debug/app-debug-signed.apk /var/www/javadoc/aurora/deploy/aurora.apk
-                        """
-                    }
-
-                    
+                    mv app/build/outputs/apk/release/app-release-signed.apk /var/www/javadoc/aurora/deploy/aurora.apk
+                    """
                 }
             }
             post {
