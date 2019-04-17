@@ -104,7 +104,8 @@ public class AuroraCommunicator extends Communicator {
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe((CachedProcessedFile processedFile) -> {
                     if ("{}".equals(processedFile.getJsonRepresentation())) {
-                        Toast.makeText(context, context.getString(R.string.cached_file_not_found), Toast.LENGTH_LONG).show();
+                        Toast.makeText(context, context.getString(R.string.cached_file_not_found),
+                                Toast.LENGTH_LONG).show();
                         // TODO: change this such that it processes the original file
                     } else {
                         sendOpenCachedFileRequest(processedFile.getJsonRepresentation(), context);
