@@ -165,6 +165,28 @@ pipeline {
                 }
             }
         } // Javadoc stage
+
+        stage('Deployment') {
+            when {
+                anyOf {
+                    branch 'master';
+                    branch 'ci-autotmatic-deployment' // testing purposes
+                } 
+            }
+            steps {
+                signAndroidApks (
+                    keyStoreId: "key0aurora",
+                    keyAlias: "key0",
+                    apksToSign: "app/build/outputs/apk/release/*-release.apk"
+                    // uncomment the following line to output the signed APK to a separate directory as described above
+                    signedApkMapping: [ $class: /var/www/javadoc/deployment/aurora.apk ]
+                    // uncomment the following line to output the signed APK as a sibling of the unsigned APK, as described above, or just omit signedApkMapping
+                    // you can override these within the script if necessary
+                    // androidHome: env.ANDROID_HOME
+                    // zipalignPath: env.ANDROID_ZIPALIGN
+                )
+            }
+        }
     } // Stages
     post {
         success {
