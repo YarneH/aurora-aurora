@@ -177,7 +177,7 @@ pipeline {
                 signAndroidApks (
                     keyStoreId: "key0aurora",
                     keyAlias: "key0",
-                    apksToSign: "app/build/outputs/apk/release/*-release.apk"
+                    apksToSign: "app/build/outputs/apk/release/*-release.apk",
                     // uncomment the following line to output the signed APK to a separate directory as described above
                     signedApkMapping: [ $class: /var/www/javadoc/deployment/aurora.apk ]
                     // uncomment the following line to output the signed APK as a sibling of the unsigned APK, as described above, or just omit signedApkMapping
@@ -185,6 +185,14 @@ pipeline {
                     // androidHome: env.ANDROID_HOME
                     // zipalignPath: env.ANDROID_ZIPALIGN
                 )
+            }
+            post {
+                failure {
+                    slack_error_deploy()
+                }
+                success {
+                    slack_deployed()
+                }
             }
         }
     } // Stages
@@ -237,6 +245,10 @@ def slack_error_sonar() {
  */
 def slack_error_doc() {
     slack_report(false, ':x: Javadoc failed', null, 'Javadoc')
+}
+
+def slack_error_deploy() {
+    slack_report(false, ':x: Automatic deployment failed', null, 'Deployment')
 }
 
 
