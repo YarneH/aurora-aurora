@@ -203,7 +203,7 @@ pipeline {
                     slack_deployed()
                 }
             }
-        }
+        } // Deployment stage
     } // Stages
     post {
         success {
