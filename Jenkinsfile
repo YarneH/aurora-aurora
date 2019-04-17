@@ -174,17 +174,23 @@ pipeline {
                 } 
             }
             steps {
-                signAndroidApks (
-                    keyStoreId: "key0aurora",
-                    keyAlias: "key0",
-                    apksToSign: "app/build/outputs/apk/release/*-release.apk",
-                    // uncomment the following line to output the signed APK to a separate directory as described above
-                    signedApkMapping: [ $class: "/var/www/javadoc/deployment/aurora.apk" ]
-                    // uncomment the following line to output the signed APK as a sibling of the unsigned APK, as described above, or just omit signedApkMapping
-                    // you can override these within the script if necessary
-                    // androidHome: env.ANDROID_HOME
-                    // zipalignPath: env.ANDROID_ZIPALIGN
-                )
+                script {
+                    // Sign the apk
+                    signAndroidApks (
+                        keyStoreId: "key0aurora",
+                        keyAlias: "key0",
+                        apksToSign: "app/build/outputs/apk/release/app-release.apk"
+                    )
+
+                    // Move to right directory
+                    sh """
+                    if [ ! -d /var/www/javadoc/aurora/deploy/ ]; then
+                        mkdir -p /var/www/javadoc/aurora/deploy;
+                    fi
+
+                    mv app/build/outputs/apk/release/app-release-signed.apk /var/www/javadoc/aurora/deploy/aurora.apk
+                    """
+                }
             }
             post {
                 failure {
