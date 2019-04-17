@@ -183,7 +183,7 @@ pipeline {
                     signAndroidApks (
                         keyStoreId: "key0aurora",
                         keyAlias: "key0",
-                        apksToSign: "app/build/outputs/apk/release/app-release.apk"
+                        apksToSign: "app/build/outputs/apk/release/app-release-unsigned.apk"
                     )
 
                     // Move to right directory
