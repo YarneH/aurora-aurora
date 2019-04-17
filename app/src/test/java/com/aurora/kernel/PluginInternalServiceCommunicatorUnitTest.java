@@ -5,6 +5,7 @@ import com.aurora.internalservice.internalprocessor.FileTypeNotSupportedExceptio
 import com.aurora.internalservice.internalprocessor.InternalTextProcessor;
 import com.aurora.kernel.event.InternalProcessorRequest;
 import com.aurora.kernel.event.InternalProcessorResponse;
+import com.aurora.plugin.Plugin;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -58,7 +59,8 @@ public class PluginInternalServiceCommunicatorUnitTest {
         observable.map(InternalProcessorResponse::getExtractedText).subscribe(testObserver);
 
         // Create request to process file and put on bus
-        InternalProcessorRequest request = new InternalProcessorRequest(ref, type, null);
+        InternalProcessorRequest request = new InternalProcessorRequest(ref, type, null,
+                Plugin.getDefaultInternalServices());
         mBus.post(request);
 
         // Assert that dummy extracted text was received

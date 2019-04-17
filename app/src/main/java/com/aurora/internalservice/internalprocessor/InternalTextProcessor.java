@@ -26,8 +26,6 @@ public class InternalTextProcessor implements InternalService {
      */
     public ExtractedText processFile(InputStream file, String fileRef, String type)
             throws FileTypeNotSupportedException {
-        Log.d("InternalTextProcessing", "Not implemented yet!");
-
         ExtractedText extractedText;
         TextExtractor extractor = fileFormatExtractorMap.get(type);
         if (extractor != null) {

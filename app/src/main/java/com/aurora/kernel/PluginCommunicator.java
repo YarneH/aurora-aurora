@@ -40,7 +40,8 @@ public class PluginCommunicator extends Communicator {
 
         // When a request comes in, call appropriate function
         mOpenFileWithPluginRequestObservable.subscribe((OpenFileWithPluginRequest request) ->
-                openFileWithPlugin(request.getExtractedText(), request.getContext())
+                openFileWithPlugin(request.getExtractedText(), request.getPluginAction(),
+                        request.getChooser(), request.getContext())
         );
 
         // Register for requests to open a cached file with plugin
@@ -64,13 +65,11 @@ public class PluginCommunicator extends Communicator {
      *
      * @param extractedText the extracted text of the file to open
      *                      TODO: add tests for this method
+     * @param pluginAction  the target intent of the chooser
+     * @param chooser       the plugin that was selected by the user in the chooser menu
      * @param context       the android context
      */
-    private void openFileWithPlugin(ExtractedText extractedText, Context context) {
-        Intent pluginAction = new Intent(Constants.PLUGIN_ACTION);
-        // Create chooser
-        Intent chooser = Intent.createChooser(pluginAction, context.getString(R.string.select_plugin));
-
+    private void openFileWithPlugin(ExtractedText extractedText, Intent pluginAction, Intent chooser, Context context) {
         String extractedTextInJSON = extractedText.toJSON();
         pluginAction.putExtra(Constants.PLUGIN_INPUT_EXTRACTED_TEXT, extractedTextInJSON);
 

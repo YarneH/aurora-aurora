@@ -21,6 +21,7 @@ import io.reactivex.schedulers.Schedulers;
  */
 public final class Kernel {
     private Bus mBus;
+    private Context mContext;
 
     private AuroraCommunicator mAuroraCommunicator;
     private PluginCommunicator mPluginCommunicator;
@@ -41,12 +42,20 @@ public final class Kernel {
      *                           memory leaks.
      */
     public Kernel(Context applicationContext) {
+        this.mContext = applicationContext;
+
+        // Create 1 bus to be shared among all communicators
         this.mBus = new Bus(Schedulers.computation());
 
-        this.mAuroraCommunicator = new AuroraCommunicator(mBus);
+        // Initialize plugin config
+        initializePluginConfig();
 
-        this.mProcessingCommunicator = new ProcessingCommunicator(mBus);
+        // Create plugin registry that keeps info of the plugins
         this.mPluginRegistry = new PluginRegistry(mProcessingCommunicator, PLUGINS_CFG, applicationContext);
+
+        // Create the different communicators
+        this.mAuroraCommunicator = new AuroraCommunicator(mBus, mPluginRegistry);
+        this.mProcessingCommunicator = new ProcessingCommunicator(mBus);
         this.mPluginCommunicator = new PluginCommunicator(mBus, mPluginRegistry);
 
         // Create internal text processor for the PluginInternalServiceCommunicator
@@ -56,9 +65,6 @@ public final class Kernel {
         // Create cache
         InternalCache internalCache = new InternalCache(applicationContext);
         this.mAuroraInternalServiceCommunicator = new AuroraInternalServiceCommunicator(mBus, internalCache);
-
-        // Initialize plugin config
-        initializePluginConfig();
     }
 
 
@@ -91,7 +97,7 @@ public final class Kernel {
      * Private helper method that checks if the plugin-config file already exists, and creates one when necessary
      */
     private void initializePluginConfig() {
-        File file = new File(PLUGINS_CFG);
+        File file = new File(mContext.getFilesDir(), PLUGINS_CFG);
 
         // If the file does not exist, create one and write an empty JSON array to it
         if (!file.exists()) {

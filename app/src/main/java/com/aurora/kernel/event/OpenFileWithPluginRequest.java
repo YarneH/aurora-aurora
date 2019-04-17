@@ -1,6 +1,7 @@
 package com.aurora.kernel.event;
 
 import android.content.Context;
+import android.content.Intent;
 
 import com.aurora.auroralib.ExtractedText;
 
@@ -14,17 +15,38 @@ public class OpenFileWithPluginRequest extends Event {
     private ExtractedText mExtractedText;
 
     /**
+     * The target intent of the chooser
+     */
+    private Intent mPluginAction;
+
+    /**
+     * The selected plugin
+     */
+    private Intent mChooser;
+
+    /**
      * The android context
      */
     private Context mContext;
 
-    public OpenFileWithPluginRequest(ExtractedText extractedText, Context context) {
+    public OpenFileWithPluginRequest(ExtractedText extractedText, Intent pluginAction,
+                                     Intent chooser, Context context) {
         mExtractedText = extractedText;
+        mPluginAction = pluginAction;
+        mChooser = chooser;
         mContext = context;
     }
 
     public ExtractedText getExtractedText() {
         return mExtractedText;
+    }
+
+    public Intent getPluginAction() {
+        return mPluginAction;
+    }
+
+    public Intent getChooser() {
+        return mChooser;
     }
 
     public Context getContext() {
