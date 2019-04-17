@@ -169,8 +169,7 @@ pipeline {
         stage('Deployment') {
             when {
                 anyOf {
-                    branch 'master';
-                    branch 'ci-automatic-deployment' // testing purposes
+                    branch 'master'
                 } 
             }
             steps {
