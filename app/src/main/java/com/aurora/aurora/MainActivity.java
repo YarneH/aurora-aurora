@@ -300,17 +300,14 @@ public class MainActivity extends AppCompatActivity
             AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
             alertDialogBuilder.setView(promptView);
             alertDialogBuilder.setCancelable(true)
-                    .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialogInterface, int i) {
-                            // Toast for demo
-                            if (mToast != null) {
-                                mToast.cancel();
-                            }
-                            mToast = Toast.makeText(MainActivity.this, "Search for "
-                                    + userInput.getText().toString(), Toast.LENGTH_SHORT);
-                            mToast.show();
+                    .setPositiveButton("Ok", (DialogInterface dialogInterface, int i) -> {
+                        // Toast for demo
+                        if (mToast != null) {
+                            mToast.cancel();
                         }
+                        mToast = Toast.makeText(MainActivity.this, "Search for "
+                                + userInput.getText().toString(), Toast.LENGTH_SHORT);
+                        mToast.show();
                     });
             // Create and show the pop-up
             alertDialogBuilder.create().show();
