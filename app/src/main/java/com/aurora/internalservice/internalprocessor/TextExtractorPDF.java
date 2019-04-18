@@ -1,10 +1,11 @@
 package com.aurora.internalservice.internalprocessor;
 
+import android.util.Log;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
-import java.util.Calendar;
 import java.util.Iterator;
 import java.util.regex.Pattern;
 
@@ -14,8 +15,12 @@ import com.itextpdf.text.pdf.PdfReader;
 import com.itextpdf.text.pdf.parser.TaggedPdfReaderTool;
 
 public class TextExtractorPDF implements TextExtractor {
+
+    private static final int CHAR_TO_INT = 48;
+    private static final int OFFSET_XML_HEADING_TAGS = 4;
+    private static final int OFFSET_XML_P_TAGS = 3;
+
     /**
-     * TODO: This method will extract the text using iText
      * @param fileRef a reference to where the file can be found
      * @return the extracted text from the file on fileRef
      */
@@ -28,10 +33,11 @@ public class TextExtractorPDF implements TextExtractor {
             pdfreader = new PdfReader(file);
             reader.convertToXml(pdfreader, baos);
         } catch (IOException e) {
-            e.printStackTrace();
+            Log.e("IOexception PDF Reader:",
+                    "Error opening and reading the pdf file: " + e.getLocalizedMessage());
         }
         String[] xmlLines = baos.toString().split("\n");
-        ExtractedText extractedText = new ExtractedText("demoo11.pdf", Calendar.getInstance().getTime());
+        ExtractedText extractedText = new ExtractedText(fileRef, null);
         Iterator<String> iterable = Arrays.asList(xmlLines).iterator();
         boolean lineProcessedIteration;
         while (iterable.hasNext()) {
@@ -40,15 +46,15 @@ public class TextExtractorPDF implements TextExtractor {
             Section section = new Section();
             if (Pattern.matches("^<[h,H][0-9]>.*", line)) {
                 lineProcessedIteration = true;
-                String title = line.substring(4);
-                section.setLevel(line.charAt(2) - 48);
+                StringBuilder title = new StringBuilder(line.substring(OFFSET_XML_HEADING_TAGS));
+                section.setLevel(line.charAt(2) - CHAR_TO_INT);
                 while (!Pattern.matches(".*</[h, H]" + String.valueOf(section.getLevel()) + ">$", line)
                         && iterable.hasNext()) {
                     line = iterable.next();
-                    title += line;
+                    title.append(line);
                 }
-                title = title.substring(0, title.length() - 5);
-                section.setTitle(title);
+                title = new StringBuilder(title.substring(0, title.length() - (OFFSET_XML_HEADING_TAGS + 1)));
+                section.setTitle(title.toString());
                 if (iterable.hasNext()) {
                     line = iterable.next();
                 } else {
@@ -59,15 +65,15 @@ public class TextExtractorPDF implements TextExtractor {
             line = stripEmptyParagraphs(iterable, line);
             if (iterable.hasNext() && Pattern.matches("^<[p,P]>.*", line)) {
                 lineProcessedIteration = true;
-                String paragraph;
-                paragraph = line.substring(3);
+                StringBuilder paragraph;
+                paragraph = new StringBuilder(line.substring(OFFSET_XML_P_TAGS));
 
                 while (!Pattern.matches(".*</[p,P]>$", line) && iterable.hasNext()) {
                     line = iterable.next();
-                    paragraph += line;
+                    paragraph.append(line);
                 }
-                paragraph = paragraph.substring(0, paragraph.length() - 4);
-                section.setBody(paragraph);
+                paragraph = new StringBuilder(paragraph.substring(0, paragraph.length() - (OFFSET_XML_P_TAGS + 1)));
+                section.setBody(paragraph.toString());
             }
             if (lineProcessedIteration){
                 extractedText.addSection(section);
@@ -77,13 +83,20 @@ public class TextExtractorPDF implements TextExtractor {
         return extractedText;
     }
 
-    private String stripEmptyParagraphs(Iterator<String> iterable, String line) {
+    /**
+     * As long as a paragraph is empty, skip to the next one
+     * @param iterable the extracted XML
+     * @param line the current line
+     * @return the next line not containing empty paragraphs
+     */
+    private static String stripEmptyParagraphs(Iterator<String> iterable, String line) {
         while (Pattern.matches("^<[P, p]> </[P,p]>$",line)) {
             if (iterable.hasNext()) {
                 line = iterable.next();
-            } else return "";
+            } else {
+                return "";
+            }
         }
-        ;
         return line;
     }
 }
