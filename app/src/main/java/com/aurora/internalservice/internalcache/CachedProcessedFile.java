@@ -22,20 +22,36 @@ public class CachedProcessedFile implements InternallyProcessedFile {
      */
     private String mUniquePluginName;
 
+    /**
+     * Creates a new CachedProcessedFile instance
+     *
+     * @param jsonRepresentation the json representation of the processed file
+     * @param fileRef the file reference to the original file
+     * @param uniquePluginName the name of the plugin that the file was processed with
+     */
     public CachedProcessedFile(String jsonRepresentation, String fileRef, String uniquePluginName) {
         mJsonRepresentation = jsonRepresentation;
         mFileRef = fileRef;
         mUniquePluginName = uniquePluginName;
     }
 
+    /**
+     * @return the json representation of the processed file, in String format
+     */
     public String getJsonRepresentation() {
         return mJsonRepresentation;
     }
 
+    /**
+     * @return the file reference to the original file
+     */
     public String getFileRef() {
         return mFileRef;
     }
 
+    /**
+     * @return the name of the plugin that the file was processed with
+     */
     public String getUniquePluginName() {
         return mUniquePluginName;
     }
