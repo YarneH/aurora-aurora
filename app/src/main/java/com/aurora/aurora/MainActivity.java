@@ -128,7 +128,7 @@ public class MainActivity extends AppCompatActivity
      */
     protected void selectFile() {
         final String[] mimeTypes = {
-                "application/vnd.openxmlformats-officedocument.wordprocessingml.document", "text/plain"};
+                "application/vnd.openxmlformats-officedocument.wordprocessingml.document", "text/plain", "application/pdf"};
         Intent intent = new Intent();
         intent.setType("* / *");
         intent.setAction(Intent.ACTION_GET_CONTENT);
