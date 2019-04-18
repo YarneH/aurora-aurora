@@ -1,6 +1,7 @@
 package com.aurora.aurora;
 
 import android.content.ContentResolver;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -299,14 +300,17 @@ public class MainActivity extends AppCompatActivity
             AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
             alertDialogBuilder.setView(promptView);
             alertDialogBuilder.setCancelable(true)
-                    .setPositiveButton("Ok", (dialogInterface, i) -> {
-                        // Toast for demo
-                        if (mToast != null) {
-                            mToast.cancel();
+                    .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            // Toast for demo
+                            if (mToast != null) {
+                                mToast.cancel();
+                            }
+                            mToast = Toast.makeText(MainActivity.this, "Search for "
+                                    + userInput.getText().toString(), Toast.LENGTH_SHORT);
+                            mToast.show();
                         }
-                        mToast = Toast.makeText(MainActivity.this, "Search for "
-                                + userInput.getText().toString(), Toast.LENGTH_SHORT);
-                        mToast.show();
                     });
             // Create and show the pop-up
             alertDialogBuilder.create().show();
