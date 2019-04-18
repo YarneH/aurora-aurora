@@ -141,6 +141,9 @@ public class Plugin {
         return mInternalServices;
     }
 
+    /**
+     * @return a default set of internal services in case the internal services were not explicitly set
+     */
     public static Set<InternalServices> getDefaultInternalServices() {
         return DEFAULT_INTERNAL_SERVICES;
     }
