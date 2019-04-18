@@ -92,30 +92,51 @@ public class Plugin {
         this(uniqueName, name, pluginLogo, description, versionNumber, versionCode, DEFAULT_INTERNAL_SERVICES);
     }
 
+    /**
+     * @return the unique name of the plugin
+     */
     public String getUniqueName() {
         return mUniqueName;
     }
 
+    /**
+     * @return the display name of the plugin
+     */
     public String getName() {
         return mName;
     }
 
+    /**
+     * @return the plugin logo, or null if no logo
+     */
     public File getPluginLogo() {
         return mPluginLogo;
     }
 
+    /**
+     * @return a description of what the plugin is used for
+     */
     public String getDescription() {
         return mDescription;
     }
 
+    /**
+     * @return the version number of the plugin. For example: 1,2,3,...
+     */
     public int getVersionNumber() {
         return mVersionNumber;
     }
 
+    /**
+     * @return the version code of the plugin. For example: "v0.1", "v1.1.2", "v2.3.2-beta",...
+     */
     public String getVersionCode() {
         return mVersionCode;
     }
 
+    /**
+     * @return the set of internal services that should be run on files processed by this plugin
+     */
     public Set<InternalServices> getInternalServices() {
         return mInternalServices;
     }
