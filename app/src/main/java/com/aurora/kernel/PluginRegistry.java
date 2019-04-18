@@ -44,6 +44,12 @@ class PluginRegistry {
      */
     private Context mContext;
 
+    /**
+     * Creates a new PluginRegistry. There should be only one instance at a time
+     * @param processingCommunicator a reference to the ProcessingCommunicator TODO: might be removed
+     * @param configFileRef a string containing the path to the config file of the registry
+     * @param context a reference to the android context, necessary for file IO
+     */
     PluginRegistry(ProcessingCommunicator processingCommunicator, String configFileRef, Context context) {
         this.mProcessingCommunicator = processingCommunicator;
 
