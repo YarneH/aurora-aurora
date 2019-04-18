@@ -30,12 +30,23 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
  * Communicator class that communicates to Aurora app environment
  */
 public class AuroraCommunicator extends Communicator {
+    /**
+     * Tag for logging purposes
+     */
     private static final String CLASS_TAG = "AuroraCommunicator";
 
+    /**
+     * A reference to the plugin registry
+     */
     private PluginRegistry mPluginRegistry;
 
-    public AuroraCommunicator(Bus mBus, PluginRegistry pluginRegistry) {
-        super(mBus);
+    /**
+     * Creates an AuroraCommunicator. There should be only one AuroraCommunicator at a time
+     * @param bus A reference to the unique bus instance over which the communicators will communicate events
+     * @param pluginRegistry a reference to the plugin registry
+     */
+    public AuroraCommunicator(Bus bus, PluginRegistry pluginRegistry) {
+        super(bus);
         mPluginRegistry = pluginRegistry;
     }
 

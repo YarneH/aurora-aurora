@@ -21,15 +21,37 @@ import io.reactivex.Observable;
  * Communicator that communicates with Plugin environments
  */
 public class PluginCommunicator extends Communicator {
+    /**
+     * Tag for logging purposes
+     */
     private static final String CLASS_TAG = "PluginCommunicator";
 
+    /**
+     * A reference to the plugin registry
+     */
     private PluginRegistry mPluginRegistry;
 
+    /**
+     * An observable keeping track of incoming OpenFileWithPluginRequests
+     */
     private Observable<OpenFileWithPluginRequest> mOpenFileWithPluginRequestObservable;
+
+    /**
+     * An observable keeping track of incoming OpenCachedFileWithPluginRequests
+     */
     private Observable<OpenCachedFileWithPluginRequest> mOpenCachedFileWithPluginRequestObservable;
+
+    /**
+     * An observable keeping track of incomong ListPluginsRequests
+     */
     private Observable<ListPluginsRequest> mListPluginsRequestObservable;
 
 
+    /**
+     * Creates a PluginCommunicator. There should be only one instance at a time
+     * @param bus a reference to the unique bus instances that all communicators should use to communicate events
+     * @param pluginRegistry a reference to the plugin registry
+     */
     public PluginCommunicator(Bus bus, PluginRegistry pluginRegistry) {
         super(bus);
 
