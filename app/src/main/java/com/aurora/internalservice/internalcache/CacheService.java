@@ -1,7 +1,6 @@
 package com.aurora.internalservice.internalcache;
 
 import android.app.Service;
-import android.content.Context;
 import android.content.Intent;
 import android.os.IBinder;
 import android.util.Log;
@@ -27,7 +26,7 @@ public class CacheService extends Service {
     }
 
     private static class CacheThread extends Thread {
-        private String pluginObject=null;
+        private String pluginObject;
         private int returnCode = -1;
         //private Context applicationContext = null;
 
