@@ -80,29 +80,6 @@ public class AuroraCommunicator extends Communicator {
 
         // Post request on the bus
         mBus.post(internalProcessorRequest);
-
-        // NOSONAR
-        /* TODO: remove these comments (but not the code) when plugins are registered
-        TODO: fix the issue that selectedPluginName is 'android' when there is more than one plugin
-        // Get internal processing parameters for the plugin from the plugin registry
-        String selectedPluginName = getChosenPlugin(pluginAction, applicationContext);
-        Plugin selectedPlugin = mPluginRegistry.getPlugin(selectedPluginName);
-
-
-        // If the plugin exists in the registry, get the set of supported internal services
-        if (selectedPlugin != null) {
-            Set<InternalServices> internalServices = selectedPlugin.getInternalServices();
-
-            InternalProcessorRequest internalProcessorRequest =
-                    new InternalProcessorRequest(fileRef, fileType, file, internalServices);
-
-            // Post request on the bus
-            mBus.post(internalProcessorRequest);
-        } else {
-            Toast.makeText(applicationContext,
-                    applicationContext.getString(R.string.plugin_not_in_registry), Toast.LENGTH_LONG).show();
-        }
-        */
     }
 
 
