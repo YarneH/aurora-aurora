@@ -27,12 +27,16 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.aurora.auroralib.Constants;
 import com.aurora.kernel.AuroraCommunicator;
 import com.aurora.kernel.Kernel;
+import com.aurora.plugin.Plugin;
 import com.google.firebase.analytics.FirebaseAnalytics;
 
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
+import java.util.Objects;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -69,6 +73,13 @@ public class MainActivity extends AppCompatActivity
         /* Set up kernel */
         mKernel = new Kernel(this.getApplicationContext());
         mAuroraCommunicator = mKernel.getAuroraCommunicator();
+
+        /*
+        Set up plugins
+        TODO: Now this is static, later the pluginmarket should register new plugins.
+         */
+        registerPlugins();
+
 
         /* Initialize FirebaseAnalytics */
         mFirebaseAnalytics = FirebaseAnalytics.getInstance(this);
@@ -146,7 +157,7 @@ public class MainActivity extends AppCompatActivity
                     String type = MimeTypeMap.getSingleton().getExtensionFromMimeType(cR.getType(textFile));
                     Log.i("MIME", type);
 
-                    /**
+                    /*
                      * Firebase Analytics
                      * TODO: convert to custom event, see https://firebase.google.com/docs/analytics/android/events
                      */
@@ -155,15 +166,27 @@ public class MainActivity extends AppCompatActivity
                     bundle.putString(FirebaseAnalytics.Param.CONTENT_TYPE, type);
                     mFirebaseAnalytics.logEvent("NEW_FILE_OPENED", bundle);
 
+                    // Make inputstream reader for aurora communicator
                     InputStream read = getContentResolver().openInputStream(textFile);
+
+                    // Create intent to open file with a certain plugin
+                    Intent pluginAction = new Intent(Constants.PLUGIN_ACTION);
+
+                    // Create chooser to let user choose the plugin
+                    Intent chooser = Intent.createChooser(pluginAction, getString(R.string.select_plugin));
+
                     mAuroraCommunicator.openFileWithPlugin(textFile.toString(), type,
-                            read, this.getApplicationContext());
+                            read, pluginAction, chooser, getApplicationContext());
+
+                    Objects.requireNonNull(read).close();
                 } else {
                     Toast.makeText(this, "The selected file was null", Snackbar.LENGTH_LONG).show();
                 }
             } catch (FileNotFoundException e) {
                 Toast.makeText(this, "The file could not be found", Snackbar.LENGTH_LONG).show();
                 Log.e("FILE_NOT_FOUND", "The file could not be found", e);
+            } catch (IOException e) {
+                Log.e("FILE_CLOSE", "Failed to close the file: " + textFile.toString(), e);
             }
         }
     }
@@ -260,6 +283,41 @@ public class MainActivity extends AppCompatActivity
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    /**
+     * Helper method that register the plugins with their info in the pluginregistry
+     * TODO: when the pluginmarket is implemented, remove this method
+     */
+    private void registerPlugins() {
+        final Plugin basicPlugin = new Plugin(
+                "com.aurora.basicplugin",
+                "Basic Plugin",
+                null,
+                "Basic plugin to open any file and display extracted text.",
+                4,
+                "v0.4");
+
+        final Plugin souschefPlugin = new Plugin(
+                "com.aurora.souschef",
+                "Souschef",
+                null,
+                "Plugin to open recipes and display them in an enhanced way.",
+                4,
+                "v0.4");
+
+        final Plugin paperViewerPlugin = new Plugin(
+                "com.aurora.paperviewer",
+                "Paperviewer",
+                null,
+                "Plugin to open papers and display them in an enhanced way.",
+                4,
+                "v0.4");
+
+        // Register plugins in the registry
+        mAuroraCommunicator.registerPlugin(basicPlugin);
+        mAuroraCommunicator.registerPlugin(souschefPlugin);
+        mAuroraCommunicator.registerPlugin(paperViewerPlugin);
     }
 }
 

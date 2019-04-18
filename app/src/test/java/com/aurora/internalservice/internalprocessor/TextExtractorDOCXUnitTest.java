@@ -44,7 +44,6 @@ public class TextExtractorDOCXUnitTest {
     }
 
     // Checks if the title is extracted correctly
-    @Ignore("The implementation of DOCX extraction is not yet on this level")
     @Test
     public void extract_shouldExtractTitleCorrectly() {
 
@@ -54,7 +53,6 @@ public class TextExtractorDOCXUnitTest {
     }
 
     // Checks if the title of a section is extracted correctly
-    @Ignore
     @Test
     public void extract_shouldExtractSectionTitleCorrectly() {
         assertEquals("DOCX text extraction: SectionTitle is not extracted correctly",
@@ -63,7 +61,6 @@ public class TextExtractorDOCXUnitTest {
     }
 
     // Checks if the body of a section is extracted correctly
-    @Ignore
     @Test
     public void extract_shouldExtractSectionBodyCorrectly() {
         assertEquals("DOCX text extraction: Section is not extracted correctly",
