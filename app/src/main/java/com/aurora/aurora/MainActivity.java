@@ -40,8 +40,8 @@ import java.util.Objects;
 /**
  * The main activity of the application, started when the app is opened.
  * See the <a href=https://developer.android.com/guide/components/activities/activity-lifecycle>
- *     android lifecycle (weblink)
- *     </a>
+ * android lifecycle (weblink)
+ * </a>
  * for more information.
  * onCreate is called when this activity is launched.
  * <br>
@@ -92,9 +92,7 @@ public class MainActivity extends AppCompatActivity
     private FirebaseAnalytics mFirebaseAnalytics = null;
 
     /**
-     * Runs on startup of the activity, in this case on startup of the app.
-     *
-     * @param savedInstanceState Bundle with the state to reload.
+     * {@inheritDoc}
      */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -162,11 +160,11 @@ public class MainActivity extends AppCompatActivity
      * </p>
      * <br>
      * <p>
-     *     For example: <br>
+     * For example: <br>
      * final String[] ACCEPT_MIME_TYPES = {
-     *         "application/pdf",
-     *         "image/*"
-     *   };
+     * "application/pdf",
+     * "image/*"
+     * };
      * </p>
      * <br>
      * <p>
@@ -197,10 +195,10 @@ public class MainActivity extends AppCompatActivity
      * @param requestCode code used to send the intent
      * @param resultCode  status code
      * @param data        resulting data, a Uri in case of fileselector
-     * Is called when returning from the file-selection Intent.
+     *                    Is called when returning from the file-selection Intent.
      * @param requestCode code used to send the intent. {@value REQUEST_FILE_GET} in this case.
-     * @param resultCode status code
-     * @param data resulting data, a URI in case of file-selector
+     * @param resultCode  status code
+     * @param data        resulting data, a URI in case of file-selector
      */
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -263,6 +261,7 @@ public class MainActivity extends AppCompatActivity
 
     /**
      * Inflate the menu; this adds items to the action bar if it is present.
+     *
      * @param menu The menu item that should be inflated.
      * @return boolean whether or not successful.
      */
@@ -274,13 +273,14 @@ public class MainActivity extends AppCompatActivity
 
     /**
      * <p>
-     *     Handles the selection of menu options in the AppBar (top bar).
+     * Handles the selection of menu options in the AppBar (top bar).
      * </p>
      * <p>
-     *     The action bar will automatically handle clicks on the Home/Up button, so long
-     *     as you specify a parent activity in AndroidManifest.xml.
-     *     The AppBar of this activity only has the search button.
+     * The action bar will automatically handle clicks on the Home/Up button, so long
+     * as you specify a parent activity in AndroidManifest.xml.
+     * The AppBar of this activity only has the search button.
      * </p>
+     *
      * @param item The selected menu item
      * @return
      */
@@ -321,13 +321,14 @@ public class MainActivity extends AppCompatActivity
 
     /**
      * <p>
-     *     Handles selection of options in NavigationView (Drawer layout).
+     * Handles selection of options in NavigationView (Drawer layout).
      * </p>
      * <p>
-     *     The NavigationView contains links to different screens.
-     *     Selecting one of these should navigate to the corresponding
-     *     view.
+     * The NavigationView contains links to different screens.
+     * Selecting one of these should navigate to the corresponding
+     * view.
      * </p>
+     *
      * @param item Selected menu item.
      * @return whether or not successful.
      */

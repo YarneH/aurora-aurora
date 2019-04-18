@@ -25,9 +25,9 @@ public class CachedFileInfo {
     /**
      * Creates a new CachedFileInfo instance
      *
-     * @param fileRef the file reference to the original file
+     * @param fileRef          the file reference to the original file
      * @param uniquePluginName the name of plugin that the file was processed with
-     * @param lastOpened the date that the file was last opened.
+     * @param lastOpened       the date that the file was last opened.
      */
     public CachedFileInfo(String fileRef, String uniquePluginName, Date lastOpened) {
         mFileRef = fileRef;
@@ -38,7 +38,7 @@ public class CachedFileInfo {
     /**
      * Creates a new CachedFileInfo instance with the last opened date set to now
      *
-     * @param fileRef the file reference to the original file
+     * @param fileRef          the file reference to the original file
      * @param uniquePluginName the name of plugin that the file was processed with
      * @see #CachedFileInfo(String, String, Date)
      */

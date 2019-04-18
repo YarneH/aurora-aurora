@@ -42,9 +42,7 @@ public class FeedbackActivity extends AppCompatActivity {
     private EditText mEditTextFeedback = null;
 
     /**
-     * Runs on startup of the activity, in this case when the user navigates to the feedback screen.
-     *
-     * @param savedInstanceState
+     * {@inheritDoc}
      */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,7 +59,7 @@ public class FeedbackActivity extends AppCompatActivity {
      * When the user clicks on the 'Send'-button,
      * this will start a SendFeedbackTask and notice the user whether it succeeded or not
      *
-     * @param view
+     * @param view a reference to the view
      */
     public void onFeedbackClick(View view) {
         boolean success = false;

@@ -447,7 +447,7 @@ public class InternalCache implements InternalService {
          * Creates a new CacheRegistryElement
          *
          * @param uniquePluginName the name of the plugin that processed the cached files
-         * @param cachedFileRefs an array of CachedFileInfo objects
+         * @param cachedFileRefs   an array of CachedFileInfo objects
          */
         public CacheRegistryElement(String uniquePluginName, CachedFileInfo[] cachedFileRefs) {
             this.uniquePluginName = uniquePluginName;
