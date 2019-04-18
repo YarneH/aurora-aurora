@@ -7,7 +7,7 @@ import android.support.annotation.NonNull;
  *
  * @see RemoveFromCacheResponse
  */
-public class RemoveFromCacheRequest extends Event {
+public class RemoveFromCacheRequest implements Event {
     /**
      * a reference to the file to be removed from the cache. If null, either all files from the specified plugin are
      * deleted, or if the plugin name is null too, clears the cache.

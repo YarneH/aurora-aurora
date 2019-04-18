@@ -9,7 +9,7 @@ import java.util.Set;
  * Event to request that a file is processed with a InternalProcessor
  * @see InternalProcessorResponse
  */
-public class InternalProcessorRequest extends Event {
+public class InternalProcessorRequest implements Event {
 
     /**
      * A reference to the file to be opened

@@ -6,7 +6,7 @@ import com.aurora.auroralib.PluginObject;
  * A class that can be used to request that a certain file representation is cached
  * @see CacheFileResponse
  */
-public class CacheFileRequest extends Event {
+public class CacheFileRequest implements Event {
     /**
      * A reference to the file that needs to be cached
      */

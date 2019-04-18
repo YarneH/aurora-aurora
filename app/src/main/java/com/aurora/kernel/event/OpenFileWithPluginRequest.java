@@ -8,7 +8,7 @@ import com.aurora.auroralib.ExtractedText;
 /**
  * Event to request that a file is opened with a plugin
  */
-public class OpenFileWithPluginRequest extends Event {
+public class OpenFileWithPluginRequest implements Event {
     /**
      * The extracted text from the file to represent
      */

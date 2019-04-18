@@ -6,7 +6,7 @@ package com.aurora.kernel.event;
  * Another possibility is to query the cache for all files that it has stored.
  * @see QueryCacheResponse
  */
-public class QueryCacheRequest extends Event {
+public class QueryCacheRequest implements Event {
     /**
      * A reference to the file to be queried (if there is a specific file. Null if cache is queried for all files
      */

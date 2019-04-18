@@ -7,7 +7,7 @@ import com.aurora.internalservice.internalcache.CachedProcessedFile;
  *
  * @see RetrieveFileFromCacheRequest
  */
-public class RetrieveFileFromCacheResponse extends Event {
+public class RetrieveFileFromCacheResponse implements Event {
     /**
      * The processed file representation
      */

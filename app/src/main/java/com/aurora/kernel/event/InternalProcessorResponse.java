@@ -6,7 +6,7 @@ import com.aurora.auroralib.ExtractedText;
  * Event to respond that a file has been processed internally
  * @see InternalProcessorRequest
  */
-public class InternalProcessorResponse extends Event {
+public class InternalProcessorResponse implements Event {
     /**
      * The text extracted by the internal processing
      */

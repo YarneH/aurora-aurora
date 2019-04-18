@@ -5,7 +5,7 @@ import android.content.Context;
 /**
  * Event used to open an already cached file with a given plugin
  */
-public class OpenCachedFileWithPluginRequest extends Event {
+public class OpenCachedFileWithPluginRequest implements Event {
     /**
      * A json representation of the processed file, in String format
      */

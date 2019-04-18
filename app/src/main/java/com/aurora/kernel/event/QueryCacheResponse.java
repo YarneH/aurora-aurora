@@ -11,7 +11,7 @@ import java.util.List;
  *
  * @see QueryCacheRequest
  */
-public class QueryCacheResponse extends Event {
+public class QueryCacheResponse implements Event {
     /**
      * A list of info objects about the cached files
      */

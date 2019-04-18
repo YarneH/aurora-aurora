@@ -5,7 +5,7 @@ package com.aurora.kernel.event;
  *
  * @see RemoveFromCacheRequest
  */
-public class RemoveFromCacheResponse extends Event {
+public class RemoveFromCacheResponse implements Event {
     /**
      * Indicates whether the file(s) were removed successfully from the cache
      */
