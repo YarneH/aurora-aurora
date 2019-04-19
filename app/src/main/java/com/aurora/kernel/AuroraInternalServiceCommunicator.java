@@ -47,6 +47,11 @@ public class AuroraInternalServiceCommunicator extends Communicator {
      */
     private Observable<RemoveFromCacheRequest> mRemoveFromCacheRequestObservable;
 
+    /**
+     * Creates an AuroraInternalServiceCommunicator. There should be only one instance at a time
+     * @param bus a reference to the unique bus instance over which the communicators will communicate events
+     * @param internalCache a reference to the internal cache
+     */
     public AuroraInternalServiceCommunicator(Bus bus, InternalCache internalCache) {
         super(bus);
         mInternalCache = internalCache;
