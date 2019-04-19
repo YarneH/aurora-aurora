@@ -1,15 +1,8 @@
 package com.aurora.kernel.event;
 
-import com.aurora.kernel.Communicator;
-
 /**
- * Event class packing together some common fields every event should have
+ * Common event interface that all other events in the kernel should implement.
+ * Else they cannot be processed by the event system.
  */
-public abstract class Event {
-    protected Communicator mDestination;
-    protected Communicator mSource;
-
-    public Event() {
-
-    }
+public interface Event {
 }

@@ -29,17 +29,32 @@ public class PluginInternalServiceCommunicator extends Communicator {
      */
     private Observable<InternalProcessorRequest> mInternalProcessorRequestObservable;
 
+    /**
+     * Creates a PluginInternalServiceCommunicator. There should be only one instance at a time
+     *
+     * @param mBus      a reference to the unique bus instance that all communicators should be using for
+     *                  communicating events
+     * @param processor a reference to the InternalTextProcessor
+     */
     public PluginInternalServiceCommunicator(Bus mBus, InternalTextProcessor processor) {
         super(mBus);
         mInternalTextProcessor = processor;
 
         mInternalProcessorRequestObservable = mBus.register(InternalProcessorRequest.class);
         mInternalProcessorRequestObservable.subscribe((InternalProcessorRequest request) ->
-                processFileWithInternalProcessor(request.getFile(),
-                        request.getFileRef(), request.getFileType(), request.getInternalServices()));
+                processFileWithInternalProcessor(request.getFileRef(), request.getFileType(), request.getFile(),
+                        request.getInternalServices()));
     }
 
-    private void processFileWithInternalProcessor(InputStream file, String fileRef, String type,
+    /**
+     * Helper method to process a file with the internal processor when a request comes in
+     *
+     * @param fileRef          a reference to the file that should be processed
+     * @param type             the file type
+     * @param file             the file input stream
+     * @param internalServices the set of internal services that should be run on the file
+     */
+    private void processFileWithInternalProcessor(String fileRef, String type, InputStream file,
                                                   Set<InternalServices> internalServices) {
 
         ExtractedText extractedText = null;

@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.widget.Toast;
 
+import com.aurora.aurora.R;
 import com.aurora.auroralib.ExtractedText;
 import com.aurora.internalservice.internalcache.CachedProcessedFile;
 import com.aurora.kernel.event.InternalProcessorRequest;
@@ -15,12 +16,10 @@ import com.aurora.kernel.event.OpenCachedFileWithPluginRequest;
 import com.aurora.kernel.event.OpenFileWithPluginRequest;
 import com.aurora.kernel.event.RetrieveFileFromCacheRequest;
 import com.aurora.kernel.event.RetrieveFileFromCacheResponse;
-import com.aurora.plugin.InternalServices;
 import com.aurora.plugin.Plugin;
 
 import java.io.InputStream;
 import java.util.List;
-import java.util.Set;
 
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -29,12 +28,23 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
  * Communicator class that communicates to Aurora app environment
  */
 public class AuroraCommunicator extends Communicator {
+    /**
+     * Tag for logging purposes
+     */
     private static final String CLASS_TAG = "AuroraCommunicator";
 
+    /**
+     * A reference to the plugin registry
+     */
     private PluginRegistry mPluginRegistry;
 
-    public AuroraCommunicator(Bus mBus, PluginRegistry pluginRegistry) {
-        super(mBus);
+    /**
+     * Creates an AuroraCommunicator. There should be only one AuroraCommunicator at a time
+     * @param bus A reference to the unique bus instance over which the communicators will communicate events
+     * @param pluginRegistry a reference to the plugin registry
+     */
+    public AuroraCommunicator(Bus bus, PluginRegistry pluginRegistry) {
+        super(bus);
         mPluginRegistry = pluginRegistry;
     }
 
@@ -63,24 +73,13 @@ public class AuroraCommunicator extends Communicator {
                 .subscribe((ExtractedText extractedText) ->
                         sendOpenFileRequest(extractedText, pluginAction, chooser, applicationContext));
 
-        // Get internal processing parameters for the plugin from the plugin registry
-        String selectedPluginName = getChosenPlugin(pluginAction, applicationContext);
-        Plugin selectedPlugin = mPluginRegistry.getPlugin(selectedPluginName);
 
-        // If the plugin exists in the registry, get the set of supported internal services
-        if (selectedPlugin != null) {
-            Set<InternalServices> internalServices = selectedPlugin.getInternalServices();
+        // TODO: this is bypass code. As soon as plugins are registered in the registry, this should be removed
+        InternalProcessorRequest internalProcessorRequest =
+                new InternalProcessorRequest(fileRef, fileType, file, Plugin.getDefaultInternalServices());
 
-            InternalProcessorRequest internalProcessorRequest =
-                    new InternalProcessorRequest(fileRef, fileType, file, internalServices);
-
-            // Post request on the bus
-            mBus.post(internalProcessorRequest);
-        } else {
-            Toast.makeText(applicationContext,
-                    "The plugin was not found in the registry!", Toast.LENGTH_LONG).show();
-        }
-
+        // Post request on the bus
+        mBus.post(internalProcessorRequest);
     }
 
 
@@ -103,7 +102,8 @@ public class AuroraCommunicator extends Communicator {
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe((CachedProcessedFile processedFile) -> {
                     if ("{}".equals(processedFile.getJsonRepresentation())) {
-                        Toast.makeText(context, "The cached file was not found", Toast.LENGTH_LONG).show();
+                        Toast.makeText(context, context.getString(R.string.cached_file_not_found),
+                                Toast.LENGTH_LONG).show();
                         // TODO: change this such that it processes the original file
                     } else {
                         sendOpenCachedFileRequest(processedFile.getJsonRepresentation(), context);

@@ -1,7 +1,6 @@
 package com.aurora.aurora;
 
 import android.content.ContentResolver;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
@@ -38,21 +37,53 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Objects;
 
+/**
+ * The main activity of the application, started when the app is opened.
+ * See the <a href=https://developer.android.com/guide/components/activities/activity-lifecycle>
+ * android lifecycle (weblink)
+ * </a>
+ * for more information.
+ * onCreate is called when this activity is launched.
+ * <br>
+ * Implements {@code NavigationView.OnNavigationItemSelectedListener} to listen to events
+ * on the NavigationView.
+ */
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
+    /**
+     * The request-code used to start the file-chooser intent.
+     * Chosen to be 1.
+     */
     private static final int REQUEST_FILE_GET = 1;
 
-    // Toast and TextView used for demo and preventing queued Toasts
-    private Context mContext = this;
+    /**
+     * Toast that holds the dummy text after a file is searched for.
+     * This will disappear after file-search is implemented.
+     */
     private Toast mToast = null;
+
+    /**
+     * Contains placeholder-text when swapping between views via the NavigationView.
+     */
     private TextView mTextViewMain = null;
+
+    /**
+     * Android view which is basically a scrollview, but efficiently
+     * reuses the containers.
+     * <br>
+     * It contains all recently opened files.
+     */
     private RecyclerView mRecyclerView = null;
 
     /**
-     * Create unique kernel instance (should be passed to every activity, fragment, adapter,...) that needs it
+     * An instance of the {@link Kernel}.
      */
     private Kernel mKernel = null;
+
+    /**
+     * Delivers the communication between the environment and the Kernel.
+     */
     private AuroraCommunicator mAuroraCommunicator = null;
 
     /**
@@ -61,9 +92,7 @@ public class MainActivity extends AppCompatActivity
     private FirebaseAnalytics mFirebaseAnalytics = null;
 
     /**
-     * Runs on startup of the activity, in this case on startup of the app
-     *
-     * @param savedInstanceState
+     * {@inheritDoc}
      */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -125,6 +154,28 @@ public class MainActivity extends AppCompatActivity
 
     /**
      * Creates an intent to open the file manager.
+     * <p>
+     * Creates an intent to open the file manager.
+     * If more filetypes need to be opened, use a final String[].
+     * </p>
+     * <br>
+     * <p>
+     * For example: <br>
+     * final String[] ACCEPT_MIME_TYPES = {
+     * "application/pdf",
+     * "image/*"
+     * };
+     * </p>
+     * <br>
+     * <p>
+     * Intent intent = new Intent();
+     * <br>
+     * intent.setType("* / *");
+     * <br>
+     * intent.setAction(Intent.ACTION_GET_CONTENT);
+     * <br>
+     * intent.putExtra(Intent.EXTRA_MIME_TYPES,ACCEPT_MIME_TYPES);
+     * </p
      */
     protected void selectFile() {
         final String[] mimeTypes = {
@@ -141,9 +192,9 @@ public class MainActivity extends AppCompatActivity
     /**
      * In this case when selectFile()'s intent returns
      *
-     * @param requestCode code used to send the intent
+     * @param requestCode code used to send the intent. {@value REQUEST_FILE_GET} in this case.
      * @param resultCode  status code
-     * @param data        resulting data, a Uri in case of fileselector
+     * @param data        resulting data, a URI in case of file-selector
      */
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -192,7 +243,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     /**
-     * Leave NavigationView, back to main view
+     * Handles when leaving NavigationView (Drawer). Go back to main view with file-overview.
      */
     @Override
     public void onBackPressed() {
@@ -204,18 +255,34 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
+    /**
+     * Inflate the menu; this adds items to the action bar if it is present.
+     *
+     * @param menu The menu item that should be inflated.
+     * @return boolean whether or not successful.
+     */
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.main, menu);
         return true;
     }
 
+    /**
+     * <p>
+     * Handles the selection of menu options in the AppBar (top bar).
+     * </p>
+     * <p>
+     * The action bar will automatically handle clicks on the Home/Up button, so long
+     * as you specify a parent activity in AndroidManifest.xml.
+     * The AppBar of this activity only has the search button.
+     * </p>
+     *
+     * @param item The selected menu item
+     * @return Return false to allow normal menu processing to proceed, true to consume it here
+     */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
+        // get the id of the selected item.
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
@@ -229,17 +296,14 @@ public class MainActivity extends AppCompatActivity
             AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
             alertDialogBuilder.setView(promptView);
             alertDialogBuilder.setCancelable(true)
-                    .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialogInterface, int i) {
-                            // Toast for demo
-                            if (mToast != null) {
-                                mToast.cancel();
-                            }
-                            mToast = Toast.makeText(mContext, "Search for "
-                                    + userInput.getText().toString(), Toast.LENGTH_SHORT);
-                            mToast.show();
+                    .setPositiveButton("Ok", (DialogInterface dialogInterface, int i) -> {
+                        // Toast for demo
+                        if (mToast != null) {
+                            mToast.cancel();
                         }
+                        mToast = Toast.makeText(MainActivity.this, "Search for "
+                                + userInput.getText().toString(), Toast.LENGTH_SHORT);
+                        mToast.show();
                     });
             // Create and show the pop-up
             alertDialogBuilder.create().show();
@@ -248,6 +312,19 @@ public class MainActivity extends AppCompatActivity
         return super.onOptionsItemSelected(item);
     }
 
+    /**
+     * <p>
+     * Handles selection of options in NavigationView (Drawer layout).
+     * </p>
+     * <p>
+     * The NavigationView contains links to different screens.
+     * Selecting one of these should navigate to the corresponding
+     * view.
+     * </p>
+     *
+     * @param item Selected menu item.
+     * @return whether or not successful.
+     */
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {

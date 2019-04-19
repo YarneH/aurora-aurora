@@ -42,7 +42,7 @@ public class BusUnitTest {
     /**
      * Test event class
      */
-    private class TestEvent extends Event {
+    private class TestEvent implements Event {
         private String testMessage;
 
         public TestEvent(String testMessage) {
