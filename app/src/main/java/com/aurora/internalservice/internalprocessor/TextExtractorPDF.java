@@ -19,7 +19,13 @@ public class TextExtractorPDF implements TextExtractor {
     private static final int CHAR_TO_INT = 48;
     private static final int OFFSET_XML_HEADING_TAGS = 4;
     private static final int OFFSET_XML_P_TAGS = 3;
+    private static final int HEADING_LEVEL_INDEX = 2;
 
+    private boolean mLineProcessed = false;
+    private String mCurrentLine;
+    private Section mExtractingSection;
+    private ExtractedText mExtractedText;
+    private Iterator<String> mXMLIterator;
     /**
      * @param fileRef a reference to where the file can be found
      * @return the extracted text from the file on fileRef
@@ -29,74 +35,83 @@ public class TextExtractorPDF implements TextExtractor {
         TaggedPdfReaderTool reader = new TaggedPdfReaderTool();
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         PdfReader pdfreader = null;
+        //TODO: Handle this so that errors are thrown
         try {
             pdfreader = new PdfReader(file);
+            //This will convert a Tagged PDF to XML
             reader.convertToXml(pdfreader, baos);
         } catch (IOException e) {
             Log.e("IOexception PDF Reader:",
                     "Error opening and reading the pdf file: " + e.getLocalizedMessage());
         }
+        //Read the XML lines and split on newlines
         String[] xmlLines = baos.toString().split("\n");
-        ExtractedText extractedText = new ExtractedText(fileRef, null);
-        Iterator<String> iterable = Arrays.asList(xmlLines).iterator();
-        boolean lineProcessedIteration;
-        while (iterable.hasNext()) {
-            lineProcessedIteration = false;
-            String line = iterable.next();
-            Section section = new Section();
-            if (Pattern.matches("^<[h,H][0-9]>.*", line)) {
-                lineProcessedIteration = true;
-                StringBuilder title = new StringBuilder(line.substring(OFFSET_XML_HEADING_TAGS));
-                section.setLevel(line.charAt(2) - CHAR_TO_INT);
-                while (!Pattern.matches(".*</[h, H]" + String.valueOf(section.getLevel()) + ">$", line)
-                        && iterable.hasNext()) {
-                    line = iterable.next();
-                    title.append(line);
-                }
-                title = new StringBuilder(title.substring(0, title.length() - (OFFSET_XML_HEADING_TAGS + 1)));
-                section.setTitle(title.toString());
-                if (iterable.hasNext()) {
-                    line = iterable.next();
-                } else {
-                    extractedText.addSection(section);
-                    return extractedText;
-                }
-            }
-            line = stripEmptyParagraphs(iterable, line);
-            if (iterable.hasNext() && Pattern.matches("^<[p,P]>.*", line)) {
-                lineProcessedIteration = true;
-                StringBuilder paragraph;
-                paragraph = new StringBuilder(line.substring(OFFSET_XML_P_TAGS));
-
-                while (!Pattern.matches(".*</[p,P]>$", line) && iterable.hasNext()) {
-                    line = iterable.next();
-                    paragraph.append(line);
-                }
-                paragraph = new StringBuilder(paragraph.substring(0, paragraph.length() - (OFFSET_XML_P_TAGS + 1)));
-                section.setBody(paragraph.toString());
-            }
-            if (lineProcessedIteration){
-                extractedText.addSection(section);
-            }
-
+        mExtractedText = new ExtractedText(fileRef, null);
+        mXMLIterator = Arrays.asList(xmlLines).iterator();
+        // As long as the file is not empty, process new lines
+        while (mXMLIterator.hasNext()) {
+            mLineProcessed = false;
+            mCurrentLine = mXMLIterator.next();
+            mExtractingSection = new Section();
+            extractHeaders();
+            stripEmptyParagraphs();
+            extractSections();
         }
-        return extractedText;
+        return mExtractedText;
+    }
+
+    /**
+     * Extract sections from the pdf
+     */
+    private void extractSections() {
+        if (mXMLIterator.hasNext() && Pattern.matches("^<[p,P]>.*", mCurrentLine)) {
+            mLineProcessed = true;
+            StringBuilder paragraph;
+            paragraph = new StringBuilder(mCurrentLine.substring(OFFSET_XML_P_TAGS));
+
+            while (!Pattern.matches(".*</[p,P]>$", mCurrentLine) && mXMLIterator.hasNext()) {
+                mCurrentLine = mXMLIterator.next();
+                paragraph.append(mCurrentLine);
+            }
+            paragraph = new StringBuilder(paragraph.substring(0, paragraph.length() - (OFFSET_XML_P_TAGS + 1)));
+            mExtractingSection.setBody(paragraph.toString());
+        }
+        if (mLineProcessed){
+            mExtractedText.addSection(mExtractingSection);
+        }
+    }
+
+    /**
+     * Extract headers from the pdf
+     */
+    private void extractHeaders(){
+        if (Pattern.matches("^<[h,H][0-9]>.*", mCurrentLine)) {
+            mLineProcessed = true;
+            StringBuilder title = new StringBuilder(mCurrentLine.substring(OFFSET_XML_HEADING_TAGS));
+            mExtractingSection.setLevel(mCurrentLine.charAt(HEADING_LEVEL_INDEX) - CHAR_TO_INT);
+            while (!Pattern.matches(".*</[h, H]" + String.valueOf(mExtractingSection.getLevel()) + ">$", mCurrentLine)
+                    && mXMLIterator.hasNext()) {
+                mCurrentLine = mXMLIterator.next();
+                title.append(mCurrentLine);
+            }
+            title = new StringBuilder(title.substring(0, title.length() - (OFFSET_XML_HEADING_TAGS + 1)));
+            mExtractingSection.setTitle(title.toString());
+            if (mXMLIterator.hasNext()) {
+                mCurrentLine = mXMLIterator.next();
+            } else {
+                mExtractedText.addSection(mExtractingSection);
+            }
+        }
     }
 
     /**
      * As long as a paragraph is empty, skip to the next one
-     * @param iterable the extracted XML
-     * @param line the current line
-     * @return the next line not containing empty paragraphs
      */
-    private static String stripEmptyParagraphs(Iterator<String> iterable, String line) {
-        while (Pattern.matches("^<[P, p]> </[P,p]>$",line)) {
-            if (iterable.hasNext()) {
-                line = iterable.next();
-            } else {
-                return "";
+    private void stripEmptyParagraphs() {
+        while (Pattern.matches("^<[P, p]> </[P,p]>$",mCurrentLine)) {
+            if (mXMLIterator.hasNext()) {
+                mCurrentLine = mXMLIterator.next();
             }
         }
-        return line;
     }
 }
