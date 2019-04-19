@@ -155,7 +155,7 @@ public class MainActivity extends AppCompatActivity
     /**
      * Creates an intent to open the file manager.
      * <p>
-     * Creates an intent to open the file manager. Can currently only select pdf files;
+     * Creates an intent to open the file manager.
      * If more filetypes need to be opened, use a final String[].
      * </p>
      * <br>
@@ -192,10 +192,6 @@ public class MainActivity extends AppCompatActivity
     /**
      * In this case when selectFile()'s intent returns
      *
-     * @param requestCode code used to send the intent
-     * @param resultCode  status code
-     * @param data        resulting data, a Uri in case of fileselector
-     *                    Is called when returning from the file-selection Intent.
      * @param requestCode code used to send the intent. {@value REQUEST_FILE_GET} in this case.
      * @param resultCode  status code
      * @param data        resulting data, a URI in case of file-selector

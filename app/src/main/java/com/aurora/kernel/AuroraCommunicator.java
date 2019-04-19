@@ -16,12 +16,10 @@ import com.aurora.kernel.event.OpenCachedFileWithPluginRequest;
 import com.aurora.kernel.event.OpenFileWithPluginRequest;
 import com.aurora.kernel.event.RetrieveFileFromCacheRequest;
 import com.aurora.kernel.event.RetrieveFileFromCacheResponse;
-import com.aurora.plugin.InternalServices;
 import com.aurora.plugin.Plugin;
 
 import java.io.InputStream;
 import java.util.List;
-import java.util.Set;
 
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -75,24 +73,13 @@ public class AuroraCommunicator extends Communicator {
                 .subscribe((ExtractedText extractedText) ->
                         sendOpenFileRequest(extractedText, pluginAction, chooser, applicationContext));
 
-        // Get internal processing parameters for the plugin from the plugin registry
-        String selectedPluginName = getChosenPlugin(pluginAction, applicationContext);
-        Plugin selectedPlugin = mPluginRegistry.getPlugin(selectedPluginName);
 
-        // If the plugin exists in the registry, get the set of supported internal services
-        if (selectedPlugin != null) {
-            Set<InternalServices> internalServices = selectedPlugin.getInternalServices();
+        // TODO: this is bypass code. As soon as plugins are registered in the registry, this should be removed
+        InternalProcessorRequest internalProcessorRequest =
+                new InternalProcessorRequest(fileRef, fileType, file, Plugin.getDefaultInternalServices());
 
-            InternalProcessorRequest internalProcessorRequest =
-                    new InternalProcessorRequest(fileRef, fileType, file, internalServices);
-
-            // Post request on the bus
-            mBus.post(internalProcessorRequest);
-        } else {
-            Toast.makeText(applicationContext,
-                    applicationContext.getString(R.string.plugin_not_in_registry), Toast.LENGTH_LONG).show();
-        }
-
+        // Post request on the bus
+        mBus.post(internalProcessorRequest);
     }
 
 

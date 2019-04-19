@@ -42,7 +42,7 @@ public class PluginCommunicator extends Communicator {
     private Observable<OpenCachedFileWithPluginRequest> mOpenCachedFileWithPluginRequestObservable;
 
     /**
-     * An observable keeping track of incomong ListPluginsRequests
+     * An observable keeping track of incoming ListPluginsRequests
      */
     private Observable<ListPluginsRequest> mListPluginsRequestObservable;
 
