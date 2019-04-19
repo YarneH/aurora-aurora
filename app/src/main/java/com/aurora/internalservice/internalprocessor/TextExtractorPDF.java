@@ -21,7 +21,7 @@ public class TextExtractorPDF implements TextExtractor {
     private static final int OFFSET_XML_P_TAGS = 3;
     private static final int HEADING_LEVEL_INDEX = 2;
 
-    private boolean mLineProcessed = false;
+    private boolean mLineProcessed;
     private String mCurrentLine;
     private Section mExtractingSection;
     private ExtractedText mExtractedText;
