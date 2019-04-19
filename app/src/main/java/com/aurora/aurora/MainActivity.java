@@ -229,15 +229,12 @@ public class MainActivity extends AppCompatActivity
                     mAuroraCommunicator.openFileWithPlugin(textFile.toString(), type,
                             read, pluginAction, chooser, getApplicationContext());
 
-                    Objects.requireNonNull(read).close();
                 } else {
                     Toast.makeText(this, "The selected file was null", Snackbar.LENGTH_LONG).show();
                 }
             } catch (FileNotFoundException e) {
                 Toast.makeText(this, "The file could not be found", Snackbar.LENGTH_LONG).show();
                 Log.e("FILE_NOT_FOUND", "The file could not be found", e);
-            } catch (IOException e) {
-                Log.e("FILE_CLOSE", "Failed to close the file: " + textFile.toString(), e);
             }
         }
     }
