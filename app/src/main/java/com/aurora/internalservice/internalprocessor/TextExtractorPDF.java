@@ -26,6 +26,12 @@ public class TextExtractorPDF implements TextExtractor {
     private Section mExtractingSection;
     private ExtractedText mExtractedText;
     private Iterator<String> mXMLIterator;
+
+    public TextExtractorPDF() {
+        mLineProcessed = false;
+        mCurrentLine = "";
+    }
+
     /**
      * @param fileRef a reference to where the file can be found
      * @return the extracted text from the file on fileRef
