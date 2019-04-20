@@ -67,17 +67,6 @@ public class TextExtractorDOCXUnitTest {
                 "4 servings", mExtractedText.getSections().get(0).getBody());
     }
 
-    @Test
-    public void t() throws FileNotFoundException{
-        TextExtractorDOCX textExtractorDOCX = new TextExtractorDOCX();
-        String mfileRef = "C:\\Users\\Gebruiker\\Documents\\School\\Universiteit\\master\\1e_master\\DP\\Aurora" + "\\beefAndRiceCasserole.docx";
-        File file = new File(mfileRef);
-        InputStream inputStream = new FileInputStream(file);
-        // Extract the text
-        mExtractedText = textExtractorDOCX.extract(inputStream, mfileRef);
-        System.out.println(mExtractedText.toJSON());
-
-    }
 
 
 }

@@ -21,7 +21,7 @@ public class Translator implements InternalService {
 
     private final static String API_KEY = "{YOUR_API_KEY}"; //TODO get an API key and hide this in the app
     private final static String KEY = "&key=" + API_KEY;
-    private RequestQueue mRequestQueue;
+
 
     public Translator() {
 

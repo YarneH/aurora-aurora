@@ -405,7 +405,7 @@ public class InternalCache implements InternalService {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(cacheFile))) {
             // Write json representation of plugin object to the file
             writer.write(pluginObject.toJSON());
-        } catch (IOException e) {
+        } catch ( IOException e) {
             Log.e(CLASS_TAG, "Something went wrong while writing a cache file!", e);
 
             return false;

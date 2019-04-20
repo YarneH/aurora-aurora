@@ -83,6 +83,8 @@ dependencies {
 
     implementation files('libs/poishadow-all.jar')
 
+
+
     // Firebase
     implementation 'com.google.firebase:firebase-core:16.0.8'
     //Translation
