@@ -168,7 +168,7 @@ public class TextExtractorDOCX implements TextExtractor {
                 mSectionInProgress.addImages(encodedImages);
                 mExtractedText.addSection(mSectionInProgress);
                 mSectionInProgress = null;
-            } else if (!formatted.isEmpty()) { // It is not empty
+            } else if (!formatted.isEmpty() || !encodedImages.isEmpty()) { // It is not empty
                 if (mSectionInProgress == null) {
                     // Create a new Section
                     mSectionInProgress = new Section();
@@ -309,23 +309,25 @@ public class TextExtractorDOCX implements TextExtractor {
      */
     private void appendTableText(XWPFTable table) {
         //this works recursively to pull embedded tables from tables
+        StringBuilder extractedTable = new StringBuilder();
         for (XWPFTableRow row : table.getRows()) {
             List<ICell> cells = row.getTableICells();
 
-            StringBuilder line = new StringBuilder();
+
             for (int i = 0; i < cells.size(); i++) {
                 ICell cell = cells.get(i);
 
                 if (cell instanceof XWPFTableCell) {
-                    line.append(((XWPFTableCell) cell).getTextRecursively());
+                    extractedTable.append(((XWPFTableCell) cell).getTextRecursively());
                 } else if (cell instanceof XWPFSDTCell) {
-                    line.append(((XWPFSDTCell) cell).getContent().getText());
+                    extractedTable.append(((XWPFSDTCell) cell).getContent().getText());
                 }
                 if (i < cells.size() - 1) {
-                    line.append("\t");
+                    extractedTable.append("\t");
                 }
             }
-            mExtractedText.addSimpleSection(line.toString());
+            extractedTable.append("\n");
         }
+        mExtractedText.addSimpleSection(extractedTable.toString());
     }
 }
