@@ -5,6 +5,7 @@ import android.util.Log;
 
 import com.aurora.internalservice.internalcache.InternalCache;
 import com.aurora.internalservice.internalprocessor.InternalTextProcessor;
+import com.aurora.internalservice.internaltranslation.Translator;
 import com.aurora.plugin.Plugin;
 import com.google.gson.Gson;
 
@@ -93,7 +94,8 @@ public final class Kernel {
 
         // Create internal text processor for the PluginInternalServiceCommunicator
         InternalTextProcessor internalTextProcessing = new InternalTextProcessor();
-        this.mPluginInternalServiceCommunicator = new PluginInternalServiceCommunicator(mBus, internalTextProcessing);
+        Translator translator = new Translator();
+        this.mPluginInternalServiceCommunicator = new PluginInternalServiceCommunicator(mBus, internalTextProcessing, translator, applicationContext);
 
         // Create cache
         InternalCache internalCache = new InternalCache(applicationContext);

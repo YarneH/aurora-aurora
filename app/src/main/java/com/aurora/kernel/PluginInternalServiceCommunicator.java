@@ -1,15 +1,30 @@
 package com.aurora.kernel;
 
+import android.content.Context;
 import android.util.Log;
 
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.Volley;
 import com.aurora.auroralib.ExtractedText;
 import com.aurora.internalservice.internalprocessor.FileTypeNotSupportedException;
 import com.aurora.internalservice.internalprocessor.InternalTextProcessor;
+import com.aurora.internalservice.internaltranslation.Translator;
 import com.aurora.kernel.event.InternalProcessorRequest;
 import com.aurora.kernel.event.InternalProcessorResponse;
+import com.aurora.kernel.event.TranslationRequest;
+import com.aurora.kernel.event.TranslationResponse;
 import com.aurora.plugin.InternalServices;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 import io.reactivex.Observable;
@@ -25,9 +40,23 @@ public class PluginInternalServiceCommunicator extends Communicator {
     private InternalTextProcessor mInternalTextProcessor;
 
     /**
+     * Translator
+     */
+    private Translator mTranslator;
+
+    /**
+     * A queue to post http requests to
+     */
+    private RequestQueue mRequestQueue;
+    /**
      * Observable keeping track of internal processor requests
      */
     private Observable<InternalProcessorRequest> mInternalProcessorRequestObservable;
+
+    /**
+     * Observable keeping track of internal processor requests
+     */
+    private Observable<TranslationRequest> mTranslationRequestObservable;
 
     /**
      * Creates a PluginInternalServiceCommunicator. There should be only one instance at a time
@@ -36,15 +65,26 @@ public class PluginInternalServiceCommunicator extends Communicator {
      *                  communicating events
      * @param processor a reference to the InternalTextProcessor
      */
-    public PluginInternalServiceCommunicator(Bus mBus, InternalTextProcessor processor) {
+    public PluginInternalServiceCommunicator(Bus mBus, InternalTextProcessor processor, Translator translator, Context context) {
         super(mBus);
         mInternalTextProcessor = processor;
+        mTranslator = translator;
+        /* Setup request queue for http requests */
+        mRequestQueue = Volley.newRequestQueue(context);
+
 
         mInternalProcessorRequestObservable = mBus.register(InternalProcessorRequest.class);
         mInternalProcessorRequestObservable.subscribe((InternalProcessorRequest request) ->
                 processFileWithInternalProcessor(request.getFileRef(), request.getFileType(), request.getFile(),
                         request.getInternalServices()));
+
+        mTranslationRequestObservable = mBus.register(TranslationRequest.class);
+        mTranslationRequestObservable.subscribe((TranslationRequest request) -> {
+            translate(request.getSentencesToTranslate(), request.getSourceLanguage(), request.getTargetLanguage());
+        });
+
     }
+
 
     /**
      * Helper method to process a file with the internal processor when a request comes in
@@ -78,6 +118,57 @@ public class PluginInternalServiceCommunicator extends Communicator {
 
         // Post response
         mBus.post(response);
+    }
+
+    /**
+     * private helper method for when a {@link TranslationRequest} comes in. It calls
+     * {@link Translator#makeUrl(String[], String, String)} to get a url and posts this to the {@link #mRequestQueue}
+     *
+     * @param sentencesToTranslate the sentences to translate
+     * @param sourceLanguage language to translate from
+     * @param targetLanguage language to translate to
+     */
+    private void translate(String[] sentencesToTranslate, String sourceLanguage, String targetLanguage) {
+        try {
+            String url = mTranslator.makeUrl(sentencesToTranslate, sourceLanguage, targetLanguage);
+
+            // Request a json response from the provided URL.
+            // TODO needs to be checked after acquiring key
+            JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET, url,
+                    null, this::postTranslationResponseEvent, this::postTranslationResponseEvent);
+            jsonObjectRequest.setTag("TRANSLATOR");
+
+            mRequestQueue.add(jsonObjectRequest);
+        } catch (IOException e) {
+            Log.e("TRANSLATION", "Translation failed", e);
+            postTranslationResponseEvent(e);
+        }
+    }
+
+    /**
+     * Posts a {@link TranslationResponse} event getting the translated data from the argutmen
+     *
+     * @param response the respons from the {@link RequestQueue} to the Google API
+     */
+    public void postTranslationResponseEvent(JSONObject response) {
+
+        try{
+        mBus.post( mTranslator.getTranslationRespons(response));}
+        catch(JSONException e){
+            Log.e("JSON", "getting from json failed", e);
+            postTranslationResponseEvent(e);
+        }
+
+
+    }
+
+    /**
+     * Posts a {@link TranslationResponse} that signifies the transation failed
+     * @param error the reason why the translation failed
+     */
+    public void postTranslationResponseEvent(Exception error) {
+        TranslationResponse errorResponse = new TranslationResponse(error.getMessage());
+        mBus.post(errorResponse);
     }
 
 }

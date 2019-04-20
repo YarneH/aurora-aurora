@@ -6,5 +6,5 @@ package com.aurora.plugin;
  * these services should be added to this enum
  */
 public enum InternalServices {
-    TEXT_EXTRACTION
+    TEXT_EXTRACTION, TRANSLATION
 }

@@ -26,6 +26,9 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.android.volley.RequestQueue;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
 import com.aurora.auroralib.Constants;
 import com.aurora.kernel.AuroraCommunicator;
 import com.aurora.kernel.Kernel;
@@ -91,6 +94,10 @@ public class MainActivity extends AppCompatActivity
      */
     private FirebaseAnalytics mFirebaseAnalytics = null;
 
+
+
+
+
     /**
      * {@inheritDoc}
      */
@@ -150,7 +157,11 @@ public class MainActivity extends AppCompatActivity
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         CardFileAdapter adapter = new CardFileAdapter(mKernel, this);
         mRecyclerView.setAdapter(adapter);
+
+
     }
+
+
 
     /**
      * Creates an intent to open the file manager.

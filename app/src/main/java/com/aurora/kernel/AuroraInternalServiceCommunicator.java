@@ -4,6 +4,7 @@ import com.aurora.auroralib.PluginObject;
 import com.aurora.internalservice.internalcache.CachedFileInfo;
 import com.aurora.internalservice.internalcache.CachedProcessedFile;
 import com.aurora.internalservice.internalcache.InternalCache;
+import com.aurora.internalservice.internaltranslation.Translator;
 import com.aurora.kernel.event.CacheFileRequest;
 import com.aurora.kernel.event.CacheFileResponse;
 import com.aurora.kernel.event.QueryCacheRequest;
