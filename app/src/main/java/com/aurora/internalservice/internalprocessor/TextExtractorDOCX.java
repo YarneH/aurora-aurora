@@ -98,7 +98,6 @@ public class TextExtractorDOCX implements TextExtractor {
             }
         }
 
-        System.out.println(mExtractedText.toJSON());
         return mExtractedText;
     }
 

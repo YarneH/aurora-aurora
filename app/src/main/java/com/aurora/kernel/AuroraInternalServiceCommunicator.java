@@ -4,7 +4,6 @@ import com.aurora.auroralib.PluginObject;
 import com.aurora.internalservice.internalcache.CachedFileInfo;
 import com.aurora.internalservice.internalcache.CachedProcessedFile;
 import com.aurora.internalservice.internalcache.InternalCache;
-import com.aurora.internalservice.internaltranslation.Translator;
 import com.aurora.kernel.event.CacheFileRequest;
 import com.aurora.kernel.event.CacheFileResponse;
 import com.aurora.kernel.event.QueryCacheRequest;
@@ -50,7 +49,8 @@ public class AuroraInternalServiceCommunicator extends Communicator {
 
     /**
      * Creates an AuroraInternalServiceCommunicator. There should be only one instance at a time
-     * @param bus a reference to the unique bus instance over which the communicators will communicate events
+     *
+     * @param bus           a reference to the unique bus instance over which the communicators will communicate events
      * @param internalCache a reference to the internal cache
      */
     public AuroraInternalServiceCommunicator(Bus bus, InternalCache internalCache) {

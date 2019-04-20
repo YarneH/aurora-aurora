@@ -1,7 +1,6 @@
 package com.aurora.internalservice.internaltranslation;
 
 
-import com.android.volley.RequestQueue;
 import com.aurora.internalservice.InternalService;
 import com.aurora.kernel.event.TranslationResponse;
 
@@ -13,17 +12,19 @@ import java.io.UnsupportedEncodingException;
 
 public class Translator implements InternalService {
 
-    private final static String START_REQUEST = "https://translation.googleapis.com/language/translate/v2?";
-    private final static String QUERY = "&q=";
-    private final static String TARGET = "&target=";
-    private final static String SOURCE = "&source=";
+    private static final String START_REQUEST = "https://translation.googleapis.com/language/translate/v2?";
+    private static final String QUERY = "&q=";
+    private static final String TARGET = "&target=";
+    private static final String SOURCE = "&source=";
 
 
-    private final static String API_KEY = "{YOUR_API_KEY}"; //TODO get an API key and hide this in the app
-    private final static String KEY = "&key=" + API_KEY;
+    private static final String API_KEY = "{YOUR_API_KEY}";
+    //TODO get an API key and hide this in the app
+    private static final String KEY = "&key=" + API_KEY;
 
 
     public Translator() {
+        // static elements
 
     }
 
@@ -71,12 +72,14 @@ public class Translator implements InternalService {
      * @throws JSONException An exception that signifies this object is not according to the google translate
      *                       api
      */
+    @java.lang.SuppressWarnings("squid:CommentedOutCodeLine")
     public TranslationResponse getTranslationRespons(JSONObject response) throws JSONException {
         // TODO get the translations
         // see https://developers.google.com/apis-explorer/?hl=nl#p/translate/v2/language.
         // translations.list?q=this+is+a+test&q=a+test+with+multiple+values&q=that+is+a+lot+of+values
         // &q=wow+so+many+values+&q=%252B%252B%252B%252B%252B%252B&q=%252F&target=nl&source=en&_h=4&
         // I don't completely know how the response will look like something like:
+
         // {
         // "data": {
         //  "translations": [

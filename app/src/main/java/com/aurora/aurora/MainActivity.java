@@ -26,9 +26,6 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.android.volley.RequestQueue;
-import com.android.volley.toolbox.StringRequest;
-import com.android.volley.toolbox.Volley;
 import com.aurora.auroralib.Constants;
 import com.aurora.kernel.AuroraCommunicator;
 import com.aurora.kernel.Kernel;
@@ -36,9 +33,7 @@ import com.aurora.plugin.Plugin;
 import com.google.firebase.analytics.FirebaseAnalytics;
 
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.io.InputStream;
-import java.util.Objects;
 
 /**
  * The main activity of the application, started when the app is opened.
@@ -93,9 +88,6 @@ public class MainActivity extends AppCompatActivity
      * Firebase analytics
      */
     private FirebaseAnalytics mFirebaseAnalytics = null;
-
-
-
 
 
     /**
@@ -160,7 +152,6 @@ public class MainActivity extends AppCompatActivity
 
 
     }
-
 
 
     /**

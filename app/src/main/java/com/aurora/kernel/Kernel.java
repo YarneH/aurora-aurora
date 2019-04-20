@@ -95,7 +95,8 @@ public final class Kernel {
         // Create internal text processor for the PluginInternalServiceCommunicator
         InternalTextProcessor internalTextProcessing = new InternalTextProcessor();
         Translator translator = new Translator();
-        this.mPluginInternalServiceCommunicator = new PluginInternalServiceCommunicator(mBus, internalTextProcessing, translator, applicationContext);
+        this.mPluginInternalServiceCommunicator = new PluginInternalServiceCommunicator(mBus,
+                internalTextProcessing, translator, applicationContext);
 
         // Create cache
         InternalCache internalCache = new InternalCache(applicationContext);

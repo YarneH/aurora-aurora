@@ -17,14 +17,11 @@ import com.aurora.kernel.event.TranslationRequest;
 import com.aurora.kernel.event.TranslationResponse;
 import com.aurora.plugin.InternalServices;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Set;
 
 import io.reactivex.Observable;
@@ -65,7 +62,8 @@ public class PluginInternalServiceCommunicator extends Communicator {
      *                  communicating events
      * @param processor a reference to the InternalTextProcessor
      */
-    public PluginInternalServiceCommunicator(Bus mBus, InternalTextProcessor processor, Translator translator, Context context) {
+    public PluginInternalServiceCommunicator(Bus mBus, InternalTextProcessor processor, Translator translator,
+                                             Context context) {
         super(mBus);
         mInternalTextProcessor = processor;
         mTranslator = translator;
@@ -79,9 +77,9 @@ public class PluginInternalServiceCommunicator extends Communicator {
                         request.getInternalServices()));
 
         mTranslationRequestObservable = mBus.register(TranslationRequest.class);
-        mTranslationRequestObservable.subscribe((TranslationRequest request) -> {
-            translate(request.getSentencesToTranslate(), request.getSourceLanguage(), request.getTargetLanguage());
-        });
+        mTranslationRequestObservable.subscribe((TranslationRequest request) ->
+            translate(request.getSentencesToTranslate(), request.getSourceLanguage(), request.getTargetLanguage()));
+
 
     }
 
@@ -125,8 +123,8 @@ public class PluginInternalServiceCommunicator extends Communicator {
      * {@link Translator#makeUrl(String[], String, String)} to get a url and posts this to the {@link #mRequestQueue}
      *
      * @param sentencesToTranslate the sentences to translate
-     * @param sourceLanguage language to translate from
-     * @param targetLanguage language to translate to
+     * @param sourceLanguage       language to translate from
+     * @param targetLanguage       language to translate to
      */
     private void translate(String[] sentencesToTranslate, String sourceLanguage, String targetLanguage) {
         try {
@@ -152,9 +150,9 @@ public class PluginInternalServiceCommunicator extends Communicator {
      */
     public void postTranslationResponseEvent(JSONObject response) {
 
-        try{
-        mBus.post( mTranslator.getTranslationRespons(response));}
-        catch(JSONException e){
+        try {
+            mBus.post(mTranslator.getTranslationRespons(response));
+        } catch (JSONException e) {
             Log.e("JSON", "getting from json failed", e);
             postTranslationResponseEvent(e);
         }
@@ -164,6 +162,7 @@ public class PluginInternalServiceCommunicator extends Communicator {
 
     /**
      * Posts a {@link TranslationResponse} that signifies the transation failed
+     *
      * @param error the reason why the translation failed
      */
     public void postTranslationResponseEvent(Exception error) {
