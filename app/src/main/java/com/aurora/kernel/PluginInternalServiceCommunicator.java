@@ -56,7 +56,6 @@ public class PluginInternalServiceCommunicator extends Communicator {
      */
     private void processFileWithInternalProcessor(String fileRef, String type, InputStream file,
                                                   Set<InternalServices> internalServices) {
-
         ExtractedText extractedText = null;
 
         // Perform internal services that are in the given set
