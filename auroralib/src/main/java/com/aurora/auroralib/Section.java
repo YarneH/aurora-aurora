@@ -64,31 +64,47 @@ public class Section {
         return mTitle;
     }
 
-    public void setTitle(String mTitle) {
-        this.mTitle = mTitle;
+    public void setTitle(String title) {
+        this.mTitle = title;
     }
 
     public String getBody() {
         return mBody;
     }
 
-    public void setBody(String mBody) {
-        this.mBody = mBody;
+    public void setBody(String body) {
+        this.mBody = body;
+    }
+
+    public void concatBody(String body) {
+        if(mBody == null) {
+            this.mBody = body;
+        } else {
+            this.mBody = this.mBody.concat(body);
+        }
     }
 
     public List<String> getImages() {
         return mImages;
     }
 
-    public void setImages(List<String> mImages) {
-        this.mImages = mImages;
+    public void setImages(List<String> images) {
+        this.mImages = images;
+    }
+
+    public void addImages(List<String> images) {
+        if(mImages == null) {
+            this.mImages = images;
+        } else {
+            this.mImages.addAll(images);
+        }
     }
 
     public int getLevel() {
         return mLevel;
     }
 
-    public void setLevel(int mLevel) {
-        this.mLevel = mLevel;
+    public void setLevel(int level) {
+        this.mLevel = level;
     }
 }
