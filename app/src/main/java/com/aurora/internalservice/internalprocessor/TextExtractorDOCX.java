@@ -29,19 +29,9 @@ import org.apache.poi.xwpf.usermodel.XWPFTableRow;
 public class TextExtractorDOCX implements TextExtractor {
 
     /**
-     * Constant for the maximum number of empty paragraphs in a row
-     */
-    private static final int MAX_NUMBER_OF_EMPTY_SECTIONS = 2;
-
-    /**
      * Extracted text object
      */
     private ExtractedText mExtractedText = null;
-
-    /**
-     * A counter that keeps track of the number of empty sections in a row
-     */
-    private int mEmptySectionCount = 0;
 
     /**
      * Section that still needs to be added to extractedText
@@ -71,7 +61,6 @@ public class TextExtractorDOCX implements TextExtractor {
         mExtractedText = new ExtractedText(fileRef, null);
 
         // Set the values to defaults
-        mEmptySectionCount = 0;
         mSectionInProgress = null;
         mLastSeenParagraphLevel = 0;
         mPreviousRunSize = 0;
@@ -126,79 +115,71 @@ public class TextExtractorDOCX implements TextExtractor {
             encodedImages.add(Base64.encodeToString(image, Base64.DEFAULT));
         }
 
-        // No more than 2 empty sections in a row and not in the beginning of the document
-        if(mEmptySectionCount < MAX_NUMBER_OF_EMPTY_SECTIONS && formatted.isEmpty()
-                && mExtractedText.getSections() != null && encodedImages.isEmpty()) {
-            mExtractedText.addSimpleSection("");
-            mEmptySectionCount++;
-        } else if(!formatted.isEmpty() || !encodedImages.isEmpty()) {
-            // This is the default flow. The section either contains text or images or both.
+        // First text line is always a title for simplicity
+        if(mExtractedText.getTitle() == null && !formatted.isEmpty()) {
+            mExtractedText.setTitle(formatted);
 
-            // Reset the empty section count
-            mEmptySectionCount = 0;
-
-            // Determine if a title, first line is always a title for simplicity
-            if(mExtractedText.getTitle() == null && !formatted.isEmpty()) {
-                mExtractedText.setTitle(formatted);
-
-                // The title section contains images, add them to their own section.
-                if(!encodedImages.isEmpty()) {
-                    Section imageSection = new Section();
-                    imageSection.setImages(encodedImages);
-                    mExtractedText.addSection(imageSection);
-                }
-
-                // If the font size is larger than 0 keep track of this. If the built in word
-                // headers are used, font size is -1 for some reason.
-                if(runSize>0) {
-                    mPreviousRunSize = runSize;
-                }
-                return;
+            // The title section contains images, add them to their own section.
+            if(!encodedImages.isEmpty()) {
+                Section imageSection = new Section();
+                imageSection.setImages(encodedImages);
+                mExtractedText.addSection(imageSection);
             }
 
-            // Check if we find a (sub)title, when using default word headers most of the headers
-            // should be recognized. When not using this, it's more vague, some titels will be
-            // found, others not because we need to base us on what was seen previously.
-            if (paragraphLevel >= 0 || mPreviousRunSize < runSize) {
-                // Flush the previous section, a title will always create a new section
-                if (mSectionInProgress != null) {
-                    mExtractedText.addSection(mSectionInProgress);
-                }
+            // If the font size is larger than 0 keep track of this. If the built in word
+            // headers are used, font size is -1 for some reason.
+            if(runSize>0) {
+                mPreviousRunSize = runSize;
+            }
+            return;
+        }
 
-                // Create a new Section
-                mSectionInProgress = new Section();
-                mSectionInProgress.setTitle(formatted);
-                mSectionInProgress.setImages(encodedImages);
-
-                // If the default headers of word are used, we can extract a paragraph level, non
-                // header sections will get the last seen paragraph level.
-                if(paragraphLevel >= 0) {
-                    mSectionInProgress.setLevel(paragraphLevel);
-                    mLastSeenParagraphLevel = paragraphLevel;
-                } else {
-                    // In case the default headers are not used, it is to hard to determine the
-                    // level of a paragraph. Just set them all to default level 0.
-                    mSectionInProgress.setLevel(0);
-                    mLastSeenParagraphLevel = 0;
-                    mPreviousRunSize = runSize;
-                }
-                return;
+        // A Header is encountered -> start a new Section and flush the previous one if it exists
+        if(paragraphLevel >= 0 || mPreviousRunSize < runSize) {
+            // Flush the previous section, a title will always create a new section
+            if (mSectionInProgress != null) {
+                mExtractedText.addSection(mSectionInProgress);
             }
 
-            // Run is not a (sub) title
-            // Check if there is an already a section in progress because a title was found.
-            if(mSectionInProgress != null) {
-                mSectionInProgress.setBody(formatted);
-                mSectionInProgress.getImages().addAll(encodedImages);
+            // Create a new Section
+            mSectionInProgress = new Section();
+            mSectionInProgress.setTitle(formatted);
+            mSectionInProgress.setImages(encodedImages);
+
+            // If the default headers of word are used, we can extract a paragraph level, non
+            // header sections will get the last seen paragraph level.
+            if(paragraphLevel >= 0) {
+                mSectionInProgress.setLevel(paragraphLevel);
+                mLastSeenParagraphLevel = paragraphLevel;
             } else {
-                mSectionInProgress = new Section(formatted);
-                mSectionInProgress.setLevel(mLastSeenParagraphLevel);
-                mSectionInProgress.setImages(encodedImages);
+                // In case the default headers are not used, it is to hard to determine the
+                // level of a paragraph. Just set them all to default level 0.
+                mSectionInProgress.setLevel(0);
+                mLastSeenParagraphLevel = 0;
+                mPreviousRunSize = runSize;
             }
-            // Not title section are added immediately because nothing could be added anymore.
-            mExtractedText.addSection(mSectionInProgress);
-            mSectionInProgress = null;
-            mPreviousRunSize = runSize;
+
+        } else {
+            // The section is not a title
+
+            // If its empty, flush the previous section (if it has body or images)
+            if(formatted.isEmpty() && mSectionInProgress != null &&
+                    (mSectionInProgress.getBody()!=null || !mSectionInProgress.getImages().isEmpty())) {
+                mSectionInProgress.addImages(encodedImages);
+                mExtractedText.addSection(mSectionInProgress);
+                mSectionInProgress = null;
+            } else if (!formatted.isEmpty() || !encodedImages.isEmpty()) { // It is not empty
+                if (mSectionInProgress == null) {
+                    // Create a new Section
+                    mSectionInProgress = new Section();
+                    mSectionInProgress.setLevel(mLastSeenParagraphLevel);
+                }
+
+                mSectionInProgress.addImages(encodedImages);
+                mSectionInProgress.concatBody(formatted + "\n");
+
+                mPreviousRunSize = runSize;
+            }
         }
     }
 
@@ -226,9 +207,17 @@ public class TextExtractorDOCX implements TextExtractor {
         /* List of images that has yet to be added */
         List<byte[]> images = new ArrayList<>();
 
+        if(paragraph.getRuns().isEmpty()) {
+
+            Log.d("DOCX_RUN","Text: " + paragraph.getText());
+
+            addRun(paragraph.getText(), getLevel(paragraph), -1,
+                    new ArrayList<>());
+        }
+
         // Loop over all the runs in a single paragraph.
         for (IRunElement run : paragraph.getRuns()) {
-            Log.d("DOCX_RUN",run.toString());
+            Log.d("DOCX_RUN","Text: " + run.toString());
             // Normal flow
             if (run instanceof XWPFRun) {
                 // Extract the images from the run and add them to the list of yet to process images
@@ -320,23 +309,25 @@ public class TextExtractorDOCX implements TextExtractor {
      */
     private void appendTableText(XWPFTable table) {
         //this works recursively to pull embedded tables from tables
+        StringBuilder extractedTable = new StringBuilder();
         for (XWPFTableRow row : table.getRows()) {
             List<ICell> cells = row.getTableICells();
 
-            StringBuilder line = new StringBuilder();
+
             for (int i = 0; i < cells.size(); i++) {
                 ICell cell = cells.get(i);
 
                 if (cell instanceof XWPFTableCell) {
-                    line.append(((XWPFTableCell) cell).getTextRecursively());
+                    extractedTable.append(((XWPFTableCell) cell).getTextRecursively());
                 } else if (cell instanceof XWPFSDTCell) {
-                    line.append(((XWPFSDTCell) cell).getContent().getText());
+                    extractedTable.append(((XWPFSDTCell) cell).getContent().getText());
                 }
                 if (i < cells.size() - 1) {
-                    line.append("\t");
+                    extractedTable.append("\t");
                 }
             }
-            mExtractedText.addSimpleSection(line.toString());
+            extractedTable.append("\n");
         }
+        mExtractedText.addSimpleSection(extractedTable.toString());
     }
 }
