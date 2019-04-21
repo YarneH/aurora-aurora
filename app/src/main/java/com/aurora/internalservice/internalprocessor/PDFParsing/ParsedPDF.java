@@ -47,6 +47,7 @@ public class ParsedPDF {
                 addElementToSection(parsedPDF.get(index), section);
                 index++;
             }
+            mExtractedText.addSection(section);
             index = skipEmptyLines(index);
         }
     }
