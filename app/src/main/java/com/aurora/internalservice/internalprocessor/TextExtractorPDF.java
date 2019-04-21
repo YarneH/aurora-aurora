@@ -5,12 +5,19 @@ import android.util.Log;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 import com.aurora.auroralib.ExtractedText;
 import com.aurora.auroralib.Section;
+import com.aurora.internalservice.internalprocessor.PDFParsing.PDFContentExtractor;
+import com.aurora.internalservice.internalprocessor.PDFParsing.ParsedPDF;
+import com.itextpdf.text.pdf.PdfDate;
 import com.itextpdf.text.pdf.PdfReader;
 import com.itextpdf.text.pdf.parser.TaggedPdfReaderTool;
 
@@ -36,8 +43,7 @@ public class TextExtractorPDF implements TextExtractor {
      * @param fileRef a reference to where the file can be found
      * @return the extracted text from the file on fileRef
      */
-    @Override
-    public ExtractedText extract(InputStream file, String fileRef) {
+    public ExtractedText extract_outdated(InputStream file, String fileRef) {
         TaggedPdfReaderTool reader = new TaggedPdfReaderTool();
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         PdfReader pdfreader = null;
@@ -50,10 +56,17 @@ public class TextExtractorPDF implements TextExtractor {
             Log.e("IOexception PDF Reader:",
                     "Error opening and reading the pdf file: " + e.getLocalizedMessage());
         }
+        mExtractedText = new ExtractedText(fileRef, null);
+        Map<String, String> info = pdfreader.getInfo();
+        if(info.containsKey("ModDate")){
+            Date lastEdit = PdfDate.decode(info.get("ModDate")).getTime();
+            mExtractedText.setDateLastEdit(lastEdit);
+        }
+        String lines = baos.toString();
         //Read the XML lines and split on newlines
         String[] xmlLines = baos.toString().split("\n");
-        mExtractedText = new ExtractedText(fileRef, null);
         mXMLIterator = Arrays.asList(xmlLines).iterator();
+
         // As long as the file is not empty, process new lines
         while (mXMLIterator.hasNext()) {
             mLineProcessed = false;
@@ -66,6 +79,23 @@ public class TextExtractorPDF implements TextExtractor {
         return mExtractedText;
     }
 
+    /**
+     * Extraction 2 better i hope
+     */
+    public ExtractedText extract(InputStream file, String fileRef){
+        PDFContentExtractor reader = new PDFContentExtractor();
+        PdfReader pdfreader = null;
+        ParsedPDF parsedPDF = new ParsedPDF();
+        try {
+            pdfreader = new PdfReader(file);
+            //This will convert a Tagged PDF to XML
+            reader.extractContent(pdfreader,parsedPDF);
+        } catch (IOException e) {
+            Log.e("IOexception PDF Reader:",
+                    "Error opening and reading the pdf file: " + e.getLocalizedMessage());
+        }
+        return parsedPDF.toExtractedText(new ExtractedText(fileRef,null));
+    }
     /**
      * Extract sections from the pdf
      */
@@ -109,6 +139,8 @@ public class TextExtractorPDF implements TextExtractor {
             }
         }
     }
+
+
 
     /**
      * As long as a paragraph is empty, skip to the next one
