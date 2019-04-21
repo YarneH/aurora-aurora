@@ -5,8 +5,6 @@ import android.util.Log;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.Iterator;
@@ -15,8 +13,8 @@ import java.util.regex.Pattern;
 
 import com.aurora.auroralib.ExtractedText;
 import com.aurora.auroralib.Section;
-import com.aurora.internalservice.internalprocessor.PDFParsing.PDFContentExtractor;
-import com.aurora.internalservice.internalprocessor.PDFParsing.ParsedPDF;
+import com.aurora.internalservice.internalprocessor.pdfparsing.PDFContentExtractor;
+import com.aurora.internalservice.internalprocessor.pdfparsing.ParsedPDF;
 import com.itextpdf.text.pdf.PdfDate;
 import com.itextpdf.text.pdf.PdfReader;
 import com.itextpdf.text.pdf.parser.TaggedPdfReaderTool;
@@ -62,7 +60,6 @@ public class TextExtractorPDF implements TextExtractor {
             Date lastEdit = PdfDate.decode(info.get("ModDate")).getTime();
             mExtractedText.setDateLastEdit(lastEdit);
         }
-        String lines = baos.toString();
         //Read the XML lines and split on newlines
         String[] xmlLines = baos.toString().split("\n");
         mXMLIterator = Arrays.asList(xmlLines).iterator();

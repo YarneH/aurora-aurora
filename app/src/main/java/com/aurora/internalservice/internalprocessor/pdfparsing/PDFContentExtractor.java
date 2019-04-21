@@ -1,4 +1,4 @@
-package com.aurora.internalservice.internalprocessor.PDFParsing;
+package com.aurora.internalservice.internalprocessor.pdfparsing;
 
 /*
  *
@@ -73,6 +73,10 @@ public class PDFContentExtractor {
     /** The reader object from which the content streams are read. */
     protected PdfReader reader;
     private static final int CHAR_TO_INT = 48;
+
+    public PDFContentExtractor() {
+    }
+
     /**
      * Parses a string with structured content.
      *
@@ -161,7 +165,7 @@ public class PDFContentExtractor {
             PdfDictionary dict = k.getAsDict(PdfName.PG);
             if (dict != null){
                 String content = parseTag(k.getDirectObject(PdfName.K), dict);
-                if(tag.equals("P")){
+                if("P".equals(tag)){
                     parsedPDF.addParagraph(content);
                 } else if(Pattern.matches("H[0-9]+",tag)){
                     parsedPDF.addHeader(content, tag.charAt(1) - CHAR_TO_INT );
@@ -170,8 +174,10 @@ public class PDFContentExtractor {
 
 
             inspectChild(k.getDirectObject(PdfName.K),tag);
-        } else
+        } else{
             inspectChild(k.getDirectObject(PdfName.K), tagParent);
+        }
+
     }
 
     protected String xmlName(PdfName name) {
@@ -233,6 +239,7 @@ public class PDFContentExtractor {
      */
     public String parseTag(PdfObject object, PdfDictionary page) {
         // if the identifier is a number, we can extract the content right away
+        String parsed = "";
         if (object instanceof PdfNumber) {
             PdfNumber mcid = (PdfNumber) object;
             RenderFilter filter = new MarkedContentRenderFilter(mcid.intValue());
@@ -246,9 +253,8 @@ public class PDFContentExtractor {
                         .getAsDict(PdfName.RESOURCES));
             } catch (IOException e) {
                 Log.e("GetPageContent", "Fail to getpagecontent: "  + e.getLocalizedMessage());
-                return "";
             }
-            return listener.getResultantText();
+            parsed = listener.getResultantText();
         }
         // if the identifier is an array, we call the parseTag method
         // recursively
@@ -259,15 +265,16 @@ public class PDFContentExtractor {
             for (int i = 0; i < n; i++) {
                 stringBuilder.append(parseTag(arr.getPdfObject(i), page));
             }
-            return stringBuilder.toString();
+            parsed = stringBuilder.toString();
         }
         // if the identifier is a dictionary, we get the resources from the
         // dictionary
         else if (object instanceof PdfDictionary) {
             PdfDictionary mcr = (PdfDictionary) object;
-            return parseTag(mcr.getDirectObject(PdfName.MCID), mcr
+            parsed = parseTag(mcr.getDirectObject(PdfName.MCID), mcr
                     .getAsDict(PdfName.PG));
-        } else return "";
+        } else parsed = "";
+        return parsed;
     }
 
 }

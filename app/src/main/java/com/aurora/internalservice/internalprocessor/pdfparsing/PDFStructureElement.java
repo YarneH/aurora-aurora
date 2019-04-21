@@ -1,4 +1,4 @@
-package com.aurora.internalservice.internalprocessor.PDFParsing;
+package com.aurora.internalservice.internalprocessor.pdfparsing;
 
 public interface PDFStructureElement {
     public String getType();

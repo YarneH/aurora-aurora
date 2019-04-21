@@ -1,4 +1,4 @@
-package com.aurora.internalservice.internalprocessor.PDFParsing;
+package com.aurora.internalservice.internalprocessor.pdfparsing;
 
 public class HeadingFromPDF implements PDFStructureElement {
     public static final String TYPE = "H";

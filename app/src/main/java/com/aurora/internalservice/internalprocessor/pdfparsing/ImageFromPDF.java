@@ -1,8 +1,8 @@
-package com.aurora.internalservice.internalprocessor.PDFParsing;
+package com.aurora.internalservice.internalprocessor.pdfparsing;
 
 public class ImageFromPDF implements PDFStructureElement {
     private String mImage;
-    public final static String TYPE = "Image";
+    public static final String TYPE = "Image";
     public ImageFromPDF(String image) {
         mImage = image;
     }

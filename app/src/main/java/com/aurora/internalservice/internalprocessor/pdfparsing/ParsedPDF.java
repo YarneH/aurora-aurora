@@ -1,4 +1,4 @@
-package com.aurora.internalservice.internalprocessor.PDFParsing;
+package com.aurora.internalservice.internalprocessor.pdfparsing;
 
 
 import com.aurora.auroralib.ExtractedText;
@@ -8,14 +8,14 @@ import java.util.ArrayList;
 
 public class ParsedPDF {
     // Contains all the extracted content from the file in an array
-    private ArrayList<PDFStructureElement> parsedPDF;
+    private ArrayList<PDFStructureElement> pdfElements;
     // If a header was ever added, the parsing strategy changes
     private boolean mContains_Headers;
     // The extracted text (instantiated after call toExtractedText)
     private ExtractedText mExtractedText;
 
     public ParsedPDF() {
-        parsedPDF = new ArrayList<>();
+        pdfElements = new ArrayList<>();
         mContains_Headers = false;
     }
 
@@ -35,16 +35,16 @@ public class ParsedPDF {
 
     private void toExtractedTextWithHeaders() {
         int index = searchTitle();
-        while (index < parsedPDF.size()) {
+        while (index < pdfElements.size()) {
             Section section = new Section();
-            if (parsedPDF.get(index).getType().equals(HeadingFromPDF.TYPE)) {
-                section.setTitle(parsedPDF.get(index).getContent());
-                section.setLevel(parsedPDF.get(index).getLevel());
+            if (pdfElements.get(index).getType().equals(HeadingFromPDF.TYPE)) {
+                section.setTitle(pdfElements.get(index).getContent());
+                section.setLevel(pdfElements.get(index).getLevel());
                 index++;
                 index = skipEmptyLines(index);
             }
-            while (index < parsedPDF.size() && !parsedPDF.get(index).getType().equals(HeadingFromPDF.TYPE)) {
-                addElementToSection(parsedPDF.get(index), section);
+            while (index < pdfElements.size() && !pdfElements.get(index).getType().equals(HeadingFromPDF.TYPE)) {
+                addElementToSection(pdfElements.get(index), section);
                 index++;
             }
             mExtractedText.addSection(section);
@@ -67,15 +67,15 @@ public class ParsedPDF {
     private void toExtractedTextWithoutHeaders() {
         int index = skipEmptyLines(0);
 
-        while (index < parsedPDF.size()) {
+        while (index < pdfElements.size()) {
             Section section = new Section();
             StringBuilder body = new StringBuilder();
-            if (index + 1 < parsedPDF.size() && parsedPDF.get(index + 1).getContent().trim().isEmpty()) {
-                section.setTitle(parsedPDF.get(index).getContent());
+            if (index + 1 < pdfElements.size() && pdfElements.get(index + 1).getContent().trim().isEmpty()) {
+                section.setTitle(pdfElements.get(index).getContent());
                 index = skipEmptyLines(index + 1);
             }
-            while (!parsedPDF.get(index).getContent().trim().isEmpty() && index < parsedPDF.size()) {
-                body.append(parsedPDF.get(index).getContent());
+            while (!pdfElements.get(index).getContent().trim().isEmpty() && index < pdfElements.size()) {
+                body.append(pdfElements.get(index).getContent());
                 index++;
             }
             mExtractedText.getSections().add(section);
@@ -84,10 +84,10 @@ public class ParsedPDF {
 
     private int searchTitle() {
         int currentLine = skipEmptyLines(0);
-        if (parsedPDF.get(currentLine).getType().equals(ParagraphFromPDF.TYPE)) {
+        if (pdfElements.get(currentLine).getType().equals(ParagraphFromPDF.TYPE)) {
             int nextline = skipEmptyLines(currentLine + 1);
-            if (parsedPDF.get(nextline).getType().equals(HeadingFromPDF.TYPE)) {
-                mExtractedText.setTitle(parsedPDF.get(currentLine).getContent());
+            if (pdfElements.get(nextline).getType().equals(HeadingFromPDF.TYPE)) {
+                mExtractedText.setTitle(pdfElements.get(currentLine).getContent());
                 return nextline;
             }
         }
@@ -101,12 +101,12 @@ public class ParsedPDF {
      * @return index of list containing content
      */
     private int skipEmptyLines(int startIndex) {
-        if (startIndex < parsedPDF.size()) {
-            String line = parsedPDF.get(startIndex).getContent();
-            while (startIndex < parsedPDF.size() && (!parsedPDF.get(startIndex).getType().equals(ImageFromPDF.TYPE)) &&
+        if (startIndex < pdfElements.size()) {
+            String line = pdfElements.get(startIndex).getContent();
+            while (startIndex < pdfElements.size() && (!pdfElements.get(startIndex).getType().equals(ImageFromPDF.TYPE)) &&
                     line.trim().isEmpty()) {
                 startIndex++;
-                line = parsedPDF.get(startIndex).getContent();
+                line = pdfElements.get(startIndex).getContent();
             }
         }
         return startIndex;
@@ -115,16 +115,16 @@ public class ParsedPDF {
 
     public void addHeader(String text, int level) {
         mContains_Headers = true;
-        parsedPDF.add(new HeadingFromPDF(text, level));
+        pdfElements.add(new HeadingFromPDF(text, level));
     }
 
 
     public void addParagraph(String text) {
-        parsedPDF.add(new ParagraphFromPDF(text));
+        pdfElements.add(new ParagraphFromPDF(text));
     }
 
 
     public void addImage(String image) {
-        parsedPDF.add(new ImageFromPDF(image));
+        pdfElements.add(new ImageFromPDF(image));
     }
 }
