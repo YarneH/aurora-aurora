@@ -87,8 +87,10 @@ public class PDFContentExtractor {
         // get the StructTreeRoot from the root object
         PdfDictionary catalog = reader.getCatalog();
         PdfDictionary struct = catalog.getAsDict(PdfName.STRUCTTREEROOT);
-        if (struct == null)
+        if (struct == null){
             throw new IOException(MessageLocalization.getComposedMessage("no.structtreeroot.found"));
+        }
+
         // Inspect the child or children of the StructTreeRoot
         inspectChild(struct.getDirectObject(PdfName.K),"");
     }
@@ -103,12 +105,15 @@ public class PDFContentExtractor {
      * @throws IOException
      */
     private void inspectChild(PdfObject k, String tagParent) throws IOException {
-        if (k == null)
+        if (k == null){
             return;
-        if (k instanceof PdfArray)
+        }
+        if (k instanceof PdfArray){
             inspectChildArray((PdfArray) k, tagParent);
-        else if (k instanceof PdfDictionary)
+        }
+        else if (k instanceof PdfDictionary){
             inspectChildDictionary((PdfDictionary) k, tagParent);
+        }
     }
 
     /**
@@ -119,8 +124,9 @@ public class PDFContentExtractor {
      * @param tagParent the tag of the parent
      */
     private void inspectChildArray(PdfArray k, String tagParent) throws IOException {
-        if (k == null)
+        if (k == null){
             return;
+        }
         for (int i = 0; i < k.size(); i++) {
             inspectChild(k.getDirectObject(i), tagParent);
         }
@@ -134,8 +140,9 @@ public class PDFContentExtractor {
      * @param tagParent the tag of the parent
      */
     private void inspectChildDictionary(PdfDictionary k, String tagParent) throws IOException {
-        if (k == null)
+        if (k == null){
             return;
+        }
         PdfName s = k.getAsName(PdfName.S);
         if (s != null) {
             String tagN = PdfName.decodeName(s.toString());
