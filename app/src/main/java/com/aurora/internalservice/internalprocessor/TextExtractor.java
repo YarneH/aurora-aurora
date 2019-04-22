@@ -10,9 +10,10 @@ import com.aurora.auroralib.ExtractedText;
  */
 public interface TextExtractor {
     /**
-     *
-     * @param fileRef a reference to where the file can be found
+     * @param file          InputStream to the file
+     * @param fileRef       a reference to where the file can be found
+     * @param extractImages True if images need to be extracted, False otherwise
      * @return the extracted text, split in parts
      */
-    ExtractedText extract(InputStream file, String fileRef);
+    ExtractedText extract(InputStream file, String fileRef, boolean extractImages);
 }

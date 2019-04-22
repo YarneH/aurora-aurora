@@ -24,14 +24,16 @@ public class InternalTextProcessor implements InternalService {
      * @param file the stream containing the file
      * @param fileRef a reference to where the file can be found
      * @param type the mimetype of the file
+     * @param extractImages True if images also need to be extracted, false otherwise
      * @return The extracted content from the file
      */
-    public ExtractedText processFile(InputStream file, String fileRef, String type)
+    public ExtractedText processFile(InputStream file, String fileRef, String type,
+                                     boolean extractImages)
             throws FileTypeNotSupportedException {
         ExtractedText extractedText;
         TextExtractor extractor = fileFormatExtractorMap.get(type);
         if (extractor != null) {
-            extractedText = extractor.extract(file, fileRef);
+            extractedText = extractor.extract(file, fileRef, extractImages);
             try {
                 Objects.requireNonNull(file).close();
             } catch (IOException e) {

@@ -7,6 +7,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import edu.stanford.nlp.pipeline.CoreNLPProtos;
+
 
 /**
  * Class to represent extracted text from an internal processor
@@ -15,6 +17,7 @@ public class ExtractedText implements InternallyProcessedFile, Serializable {
     private String mFilename;
     private Date mDateLastEdit;
     private String mTitle;
+    private CoreNLPProtos.Document mTitleAnnotations;
     private List<String> mAuthors;
     private List<Section> mSections;
 
@@ -110,6 +113,14 @@ public class ExtractedText implements InternallyProcessedFile, Serializable {
 
     public void setTitle(String title) {
         this.mTitle = title;
+    }
+
+    public CoreNLPProtos.Document getTitleAnnotations() {
+        return mTitleAnnotations;
+    }
+
+    public void setTitleAnnotations(CoreNLPProtos.Document titleAnnotations) {
+        this.mTitleAnnotations = titleAnnotations;
     }
 
 

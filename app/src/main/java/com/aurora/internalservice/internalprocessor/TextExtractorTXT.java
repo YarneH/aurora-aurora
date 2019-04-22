@@ -17,10 +17,11 @@ public class TextExtractorTXT implements TextExtractor {
      * Extracts the text from a .txt file.
      *
      * @param fileRef a reference to where the file can be found
+     * @param extractImages
      * @return an ExtractedText object without title and one line per paragraph.
      */
     @Override
-    public ExtractedText extract(InputStream file, String fileRef) {
+    public ExtractedText extract(InputStream file, String fileRef, boolean extractImages) {
         ExtractedText extractedText = new ExtractedText(fileRef, null);
         String content = extractStringFromTXT(file, fileRef);
         String[] splitContent = new String[0];
