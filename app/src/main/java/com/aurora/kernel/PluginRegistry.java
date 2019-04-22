@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Class that maintains link between a plugin name and plugin
@@ -43,7 +44,12 @@ class PluginRegistry {
      */
     private Context mContext;
 
-
+    /**
+     * Creates a new PluginRegistry. There should be only one instance at a time
+     * @param processingCommunicator a reference to the ProcessingCommunicator TODO: might be removed
+     * @param configFileRef a string containing the path to the config file of the registry
+     * @param context a reference to the android context, necessary for file IO
+     */
     PluginRegistry(ProcessingCommunicator processingCommunicator, String configFileRef, Context context) {
         this.mProcessingCommunicator = processingCommunicator;
 
@@ -59,9 +65,9 @@ class PluginRegistry {
      * Returns metadata of the selected plugin
      *
      * @param pluginName the name of the plugin to load
-     * @return the PluginEnvironment associated with the plugin name or null if not found
+     * @return the Plugin associated with the plugin name or null if not found
      */
-    public Plugin loadPlugin(String pluginName) {
+    public Plugin getPlugin(String pluginName) {
         return mPluginsMap.get(pluginName);
     }
 
@@ -78,20 +84,40 @@ class PluginRegistry {
     /**
      * Adds a plugin with a given name to the map and writes back the configuration file
      *
-     * @param pluginName the name of the plugin to add
-     * @param plugin     the plugin object that contains the plugin
+     * @param pluginName          the name of the plugin to add
+     * @param plugin              the plugin object that contains the plugin
+     * @param overwriteOldVersion indicates whether an old version of the plugin should be overwritten
+     *                            with a new version (compares the version numbers)
      * @return true if the plugin was added, false if the plugin could not be added (e.g. if it was already present)
      */
-    boolean registerPlugin(String pluginName, Plugin plugin) {
+    boolean registerPlugin(String pluginName, Plugin plugin, boolean overwriteOldVersion) {
         // TODO: write back config file immediately
-        if (!mPluginsMap.containsKey(pluginName)) {
+        if (!mPluginsMap.containsKey(pluginName) || (overwriteOldVersion &&
+                Objects.requireNonNull(mPluginsMap.get(pluginName)).getVersionNumber() < plugin.getVersionNumber())) {
+
             // Add plugin to the map
             mPluginsMap.put(pluginName, plugin);
+
+            // Persist plugin
+            persistPluginsMap();
+
             return true;
         }
 
         // Return false because plugin was already present
         return false;
+    }
+
+    /**
+     * Adds a plugin with a given name to the map and writes back the configuration file.
+     * Only adds the plugin if there is no previous version of it in the registry.
+     *
+     * @param pluginName          the name of the plugin to add
+     * @param plugin              the plugin object that contains the plugin
+     * @return true if the plugin was added, false if the plugin could not be added (e.g. if it was already present)
+     */
+    boolean registerPlugin(String pluginName, Plugin plugin) {
+        return this.registerPlugin(pluginName, plugin, false);
     }
 
     /**
@@ -172,8 +198,9 @@ class PluginRegistry {
         Gson gson = new Gson();
         String pluginsJson = gson.toJson(plugins);
 
-        // Write to config file+
-        try (Writer writer = new BufferedWriter(new FileWriter(mConfigFileRef))) {
+        // Write to config file
+        File configFile = new File(mContext.getFilesDir(), mConfigFileRef);
+        try (Writer writer = new BufferedWriter(new FileWriter(configFile))) {
             writer.write(pluginsJson);
             writer.flush();
         } catch (IOException e) {

@@ -2,6 +2,7 @@ package com.aurora.kernel;
 
 import android.content.Context;
 import android.content.Intent;
+import android.util.Log;
 import android.widget.Toast;
 
 import com.aurora.aurora.R;
@@ -21,15 +22,37 @@ import io.reactivex.Observable;
  * Communicator that communicates with Plugin environments
  */
 public class PluginCommunicator extends Communicator {
+    /**
+     * Tag for logging purposes
+     */
     private static final String CLASS_TAG = "PluginCommunicator";
 
+    /**
+     * A reference to the plugin registry
+     */
     private PluginRegistry mPluginRegistry;
 
+    /**
+     * An observable keeping track of incoming OpenFileWithPluginRequests
+     */
     private Observable<OpenFileWithPluginRequest> mOpenFileWithPluginRequestObservable;
+
+    /**
+     * An observable keeping track of incoming OpenCachedFileWithPluginRequests
+     */
     private Observable<OpenCachedFileWithPluginRequest> mOpenCachedFileWithPluginRequestObservable;
+
+    /**
+     * An observable keeping track of incoming ListPluginsRequests
+     */
     private Observable<ListPluginsRequest> mListPluginsRequestObservable;
 
 
+    /**
+     * Creates a PluginCommunicator. There should be only one instance at a time
+     * @param bus a reference to the unique bus instances that all communicators should use to communicate events
+     * @param pluginRegistry a reference to the plugin registry
+     */
     public PluginCommunicator(Bus bus, PluginRegistry pluginRegistry) {
         super(bus);
 
@@ -40,7 +63,8 @@ public class PluginCommunicator extends Communicator {
 
         // When a request comes in, call appropriate function
         mOpenFileWithPluginRequestObservable.subscribe((OpenFileWithPluginRequest request) ->
-                openFileWithPlugin(request.getExtractedText(), request.getContext())
+                openFileWithPlugin(request.getExtractedText(), request.getPluginAction(),
+                        request.getChooser(), request.getContext())
         );
 
         // Register for requests to open a cached file with plugin
@@ -64,17 +88,22 @@ public class PluginCommunicator extends Communicator {
      *
      * @param extractedText the extracted text of the file to open
      *                      TODO: add tests for this method
+     * @param pluginAction  the target intent of the chooser
+     * @param chooser       the plugin that was selected by the user in the chooser menu
      * @param context       the android context
      */
-    private void openFileWithPlugin(ExtractedText extractedText, Context context) {
-        Intent pluginAction = new Intent(Constants.PLUGIN_ACTION);
-        // Create chooser
-        Intent chooser = Intent.createChooser(pluginAction, context.getString(R.string.select_plugin));
-
+    private void openFileWithPlugin(ExtractedText extractedText, Intent pluginAction, Intent chooser, Context context) {
         String extractedTextInJSON = extractedText.toJSON();
         pluginAction.putExtra(Constants.PLUGIN_INPUT_EXTRACTED_TEXT, extractedTextInJSON);
 
+        Log.d("JSON", extractedTextInJSON);
+
         boolean pluginOpens = pluginAction.resolveActivity(context.getPackageManager()) != null;
+
+        // This is a bit of a hack, but it needs to be done because of trying to launch an
+        // activity outside of and activity context
+        // https://stackoverflow.com/questions/3918517/calling-startactivity-from-outside-of-an-activity-context
+        chooser.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 
 
         if (pluginOpens) {

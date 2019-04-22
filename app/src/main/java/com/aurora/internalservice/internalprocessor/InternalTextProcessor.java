@@ -5,9 +5,11 @@ import android.util.Log;
 import com.aurora.auroralib.ExtractedText;
 import com.aurora.internalservice.InternalService;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Class that takes care of internal processing of file (such as text extraction)
@@ -26,12 +28,15 @@ public class InternalTextProcessor implements InternalService {
      */
     public ExtractedText processFile(InputStream file, String fileRef, String type)
             throws FileTypeNotSupportedException {
-        Log.d("InternalTextProcessing", "Not implemented yet!");
-
         ExtractedText extractedText;
         TextExtractor extractor = fileFormatExtractorMap.get(type);
         if (extractor != null) {
             extractedText = extractor.extract(file, fileRef);
+            try {
+                Objects.requireNonNull(file).close();
+            } catch (IOException e) {
+                Log.e("FILE_CLOSE", "Failed to close the file: " + fileRef, e);
+            }
         } else {
             Log.d("InternalTextProcessor", "File type not supported");
             throw new FileTypeNotSupportedException("");

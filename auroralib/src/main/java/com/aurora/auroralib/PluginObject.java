@@ -7,6 +7,9 @@ import java.io.Serializable;
  * Class to represent text processed by the plugin
  */
 public abstract class PluginObject implements Serializable {
+    /**
+     * Gson object for turning PluginObject to Json string
+     */
     protected static Gson sGson = new Gson();
 
     // TODO: check polymorphism

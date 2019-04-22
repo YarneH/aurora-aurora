@@ -9,7 +9,12 @@ public abstract class Communicator {
      */
     protected Bus mBus;
 
-    public Communicator(Bus mBus) {
+    /**
+     * Creates a new communicator instance
+     *
+     * @param mBus a reference to the unique bus instance that should be used by communicators to communicate events
+     */
+    protected Communicator(Bus mBus) {
         this.mBus = mBus;
     }
 }

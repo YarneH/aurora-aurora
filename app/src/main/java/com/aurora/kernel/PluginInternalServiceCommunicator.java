@@ -1,5 +1,7 @@
 package com.aurora.kernel;
 
+import android.util.Log;
+
 import com.aurora.auroralib.ExtractedText;
 import com.aurora.auroralib.Section;
 import com.aurora.internalservice.internalnlp.InternalNLP;
@@ -7,10 +9,10 @@ import com.aurora.internalservice.internalprocessor.FileTypeNotSupportedExceptio
 import com.aurora.internalservice.internalprocessor.InternalTextProcessor;
 import com.aurora.kernel.event.InternalProcessorRequest;
 import com.aurora.kernel.event.InternalProcessorResponse;
+import com.aurora.plugin.InternalServices;
 
 import java.io.InputStream;
-import java.util.Arrays;
-import java.util.List;
+import java.util.Set;
 
 import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.pipeline.AnnotationPipeline;
@@ -24,84 +26,56 @@ public class PluginInternalServiceCommunicator extends Communicator {
     /**
      * internal text processor
      */
-    private InternalTextProcessor mProcessor;
+    private InternalTextProcessor mInternalTextProcessor;
 
     /**
      * Observable keeping track of internal processor requests
      */
-    private Observable<InternalProcessorRequest> internalProcessorEventObservable;
+    private Observable<InternalProcessorRequest> mInternalProcessorRequestObservable;
 
+    /**
+     * Creates a PluginInternalServiceCommunicator. There should be only one instance at a time
+     *
+     * @param mBus      a reference to the unique bus instance that all communicators should be using for
+     *                  communicating events
+     * @param processor a reference to the InternalTextProcessor
+     */
     public PluginInternalServiceCommunicator(Bus mBus, InternalTextProcessor processor) {
         super(mBus);
-        mProcessor = processor;
+        mInternalTextProcessor = processor;
 
-        internalProcessorEventObservable = mBus.register(InternalProcessorRequest.class);
-        internalProcessorEventObservable.subscribe((InternalProcessorRequest internalProcessorRequest) ->
-                processFileWithInternalProcessor(internalProcessorRequest.getFile(),
-                        internalProcessorRequest.getFileRef(), internalProcessorRequest.getType()));
+        mInternalProcessorRequestObservable = mBus.register(InternalProcessorRequest.class);
+        mInternalProcessorRequestObservable.subscribe((InternalProcessorRequest request) ->
+                processFileWithInternalProcessor(request.getFileRef(), request.getFileType(), request.getFile(),
+                        request.getInternalServices()));
     }
 
-    private void processFileWithInternalProcessor(InputStream file, String fileRef, String type) {
-        // Call internal processor
+    /**
+     * Helper method to process a file with the internal processor when a request comes in
+     *
+     * @param fileRef          a reference to the file that should be processed
+     * @param type             the file type
+     * @param file             the file input stream
+     * @param internalServices the set of internal services that should be run on the file
+     */
+    private void processFileWithInternalProcessor(String fileRef, String type, InputStream file,
+                                                  Set<InternalServices> internalServices) {
         ExtractedText extractedText = null;
-        try {
-            extractedText = mProcessor.processFile(file, fileRef, type);
-        } catch (FileTypeNotSupportedException e) {
-            // TODO remove this (added for testing PluginIntegration while extractors not finished)
-            List<String> paragraphs = Arrays.asList(
-                    "Yield\n" +
-                            "    6 servings\n" +
-                            "Active Time\n" +
-                            "    30 minutes\n" +
-                            "Total Time\n" +
-                            "    35 minutes\n" +
-                            "\n" +
-                            "Ingredients",
 
-                    "        1 lb. linguine or other long pasta\n" +
-                            "        Kosher salt\n" +
-                            "        1 (14-oz.) can diced tomatoes\n" +
-                            "        1/2 cup extra-virgin olive oil, divided\n" +
-                            "        1/4 cup capers, drained\n" +
-                            "        6 oil-packed anchovy fillets\n" +
-                            "        1 Tbsp. tomato paste\n" +
-                            "        1/3 cup pitted Kalamata olives, halved\n" +
-                            "        2 tsp. dried oregano\n" +
-                            "        1/2 tsp. crushed red pepper flakes\n" +
-                            "        6 oz. oil-packed tuna",
-
-                    "Preparation",
-
-                    "        Cook pasta in a large pot of boiling salted water, stirring " +
-                            "occasionally, until al dente. Drain pasta, reserving 1 cup pasta cooking " +
-                            "liquid; return pasta to pot.\n" +
-                            "        While pasta cooks, pour tomatoes into a fine-mesh sieve set over " +
-                            "a medium bowl. Shake to release as much juice as possible, then let tomatoes " +
-                            "drain in sieve, collecting juices in bowl, until ready to use.\n" +
-                            "        Heat 1/4 cup oil in a large deep-sided skillet over medium-high. " +
-                            "Add capers and cook, swirling pan occasionally, until they burst and are " +
-                            "crisp, about 3 minutes. Using a slotted spoon, transfer capers to a paper " +
-                            "towel-lined plate, reserving oil in skillet.\n" +
-                            "        Combine anchovies, tomato paste, and drained tomatoes in skillet. " +
-                            "Cook over medium-high heat, stirring occasionally, until tomatoes begin " +
-                            "to caramelize and anchovies start to break down, about 5 minutes. Add " +
-                            "collected tomato juices, olives, oregano, and red pepper flakes and bring " +
-                            "to a simmer. Cook, stirring occasionally, until sauce is slightly thickened, " +
-                            "about 5 minutes. Add pasta, remaining 1/4 cup oil, and 3/4 cup pasta " +
-                            "cooking liquid to pan. Cook over medium heat, stirring and adding remaining " +
-                            "1/4 cup pasta cooking liquid to loosen if needed, until sauce is thickened " +
-                            "and emulsified, about 2 minutes. Flake tuna into pasta and toss to combine.\n" +
-                            "        Divide pasta among plates. Top with fried capers.\n"
-
-            );
-
-            extractedText = new ExtractedText("ExtractedTextTitle", null);
-            for (String section : paragraphs) {
-                extractedText.addSimpleSection(section);
+        // Perform internal services that are in the given set
+        if (internalServices.contains(InternalServices.TEXT_EXTRACTION)) {
+            // Call internal text processor
+            try {
+                extractedText = mInternalTextProcessor.processFile(file, fileRef, type);
+            } catch (FileTypeNotSupportedException e) {
+                Log.e("PluginIntSerComm", "File type is not supported!", e);
             }
-            e.printStackTrace();
         }
 
+        // If extractedText is null for some reason: return default extracted text
+        if (extractedText == null) {
+            extractedText = new ExtractedText("", null);
+        }
         if(false) {
 
             InternalNLP internalNLP = new InternalNLP();

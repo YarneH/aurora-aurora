@@ -152,7 +152,8 @@ pipeline {
                 // Generate javadoc
                 sh """
                 javadoc -d /var/www/javadoc/aurora/${env.BRANCH_NAME} -sourcepath ${WORKSPACE}/app/src/main/java -subpackages com -private \
-                -classpath ${WORKSPACE}/app/build/intermediates/javac/release/compileReleaseJavaWithJavac/classes
+                -classpath ${WORKSPACE}/app/build/intermediates/javac/release/compileReleaseJavaWithJavac/classes \
+                -bootclasspath /opt/android-sdk-linux/platforms/android-28/android.jar
                 """
             }
             post {
@@ -164,6 +165,45 @@ pipeline {
                 }
             }
         } // Javadoc stage
+
+        stage('Deployment') {
+            when {
+                anyOf {
+                    branch 'master'
+                } 
+            }
+            steps {
+                script {
+                    // Create unsigned apk
+                    sh './gradlew assembleRelease'
+
+
+                    // Sign the apk
+                    signAndroidApks (
+                        keyStoreId: "key0aurora",
+                        keyAlias: "key0",
+                        apksToSign: "app/build/outputs/apk/release/app-release-unsigned.apk"
+                    )
+
+                    // Move to right directory
+                    sh """
+                    if [ ! -d /var/www/javadoc/deploy/ ]; then
+                        mkdir -p /var/www/javadoc/deploy;
+                    fi
+
+                    mv app/build/outputs/apk/release/app-release.apk /var/www/javadoc/deploy/aurora.apk
+                    """
+                }
+            }
+            post {
+                failure {
+                    slack_error_deploy()
+                }
+                success {
+                    slack_deployed()
+                }
+            }
+        } // Deployment stage
     } // Stages
     post {
         success {
@@ -214,6 +254,10 @@ def slack_error_sonar() {
  */
 def slack_error_doc() {
     slack_report(false, ':x: Javadoc failed', null, 'Javadoc')
+}
+
+def slack_error_deploy() {
+    slack_report(false, ':x: Automatic deployment failed', null, 'Deployment')
 }
 
 

@@ -17,20 +17,54 @@ import java.io.Writer;
 import io.reactivex.schedulers.Schedulers;
 
 /**
- * Wrapper class that wraps all communicators and instantiates the unique event bus
+ * Wrapper class that wraps all communicators and instantiates the unique event bus.
+ * This class will perform the initial 'configuration' or 'bootstrapping' of everything kernel related.
  */
 public final class Kernel {
+    /**
+     * A reference to the unique bus instance that should be used among all communicators
+     */
     private Bus mBus;
 
+    /**
+     * A reference to the android context
+     */
+    private Context mContext;
+
+    /**
+     * A reference to the AuroraCommunicator
+     */
     private AuroraCommunicator mAuroraCommunicator;
+
+    /**
+     * A reference to the PluginCommunicator
+     */
     private PluginCommunicator mPluginCommunicator;
+
+    /**
+     * A reference to the ProcessingCommunicator
+     */
     private ProcessingCommunicator mProcessingCommunicator;
+
+    /**
+     * A reference to the PluginInternalServiceCommunicator
+     */
     private PluginInternalServiceCommunicator mPluginInternalServiceCommunicator;
+
+    /**
+     * A reference to the AuroraInternalServiceCommunicator
+     */
     private AuroraInternalServiceCommunicator mAuroraInternalServiceCommunicator;
 
+    /**
+     * A reference to the plugin registry
+     */
     private PluginRegistry mPluginRegistry;
 
     // TODO: change this if necessary
+    /**
+     * A constant indicating how the plugin config file is named
+     */
     private static final String PLUGINS_CFG = "plugin-config.json";
 
     /**
@@ -41,12 +75,20 @@ public final class Kernel {
      *                           memory leaks.
      */
     public Kernel(Context applicationContext) {
+        this.mContext = applicationContext;
+
+        // Create 1 bus to be shared among all communicators
         this.mBus = new Bus(Schedulers.computation());
 
-        this.mAuroraCommunicator = new AuroraCommunicator(mBus);
+        // Initialize plugin config
+        initializePluginConfig();
 
-        this.mProcessingCommunicator = new ProcessingCommunicator(mBus);
+        // Create plugin registry that keeps info of the plugins
         this.mPluginRegistry = new PluginRegistry(mProcessingCommunicator, PLUGINS_CFG, applicationContext);
+
+        // Create the different communicators
+        this.mAuroraCommunicator = new AuroraCommunicator(mBus, mPluginRegistry);
+        this.mProcessingCommunicator = new ProcessingCommunicator(mBus);
         this.mPluginCommunicator = new PluginCommunicator(mBus, mPluginRegistry);
 
         // Create internal text processor for the PluginInternalServiceCommunicator
@@ -56,9 +98,6 @@ public final class Kernel {
         // Create cache
         InternalCache internalCache = new InternalCache(applicationContext);
         this.mAuroraInternalServiceCommunicator = new AuroraInternalServiceCommunicator(mBus, internalCache);
-
-        // Initialize plugin config
-        initializePluginConfig();
     }
 
 
@@ -71,18 +110,30 @@ public final class Kernel {
         return mAuroraCommunicator;
     }
 
+    /**
+     * @return the PluginCommunicator
+     */
     public PluginCommunicator getPluginCommunicator() {
         return mPluginCommunicator;
     }
 
+    /**
+     * @return the ProcessingCommunicator
+     */
     public ProcessingCommunicator getProcessingCommunicator() {
         return mProcessingCommunicator;
     }
 
+    /**
+     * @return the PluginInternalServiceCommunicator
+     */
     public PluginInternalServiceCommunicator getPluginInternalServiceCommunicator() {
         return mPluginInternalServiceCommunicator;
     }
 
+    /**
+     * @return the AuroraInternalServiceCommunicator
+     */
     public AuroraInternalServiceCommunicator getAuroraInternalServiceCommunicator() {
         return mAuroraInternalServiceCommunicator;
     }
@@ -91,7 +142,7 @@ public final class Kernel {
      * Private helper method that checks if the plugin-config file already exists, and creates one when necessary
      */
     private void initializePluginConfig() {
-        File file = new File(PLUGINS_CFG);
+        File file = new File(mContext.getFilesDir(), PLUGINS_CFG);
 
         // If the file does not exist, create one and write an empty JSON array to it
         if (!file.exists()) {

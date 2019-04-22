@@ -16,6 +16,17 @@ public class Section {
      * The images in a section, as a Base64 String
      */
     private List<String> mImages;
+    /**
+     * The level of the section, default level is 0
+     */
+    private int mLevel;
+
+    /**
+     * Constructor for creating an empty section
+     */
+    public Section(){
+
+    }
 
     /**
      * Constructor for creating a section without images or title
@@ -43,30 +54,57 @@ public class Section {
             return mTitle + "\n" + mBody + "\n";
         } else if (mBody != null){
             return mBody + "\n";
-        } else return "Empty paragraph.\n";
+        } else if (mTitle != null) {
+            return (mTitle + "\n");
+        }
+        else return "Empty paragraph.\n";
     }
 
     public String getTitle() {
         return mTitle;
     }
 
-    public void setTitle(String mTitle) {
-        this.mTitle = mTitle;
+    public void setTitle(String title) {
+        this.mTitle = title;
     }
 
     public String getBody() {
         return mBody;
     }
 
-    public void setBody(String mBody) {
-        this.mBody = mBody;
+    public void setBody(String body) {
+        this.mBody = body;
+    }
+
+    public void concatBody(String body) {
+        if(mBody == null) {
+            this.mBody = body;
+        } else {
+            this.mBody = this.mBody.concat(body);
+        }
     }
 
     public List<String> getImages() {
         return mImages;
     }
 
-    public void setImages(List<String> mImages) {
-        this.mImages = mImages;
+    public void setImages(List<String> images) {
+        this.mImages = images;
+    }
+
+    public void addImages(List<String> images) {
+        if(mImages == null) {
+            this.mImages = images;
+        } else {
+            this.mImages.addAll(images);
+        }
+    }
+
+    public int getLevel() {
+        return mLevel;
+    }
+
+    public void setLevel(int level) {
+        this.mLevel = level;
     }
 }

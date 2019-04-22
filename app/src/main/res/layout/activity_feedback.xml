@@ -14,6 +14,8 @@
         android:layout_height="wrap_content"
         android:backgroundTint="@color/colorPrimary"
         android:gravity="top"
+        android:hint="@string/feedback_edittext_hint"
+        android:inputType="textMultiLine"
         android:maxLines="10"
         android:minLines="10" />
 
@@ -22,7 +24,7 @@
         android:layout_height="wrap_content"
         android:background="@drawable/rounded_button"
         android:onClick="onFeedbackClick"
-        android:text="Send"
+        android:text="@string/feedback_send"
         android:textAllCaps="false"
         android:textColor="#FFFFFF" />
 

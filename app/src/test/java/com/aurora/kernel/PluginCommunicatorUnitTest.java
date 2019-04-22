@@ -11,8 +11,6 @@ import com.aurora.util.MockContext;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import java.io.File;
-
 import io.reactivex.Observable;
 import io.reactivex.observers.TestObserver;
 import io.reactivex.schedulers.Schedulers;
@@ -24,6 +22,7 @@ public class PluginCommunicatorUnitTest {
     private static PluginRegistry mPluginRegistry;
     private static PluginCommunicator mPluginCommunicator;
     private static final String PLUGINS_CFG = "testConfigFile.json";
+    private static final String UNIQUE_PLUGIN_NAME = "com.aurora.dummyplugin";
     private static final String PLUGIN_NAME = "DummyPlugin";
     private static final String PLUGIN_NOT_IN_REGISTRY = "You have found the candy, congratulations!";
     private static final String FILE_PATH = "/path/to/file";
@@ -51,13 +50,12 @@ public class PluginCommunicatorUnitTest {
         mPluginRegistry.removeAllPlugins();
 
         // Create name and description
-        String uniqueName = PLUGIN_NAME;
-        String pluginName = PLUGIN_NAME;
         String description = "This is a dummy description.";
-        String version = "0.1";
+        int versionNumber = 1;
+        String versionCode = "0.1";
 
         // Create plugin using environment and processor
-        mPlugin = new DummyPlugin(pluginName, pluginName, null, description, version);
+        mPlugin = new Plugin(UNIQUE_PLUGIN_NAME, PLUGIN_NAME, null, description, versionNumber, versionCode);
 
         // Register plugin in registry
         mPluginRegistry.registerPlugin(PLUGIN_NAME, mPlugin);
@@ -84,17 +82,6 @@ public class PluginCommunicatorUnitTest {
         observer.assertSubscribed();
         observer.assertValue(mPlugin.getName());
         observer.dispose();
-    }
-
-
-    /**
-     * Dummy plugin class for testing purposes
-     */
-    private class DummyPlugin extends Plugin {
-
-        public DummyPlugin(String uniqueName, String name, File pluginLogo, String description, String version) {
-            super(uniqueName, name, pluginLogo, description, version);
-        }
     }
 
     /**
