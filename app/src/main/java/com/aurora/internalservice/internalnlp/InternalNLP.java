@@ -3,6 +3,7 @@ package com.aurora.internalservice.internalnlp;
 import android.util.Log;
 
 import com.aurora.auroralib.ExtractedText;
+import com.aurora.auroralib.Section;
 import com.aurora.internalservice.InternalService;
 import com.aurora.plugin.InternalServices;
 
@@ -62,21 +63,35 @@ public class InternalNLP implements InternalService {
     }
 
     /**
-     * Add annotations to all text in the extractedText object
+     * Add annotations to all text in the extractedText object. This is the Title, the Section
+     * titles and the Section body
      *
      * @param extractedText ExtractedText object that should be annotated
      */
     public void annotate(ExtractedText extractedText) {
 
+        // Title annotations
         if (extractedText.getTitle() != null) {
             Annotation annotatedTitle = new Annotation(extractedText.getTitle());
-
             mAnnotationPipeline.annotate(annotatedTitle);
-
             extractedText.setTitleAnnotations(mAnnotationSerializer.toProto(annotatedTitle));
-
-            Log.d("NLP", mAnnotationSerializer.toProto(annotatedTitle).toString());
         }
 
+        // Section annotations
+        for (Section section: extractedText.getSections()) {
+            // Section title annotations
+            if (section.getTitle() != null) {
+                Annotation annotatedTitle = new Annotation(section.getTitle());
+                mAnnotationPipeline.annotate(annotatedTitle);
+                section.setTitleAnnotations(mAnnotationSerializer.toProto(annotatedTitle));
+            }
+
+            // Section body annotations
+            if (section.getBody() != null) {
+                Annotation annotatedBody = new Annotation(section.getBody());
+                mAnnotationPipeline.annotate(annotatedBody);
+                section.setBodyAnnotations(mAnnotationSerializer.toProto(annotatedBody));
+            }
+        }
     }
 }
