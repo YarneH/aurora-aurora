@@ -81,6 +81,9 @@ dependencies {
         exclude group: 'org.codehaus.woodstox'
     }
 
+    // IText library for pdf files
+    implementation 'com.itextpdf:itextg:5.5.10'
+
     implementation files('libs/poishadow-all.jar')
 
     // Firebase

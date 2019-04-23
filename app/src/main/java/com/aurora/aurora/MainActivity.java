@@ -33,9 +33,7 @@ import com.aurora.plugin.Plugin;
 import com.google.firebase.analytics.FirebaseAnalytics;
 
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.io.InputStream;
-import java.util.Objects;
 
 /**
  * The main activity of the application, started when the app is opened.
@@ -150,6 +148,13 @@ public class MainActivity extends AppCompatActivity
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         CardFileAdapter adapter = new CardFileAdapter(mKernel, this);
         mRecyclerView.setAdapter(adapter);
+
+        // If opening the file is done from a file explorer
+        if (Intent.ACTION_VIEW.equals(getIntent().getAction())) {
+            // This method is also called when a file is opened from the file chooser
+            onActivityResult(REQUEST_FILE_GET,RESULT_OK, getIntent());
+        }
+
     }
 
     /**
@@ -179,7 +184,9 @@ public class MainActivity extends AppCompatActivity
      */
     protected void selectFile() {
         final String[] mimeTypes = {
-                "application/vnd.openxmlformats-officedocument.wordprocessingml.document", "text/plain"};
+                "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                "text/plain",
+                "application/pdf"};
         Intent intent = new Intent();
         intent.setType("* / *");
         intent.setAction(Intent.ACTION_GET_CONTENT);
