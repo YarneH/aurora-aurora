@@ -168,7 +168,8 @@ public class TextExtractorDOCX implements TextExtractor {
                 mSectionInProgress.addImages(encodedImages);
                 mExtractedText.addSection(mSectionInProgress);
                 mSectionInProgress = null;
-            } else if (!formatted.isEmpty() || !encodedImages.isEmpty()) { // It is not empty
+            } else if (!formatted.isEmpty() || !encodedImages.isEmpty()) {
+                // It is not empty
                 if (mSectionInProgress == null) {
                     // Create a new Section
                     mSectionInProgress = new Section();
