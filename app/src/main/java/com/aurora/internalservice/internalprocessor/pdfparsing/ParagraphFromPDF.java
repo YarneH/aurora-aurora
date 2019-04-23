@@ -2,7 +2,7 @@ package com.aurora.internalservice.internalprocessor.pdfparsing;
 
 public class ParagraphFromPDF implements PDFStructureElement {
     public static final String TYPE = "P";
-    String mParagraph;
+    private String mParagraph;
     public ParagraphFromPDF(String text) {
         mParagraph = text;
     }

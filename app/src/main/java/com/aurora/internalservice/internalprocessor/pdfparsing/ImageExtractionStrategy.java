@@ -9,8 +9,15 @@ import com.itextpdf.text.pdf.parser.TextRenderInfo;
 
 import java.io.IOException;
 
+/**
+ * The ImageExtractionStrategy extracts an image from a pdf
+ */
 public class ImageExtractionStrategy implements TextExtractionStrategy {
     private String mImage;
+
+    public ImageExtractionStrategy() {
+        this.mImage = "";
+    }
 
     @Override
     public String getResultantText() {
@@ -19,17 +26,17 @@ public class ImageExtractionStrategy implements TextExtractionStrategy {
 
     @Override
     public void beginTextBlock() {
-
+        // Not needed for images
     }
 
     @Override
     public void renderText(TextRenderInfo renderInfo) {
-
+        // Not needed for images
     }
 
     @Override
     public void endTextBlock() {
-
+        // Not needed for images
     }
 
     @Override

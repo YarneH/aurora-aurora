@@ -6,47 +6,10 @@ package com.aurora.internalservice.internalprocessor.pdfparsing;
  * Copyright (c) 1998-2016 iText Group NV
  * Authors: Bruno Lowagie, et al.
  *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License version 3
- * as published by the Free Software Foundation with the addition of the
- * following permission added to Section 15 as permitted in Section 7(a):
- * FOR ANY PART OF THE COVERED WORK IN WHICH THE COPYRIGHT IS OWNED BY
- * ITEXT GROUP. ITEXT GROUP DISCLAIMS THE WARRANTY OF NON INFRINGEMENT
- * OF THIRD PARTY RIGHTS
- *
- * This program is distributed in the hope that it will be useful, but
- * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
- * or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU Affero General Public License for more details.
- * You should have received a copy of the GNU Affero General Public License
- * along with this program; if not, see http://www.gnu.org/licenses or write to
- * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
- * Boston, MA, 02110-1301 USA, or download the license from the following URL:
- * http://itextpdf.com/terms-of-use/
- *
- * The interactive user interfaces in modified source and object code versions
- * of this program must display Appropriate Legal Notices, as required under
- * Section 5 of the GNU Affero General Public License.
- *
- * In accordance with Section 7(b) of the GNU Affero General Public License,
- * a covered work must retain the producer line in every PDF that is created
- * or manipulated using iText.
- *
- * You can be released from the requirements of the license by purchasing
- * a commercial license. Buying such a license is mandatory as soon as you
- * develop commercial activities involving the iText software without
- * disclosing the source code of your own applications.
- * These activities include: offering paid services to customers as an ASP,
- * serving PDFs on the fly in a web application, shipping iText with a closed
- * source product.
- *
- * For more information, please contact iText Software Corp. at this
- * address: sales@itextpdf.com
+ * Jonas Cuypers adapted this code on 23/04
  */
 
 import android.util.Log;
-
-import com.itextpdf.text.error_messages.MessageLocalization;
 import com.itextpdf.text.pdf.PdfArray;
 import com.itextpdf.text.pdf.PdfDictionary;
 import com.itextpdf.text.pdf.PdfName;
@@ -64,39 +27,37 @@ import java.io.IOException;
 import java.util.regex.Pattern;
 
 /**
- * Converts a tagged PDF document into an XML file.
- *
- * @since 5.0.2
+ * Converts a tagged PDF document into a ParsedPDF.
  */
 public class PDFContentExtractor {
-    private ParsedPDF parsedPDF;
-    /** The reader object from which the content streams are read. */
-    protected PdfReader reader;
+
+    private ParsedPDF mParsedPDF;
+
+    // Subtract 48 from a char to get the number in int
     private static final int CHAR_TO_INT = 48;
 
     public PDFContentExtractor() {
+        mParsedPDF = new ParsedPDF();
     }
 
     /**
      * Parses a string with structured content.
      *
-     * @param reader
-     *            the PdfReader that has access to the PDF file
+     * @param reader the PdfReader that has access to the PDF file
      * @since 5.0.5
      */
     public void extractContent(PdfReader reader, ParsedPDF parsedPDF)
             throws IOException {
-        this.parsedPDF = parsedPDF;
-        this.reader = reader;
+        this.mParsedPDF = parsedPDF;
         // get the StructTreeRoot from the root object
         PdfDictionary catalog = reader.getCatalog();
         PdfDictionary struct = catalog.getAsDict(PdfName.STRUCTTREEROOT);
-        if (struct == null){
-            throw new IOException(MessageLocalization.getComposedMessage("no.structtreeroot.found"));
+        if (struct == null) {
+            Log.e("PDF text extraction", "Could not receive struct");
+        } else {
+            // Inspect the child or children of the StructTreeRoot
+            inspectChild(struct.getDirectObject(PdfName.K), "");
         }
-
-        // Inspect the child or children of the StructTreeRoot
-        inspectChild(struct.getDirectObject(PdfName.K),"");
     }
 
 
@@ -104,18 +65,17 @@ public class PDFContentExtractor {
      * Inspects a child of a structured element. This can be an array or a
      * dictionary.
      *
-     * @param k the child to inspect
+     * @param k         the child to inspect
      * @param tagParent the tag of the parent
      * @throws IOException
      */
     private void inspectChild(PdfObject k, String tagParent) throws IOException {
-        if (k == null){
+        if (k == null) {
             return;
         }
-        if (k instanceof PdfArray){
+        if (k instanceof PdfArray) {
             inspectChildArray((PdfArray) k, tagParent);
-        }
-        else if (k instanceof PdfDictionary){
+        } else if (k instanceof PdfDictionary) {
             inspectChildDictionary((PdfDictionary) k, tagParent);
         }
     }
@@ -124,11 +84,11 @@ public class PDFContentExtractor {
      * If the child of a structured element is an array, we need to loop over
      * the elements.
      *
-     * @param k the child array to inspect
+     * @param k         the child array to inspect
      * @param tagParent the tag of the parent
      */
     private void inspectChildArray(PdfArray k, String tagParent) throws IOException {
-        if (k == null){
+        if (k == null) {
             return;
         }
         for (int i = 0; i < k.size(); i++) {
@@ -140,54 +100,36 @@ public class PDFContentExtractor {
      * If the child of a structured element is a dictionary, we inspect the
      * child;
      *
-     * @param k the child dictionary to inspect
+     * @param k         the child dictionary to inspect
      * @param tagParent the tag of the parent
      */
     private void inspectChildDictionary(PdfDictionary k, String tagParent) throws IOException {
-        if (k == null){
+        if (k == null) {
             return;
         }
+        String tag = tagParent;
         PdfName s = k.getAsName(PdfName.S);
         if (s != null) {
-            String tagN = PdfName.decodeName(s.toString());
-            String tag = fixTagName(tagN);
-            if(!Pattern.matches("(H[0-9]+|P|Figure)",tag)){
+            tag = PdfName.decodeName(s.toString());
+            if (!Pattern.matches("(H[0-9]+|P|Figure)", tag)) {
                 tag = tagParent;
             }
-            if(k.checkType(PdfName.FIGURE)){
-                Log.d("Figure Found", "WELLEEEE WEEEG");
-            }
-            //images
-            PdfObject alt = k.get(PdfName.ALT);
-            if (alt != null && alt.toString() != null) {
-//
-//                out.print("<alt><![CDATA[");
-//                out.print(alt.toString().replaceAll("[\\000]*", ""));
-//                out.print("]]></alt>");
-            }
-
             PdfDictionary dict = k.getAsDict(PdfName.PG);
-            if (dict != null){
-                if (tag.equals("Figure")){
-                    String content = parseTag(k.getDirectObject(PdfName.K), dict,true);
-                    parsedPDF.addImage(content);
+            if (dict != null) {
+                if (tag.equals("Figure")) {
+                    String content = parseTag(k.getDirectObject(PdfName.K), dict, true);
+                    mParsedPDF.addImage(content);
                 } else {
-                    String content = parseTag(k.getDirectObject(PdfName.K), dict,false);
-                    if("P".equals(tag)){
-                        parsedPDF.addParagraph(content);
-                    } else if(Pattern.matches("H[0-9]+",tag)){
-                        parsedPDF.addHeader(content, tag.charAt(1) - CHAR_TO_INT );
+                    String content = parseTag(k.getDirectObject(PdfName.K), dict, false);
+                    if ("P".equals(tag)) {
+                        mParsedPDF.addParagraph(content);
+                    } else if (Pattern.matches("H[0-9]+", tag)) {
+                        mParsedPDF.addHeader(content, tag.charAt(1) - CHAR_TO_INT);
                     }
                 }
-
             }
-
-
-            inspectChild(k.getDirectObject(PdfName.K),tag);
-        } else{
-            inspectChild(k.getDirectObject(PdfName.K), tagParent);
         }
-
+        inspectChild(k.getDirectObject(PdfName.K), tag);
     }
 
     protected String xmlName(PdfName name) {
@@ -197,55 +139,11 @@ public class PDFContentExtractor {
         return xmlName;
     }
 
-    private static String fixTagName(String tag) {
-        StringBuilder sb = new StringBuilder();
-        for (int k = 0; k < tag.length(); ++k) {
-            char c = tag.charAt(k);
-            boolean nameStart =
-                    c == ':'
-                            || (c >= 'A' && c <= 'Z')
-                            || c == '_'
-                            || (c >= 'a' && c <= 'z')
-                            || (c >= '\u00c0' && c <= '\u00d6')
-                            || (c >= '\u00d8' && c <= '\u00f6')
-                            || (c >= '\u00f8' && c <= '\u02ff')
-                            || (c >= '\u0370' && c <= '\u037d')
-                            || (c >= '\u037f' && c <= '\u1fff')
-                            || (c >= '\u200c' && c <= '\u200d')
-                            || (c >= '\u2070' && c <= '\u218f')
-                            || (c >= '\u2c00' && c <= '\u2fef')
-                            || (c >= '\u3001' && c <= '\ud7ff')
-                            || (c >= '\uf900' && c <= '\ufdcf')
-                            || (c >= '\ufdf0' && c <= '\ufffd');
-            boolean nameMiddle =
-                    c == '-'
-                            || c == '.'
-                            || (c >= '0' && c <= '9')
-                            || c == '\u00b7'
-                            || (c >= '\u0300' && c <= '\u036f')
-                            || (c >= '\u203f' && c <= '\u2040')
-                            || nameStart;
-            if (k == 0) {
-                if (!nameStart)
-                    c = '_';
-            }
-            else {
-                if (!nameMiddle)
-                    c = '-';
-            }
-            sb.append(c);
-        }
-        return sb.toString();
-    }
-
     /**
      * Searches for a tag in a page.
      *
-
-     * @param object
-     *            an identifier to find the marked content
-     * @param page
-     *            a page dictionary
+     * @param object an identifier to find the marked content
+     * @param page   a page dictionary
      */
     public String parseTag(PdfObject object, PdfDictionary page, boolean image) {
         // if the identifier is a number, we can extract the content right away
@@ -254,9 +152,9 @@ public class PDFContentExtractor {
             PdfNumber mcid = (PdfNumber) object;
             RenderFilter filter = new MarkedContentRenderFilter(mcid.intValue());
             TextExtractionStrategy strategy;
-            if (image){
+            if (image) {
                 strategy = new ImageExtractionStrategy();
-            }else {
+            } else {
                 strategy = new SimpleTextExtractionStrategy();
             }
             FilteredTextRenderListener listener = new FilteredTextRenderListener(
@@ -267,13 +165,12 @@ public class PDFContentExtractor {
                 processor.processContent(PdfReader.getPageContent(page), page
                         .getAsDict(PdfName.RESOURCES));
             } catch (IOException e) {
-                Log.e("GetPageContent", "Fail to getpagecontent: "  + e.getLocalizedMessage());
+                Log.e("GetPageContent", "Fail to getpagecontent: " + e.getLocalizedMessage());
             }
             parsed = listener.getResultantText();
-        }
-        // if the identifier is an array, we call the parseTag method
-        // recursively
-        else if (object instanceof PdfArray) {
+        } else if (object instanceof PdfArray) {
+            // if the identifier is an array, we call the parseTag method
+            // recursively
             PdfArray arr = (PdfArray) object;
             int n = arr.size();
             StringBuilder stringBuilder = new StringBuilder();
@@ -281,14 +178,15 @@ public class PDFContentExtractor {
                 stringBuilder.append(parseTag(arr.getPdfObject(i), page, image));
             }
             parsed = stringBuilder.toString();
-        }
-        // if the identifier is a dictionary, we get the resources from the
-        // dictionary
-        else if (object instanceof PdfDictionary) {
+        } else if (object instanceof PdfDictionary) {
+            // if the identifier is a dictionary, we get the resources from the
+            // dictionary
             PdfDictionary mcr = (PdfDictionary) object;
             parsed = parseTag(mcr.getDirectObject(PdfName.MCID), mcr
                     .getAsDict(PdfName.PG), image);
-        } else parsed = "";
+        } else{
+            parsed = "";
+        }
         return parsed;
     }
 
