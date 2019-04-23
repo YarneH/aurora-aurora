@@ -19,12 +19,22 @@ public class CacheService extends Service {
 
         @Override
         public int cache(String pluginObject) {
+            Log.d("AURORA_CACHE", "SERVICE IS BEING RUN FOR:" + pluginObject);
+            return 0;
+            /*
             CacheThread ct = new CacheThread(pluginObject);
             ct.start();
+            try {
+                ct.join();
+            } catch (InterruptedException e) {
+                Log.e("CACHE_SERVICE", "interrupted cache service thread", e);
+            }
             return ct.getReturnCode();
+            */
         }
     }
 
+    /*
     private static class CacheThread extends Thread {
         private String pluginObject;
         private int returnCode = -1;
@@ -47,4 +57,5 @@ public class CacheService extends Service {
             returnCode = 0;
         }
     }
+    */
 }
