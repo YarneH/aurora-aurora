@@ -1,8 +1,8 @@
 package com.aurora.internalservice.internalprocessor;
 
-import java.io.InputStream;
-
 import com.aurora.auroralib.ExtractedText;
+
+import java.io.InputStream;
 
 public class TextExtractorPDF implements TextExtractor {
     /**

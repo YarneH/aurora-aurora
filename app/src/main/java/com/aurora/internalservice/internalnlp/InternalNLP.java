@@ -118,6 +118,8 @@ public class InternalNLP implements InternalService {
      * @param annotatorName Name of the Annotator for logging purposes
      * @return True if all dependencies are satisfied, false otherwise.
      */
+    // Sonar says "Set<Class>" cannot contain a "Class", but this is incorrect
+    @java.lang.SuppressWarnings("squid:S2175")
     private boolean dependenciesSatisfied(Annotator annotator, InternalServices annotatorName) {
         boolean allDependenciesSatisfied = true;
 

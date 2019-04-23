@@ -6,13 +6,6 @@ import android.util.Log;
 import com.aurora.auroralib.ExtractedText;
 import com.aurora.auroralib.Section;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import org.apache.poi.xwpf.usermodel.IBodyElement;
 import org.apache.poi.xwpf.usermodel.ICell;
 import org.apache.poi.xwpf.usermodel.IRunElement;
@@ -25,6 +18,13 @@ import org.apache.poi.xwpf.usermodel.XWPFSDTCell;
 import org.apache.poi.xwpf.usermodel.XWPFTable;
 import org.apache.poi.xwpf.usermodel.XWPFTableCell;
 import org.apache.poi.xwpf.usermodel.XWPFTableRow;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class TextExtractorDOCX implements TextExtractor {
 
@@ -169,7 +169,9 @@ public class TextExtractorDOCX implements TextExtractor {
                 mSectionInProgress.addImages(encodedImages);
                 mExtractedText.addSection(mSectionInProgress);
                 mSectionInProgress = null;
-            } else if (!formatted.isEmpty() || !encodedImages.isEmpty()) { // It is not empty
+            } else if (!formatted.isEmpty() || !encodedImages.isEmpty()) {
+                // It is not empty
+                
                 if (mSectionInProgress == null) {
                     // Create a new Section
                     mSectionInProgress = new Section();
