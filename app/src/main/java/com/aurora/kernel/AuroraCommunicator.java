@@ -3,6 +3,7 @@ package com.aurora.kernel;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.util.Log;
 import android.widget.Toast;
 
 import com.aurora.aurora.R;
@@ -16,12 +17,10 @@ import com.aurora.kernel.event.OpenCachedFileWithPluginRequest;
 import com.aurora.kernel.event.OpenFileWithPluginRequest;
 import com.aurora.kernel.event.RetrieveFileFromCacheRequest;
 import com.aurora.kernel.event.RetrieveFileFromCacheResponse;
-import com.aurora.plugin.InternalServices;
 import com.aurora.plugin.Plugin;
 
 import java.io.InputStream;
 import java.util.List;
-import java.util.Set;
 
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -30,12 +29,24 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
  * Communicator class that communicates to Aurora app environment
  */
 public class AuroraCommunicator extends Communicator {
+    /**
+     * Tag for logging purposes
+     */
     private static final String CLASS_TAG = "AuroraCommunicator";
 
+    /**
+     * A reference to the plugin registry
+     */
     private PluginRegistry mPluginRegistry;
 
-    public AuroraCommunicator(Bus mBus, PluginRegistry pluginRegistry) {
-        super(mBus);
+    /**
+     * Creates an AuroraCommunicator. There should be only one AuroraCommunicator at a time
+     *
+     * @param bus            A reference to the unique bus instance over which the communicators will communicate events
+     * @param pluginRegistry a reference to the plugin registry
+     */
+    public AuroraCommunicator(Bus bus, PluginRegistry pluginRegistry) {
+        super(bus);
         mPluginRegistry = pluginRegistry;
     }
 
@@ -53,35 +64,30 @@ public class AuroraCommunicator extends Communicator {
      */
     public void openFileWithPlugin(String fileRef, String fileType, InputStream file,
                                    Intent pluginAction, Intent chooser, Context applicationContext) {
-        // Create observable to listen to
-        Observable<InternalProcessorResponse> internalProcessorResponse =
+
+        // Register observable
+        Observable<InternalProcessorResponse> internalProcessorResponseObservable =
                 mBus.register(InternalProcessorResponse.class);
 
         // Subscribe to observable
         // The subscribe will only be triggered after the file was processed internally
-        internalProcessorResponse
+        internalProcessorResponseObservable
                 .map(InternalProcessorResponse::getExtractedText)
-                .subscribe((ExtractedText extractedText) ->
-                        sendOpenFileRequest(extractedText, pluginAction, chooser, applicationContext));
+                .take(1)
+                .subscribe((ExtractedText extractedText) -> {
+                            sendOpenFileRequest(extractedText, pluginAction, chooser, applicationContext);
+                        }, (Throwable e) ->
+                                Log.e(CLASS_TAG,
+                                        "Something went wrong when receiving the internally processed file.", e)
+                );
 
-        // Get internal processing parameters for the plugin from the plugin registry
-        String selectedPluginName = getChosenPlugin(pluginAction, applicationContext);
-        Plugin selectedPlugin = mPluginRegistry.getPlugin(selectedPluginName);
 
-        // If the plugin exists in the registry, get the set of supported internal services
-        if (selectedPlugin != null) {
-            Set<InternalServices> internalServices = selectedPlugin.getInternalServices();
+        // TODO: this is bypass code. As soon as plugins are registered in the registry, this should be removed
+        InternalProcessorRequest internalProcessorRequest =
+                new InternalProcessorRequest(fileRef, fileType, file, Plugin.getDefaultInternalServices());
 
-            InternalProcessorRequest internalProcessorRequest =
-                    new InternalProcessorRequest(fileRef, fileType, file, internalServices);
-
-            // Post request on the bus
-            mBus.post(internalProcessorRequest);
-        } else {
-            Toast.makeText(applicationContext,
-                    applicationContext.getString(R.string.plugin_not_in_registry), Toast.LENGTH_LONG).show();
-        }
-
+        // Post request on the bus
+        mBus.post(internalProcessorRequest);
     }
 
 
@@ -102,15 +108,18 @@ public class AuroraCommunicator extends Communicator {
         retrieveFileFromCacheResponse
                 .map(RetrieveFileFromCacheResponse::getProcessedFile)
                 .observeOn(AndroidSchedulers.mainThread())
+                .take(1)
                 .subscribe((CachedProcessedFile processedFile) -> {
-                    if ("{}".equals(processedFile.getJsonRepresentation())) {
-                        Toast.makeText(context, context.getString(R.string.cached_file_not_found),
-                                Toast.LENGTH_LONG).show();
-                        // TODO: change this such that it processes the original file
-                    } else {
-                        sendOpenCachedFileRequest(processedFile.getJsonRepresentation(), context);
-                    }
-                });
+                            if ("{}".equals(processedFile.getJsonRepresentation())) {
+                                Toast.makeText(context, context.getString(R.string.cached_file_not_found),
+                                        Toast.LENGTH_LONG).show();
+                                // TODO: change this such that it processes the original file
+                            } else {
+                                sendOpenCachedFileRequest(processedFile.getJsonRepresentation(), context);
+                            }
+                        }, (Throwable e) ->
+                                Log.e(CLASS_TAG, "Something went wrong while retrieving a file from the cache!", e)
+                );
 
 
         // Send request to retrieve file from cache TODO change this (DummyPlugin)!
