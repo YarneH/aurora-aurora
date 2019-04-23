@@ -34,9 +34,9 @@ public class ProcessorCacheThread extends Thread {
      */
     protected void handleCacheResult(int cacheResult){
         if (cacheResult != 0) {
-            cache();
+            int secondResult = cache();
+            Log.d(TAG, "Second cache operation result: " + secondResult);
         }
-        //Log.d(TAG, "Second cache operation works");
     }
 
     public void run() {
