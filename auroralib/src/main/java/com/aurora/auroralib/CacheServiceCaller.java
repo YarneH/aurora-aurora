@@ -29,8 +29,18 @@ public class CacheServiceCaller implements ServiceConnection {
     }
 
 
-    //TODO See how to integrate this properly (should be called form processor so skip activities
-    public void bindService() {
+    public int cacheOperation(String pluginObjectJSON){
+        bindService();
+        int result = cache(pluginObjectJSON);
+        //unbindService();
+        return result;
+    }
+
+
+    /**
+     * Binds the service so that a call to the AIDL defined function cache(String) can be executed
+     */
+    private void bindService() {
         Intent implicit = new Intent(ICache.class.getName());
         //Intent implicit = new Intent(IDownload.class.getName());
         List<ResolveInfo> matches = mAppContext.getPackageManager().queryIntentServices(implicit, 0);
@@ -51,12 +61,20 @@ public class CacheServiceCaller implements ServiceConnection {
         }
     }
 
-    public void unbindService() {
+    /**
+     * Release the binding
+     */
+    private void unbindService() {
         mAppContext.unbindService(this);
         disconnect();
     }
 
-    public int cache(String pluginObjectJSON) {
+    /**
+     *
+     * @param pluginObjectJSON the JSON string of the object that needs to be cached
+     * @return status code of the cache operation from Cache Service in Aurora Internal Services
+     */
+    private int cache(String pluginObjectJSON) {
         CacheThread cacheThread = new CacheThread(pluginObjectJSON);
         cacheThread.start();
         /*try {
@@ -64,7 +82,6 @@ public class CacheServiceCaller implements ServiceConnection {
         } catch (InterruptedException e){
             Log.e(getClass().getSimpleName(), "Exception requesting cache", e);
         }*/
-
         return cacheThread.getCacheResult();
     }
 
@@ -74,6 +91,14 @@ public class CacheServiceCaller implements ServiceConnection {
      */
 
 
+    /**
+     * This function will be called by the android system
+     *
+     * @param className
+     * @param binder
+     *
+     * Finishes the binding process
+     */
     @Override
     public void onServiceConnected(ComponentName className, IBinder binder) {
         synchronized (monitor) {
@@ -84,19 +109,25 @@ public class CacheServiceCaller implements ServiceConnection {
         }
     }
 
+    /**
+     * This function is called by the android system if the service gets disconnected
+     * @param className
+     */
     @Override
     public void onServiceDisconnected(ComponentName className) {
         disconnect();
-
     }
 
+    /**
+     * Release the binding
+     */
     private void disconnect() {
         mBinding = null;
-        Log.d(LOG_TAG, "Plugin UnBound");
+        Log.d(LOG_TAG, "Plugin Unbound");
     }
 
     private class CacheThread extends Thread {
-        private int mCacheResult = -1000;
+        private int mCacheResult = -1000; // - 1000 means that the cache service from Aurora has not been reached
         private String pluginObjectJSON;
 
         protected CacheThread(String pluginObjectJSON) {
@@ -110,17 +141,6 @@ public class CacheServiceCaller implements ServiceConnection {
         public void run() {
             Log.d(LOG_TAG, "cache called");
             try {
-                /*
-                int countSleepIterations = 0;
-                while (mBinding == null && countSleepIterations < 5){
-                    try {
-                        sleep(500);
-                        countSleepIterations++;
-                    } catch (InterruptedException e){
-                        break;
-                    }
-                }*/
-
 
                 if (mBinding == null) {
                     synchronized (monitor) {
@@ -133,20 +153,18 @@ public class CacheServiceCaller implements ServiceConnection {
                         mCacheResult = mBinding.cache(pluginObjectJSON);
                         Log.d(LOG_TAG, "" + mCacheResult);
                     }
-
-                    //Log.e(getClass().getSimpleName(), "Number of sleep iterations exceeded");
                 }
-                // TODO remove
                 else {
                     mCacheResult = mBinding.cache(pluginObjectJSON);
                     Log.d(LOG_TAG, "" + mCacheResult);
-
                 }
+
 
             } catch (RemoteException e) {
                 Log.e(getClass().getSimpleName(), "Exception requesting cache", e);
                 mCacheResult = -1;
             }
+            unbindService();
         }
     }
 
