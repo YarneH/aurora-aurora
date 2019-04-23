@@ -7,8 +7,12 @@ import com.aurora.auroralib.Section;
 import com.aurora.internalservice.InternalService;
 import com.aurora.plugin.InternalServices;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.pipeline.AnnotationPipeline;
+import edu.stanford.nlp.pipeline.Annotator;
 import edu.stanford.nlp.pipeline.POSTaggerAnnotator;
 import edu.stanford.nlp.pipeline.ProtobufAnnotationSerializer;
 import edu.stanford.nlp.pipeline.TokenizerAnnotator;
@@ -20,11 +24,23 @@ import edu.stanford.nlp.pipeline.WordsToSentencesAnnotator;
  */
 public class InternalNLP implements InternalService {
 
+    private static final List<Annotator> sBasicAnnotators = new ArrayList<>();
+
     /** The CoreNLP annotation pipeline */
     private AnnotationPipeline mAnnotationPipeline;
 
     /** Serializer used for to serialize the annotations. Uses Google's protobuf scheme */
     private ProtobufAnnotationSerializer mAnnotationSerializer;
+
+    static {
+        synchronized (sBasicAnnotators) {
+            sBasicAnnotators.add(new TokenizerAnnotator(false, "en"));
+            sBasicAnnotators.add(new WordsToSentencesAnnotator(false));
+            sBasicAnnotators.add(new POSTaggerAnnotator(false));
+
+            sBasicAnnotators.notifyAll();
+        }
+    }
 
     /**
      * Default constructor
@@ -44,13 +60,13 @@ public class InternalNLP implements InternalService {
         try {
             switch (annotator) {
                 case NLP_TOKENIZE:
-                    mAnnotationPipeline.addAnnotator(new TokenizerAnnotator(false, "en"));
+                    mAnnotationPipeline.addAnnotator(sBasicAnnotators.get(0));
                     break;
                 case NLP_SSPLIT:
-                    mAnnotationPipeline.addAnnotator(new WordsToSentencesAnnotator(false));
+                    mAnnotationPipeline.addAnnotator(sBasicAnnotators.get(1));
                     break;
                 case NLP_POS:
-                    mAnnotationPipeline.addAnnotator(new POSTaggerAnnotator(false));
+                    mAnnotationPipeline.addAnnotator(sBasicAnnotators.get(2));
                     break;
 
                 default:
