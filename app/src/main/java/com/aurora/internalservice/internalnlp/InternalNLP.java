@@ -74,7 +74,7 @@ public class InternalNLP implements InternalService {
         if (extractedText.getTitle() != null) {
             Annotation annotatedTitle = new Annotation(extractedText.getTitle());
             mAnnotationPipeline.annotate(annotatedTitle);
-            extractedText.setTitleAnnotations(mAnnotationSerializer.toProto(annotatedTitle));
+            extractedText.setTitleAnnotationProto(mAnnotationSerializer.toProto(annotatedTitle));
         }
 
         // Section annotations

@@ -8,7 +8,9 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.pipeline.CoreNLPProtos;
+import edu.stanford.nlp.pipeline.ProtobufAnnotationSerializer;
 
 
 /**
@@ -17,9 +19,15 @@ import edu.stanford.nlp.pipeline.CoreNLPProtos;
 public class ExtractedText implements InternallyProcessedFile, Serializable {
     private String mFilename;
     private Date mDateLastEdit;
+
+    /** The text of the title of the file */
     private String mTitle;
+    /** The CoreNLP annotations of the title in Google's protobuf format */
     @JsonAdapter(CoreNLPDocumentAdapter.class)
-    private CoreNLPProtos.Document mTitleAnnotations;
+    private CoreNLPProtos.Document mTitleAnnotationProto;
+    /** The deserialized Annotation of the title */
+    private Annotation mTitleAnnotation;
+
     private List<String> mAuthors;
     private List<Section> mSections;
 
@@ -123,12 +131,12 @@ public class ExtractedText implements InternallyProcessedFile, Serializable {
         this.mTitle = title;
     }
 
-    public CoreNLPProtos.Document getTitleAnnotations() {
-        return mTitleAnnotations;
+    public void setTitleAnnotationProto(CoreNLPProtos.Document titleAnnotationProto) {
+        this.mTitleAnnotationProto = titleAnnotationProto;
     }
 
-    public void setTitleAnnotations(CoreNLPProtos.Document titleAnnotations) {
-        this.mTitleAnnotations = titleAnnotations;
+    public Annotation getTitleAnnotation() {
+        return mTitleAnnotation;
     }
 
     public List<String> getAuthors() {
@@ -175,6 +183,13 @@ public class ExtractedText implements InternallyProcessedFile, Serializable {
     public static ExtractedText fromJson(String json) {
         Gson gson = new Gson();
 
-        return gson.fromJson(json, ExtractedText.class);
+        ExtractedText extractedText = gson.fromJson(json, ExtractedText.class);
+        ProtobufAnnotationSerializer annotationSerializer =
+                new ProtobufAnnotationSerializer(true);
+        extractedText.mTitleAnnotation =
+                annotationSerializer.fromProto(extractedText.mTitleAnnotationProto);
+
+
+        return extractedText;
     }
 }
