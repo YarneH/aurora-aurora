@@ -24,6 +24,16 @@ import edu.stanford.nlp.pipeline.WordsToSentencesAnnotator;
  */
 public class InternalNLP implements InternalService {
 
+    /** Id of the tokenize annotator in the basicAnnotators */
+    private static final int TOKENIZE = 0;
+
+    /** Id of the ssplit annotator in the basicAnnotators */
+    private static final int SSPLIT = 1;
+
+    /** Id of the pos annotator in the basicAnnotators */
+    private static final int POS = 2;
+
+    /** Static list of 3 default annotators that will only be loaded at most once */
     private static final List<Annotator> sBasicAnnotators = new ArrayList<>();
 
     /** The CoreNLP annotation pipeline */
@@ -60,13 +70,13 @@ public class InternalNLP implements InternalService {
         try {
             switch (annotator) {
                 case NLP_TOKENIZE:
-                    mAnnotationPipeline.addAnnotator(sBasicAnnotators.get(0));
+                    mAnnotationPipeline.addAnnotator(sBasicAnnotators.get(TOKENIZE));
                     break;
                 case NLP_SSPLIT:
-                    mAnnotationPipeline.addAnnotator(sBasicAnnotators.get(1));
+                    mAnnotationPipeline.addAnnotator(sBasicAnnotators.get(SSPLIT));
                     break;
                 case NLP_POS:
-                    mAnnotationPipeline.addAnnotator(sBasicAnnotators.get(2));
+                    mAnnotationPipeline.addAnnotator(sBasicAnnotators.get(POS));
                     break;
 
                 default:
