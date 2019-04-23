@@ -8,7 +8,9 @@ dependencies {
         exclude group: 'org.apache.lucene'
         exclude group: 'com.sun.xml.bind'
     }
+    compile group: 'com.google.protobuf', name: 'protobuf-java-util', version: '3.7.1'
 }
+
 
 sourceCompatibility = "8"
 targetCompatibility = "8"

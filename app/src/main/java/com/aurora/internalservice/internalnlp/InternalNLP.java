@@ -3,26 +3,26 @@ package com.aurora.internalservice.internalnlp;
 import android.util.Log;
 
 import com.aurora.auroralib.ExtractedText;
-import com.aurora.auroralib.Section;
 import com.aurora.internalservice.InternalService;
 import com.aurora.plugin.InternalServices;
-
-import java.util.Properties;
 
 import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.pipeline.AnnotationPipeline;
 import edu.stanford.nlp.pipeline.POSTaggerAnnotator;
 import edu.stanford.nlp.pipeline.ProtobufAnnotationSerializer;
-import edu.stanford.nlp.pipeline.StanfordCoreNLP;
 import edu.stanford.nlp.pipeline.TokenizerAnnotator;
 import edu.stanford.nlp.pipeline.WordsToSentencesAnnotator;
 
+/**
+ * Class responsible for the CoreNLP service provided by Aurora. The currently supported CoreNLP
+ * annotators are Tokenize, Ssplit and Pos.
+ */
 public class InternalNLP implements InternalService {
 
     /** The CoreNLP annotation pipeline */
     private AnnotationPipeline mAnnotationPipeline;
 
-    /** */
+    /** Serializer used for to serialize the annotations. Uses Google's protobuf scheme */
     private ProtobufAnnotationSerializer mAnnotationSerializer;
 
     /**
@@ -79,24 +79,4 @@ public class InternalNLP implements InternalService {
         }
 
     }
-
-
-
-    private AnnotationPipeline buildPipeline() {
-/*        AnnotationPipeline pipeline = new AnnotationPipeline();
-        pipeline.addAnnotator(new TokenizerAnnotator(false, "en"));
-        pipeline.addAnnotator(new WordsToSentencesAnnotator(false));
-        new ParserAnnotator()
-        pipeline.addAnnotator(new ParserAnnotator(false, MAX_SENTENCES_FOR_PARSER));
-        //pipeline.addAnnotator(new MorphaAnnotator(false));
-        return pipeline;*/
-
-
-
-        Properties props = new Properties();
-        props.setProperty("annotators", "tokenize,ssplit,pos,lemma,ner,parse,depparse,coref,kbp,quote");
-        StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
-        return pipeline;
-    }
-
 }

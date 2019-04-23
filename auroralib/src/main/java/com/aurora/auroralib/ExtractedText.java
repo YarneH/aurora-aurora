@@ -1,6 +1,7 @@
 package com.aurora.auroralib;
 
 import com.google.gson.Gson;
+import com.google.gson.annotations.JsonAdapter;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -17,7 +18,9 @@ public class ExtractedText implements InternallyProcessedFile, Serializable {
     private String mFilename;
     private Date mDateLastEdit;
     private String mTitle;
+    @JsonAdapter(CoreNLPDocumentAdapter.class)
     private CoreNLPProtos.Document mTitleAnnotations;
+    private String titleAnnotationsBase64;
     private List<String> mAuthors;
     private List<Section> mSections;
 
@@ -123,6 +126,14 @@ public class ExtractedText implements InternallyProcessedFile, Serializable {
         this.mTitleAnnotations = titleAnnotations;
     }
 
+    public String getTitleAnnotationsBase64() {
+        return titleAnnotationsBase64;
+    }
+
+    public void setTitleAnnotationsBase64(String titleAnnotationsBase64) {
+        this.titleAnnotationsBase64 = titleAnnotationsBase64;
+    }
+
 
     public String toString() {
         StringBuilder res = new StringBuilder();
@@ -155,6 +166,7 @@ public class ExtractedText implements InternallyProcessedFile, Serializable {
      */
     public static ExtractedText fromJson(String json) {
         Gson gson = new Gson();
+
         return gson.fromJson(json, ExtractedText.class);
     }
 }
