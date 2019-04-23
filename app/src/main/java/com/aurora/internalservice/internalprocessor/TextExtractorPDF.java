@@ -16,6 +16,7 @@ public class TextExtractorPDF implements TextExtractor {
      * @param fileRef a reference to where the file can be found
      * @return the extracted text from the file on fileRef
      */
+    @Override
     public ExtractedText extract(InputStream file, String fileRef){
         PDFContentExtractor reader = new PDFContentExtractor();
         PdfReader pdfreader;
@@ -26,8 +27,8 @@ public class TextExtractorPDF implements TextExtractor {
             reader.extractContent(pdfreader,parsedPDF);
         } catch (IOException e) {
             Log.e("IOexception PDF Reader:",
-                    "Error opening and reading the pdf file: " + e.getLocalizedMessage());
+                    "Error opening and reading the pdf file: " + e.getLocalizedMessage(), e);
         }
-        return parsedPDF.toExtractedText(new ExtractedText(fileRef,null));
+        return parsedPDF.toExtractedText(fileRef);
     }
 }
