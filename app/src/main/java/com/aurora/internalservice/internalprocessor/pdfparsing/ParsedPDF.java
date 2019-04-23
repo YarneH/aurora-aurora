@@ -5,6 +5,7 @@ import com.aurora.auroralib.ExtractedText;
 import com.aurora.auroralib.Section;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class ParsedPDF {
     // Contains all the extracted content from the file in an array
@@ -54,7 +55,9 @@ public class ParsedPDF {
 
     private void addElementToSection(PDFStructureElement pdfStructureElement, Section section) {
         if (pdfStructureElement.getType().equals(ImageFromPDF.TYPE)) {
-            section.getImages().add(pdfStructureElement.getContent());
+            List<String> images = new ArrayList<>();
+            images.add(pdfStructureElement.getContent());
+            section.addImages((images));
         } else {
             section.setBody(section.getBody() + "\n" + pdfStructureElement.getContent());
         }

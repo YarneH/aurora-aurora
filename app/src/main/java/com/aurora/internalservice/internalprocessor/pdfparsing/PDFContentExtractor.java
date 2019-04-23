@@ -151,12 +151,16 @@ public class PDFContentExtractor {
         if (s != null) {
             String tagN = PdfName.decodeName(s.toString());
             String tag = fixTagName(tagN);
-            if(!Pattern.matches("(H[0-9]+|P)",tag)){
+            if(!Pattern.matches("(H[0-9]+|P|Figure)",tag)){
                 tag = tagParent;
+            }
+            if(k.checkType(PdfName.FIGURE)){
+                Log.d("Figure Found", "WELLEEEE WEEEG");
             }
             //images
             PdfObject alt = k.get(PdfName.ALT);
             if (alt != null && alt.toString() != null) {
+//
 //                out.print("<alt><![CDATA[");
 //                out.print(alt.toString().replaceAll("[\\000]*", ""));
 //                out.print("]]></alt>");
@@ -164,12 +168,18 @@ public class PDFContentExtractor {
 
             PdfDictionary dict = k.getAsDict(PdfName.PG);
             if (dict != null){
-                String content = parseTag(k.getDirectObject(PdfName.K), dict);
-                if("P".equals(tag)){
-                    parsedPDF.addParagraph(content);
-                } else if(Pattern.matches("H[0-9]+",tag)){
-                    parsedPDF.addHeader(content, tag.charAt(1) - CHAR_TO_INT );
+                if (tag.equals("Figure")){
+                    String content = parseTag(k.getDirectObject(PdfName.K), dict,true);
+                    parsedPDF.addImage(content);
+                } else {
+                    String content = parseTag(k.getDirectObject(PdfName.K), dict,false);
+                    if("P".equals(tag)){
+                        parsedPDF.addParagraph(content);
+                    } else if(Pattern.matches("H[0-9]+",tag)){
+                        parsedPDF.addHeader(content, tag.charAt(1) - CHAR_TO_INT );
+                    }
                 }
+
             }
 
 
@@ -237,13 +247,18 @@ public class PDFContentExtractor {
      * @param page
      *            a page dictionary
      */
-    public String parseTag(PdfObject object, PdfDictionary page) {
+    public String parseTag(PdfObject object, PdfDictionary page, boolean image) {
         // if the identifier is a number, we can extract the content right away
         String parsed = "";
         if (object instanceof PdfNumber) {
             PdfNumber mcid = (PdfNumber) object;
             RenderFilter filter = new MarkedContentRenderFilter(mcid.intValue());
-            TextExtractionStrategy strategy = new SimpleTextExtractionStrategy();
+            TextExtractionStrategy strategy;
+            if (image){
+                strategy = new ImageExtractionStrategy();
+            }else {
+                strategy = new SimpleTextExtractionStrategy();
+            }
             FilteredTextRenderListener listener = new FilteredTextRenderListener(
                     strategy, filter);
             PdfContentStreamProcessor processor = new PdfContentStreamProcessor(
@@ -263,7 +278,7 @@ public class PDFContentExtractor {
             int n = arr.size();
             StringBuilder stringBuilder = new StringBuilder();
             for (int i = 0; i < n; i++) {
-                stringBuilder.append(parseTag(arr.getPdfObject(i), page));
+                stringBuilder.append(parseTag(arr.getPdfObject(i), page, image));
             }
             parsed = stringBuilder.toString();
         }
@@ -272,7 +287,7 @@ public class PDFContentExtractor {
         else if (object instanceof PdfDictionary) {
             PdfDictionary mcr = (PdfDictionary) object;
             parsed = parseTag(mcr.getDirectObject(PdfName.MCID), mcr
-                    .getAsDict(PdfName.PG));
+                    .getAsDict(PdfName.PG), image);
         } else parsed = "";
         return parsed;
     }
