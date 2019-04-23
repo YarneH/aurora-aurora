@@ -33,9 +33,7 @@ import com.aurora.plugin.Plugin;
 import com.google.firebase.analytics.FirebaseAnalytics;
 
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.io.InputStream;
-import java.util.Objects;
 
 /**
  * The main activity of the application, started when the app is opened.
