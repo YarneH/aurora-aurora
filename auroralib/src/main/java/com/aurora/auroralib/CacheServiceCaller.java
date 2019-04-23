@@ -15,7 +15,7 @@ import com.aurora.internalservice.internalcache.ICache;
 import java.util.List;
 
 public class CacheServiceCaller implements ServiceConnection {
-    private static final String LOG_TAG = "CACHE_SERVICE_CALLER";
+    private static final String LOG_TAG = CacheServiceCaller.class.getSimpleName();
 
     private ICache mBinding = null;
     //private ICache cacheBinding = null;
@@ -30,10 +30,20 @@ public class CacheServiceCaller implements ServiceConnection {
 
 
     public int cacheOperation(String pluginObjectJSON){
-        bindService();
-        int result = cache(pluginObjectJSON);
-        //unbindService();
-        return result;
+        synchronized (monitor) {
+            int result = -1000;
+            bindService();
+            try {
+                monitor.wait();
+                result = cache(pluginObjectJSON);
+                unbindService();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+
+            //unbindService();
+            return result;
+        }
     }
 
 
@@ -77,11 +87,11 @@ public class CacheServiceCaller implements ServiceConnection {
     private int cache(String pluginObjectJSON) {
         CacheThread cacheThread = new CacheThread(pluginObjectJSON);
         cacheThread.start();
-        /*try {
+        try {
             cacheThread.join();
         } catch (InterruptedException e){
             Log.e(getClass().getSimpleName(), "Exception requesting cache", e);
-        }*/
+        }
         return cacheThread.getCacheResult();
     }
 
@@ -164,7 +174,7 @@ public class CacheServiceCaller implements ServiceConnection {
                 Log.e(getClass().getSimpleName(), "Exception requesting cache", e);
                 mCacheResult = -1;
             }
-            unbindService();
+            //unbindService();
         }
     }
 
