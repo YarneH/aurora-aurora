@@ -7,6 +7,10 @@ import com.aurora.auroralib.Section;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * This class will represent a PDF parsed by the PDFContentExtractor
+ * It has a list of PDFStructureElements and it can be converted to an Extracted text
+ */
 public class ParsedPDF {
     // Contains all the extracted content from the file in an array
     private ArrayList<PDFStructureElement> pdfElements;
@@ -20,6 +24,11 @@ public class ParsedPDF {
         mContainsHeaders = false;
     }
 
+    /**
+     * Adds structure to the text
+     * @param extractedText an empty extractedText
+     * @return the same ExtractedText but now filled with text
+     */
     public ExtractedText toExtractedText(ExtractedText extractedText) {
         mExtractedText = extractedText;
         if (mContainsHeaders) {
@@ -54,6 +63,11 @@ public class ParsedPDF {
         }
     }
 
+    /**
+     * Adds an PDFStructureElement to a Section, depending on which type of element it is
+     * @param pdfStructureElement The element to add
+     * @param section the section to add the element to
+     */
     private void addElementToSection(PDFStructureElement pdfStructureElement, Section section) {
         if (pdfStructureElement.getType().equals(ImageFromPDF.TYPE)) {
             List<String> images = new ArrayList<>();
@@ -86,6 +100,10 @@ public class ParsedPDF {
         }
     }
 
+    /**
+     * Logic to find the title of a file
+     * @return the line number after possibly finding a title
+     */
     private int searchTitle() {
         int currentLine = skipEmptyLines(0);
         if (pdfElements.get(currentLine).getType().equals(ParagraphFromPDF.TYPE)) {
