@@ -95,10 +95,6 @@ dependencies {
         exclude group: 'org.apache.lucene'
         exclude group: 'com.sun.xml.bind'
     }
-//    implementation('edu.stanford.nlp:stanford-corenlp:3.9.2:models') {
-//        exclude group: 'org.apache.lucene'
-//        exclude group: 'com.sun.xml.bind'
-//    }
     implementation files('libs/stanford-corenlp-3.9.2-models.jar-small')
 }
 

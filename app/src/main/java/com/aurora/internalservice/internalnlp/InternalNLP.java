@@ -8,7 +8,9 @@ import com.aurora.internalservice.InternalService;
 import com.aurora.plugin.InternalServices;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.pipeline.AnnotationPipeline;
@@ -23,6 +25,9 @@ import edu.stanford.nlp.pipeline.WordsToSentencesAnnotator;
  * annotators are Tokenize, Ssplit and Pos.
  */
 public class InternalNLP implements InternalService {
+
+    /** Tag for logging purposes */
+    private static final String CLASS_TAG = "InternalNLP";
 
     /** Id of the tokenize annotator in the basicAnnotators */
     private static final int TOKENIZE = 0;
@@ -41,6 +46,10 @@ public class InternalNLP implements InternalService {
 
     /** Serializer used for to serialize the annotations. Uses Google's protobuf scheme */
     private ProtobufAnnotationSerializer mAnnotationSerializer;
+
+    /** Set of satisfied dependencies */
+    private Set<java.lang.Class<? extends edu.stanford.nlp.ling.CoreAnnotation>>
+            mSatisfiedDependencies = new HashSet<>();
 
     static {
         synchronized (sBasicAnnotators) {
@@ -70,22 +79,58 @@ public class InternalNLP implements InternalService {
         try {
             switch (annotator) {
                 case NLP_TOKENIZE:
-                    mAnnotationPipeline.addAnnotator(sBasicAnnotators.get(TOKENIZE));
+                    addAnnotatorIfSatisfied(sBasicAnnotators.get(TOKENIZE), annotator);
                     break;
                 case NLP_SSPLIT:
-                    mAnnotationPipeline.addAnnotator(sBasicAnnotators.get(SSPLIT));
+                    addAnnotatorIfSatisfied(sBasicAnnotators.get(SSPLIT), annotator);
                     break;
                 case NLP_POS:
-                    mAnnotationPipeline.addAnnotator(sBasicAnnotators.get(POS));
+                    addAnnotatorIfSatisfied(sBasicAnnotators.get(POS), annotator);
                     break;
 
                 default:
-                    Log.d("NLP", annotator.name() + " Is currently not yet supported");
+                    Log.d(CLASS_TAG, annotator.name() + " Is currently not yet supported");
 
             }
         } catch (Exception e) {
-            Log.e("NLP", "Creating the annotation pipeline failed", e);
+            Log.e(CLASS_TAG, "Creating the annotation pipeline failed", e);
         }
+    }
+
+    /**
+     * Private helper method that adds the Annotator if its dependencies are satisfied
+     *
+     * @param annotator     Annotator that needs to be added to the pipeline
+     * @param annotatorName Name of the Annotator for logging purposes
+     */
+    private void addAnnotatorIfSatisfied(Annotator annotator, InternalServices annotatorName) {
+        if (dependenciesSatisfied(annotator, annotatorName)) {
+            mAnnotationPipeline.addAnnotator(annotator);
+            mSatisfiedDependencies.addAll(annotator.requirementsSatisfied());
+            Log.d(CLASS_TAG, annotatorName.name() + " has been added to the NLP pipeline");
+        }
+    }
+
+    /**
+     * Private helper method that checks if all the dependencies of the Annotator are satisfied.
+     *
+     * @param annotator     Annotator for which the dependencies will be checked.
+     * @param annotatorName Name of the Annotator for logging purposes
+     * @return True if all dependencies are satisfied, false otherwise.
+     */
+    private boolean dependenciesSatisfied(Annotator annotator, InternalServices annotatorName) {
+        boolean allDependenciesSatisfied = true;
+
+        for (java.lang.Class<? extends edu.stanford.nlp.ling.CoreAnnotation> dependency :
+                annotator.requires()) {
+            if (!mSatisfiedDependencies.contains(dependency)) {
+                Log.e(CLASS_TAG, "Dependency " + dependency.getSimpleName() + " required by " +
+                        annotatorName + " is not yet satisfied. " +
+                        annotatorName + " will not be added to the pipeline");
+                allDependenciesSatisfied = false;
+            }
+        }
+        return allDependenciesSatisfied;
     }
 
     /**

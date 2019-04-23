@@ -16,8 +16,8 @@ public class TextExtractorTXT implements TextExtractor {
     /**
      * Extracts the text from a .txt file.
      *
-     * @param fileRef a reference to where the file can be found
-     * @param extractImages
+     * @param fileRef       a reference to where the file can be found
+     * @param extractImages useless parameter for .TXT
      * @return an ExtractedText object without title and one line per paragraph.
      */
     @Override

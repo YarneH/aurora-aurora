@@ -21,6 +21,11 @@ import io.reactivex.Observable;
 public class PluginInternalServiceCommunicator extends Communicator {
 
     /**
+     * Tag for logging purposes
+     */
+    private static final String CLASS_TAG = "PIServiceCommunicator";
+
+    /**
      * internal text processor
      */
     private InternalTextProcessor mInternalTextProcessor;
@@ -71,12 +76,14 @@ public class PluginInternalServiceCommunicator extends Communicator {
 
                 extractedText = mInternalTextProcessor.processFile(file, fileRef, type, extractImages);
 
-                Log.d("SERVICE_DONE", InternalServices.TEXT_EXTRACTION.name());
+                Log.d( CLASS_TAG,
+                        "Service completed: " + InternalServices.TEXT_EXTRACTION.name());
                 if(extractImages) {
-                    Log.d("SERVICE_DONE", InternalServices.IMAGE_EXTRACTION.name());
+                    Log.d(CLASS_TAG,
+                            "Service completed: " + InternalServices.IMAGE_EXTRACTION.name());
                 }
             } catch (FileTypeNotSupportedException e) {
-                Log.e("PluginIntSerComm", "File type is not supported!", e);
+                Log.e(CLASS_TAG, "File type is not supported!", e);
             }
         }
 
@@ -94,14 +101,13 @@ public class PluginInternalServiceCommunicator extends Communicator {
                 }
 
                 mNLPPipeline.addAnnotator(internalService);
-
-                Log.d("NLP", internalService.name() + " has been added to the NLP pipeline");
             }
 
         }
 
         if(mNLPPipeline != null) {
              mNLPPipeline.annotate(extractedText);
+            Log.d(CLASS_TAG, "Service completed: " + "NLP ANNOTATION");
         }
 
 
