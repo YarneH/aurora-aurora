@@ -44,7 +44,8 @@ public class ParsedPDF {
                 index++;
                 index = skipEmptyLines(index);
             }
-            while (index < pdfElements.size() && !pdfElements.get(index).getType().equals(HeadingFromPDF.TYPE)) {
+            while (index < pdfElements.size() &&
+                    !pdfElements.get(index).getType().equals(HeadingFromPDF.TYPE)) {
                 addElementToSection(pdfElements.get(index), section);
                 index++;
             }

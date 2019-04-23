@@ -116,7 +116,7 @@ public class PDFContentExtractor {
             }
             PdfDictionary dict = k.getAsDict(PdfName.PG);
             if (dict != null) {
-                if (tag.equals("Figure")) {
+                if ("Figure".equals(tag)) {
                     String content = parseTag(k.getDirectObject(PdfName.K), dict, true);
                     mParsedPDF.addImage(content);
                 } else {
