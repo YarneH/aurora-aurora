@@ -17,7 +17,9 @@ import edu.stanford.nlp.pipeline.ProtobufAnnotationSerializer;
  * Class to represent extracted text from an internal processor
  */
 public class ExtractedText implements InternallyProcessedFile, Serializable {
+    /** The filename, often the path to the file */
     private String mFilename;
+    /** The Date of the last edit*/
     private Date mDateLastEdit;
 
     /** The text of the title of the file */
@@ -28,7 +30,9 @@ public class ExtractedText implements InternallyProcessedFile, Serializable {
     /** The deserialized Annotation of the title */
     private Annotation mTitleAnnotation;
 
+    /** A list of authors of the file */
     private List<String> mAuthors;
+    /** A list of Sections of the file which represent the content */
     private List<Section> mSections;
 
     /**
@@ -99,14 +103,17 @@ public class ExtractedText implements InternallyProcessedFile, Serializable {
     }
 
     /**
-     * Adds a new section without images or title
+     * Adds a new section with only a body
      *
      * @param sectionText the content of the section
      */
     public void addSimpleSection(String sectionText) {
-        addSection(new Section(sectionText));
+        Section section = new Section();
+        section.setBody(sectionText);
+        addSection(section);
     }
 
+    @SuppressWarnings("unused")
     public String getFilename() {
         return mFilename;
     }
@@ -115,6 +122,7 @@ public class ExtractedText implements InternallyProcessedFile, Serializable {
         this.mFilename = mFilename;
     }
 
+    @SuppressWarnings("unused")
     public Date getDateLastEdit() {
         return mDateLastEdit;
     }
@@ -135,10 +143,12 @@ public class ExtractedText implements InternallyProcessedFile, Serializable {
         this.mTitleAnnotationProto = titleAnnotationProto;
     }
 
+    @SuppressWarnings("unused")
     public Annotation getTitleAnnotation() {
         return mTitleAnnotation;
     }
 
+    @SuppressWarnings("unused")
     public List<String> getAuthors() {
         if (mAuthors != null) {
             return  mAuthors;
@@ -180,15 +190,32 @@ public class ExtractedText implements InternallyProcessedFile, Serializable {
      * @param json The extracted JSON string of the ExtractedText object
      * @return ExtractedText
      */
+    @SuppressWarnings("unused")
     public static ExtractedText fromJson(String json) {
         Gson gson = new Gson();
 
         ExtractedText extractedText = gson.fromJson(json, ExtractedText.class);
         ProtobufAnnotationSerializer annotationSerializer =
                 new ProtobufAnnotationSerializer(true);
-        extractedText.mTitleAnnotation =
-                annotationSerializer.fromProto(extractedText.mTitleAnnotationProto);
 
+        // Recover the title CoreNLP annotations
+        if (extractedText.mTitleAnnotationProto != null) {
+            extractedText.mTitleAnnotation =
+                    annotationSerializer.fromProto(extractedText.mTitleAnnotationProto);
+        }
+
+        // Recover the Section CoreNLP annotations
+        for (Section section : extractedText.getSections()) {
+            if (section.getTitleAnnotationProto() != null) {
+                section.setTitleAnnotation(
+                        annotationSerializer.fromProto(section.getTitleAnnotationProto()));
+            }
+
+            if (section.getBodyAnnotationProto() != null) {
+                section.setBodyAnnotation(
+                        annotationSerializer.fromProto(section.getBodyAnnotationProto()));
+            }
+        }
 
         return extractedText;
     }

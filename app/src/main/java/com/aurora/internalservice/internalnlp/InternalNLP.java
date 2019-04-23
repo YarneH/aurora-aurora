@@ -83,14 +83,14 @@ public class InternalNLP implements InternalService {
             if (section.getTitle() != null) {
                 Annotation annotatedTitle = new Annotation(section.getTitle());
                 mAnnotationPipeline.annotate(annotatedTitle);
-                section.setTitleAnnotations(mAnnotationSerializer.toProto(annotatedTitle));
+                section.setTitleAnnotationProto(mAnnotationSerializer.toProto(annotatedTitle));
             }
 
             // Section body annotations
             if (section.getBody() != null) {
                 Annotation annotatedBody = new Annotation(section.getBody());
                 mAnnotationPipeline.annotate(annotatedBody);
-                section.setBodyAnnotations(mAnnotationSerializer.toProto(annotatedBody));
+                section.setBodyAnnotationProto(mAnnotationSerializer.toProto(annotatedBody));
             }
         }
     }
