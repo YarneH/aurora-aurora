@@ -11,18 +11,18 @@ public class ParsedPDF {
     // Contains all the extracted content from the file in an array
     private ArrayList<PDFStructureElement> pdfElements;
     // If a header was ever added, the parsing strategy changes
-    private boolean mContains_Headers;
+    private boolean mContainsHeaders;
     // The extracted text (instantiated after call toExtractedText)
     private ExtractedText mExtractedText;
 
     public ParsedPDF() {
         pdfElements = new ArrayList<>();
-        mContains_Headers = false;
+        mContainsHeaders = false;
     }
 
     public ExtractedText toExtractedText(ExtractedText extractedText) {
         mExtractedText = extractedText;
-        if (mContains_Headers) {
+        if (mContainsHeaders) {
             toExtractedTextWithHeaders();
         } else {
             toExtractedTextWithoutHeaders();
@@ -117,7 +117,7 @@ public class ParsedPDF {
 
 
     public void addHeader(String text, int level) {
-        mContains_Headers = true;
+        mContainsHeaders = true;
         pdfElements.add(new HeadingFromPDF(text, level));
     }
 
