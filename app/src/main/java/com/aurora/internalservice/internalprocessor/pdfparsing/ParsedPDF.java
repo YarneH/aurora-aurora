@@ -107,7 +107,8 @@ public class ParsedPDF {
     private int skipEmptyLines(int startIndex) {
         if (startIndex < pdfElements.size()) {
             String line = pdfElements.get(startIndex).getContent();
-            while (startIndex < pdfElements.size() && (!pdfElements.get(startIndex).getType().equals(ImageFromPDF.TYPE)) &&
+            while (startIndex < pdfElements.size() &&
+                    (!pdfElements.get(startIndex).getType().equals(ImageFromPDF.TYPE)) &&
                     line.trim().isEmpty()) {
                 startIndex++;
                 line = pdfElements.get(startIndex).getContent();
