@@ -13,11 +13,12 @@ import com.itextpdf.text.pdf.PdfReader;
 public class TextExtractorPDF implements TextExtractor {
 
     /**
-     * @param fileRef a reference to where the file can be found
+     * @param fileRef       a reference to where the file can be found
+     * @param extractImages True if images need to be extracted, false otherwise
      * @return the extracted text from the file on fileRef
      */
     @Override
-    public ExtractedText extract(InputStream file, String fileRef){
+    public ExtractedText extract(InputStream file, String fileRef, boolean extractImages){
         PDFContentExtractor reader = new PDFContentExtractor();
         PdfReader pdfreader;
         ParsedPDF parsedPDF = new ParsedPDF();

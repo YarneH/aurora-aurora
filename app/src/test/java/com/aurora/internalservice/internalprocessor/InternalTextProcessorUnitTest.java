@@ -20,7 +20,7 @@ public class InternalTextProcessorUnitTest {
     // Test if an exception is thrown when a wrong file type is passed
     @Test(expected = FileTypeNotSupportedException.class)
     public void processFile_shouldThrowErrorUnsupportedExtension() throws FileTypeNotSupportedException {
-        mInternalTextProcessor.processFile(null, null, "jpg");
+        mInternalTextProcessor.processFile(null, null, "jpg", false);
     }
 
     // Test if, when a 'txt'-file is passed, text is extracted
@@ -30,7 +30,8 @@ public class InternalTextProcessorUnitTest {
         File file = new File(fileRef);
         try {
             InputStream inputStream = new FileInputStream(file);
-            ExtractedText extractedText = mInternalTextProcessor.processFile(inputStream, fileRef, "txt");
+            ExtractedText extractedText = mInternalTextProcessor.processFile(inputStream, fileRef
+                    , "txt", false);
             assertNotNull("The extraction of the 'txt'-file has failed" , extractedText);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
@@ -52,7 +53,8 @@ public class InternalTextProcessorUnitTest {
         File file = new File(fileRef);
         try {
             InputStream inputStream = new FileInputStream(file);
-            ExtractedText extractedText = mInternalTextProcessor.processFile(inputStream, fileRef, "docx");
+            ExtractedText extractedText = mInternalTextProcessor.processFile(inputStream, fileRef
+                    , "docx", false);
             assertNotNull("The extraction of the 'docx'-file has failed" , extractedText);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
@@ -66,7 +68,8 @@ public class InternalTextProcessorUnitTest {
         File file = new File(fileRef);
         try {
             InputStream inputStream = new FileInputStream(file);
-            ExtractedText extractedText = mInternalTextProcessor.processFile(inputStream, fileRef, "pdf");
+            ExtractedText extractedText = mInternalTextProcessor.processFile(inputStream, fileRef
+                    , "pdf", false);
             assertNotNull("The extraction of the 'pdf'-file has failed" , extractedText);
         } catch (FileNotFoundException e) {
             e.printStackTrace();

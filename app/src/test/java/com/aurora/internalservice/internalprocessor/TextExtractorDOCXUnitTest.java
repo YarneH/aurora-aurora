@@ -3,7 +3,6 @@ package com.aurora.internalservice.internalprocessor;
 import com.aurora.auroralib.ExtractedText;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.File;
@@ -35,7 +34,7 @@ public class TextExtractorDOCXUnitTest {
         File file = new File(mfileRef);
         InputStream inputStream = new FileInputStream(file);
         // Extract the text
-        mExtractedText = textExtractorDOCX.extract(inputStream, mfileRef);
+        mExtractedText = textExtractorDOCX.extract(inputStream, mfileRef, false);
     }
 
     @Test
