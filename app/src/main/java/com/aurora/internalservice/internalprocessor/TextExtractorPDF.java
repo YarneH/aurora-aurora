@@ -1,18 +1,35 @@
 package com.aurora.internalservice.internalprocessor;
 
-import com.aurora.auroralib.ExtractedText;
+import android.util.Log;
 
+import java.io.IOException;
 import java.io.InputStream;
 
+import com.aurora.auroralib.ExtractedText;
+import com.aurora.internalservice.internalprocessor.pdfparsing.PDFContentExtractor;
+import com.aurora.internalservice.internalprocessor.pdfparsing.ParsedPDF;
+import com.itextpdf.text.pdf.PdfReader;
+
 public class TextExtractorPDF implements TextExtractor {
+
     /**
-     * TODO: This method will extract the text using iText
-     * @param fileRef a reference to where the file can be found
-     * @param extractImages
+     * @param fileRef       a reference to where the file can be found
+     * @param extractImages True if images need to be extracted, false otherwise
      * @return the extracted text from the file on fileRef
      */
     @Override
-    public ExtractedText extract(InputStream file, String fileRef, boolean extractImages) {
-        return new ExtractedText(fileRef, null);
+    public ExtractedText extract(InputStream file, String fileRef, boolean extractImages){
+        PDFContentExtractor reader = new PDFContentExtractor();
+        PdfReader pdfreader;
+        ParsedPDF parsedPDF = new ParsedPDF();
+        try {
+            pdfreader = new PdfReader(file);
+            //This will convert a Tagged PDF to XML
+            reader.extractContent(pdfreader,parsedPDF);
+        } catch (IOException e) {
+            Log.e("IOexception PDF Reader:",
+                    "Error opening and reading the pdf file: " + e.getLocalizedMessage(), e);
+        }
+        return parsedPDF.toExtractedText(fileRef);
     }
 }
