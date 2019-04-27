@@ -7,7 +7,7 @@
     android:paddingBottom="1000dp"
     android:visibility="gone">
 
-    <!-- TODO: Fill in details screen with neccessary views -->
+    <!-- TODO: Fill in details screen with necessary views -->
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

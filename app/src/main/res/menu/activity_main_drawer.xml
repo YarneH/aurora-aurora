@@ -19,6 +19,11 @@
             android:title="@string/about_us" />
     </group>
     <item
+        android:id="@+id/nav_plugin_market"
+        android:icon="@drawable/ic_shopping_cart_black"
+        android:title="@string/plugin_market"
+        />
+    <item
         android:id="@+id/nav_help_feedback"
         android:icon="@drawable/ic_nav_help"
         android:title="@string/help_feedback" />

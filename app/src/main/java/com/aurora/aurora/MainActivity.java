@@ -1,5 +1,6 @@
 package com.aurora.aurora;
 
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.ContentResolver;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -29,6 +30,8 @@ import android.widget.Toast;
 import com.aurora.auroralib.Constants;
 import com.aurora.kernel.AuroraCommunicator;
 import com.aurora.kernel.Kernel;
+import com.aurora.market.MarketPluginListActivity;
+import com.aurora.market.PluginMarketViewModel;
 import com.aurora.plugin.Plugin;
 import com.google.firebase.analytics.FirebaseAnalytics;
 
@@ -80,6 +83,11 @@ public class MainActivity extends AppCompatActivity
     private Kernel mKernel = null;
 
     /**
+     * The ViewModel of the PluginMarket, containing the downloadable plugins
+     */
+    private PluginMarketViewModel mPluginMarket = null;
+
+    /**
      * Delivers the communication between the environment and the Kernel.
      */
     private AuroraCommunicator mAuroraCommunicator = null;
@@ -107,7 +115,6 @@ public class MainActivity extends AppCompatActivity
          */
         registerPlugins();
 
-
         /* Initialize FirebaseAnalytics */
         mFirebaseAnalytics = FirebaseAnalytics.getInstance(this);
 
@@ -124,7 +131,7 @@ public class MainActivity extends AppCompatActivity
         setSupportActionBar(toolbar);
 
         /* The floating action button to add files */
-        FloatingActionButton fab = findViewById(R.id.fab);
+        FloatingActionButton fab = findViewById(R.id.fab_download_plugin);
         /* Implementation of adding files in onClick */
         fab.setOnClickListener(view -> selectFile());
 
@@ -152,7 +159,7 @@ public class MainActivity extends AppCompatActivity
         // If opening the file is done from a file explorer
         if (Intent.ACTION_VIEW.equals(getIntent().getAction())) {
             // This method is also called when a file is opened from the file chooser
-            onActivityResult(REQUEST_FILE_GET,RESULT_OK, getIntent());
+            onActivityResult(REQUEST_FILE_GET, RESULT_OK, getIntent());
         }
 
     }
@@ -345,6 +352,9 @@ public class MainActivity extends AppCompatActivity
             mTextViewMain.setText(text);
         } else if (id == R.id.nav_help_feedback) {
             Intent intent = new Intent(MainActivity.this, FeedbackActivity.class);
+            startActivity(intent);
+        } else if (id == R.id.nav_plugin_market) {
+            Intent intent = new Intent(MainActivity.this, MarketPluginListActivity.class);
             startActivity(intent);
         } else if (id == R.id.nav_home) {
             home = true;
