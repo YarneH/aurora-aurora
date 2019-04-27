@@ -74,11 +74,10 @@ public class AuroraCommunicator extends Communicator {
         internalProcessorResponseObservable
                 .map(InternalProcessorResponse::getExtractedText)
                 .take(1)
-                .subscribe((ExtractedText extractedText) -> {
-                            sendOpenFileRequest(extractedText, pluginAction, chooser, applicationContext);
-                        }, (Throwable e) ->
-                                Log.e(CLASS_TAG,
-                                        "Something went wrong when receiving the internally processed file.", e)
+                .subscribe((ExtractedText extractedText) ->
+                        sendOpenFileRequest(extractedText, pluginAction, chooser, applicationContext), (Throwable e) ->
+                        Log.e(CLASS_TAG,
+                                "Something went wrong when receiving the internally processed file.", e)
                 );
 
 
