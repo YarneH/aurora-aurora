@@ -1,6 +1,5 @@
 package com.aurora.aurora;
 
-import android.arch.lifecycle.ViewModelProviders;
 import android.content.ContentResolver;
 import android.content.DialogInterface;
 import android.content.Intent;

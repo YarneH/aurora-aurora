@@ -9,10 +9,11 @@ import java.net.URL;
  * A Class representing a Plugin which can be downloaded from the PluginMarket
  */
 public class MarketPlugin implements Serializable {
-    Image mLogo;
-    String mPluginName;
-    String mDescription;
-    URL mDownloadLink;
+    private static final long serialVersionUID = 1;
+    private Image mLogo;
+    private String mPluginName;
+    private String mDescription;
+    private URL mDownloadLink;
 
 
     /**

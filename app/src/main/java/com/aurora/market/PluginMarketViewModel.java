@@ -35,10 +35,6 @@ public class PluginMarketViewModel extends AndroidViewModel {
         mMarketPlugins.getValue().add(dummy3);
     }
 
-    public void initialize() {
-
-    }
-
     public LiveData<List<MarketPlugin>> getMarketPlugins() {
         return mMarketPlugins;
     }
