@@ -258,5 +258,8 @@ public class AuroraInternalServiceCommunicatorUnitTest {
      * Dummy implementation for testing purposes
      */
     private class DummyPluginObject extends PluginObject {
+        public DummyPluginObject() {
+            super("dummyfilename", "dummyplugin");
+        }
     }
 }
