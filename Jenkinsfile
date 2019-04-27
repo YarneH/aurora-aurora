@@ -39,9 +39,9 @@ pipeline {
                     junit allowEmptyResults: true, testResults: '**/TEST-*.xml'
 
                     // Analyze coverage info
-                    jacoco sourcePattern: '**/src/main/*/java', 
+                    jacoco sourcePattern: '**/src/*/java', 
                         classPattern: '**/classes/com/aurora', 
-                        exclusionPattern: '**/*Test*.class,  **/aurora/*.class, **/util/*.class, **/R.class, **/R$*.class, **/BuildConfig, **/src/test/, **/src/androidTest/'
+                        exclusionPattern: '**/*Test*.class,  **/aurora/*.class, **/util/*.class, **/*ICache*, **/R.class, **/R$*.class, **/BuildConfig, **/src/test/, **/src/androidTest/'
                 }
             }
 
@@ -104,9 +104,9 @@ pipeline {
                     junit allowEmptyResults: true, testResults: '**/TEST-*.xml'
 
                     // Analyze coverage info
-                     jacoco sourcePattern: '**/src/main/*/java', 
+                     jacoco sourcePattern: '**/src/*/java', 
                         classPattern: '**/classes/com/aurora', 
-                        exclusionPattern: '**/*Test*.class,  **/aurora/*.class, **/util/*.class, **/R.class, **/R$*.class, **/BuildConfig, **/src/test, **/src/androidTest'
+                        exclusionPattern: '**/*Test*.class,  **/aurora/*.class, **/util/*.class, **/ICache*, **/R.class, **/R$*.class, **/BuildConfig, **/src/test, **/src/androidTest'
                 }
             }
             post {
@@ -129,9 +129,9 @@ pipeline {
                     junit allowEmptyResults: true, testResults: '**/TEST-*.xml'
 
                     // Analyze coverage info
-                    jacoco sourcePattern: '**/src/main/*/java', 
+                    jacoco sourcePattern: '**/src/*/java', 
                         classPattern: '**/classes/com/aurora', 
-                        exclusionPattern: '**/*Test*.class,  **/aurora/*.class, **/util/*.class, **/R.class, **/R$*.class, **/BuildConfig, **/src/test/, **/src/androidTest/'
+                        exclusionPattern: '**/*Test*.class,  **/aurora/*.class, **/util/*.class, **/ICache*, **/R.class, **/R$*.class, **/BuildConfig, **/src/test/, **/src/androidTest/'
                 }
             }
             post {
