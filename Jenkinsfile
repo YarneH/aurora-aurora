@@ -41,7 +41,7 @@ pipeline {
                     // Analyze coverage info
                     jacoco sourcePattern: '**/src/*/java', 
                         classPattern: '**/classes/com/aurora', 
-                        exclusionPattern: '**/*Test*.class,  **/aurora/*.class, **/auroralib/*.class, **/R.class, **/R$*.class, **/BuildConfig, **/src/test, **/src/androidTest'
+                        exclusionPattern: '**/*Test*.class,  **/aurora/*.class, **/auroralib/*.class, **/R.class, **/R$*.class, **/BuildConfig, **/src/test/, **/src/androidTest/'
                 }
             }
 
@@ -106,7 +106,7 @@ pipeline {
                     // Analyze coverage info
                      jacoco sourcePattern: '**/src/*/java', 
                         classPattern: '**/classes/com/aurora', 
-                        exclusionPattern: '**/*Test*.class,  **/aurora/*.class, **/auroralib/*.class, **/R.class, **/R$*.class, **/BuildConfig, **/src/test, **/src/androidTest'
+                        exclusionPattern: '**/*Test*.class,  **/aurora/*.class, **/auroralib/*.class, **/R.class, **/R$*.class, **/BuildConfig, **/src/test/, **/src/androidTest/'
                 }
             }
             post {
@@ -131,7 +131,7 @@ pipeline {
                     // Analyze coverage info
                     jacoco sourcePattern: '**/src/*/java', 
                         classPattern: '**/classes/com/aurora', 
-                        exclusionPattern: '**/*Test*.class,  **/aurora/*.class, **/auroralib/*.class, **/R.class, **/R$*.class, **/BuildConfig, **/src/test, **/src/androidTest'
+                        exclusionPattern: '**/*Test*.class,  **/aurora/*.class, **/auroralib/*.class, **/R.class, **/R$*.class, **/BuildConfig, **/src/test/, **/src/androidTest/'
                 }
             }
             post {
