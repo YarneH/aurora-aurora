@@ -22,7 +22,7 @@ public class TextExtractorTXTUnitTest {
         String fileRef = RES_PATH + "Pasta.txt";
         File file = new File(fileRef);
         InputStream inputStream = new FileInputStream(file);
-        mExtractedText = textExtractorTXT.extract(inputStream, fileRef);
+        mExtractedText = textExtractorTXT.extract(inputStream, fileRef, false);
     }
 
 

@@ -3,7 +3,6 @@ package com.aurora.internalservice.internalprocessor;
 import com.aurora.auroralib.ExtractedText;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.File;
@@ -35,7 +34,7 @@ public class TextExtractorDOCXUnitTest {
         File file = new File(mfileRef);
         InputStream inputStream = new FileInputStream(file);
         // Extract the text
-        mExtractedText = textExtractorDOCX.extract(inputStream, mfileRef);
+        mExtractedText = textExtractorDOCX.extract(inputStream, mfileRef, false);
     }
 
     @Test
@@ -64,7 +63,11 @@ public class TextExtractorDOCXUnitTest {
     @Test
     public void extract_shouldExtractSectionBodyCorrectly() {
         assertEquals("DOCX text extraction: Section is not extracted correctly",
-                "4 servings", mExtractedText.getSections().get(0).getBody());
+                "4 servings\n" +
+                        "Active Time\n" +
+                        "30 minutes\n" +
+                        "Total Time\n" +
+                        "35 minutes\n", mExtractedText.getSections().get(0).getBody());
     }
 
 

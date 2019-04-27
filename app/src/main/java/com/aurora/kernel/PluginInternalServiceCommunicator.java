@@ -8,6 +8,7 @@ import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.aurora.auroralib.ExtractedText;
+import com.aurora.internalservice.internalnlp.InternalNLP;
 import com.aurora.internalservice.internalprocessor.FileTypeNotSupportedException;
 import com.aurora.internalservice.internalprocessor.InternalTextProcessor;
 import com.aurora.internalservice.internaltranslation.Translator;
@@ -22,7 +23,7 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Set;
+import java.util.List;
 
 import io.reactivex.Observable;
 
@@ -32,9 +33,17 @@ import io.reactivex.Observable;
 public class PluginInternalServiceCommunicator extends Communicator {
 
     /**
+     * Tag for logging purposes
+     */
+    private static final String CLASS_TAG = "PIServiceCommunicator";
+
+    /**
      * internal text processor
      */
     private InternalTextProcessor mInternalTextProcessor;
+
+    /** CoreNLP pipeline */
+    private InternalNLP mNLPPipeline;
 
     /**
      * Translator
@@ -93,17 +102,26 @@ public class PluginInternalServiceCommunicator extends Communicator {
      * @param internalServices the set of internal services that should be run on the file
      */
     private void processFileWithInternalProcessor(String fileRef, String type, InputStream file,
-                                                  Set<InternalServices> internalServices) {
-
+                                                  List<InternalServices> internalServices) {
         ExtractedText extractedText = null;
 
         // Perform internal services that are in the given set
         if (internalServices.contains(InternalServices.TEXT_EXTRACTION)) {
             // Call internal text processor
             try {
-                extractedText = mInternalTextProcessor.processFile(file, fileRef, type);
+                boolean extractImages =
+                        internalServices.contains(InternalServices.IMAGE_EXTRACTION);
+
+                extractedText = mInternalTextProcessor.processFile(file, fileRef, type, extractImages);
+
+                Log.d( CLASS_TAG,
+                        "Service completed: " + InternalServices.TEXT_EXTRACTION.name());
+                if(extractImages) {
+                    Log.d(CLASS_TAG,
+                            "Service completed: " + InternalServices.IMAGE_EXTRACTION.name());
+                }
             } catch (FileTypeNotSupportedException e) {
-                Log.e("PluginIntSerComm", "File type is not supported!", e);
+                Log.e(CLASS_TAG, "File type is not supported!", e);
             }
         }
 
@@ -111,6 +129,26 @@ public class PluginInternalServiceCommunicator extends Communicator {
         if (extractedText == null) {
             extractedText = new ExtractedText("", null);
         }
+
+        // Add all NLP steps to the pipeline
+        for (InternalServices internalService: internalServices) {
+
+            if(internalService.name().startsWith("NLP_")) {
+                if(mNLPPipeline == null) {
+                    mNLPPipeline = new InternalNLP();
+                }
+
+                mNLPPipeline.addAnnotator(internalService);
+            }
+
+        }
+
+        if(mNLPPipeline != null) {
+             mNLPPipeline.annotate(extractedText);
+            Log.d(CLASS_TAG, "Service completed: " + "NLP ANNOTATION");
+        }
+
+
         // Create response
         InternalProcessorResponse response = new InternalProcessorResponse(extractedText);
 

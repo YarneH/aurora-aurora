@@ -84,11 +84,13 @@ public class PluginInternalServiceCommunicatorUnitTest {
          * Dummy method that will just return a fake extracted text
          *
          * @param fileRef a reference to where the file can be found
+         * @param extractImages
          * @return dummy extracted text
          * @throws FileTypeNotSupportedException thrown when a file with an unsupported extension is opened
          */
         @Override
-        public ExtractedText processFile(InputStream file, String fileRef, String type) throws FileTypeNotSupportedException {
+        public ExtractedText processFile(InputStream file, String fileRef, String type,
+                                         boolean extractImages) throws FileTypeNotSupportedException {
             // Just return the dummy extracted text
             return mExtractedText;
         }
