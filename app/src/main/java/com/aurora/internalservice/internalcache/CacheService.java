@@ -18,8 +18,9 @@ public class CacheService extends Service {
     private static class CacheBinder extends ICache.Stub {
 
         @Override
-        public int cache(String pluginObject) {
-            Log.d("AURORA_CACHE", "SERVICE IS BEING RUN FOR:" + pluginObject);
+        public int cache(String fileName, String uniquePluginName, String pluginObject) {
+            Log.d("AURORA_CACHE", "SERVICE IS BEING RUN FOR:" + fileName + "\n" +
+                    uniquePluginName  + "\n" + pluginObject);
             return 0;
             /*
             CacheThread ct = new CacheThread(pluginObject);

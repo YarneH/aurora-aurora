@@ -8,5 +8,5 @@ interface ICache {
      * Caches a pluginObject in JSON format
      * returns a statuscode
      */
-    int cache(String pluginObject);
+    int cache(String fileName, String uniquePluginName, String pluginObject);
 }

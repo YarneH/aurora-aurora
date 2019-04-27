@@ -40,7 +40,7 @@
 
 
         <!--
-        AuroraService
+        AuroraServices
         android:permission="com.aurora.aurora.permission.AURORA_SERVICES" in service definition for permission
         -->
         <service android:name="com.aurora.internalservice.internalcache.CacheService">

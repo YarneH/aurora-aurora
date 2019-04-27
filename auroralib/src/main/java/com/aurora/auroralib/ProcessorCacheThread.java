@@ -4,7 +4,7 @@ import android.util.Log;
 
 /**
  * This class should be used to call the CacheServiceCaller
- * Using a seeparate thread is necessary to avoid threading issues (OnServiceBound in CacheServiceCaller
+ * Using a separate thread is necessary to avoid threading issues (OnServiceBound in CacheServiceCaller
  * is automatically called on main thread, which leads to threading/waiting dificulties)
  */
 public class ProcessorCacheThread extends Thread {
@@ -23,11 +23,12 @@ public class ProcessorCacheThread extends Thread {
     }
 
     protected int cache(){
-        return mCacheServiceCaller.cacheOperation(mPluginObject.toJSON());
+        return mCacheServiceCaller.cacheOperation(mPluginObject.mFileName,
+                mPluginObject.mUniquePluginName, mPluginObject.toJSON());
     }
 
     /**
-     * This methad can be overriden to take particular actions depending on the cache result.
+     * This methad can be overridden to take particular actions depending on the cache result.
      * Currently tries caching again if it failed during its first attempt.
      *
      * @param cacheResult result of the first caching operation. 0 means success.

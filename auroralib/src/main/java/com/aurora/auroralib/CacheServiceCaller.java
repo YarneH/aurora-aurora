@@ -8,6 +8,7 @@ import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.support.annotation.NonNull;
 import android.util.Log;
 
 import com.aurora.internalservice.internalcache.ICache;
@@ -29,13 +30,22 @@ public class CacheServiceCaller implements ServiceConnection {
     }
 
 
-    public int cacheOperation(String pluginObjectJSON){
+    /**
+     * Tries to cache a file in aurora through the service
+     *
+     * @param fileName         the name of the file that contained the plain text
+     * @param uniquePluginName the name of the plugin that the file was processed with
+     * @param pluginObjectJSON the json representation of the processed text
+     * @return a status code indicating whether or not the operation was successful
+     */
+    public int cacheOperation(@NonNull String fileName, @NonNull String uniquePluginName,
+                              @NonNull String pluginObjectJSON) {
         synchronized (monitor) {
             int result = -1000;
             bindService();
             try {
                 monitor.wait();
-                result = cache(pluginObjectJSON);
+                result = cache(fileName, uniquePluginName, pluginObjectJSON);
                 unbindService();
             } catch (InterruptedException e) {
                 e.printStackTrace();
@@ -80,23 +90,26 @@ public class CacheServiceCaller implements ServiceConnection {
     }
 
     /**
+     * Will start a new thread to cache the file
      *
+     * @param fileName         the name of the file that contained the original plain text
+     * @param uniquePluginName the name of the plugin that processed the file
      * @param pluginObjectJSON the JSON string of the object that needs to be cached
      * @return status code of the cache operation from Cache Service in Aurora Internal Services
      */
-    private int cache(String pluginObjectJSON) {
-        CacheThread cacheThread = new CacheThread(pluginObjectJSON);
+    private int cache(@NonNull String fileName, @NonNull String uniquePluginName, @NonNull String pluginObjectJSON) {
+        CacheThread cacheThread = new CacheThread(fileName, uniquePluginName, pluginObjectJSON);
         cacheThread.start();
         try {
             cacheThread.join();
-        } catch (InterruptedException e){
+        } catch (InterruptedException e) {
             Log.e(getClass().getSimpleName(), "Exception requesting cache", e);
         }
         return cacheThread.getCacheResult();
     }
 
     /*
-    unbindService(AuroraService.CACHE);
+    unbindService(AuroraServices.CACHE);
         disconnect();
      */
 
@@ -105,9 +118,7 @@ public class CacheServiceCaller implements ServiceConnection {
      * This function will be called by the android system
      *
      * @param className
-     * @param binder
-     *
-     * Finishes the binding process
+     * @param binder    Finishes the binding process
      */
     @Override
     public void onServiceConnected(ComponentName className, IBinder binder) {
@@ -121,6 +132,7 @@ public class CacheServiceCaller implements ServiceConnection {
 
     /**
      * This function is called by the android system if the service gets disconnected
+     *
      * @param className
      */
     @Override
@@ -136,12 +148,19 @@ public class CacheServiceCaller implements ServiceConnection {
         Log.d(LOG_TAG, "Plugin Unbound");
     }
 
+    /**
+     * A private thread class that will cache the file in another thread to avoid blocking of the main thread
+     */
     private class CacheThread extends Thread {
         private int mCacheResult = -1000; // - 1000 means that the cache service from Aurora has not been reached
-        private String pluginObjectJSON;
+        private String mFileName;
+        private String mUniquePluginName;
+        private String mPluginObjectJSON;
 
-        protected CacheThread(String pluginObjectJSON) {
-            this.pluginObjectJSON = pluginObjectJSON;
+        protected CacheThread(String fileName, String uniquePluginName, String pluginObjectJSON) {
+            mFileName = fileName;
+            mUniquePluginName = uniquePluginName;
+            mPluginObjectJSON = pluginObjectJSON;
         }
 
         protected int getCacheResult() {
@@ -160,12 +179,11 @@ public class CacheServiceCaller implements ServiceConnection {
                         } catch (InterruptedException e) {
                             Log.e(getClass().getSimpleName(), "Exception requesting cache", e);
                         }
-                        mCacheResult = mBinding.cache(pluginObjectJSON);
+                        mCacheResult = mBinding.cache(mFileName, mUniquePluginName, mPluginObjectJSON);
                         Log.d(LOG_TAG, "" + mCacheResult);
                     }
-                }
-                else {
-                    mCacheResult = mBinding.cache(pluginObjectJSON);
+                } else {
+                    mCacheResult = mBinding.cache(mFileName, mUniquePluginName, mPluginObjectJSON);
                     Log.d(LOG_TAG, "" + mCacheResult);
                 }
 

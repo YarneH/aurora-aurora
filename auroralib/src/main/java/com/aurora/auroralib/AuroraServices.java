@@ -1,5 +1,5 @@
 package com.aurora.auroralib;
 
-public enum AuroraService {
+public enum AuroraServices {
     CACHE
 }
