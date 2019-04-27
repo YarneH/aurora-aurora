@@ -10,10 +10,7 @@ public class TranslationResponse implements Event {
      * The translated sentences. Is null when {@link #isError()} is true
      */
     private String[] mTranslatedSentences;
-    /**
-     * Indicates wheter the translation failed
-     */
-    private boolean mError;
+
     /**
      * The reason why the translation failed
      */
@@ -26,7 +23,7 @@ public class TranslationResponse implements Event {
      */
     public TranslationResponse(String[] translatedSentences) {
         mTranslatedSentences = translatedSentences;
-        mError = false;
+
     }
 
     /**
@@ -36,14 +33,14 @@ public class TranslationResponse implements Event {
      */
     public TranslationResponse(String errorMessage) {
         mErrorMessage = errorMessage;
-        mError = true;
+
     }
 
     public String[] getTranslatedSentences() {
         return mTranslatedSentences;
     }
 
-    public boolean isError() {
-        return mError;
+    public String getErrorMessage() {
+        return mErrorMessage;
     }
 }

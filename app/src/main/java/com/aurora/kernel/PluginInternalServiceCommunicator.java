@@ -72,12 +72,11 @@ public class PluginInternalServiceCommunicator extends Communicator {
      * @param processor a reference to the InternalTextProcessor
      */
     public PluginInternalServiceCommunicator(Bus mBus, InternalTextProcessor processor, Translator translator,
-                                             Context context) {
+                                             RequestQueue requestQueue) {
         super(mBus);
         mInternalTextProcessor = processor;
         mTranslator = translator;
-        /* Setup request queue for http requests */
-        mRequestQueue = Volley.newRequestQueue(context);
+        mRequestQueue = requestQueue;
 
 
         mInternalProcessorRequestObservable = mBus.register(InternalProcessorRequest.class);

@@ -10,7 +10,7 @@ public class TranslationRequest implements Event {
     private String mTargetLanguage;
     private String mSourceLanguage;
 
-    public TranslationRequest(String[] sentencesToTranslate, String targetLanguage, String sourceLanguage) {
+    public TranslationRequest(String[] sentencesToTranslate, String sourceLanguage, String targetLanguage) {
         mSentencesToTranslate = sentencesToTranslate;
         mTargetLanguage = targetLanguage;
         mSourceLanguage = sourceLanguage;

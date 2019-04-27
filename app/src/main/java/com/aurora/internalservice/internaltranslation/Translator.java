@@ -3,6 +3,8 @@ package com.aurora.internalservice.internaltranslation;
 
 import com.aurora.internalservice.InternalService;
 import com.aurora.kernel.event.TranslationResponse;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -73,7 +75,7 @@ public class Translator implements InternalService {
      *                       api
      */
     @java.lang.SuppressWarnings("squid:CommentedOutCodeLine")
-    public TranslationResponse getTranslationRespons(JSONObject response) throws JSONException {
+    public TranslationResponse getTranslationRespons(JsonObject response) throws JSONException {
         // TODO get the translations
         // see https://developers.google.com/apis-explorer/?hl=nl#p/translate/v2/language.
         // translations.list?q=this+is+a+test&q=a+test+with+multiple+values&q=that+is+a+lot+of+values
@@ -99,10 +101,12 @@ public class Translator implements InternalService {
         // }
         //}
         // but cannot test before the API is acquired
-        JSONArray jsonTranslations = response.getJSONObject("data").getJSONArray("translations");
-        String[] translations = new String[jsonTranslations.length()];
-        for (int i = 0; i < jsonTranslations.length(); i++) {
-            String translation = jsonTranslations.getJSONObject(i).getString("translatedText");
+        JsonArray jsonTranslations = response.getAsJsonObject("data").getAsJsonArray("translations");
+        String[] translations = new String[jsonTranslations.size()];
+        for (int i = 0; i < jsonTranslations.size(); i++) {
+            String translation = jsonTranslations.get(i).getAsJsonObject().
+                    getAsJsonPrimitive("translatedText").getAsString();
+
             translations[i] = (translation);
         }
         return new TranslationResponse(translations);

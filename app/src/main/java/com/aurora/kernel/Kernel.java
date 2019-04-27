@@ -3,6 +3,7 @@ package com.aurora.kernel;
 import android.content.Context;
 import android.util.Log;
 
+import com.android.volley.toolbox.Volley;
 import com.aurora.internalservice.internalcache.InternalCache;
 import com.aurora.internalservice.internalprocessor.InternalTextProcessor;
 import com.aurora.internalservice.internaltranslation.Translator;
@@ -96,7 +97,8 @@ public final class Kernel {
         InternalTextProcessor internalTextProcessing = new InternalTextProcessor();
         Translator translator = new Translator();
         this.mPluginInternalServiceCommunicator = new PluginInternalServiceCommunicator(mBus,
-                internalTextProcessing, translator, applicationContext);
+                internalTextProcessing, translator,
+             Volley.newRequestQueue(applicationContext));
 
         // Create cache
         InternalCache internalCache = new InternalCache(applicationContext);
