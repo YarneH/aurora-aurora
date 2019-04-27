@@ -98,7 +98,7 @@ public class MainActivity extends AppCompatActivity
         setContentView(R.layout.activity_main);
 
         /* Set up kernel */
-        mKernel = new Kernel(this.getApplicationContext());
+        mKernel = Kernel.getInstance(this.getApplicationContext());
         mAuroraCommunicator = mKernel.getAuroraCommunicator();
 
         /*

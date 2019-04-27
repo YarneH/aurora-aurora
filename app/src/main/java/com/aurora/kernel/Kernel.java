@@ -19,47 +19,48 @@ import io.reactivex.schedulers.Schedulers;
 /**
  * Wrapper class that wraps all communicators and instantiates the unique event bus.
  * This class will perform the initial 'configuration' or 'bootstrapping' of everything kernel related.
+ * This class is a singleton class to allow it to be accessible from different places, without the risk of having
+ * multiple separate instances. For example, the kernel may be needed both in the activities of aurora, and in the
+ * services that aurora provides to the plugins.
  */
 public final class Kernel {
+
+    private static Kernel sKernel = null;
+
     /**
      * A reference to the unique bus instance that should be used among all communicators
      */
-    private Bus mBus;
-
-    /**
-     * A reference to the android context
-     */
-    private Context mContext;
+    private static Bus sBus;
 
     /**
      * A reference to the AuroraCommunicator
      */
-    private AuroraCommunicator mAuroraCommunicator;
+    private static AuroraCommunicator sAuroraCommunicator;
 
     /**
      * A reference to the PluginCommunicator
      */
-    private PluginCommunicator mPluginCommunicator;
+    private static PluginCommunicator sPluginCommunicator;
 
     /**
      * A reference to the ProcessingCommunicator
      */
-    private ProcessingCommunicator mProcessingCommunicator;
+    private static ProcessingCommunicator sProcessingCommunicator;
 
     /**
      * A reference to the PluginInternalServiceCommunicator
      */
-    private PluginInternalServiceCommunicator mPluginInternalServiceCommunicator;
+    private static PluginInternalServiceCommunicator sPluginInternalServiceCommunicator;
 
     /**
      * A reference to the AuroraInternalServiceCommunicator
      */
-    private AuroraInternalServiceCommunicator mAuroraInternalServiceCommunicator;
+    private static AuroraInternalServiceCommunicator sAuroraInternalServiceCommunicator;
 
     /**
      * A reference to the plugin registry
      */
-    private PluginRegistry mPluginRegistry;
+    private static PluginRegistry sPluginRegistry;
 
     // TODO: change this if necessary
     /**
@@ -68,38 +69,78 @@ public final class Kernel {
     private static final String PLUGINS_CFG = "plugin-config.json";
 
     /**
-     * Starts and creates all communicators, keeping references
-     *
-     * @param applicationContext the android application context. Make sure this is the application context and not
-     *                           the context related to the activity (get with this.getApplicationContext) to avoid
-     *                           memory leaks.
+     * private constructor so no new instance can be constructed
      */
-    public Kernel(Context applicationContext) {
-        this.mContext = applicationContext;
+    private Kernel() {
+    }
+
+    /**
+     * Private method that creates the singleton kernel instance with all the communicators.
+     *
+     * @param applicationContext the android application context needed for some communicators
+     * @return the singleton kernel instance
+     */
+    private static Kernel initialize(Context applicationContext) {
+        sKernel = new Kernel();
 
         // Create 1 bus to be shared among all communicators
-        this.mBus = new Bus(Schedulers.computation());
+        sBus = new Bus(Schedulers.computation());
 
         // Initialize plugin config
-        initializePluginConfig();
+        initializePluginConfig(applicationContext);
 
         // Create plugin registry that keeps info of the plugins
-        this.mPluginRegistry = new PluginRegistry(mProcessingCommunicator, PLUGINS_CFG, applicationContext);
+        sPluginRegistry = new PluginRegistry(sProcessingCommunicator, PLUGINS_CFG, applicationContext);
 
         // Create the different communicators
-        this.mAuroraCommunicator = new AuroraCommunicator(mBus, mPluginRegistry);
-        this.mProcessingCommunicator = new ProcessingCommunicator(mBus);
-        this.mPluginCommunicator = new PluginCommunicator(mBus, mPluginRegistry);
+        sAuroraCommunicator = new AuroraCommunicator(sBus, sPluginRegistry);
+        sProcessingCommunicator = new ProcessingCommunicator(sBus);
+        sPluginCommunicator = new PluginCommunicator(sBus, sPluginRegistry);
 
         // Create internal text processor for the PluginInternalServiceCommunicator
         InternalTextProcessor internalTextProcessing = new InternalTextProcessor();
-        this.mPluginInternalServiceCommunicator = new PluginInternalServiceCommunicator(mBus, internalTextProcessing);
+        sPluginInternalServiceCommunicator = new PluginInternalServiceCommunicator(sBus, internalTextProcessing);
 
         // Create cache
         InternalCache internalCache = new InternalCache(applicationContext);
-        this.mAuroraInternalServiceCommunicator = new AuroraInternalServiceCommunicator(mBus, internalCache);
+        sAuroraInternalServiceCommunicator = new AuroraInternalServiceCommunicator(sBus, internalCache);
+
+        return sKernel;
     }
 
+    /**
+     * Returns the singleton kernel instance after it has been created.
+     * If no instance exists yet, this method will take care of it, but the applicationContext may not be null in that
+     * case. If the instance already exists the applicationContext argument will not be used
+     *
+     * @param applicationContext the android application context
+     * @return the singleton kernel instance
+     * @throws IllegalArgumentException when the kernel has not yet been initialized and the applicationContext is null
+     */
+    public static Kernel getInstance(Context applicationContext) throws IllegalArgumentException {
+        if (sKernel == null && applicationContext != null) {
+            // Initialize kernel
+            return initialize(applicationContext);
+        } else if (sKernel == null) {
+            // Kernel not initialzed but application context cannot be used to initialized
+            throw new IllegalArgumentException("The kernel can not be initialized with " +
+                    "applicationContext equal to null!");
+        } else {
+            // Already initialized, return existing instance
+            return sKernel;
+        }
+    }
+
+    /**
+     * Returns the singleton kernel if it has already been initialized.
+     * In case the kernel was not yet initialized, this method will throw an exception
+     *
+     * @return the singleton kernel instance, if it was initialized before
+     * @throws IllegalArgumentException when the kernel has not yet been initialized and the applicationContext is null
+     */
+    public static Kernel getInstance() throws IllegalArgumentException {
+        return getInstance(null);
+    }
 
     /**
      * gets a reference to the aurora communicator
@@ -107,42 +148,44 @@ public final class Kernel {
      * @return AuroraCommunicator
      */
     public AuroraCommunicator getAuroraCommunicator() {
-        return mAuroraCommunicator;
+        return sAuroraCommunicator;
     }
 
     /**
      * @return the PluginCommunicator
      */
     public PluginCommunicator getPluginCommunicator() {
-        return mPluginCommunicator;
+        return sPluginCommunicator;
     }
 
     /**
      * @return the ProcessingCommunicator
      */
     public ProcessingCommunicator getProcessingCommunicator() {
-        return mProcessingCommunicator;
+        return sProcessingCommunicator;
     }
 
     /**
      * @return the PluginInternalServiceCommunicator
      */
     public PluginInternalServiceCommunicator getPluginInternalServiceCommunicator() {
-        return mPluginInternalServiceCommunicator;
+        return sPluginInternalServiceCommunicator;
     }
 
     /**
      * @return the AuroraInternalServiceCommunicator
      */
     public AuroraInternalServiceCommunicator getAuroraInternalServiceCommunicator() {
-        return mAuroraInternalServiceCommunicator;
+        return sAuroraInternalServiceCommunicator;
     }
 
     /**
      * Private helper method that checks if the plugin-config file already exists, and creates one when necessary
+     *
+     * @param applicationContext the android application context, needed for writing files
      */
-    private void initializePluginConfig() {
-        File file = new File(mContext.getFilesDir(), PLUGINS_CFG);
+    private static void initializePluginConfig(Context applicationContext) {
+        File file = new File(applicationContext.getFilesDir(), PLUGINS_CFG);
 
         // If the file does not exist, create one and write an empty JSON array to it
         if (!file.exists()) {

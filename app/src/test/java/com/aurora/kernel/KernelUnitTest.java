@@ -9,7 +9,7 @@ import static junit.framework.TestCase.assertNotNull;
 
 public class KernelUnitTest {
 
-    private static Kernel mKernel = new Kernel(new MockContext());
+    private static Kernel mKernel = Kernel.getInstance(new MockContext());
 
     @Test
     public void Kernel_AllObjectsShouldBeMade() {
