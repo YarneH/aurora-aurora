@@ -7,6 +7,7 @@ import com.android.volley.toolbox.Volley;
 import com.aurora.internalservice.internalcache.InternalCache;
 import com.aurora.internalservice.internalprocessor.InternalTextProcessor;
 import com.aurora.internalservice.internaltranslation.Translator;
+import com.aurora.kernel.event.TranslationRequest;
 import com.aurora.plugin.Plugin;
 import com.google.gson.Gson;
 
@@ -103,6 +104,12 @@ public final class Kernel {
         // Create cache
         InternalCache internalCache = new InternalCache(applicationContext);
         this.mAuroraInternalServiceCommunicator = new AuroraInternalServiceCommunicator(mBus, internalCache);
+
+
+        // Test code for translation
+        String [] sentences = {"Translate this", "My name is Luca"};
+        TranslationRequest req = new TranslationRequest(sentences, "en", "nl");
+        mBus.post(req);
     }
 
 

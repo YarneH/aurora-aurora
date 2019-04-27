@@ -17,6 +17,7 @@ import com.aurora.kernel.event.InternalProcessorResponse;
 import com.aurora.kernel.event.TranslationRequest;
 import com.aurora.kernel.event.TranslationResponse;
 import com.aurora.plugin.InternalServices;
+import com.google.gson.JsonObject;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -166,7 +167,7 @@ public class PluginInternalServiceCommunicator extends Communicator {
     private void translate(String[] sentencesToTranslate, String sourceLanguage, String targetLanguage) {
         try {
             String url = mTranslator.makeUrl(sentencesToTranslate, sourceLanguage, targetLanguage);
-
+            Log.d("TRANSLATE", url);
             // Request a json response from the provided URL.
             // TODO needs to be checked after acquiring key
             JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET, url,
@@ -174,6 +175,7 @@ public class PluginInternalServiceCommunicator extends Communicator {
             jsonObjectRequest.setTag("TRANSLATOR");
 
             mRequestQueue.add(jsonObjectRequest);
+            Log.d("TRANSLATE", "request added");
         } catch (IOException e) {
             Log.e("TRANSLATION", "Translation failed", e);
             postTranslationResponseEvent(e);
@@ -181,12 +183,11 @@ public class PluginInternalServiceCommunicator extends Communicator {
     }
 
     /**
-     * Posts a {@link TranslationResponse} event getting the translated data from the argutmen
+     * Posts a {@link TranslationResponse} event getting the translated data from the argument
      *
      * @param response the respons from the {@link RequestQueue} to the Google API
      */
     public void postTranslationResponseEvent(JSONObject response) {
-
         try {
             mBus.post(mTranslator.getTranslationRespons(response));
         } catch (JSONException e) {

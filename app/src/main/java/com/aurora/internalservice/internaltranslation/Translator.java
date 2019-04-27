@@ -1,6 +1,8 @@
 package com.aurora.internalservice.internaltranslation;
 
 
+import android.util.Log;
+
 import com.aurora.internalservice.InternalService;
 import com.aurora.kernel.event.TranslationResponse;
 import com.google.gson.JsonArray;
@@ -20,8 +22,9 @@ public class Translator implements InternalService {
     private static final String SOURCE = "&source=";
 
 
-    private static final String API_KEY = "{YOUR_API_KEY}";
-    //TODO get an API key and hide this in the app
+    //TODO hide this in the app
+    private static final String API_KEY = "AIzaSyBT0I7M_hZlTmpD1hqC8beY1ILzpWGSU4s";
+
     private static final String KEY = "&key=" + API_KEY;
 
 
@@ -69,46 +72,27 @@ public class Translator implements InternalService {
     /**
      * Gets the translation from the JSON object using google api"s standard
      *
+     * The JSONObject is structured as follows: {"data": {"translations" : {"translatedText": return of translation}}}
+     *
+     *
      * @param response The response from google api
      * @return a translation response that contains the translated sentenced
      * @throws JSONException An exception that signifies this object is not according to the google translate
      *                       api
      */
-    @java.lang.SuppressWarnings("squid:CommentedOutCodeLine")
-    public TranslationResponse getTranslationRespons(JsonObject response) throws JSONException {
-        // TODO get the translations
-        // see https://developers.google.com/apis-explorer/?hl=nl#p/translate/v2/language.
-        // translations.list?q=this+is+a+test&q=a+test+with+multiple+values&q=that+is+a+lot+of+values
-        // &q=wow+so+many+values+&q=%252B%252B%252B%252B%252B%252B&q=%252F&target=nl&source=en&_h=4&
-        // I don't completely know how the response will look like something like:
+    public TranslationResponse getTranslationRespons(JSONObject response) throws JSONException {
 
-        // {
-        // "data": {
-        //  "translations": [
-        //   {
-        //    "translatedText": "dit is een test"
-        //   },
-        //   {
-        //    "translatedText": "wat een gave test"
-        //   },
-        //   {
-        //    "translatedText": "met escape-tekens / +."
-        //   },
-        //   {
-        //    "translatedText": "hoe vertaalt dat"
-        //   }
-        //  ]
-        // }
-        //}
-        // but cannot test before the API is acquired
-        JsonArray jsonTranslations = response.getAsJsonObject("data").getAsJsonArray("translations");
-        String[] translations = new String[jsonTranslations.size()];
-        for (int i = 0; i < jsonTranslations.size(); i++) {
-            String translation = jsonTranslations.get(i).getAsJsonObject().
-                    getAsJsonPrimitive("translatedText").getAsString();
-
+        // Get the translations
+        JSONArray jsonTranslations = response.getJSONObject("data").getJSONArray("translations");
+        // Create an array for storing the translations
+        String[] translations = new String[jsonTranslations.length()];
+        // Store the translatedText
+        for (int i = 0; i < jsonTranslations.length(); i++) {
+            String translation = jsonTranslations.getJSONObject(i).getString("translatedText");
             translations[i] = (translation);
+            Log.d("Translation", translation);
         }
+        // Return the response
         return new TranslationResponse(translations);
 
 
