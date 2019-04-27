@@ -39,7 +39,7 @@ pipeline {
                     junit allowEmptyResults: true, testResults: '**/TEST-*.xml'
 
                     // Analyze coverage info
-                    jacoco sourcePattern: '**/src/*/java', 
+                    jacoco sourcePattern: '**/src/main/*/java', 
                         classPattern: '**/classes/com/aurora', 
                         exclusionPattern: '**/*Test*.class,  **/aurora/*.class, **/auroralib/*.class, **/R.class, **/R$*.class, **/BuildConfig, **/src/test/, **/src/androidTest/'
                 }
@@ -104,7 +104,7 @@ pipeline {
                     junit allowEmptyResults: true, testResults: '**/TEST-*.xml'
 
                     // Analyze coverage info
-                     jacoco sourcePattern: '**/src/*/java', 
+                     jacoco sourcePattern: '**/src/main/*/java', 
                         classPattern: '**/classes/com/aurora', 
                         exclusionPattern: '**/*Test*.class,  **/aurora/*.class, **/auroralib/*.class, **/R.class, **/R$*.class, **/BuildConfig, **/src/test/, **/src/androidTest/'
                 }
@@ -129,7 +129,7 @@ pipeline {
                     junit allowEmptyResults: true, testResults: '**/TEST-*.xml'
 
                     // Analyze coverage info
-                    jacoco sourcePattern: '**/src/*/java', 
+                    jacoco sourcePattern: '**/src/main/*/java', 
                         classPattern: '**/classes/com/aurora', 
                         exclusionPattern: '**/*Test*.class,  **/aurora/*.class, **/auroralib/*.class, **/R.class, **/R$*.class, **/BuildConfig, **/src/test/, **/src/androidTest/'
                 }
