@@ -208,7 +208,7 @@ public class MainActivity extends AppCompatActivity
             Uri textFile = data.getData();
 
             try {
-                if (textFile == null) {
+                if (textFile != null) {
                     Log.i("URI", textFile.toString());
                     ContentResolver cR = getApplicationContext().getContentResolver();
                     String type = MimeTypeMap.getSingleton().getExtensionFromMimeType(cR.getType(textFile));
