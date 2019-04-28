@@ -7,7 +7,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
-import android.support.design.widget.Snackbar;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -152,7 +151,7 @@ public class MainActivity extends AppCompatActivity
         // If opening the file is done from a file explorer
         if (Intent.ACTION_VIEW.equals(getIntent().getAction())) {
             // This method is also called when a file is opened from the file chooser
-            onActivityResult(REQUEST_FILE_GET,RESULT_OK, getIntent());
+            onActivityResult(REQUEST_FILE_GET, RESULT_OK, getIntent());
         }
 
     }
@@ -209,7 +208,7 @@ public class MainActivity extends AppCompatActivity
             Uri textFile = data.getData();
 
             try {
-                if (textFile != null) {
+                if (textFile == null) {
                     Log.i("URI", textFile.toString());
                     ContentResolver cR = getApplicationContext().getContentResolver();
                     String type = MimeTypeMap.getSingleton().getExtensionFromMimeType(cR.getType(textFile));
@@ -237,10 +236,10 @@ public class MainActivity extends AppCompatActivity
                             read, pluginAction, chooser, getApplicationContext());
 
                 } else {
-                    Toast.makeText(this, "The selected file was null", Snackbar.LENGTH_LONG).show();
+                    showPopUpView("The selected file was null, please select another file!");
                 }
             } catch (FileNotFoundException e) {
-                Toast.makeText(this, "The file could not be found", Snackbar.LENGTH_LONG).show();
+                showPopUpView("The file could not be found, please select another file!");
                 Log.e("FILE_NOT_FOUND", "The file could not be found", e);
             }
         }
@@ -293,7 +292,7 @@ public class MainActivity extends AppCompatActivity
         if (id == R.id.action_search) {
             // Create a LayoutInflater which will create the view for the pop-up
             LayoutInflater li = LayoutInflater.from(this);
-            View promptView = li.inflate(R.layout.search_prompt, null);
+            View promptView = li.inflate(R.layout.search_prompt, mRecyclerView, false);
             final EditText userInput = promptView.findViewById(R.id.et_search_prompt);
 
             // Create a builder to build the actual alertdialog from the previous inflated view
@@ -400,5 +399,22 @@ public class MainActivity extends AppCompatActivity
         mAuroraCommunicator.registerPlugin(souschefPlugin);
         mAuroraCommunicator.registerPlugin(paperViewerPlugin);
     }
-}
 
+    private void showPopUpView(String message) {
+        // Create a LayoutInflater which will create the view for the pop-up
+        LayoutInflater li = LayoutInflater.from(this);
+        View promptView = li.inflate(R.layout.popup_card, mRecyclerView, false);
+
+        // Set the message of the TextView
+        TextView messageText = promptView.findViewById(R.id.tv_message);
+        messageText.setText(message);
+
+        // Create a builder to build the actual alertdialog from the previous inflated view
+        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
+        alertDialogBuilder.setView(promptView);
+        alertDialogBuilder.setCancelable(false);
+
+        // Create and show the pop-up
+        alertDialogBuilder.create().show();
+    }
+}
