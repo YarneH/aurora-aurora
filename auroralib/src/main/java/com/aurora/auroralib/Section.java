@@ -21,7 +21,7 @@ public class Section {
     /**
      * The deserialized Annotation of the Section title
      */
-    private Annotation mTitleAnnotation;
+    private transient Annotation mTitleAnnotation;
 
     /**
      * The content/body of a Section (the text)
@@ -35,7 +35,7 @@ public class Section {
     /**
      * The deserialized Annotation of the Section body
      */
-    private Annotation mBodyAnnotation;
+    private transient Annotation mBodyAnnotation;
 
     /**
      * The images in a section, as a Base64 String

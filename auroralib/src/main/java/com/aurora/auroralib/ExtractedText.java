@@ -28,7 +28,7 @@ public class ExtractedText implements InternallyProcessedFile, Serializable {
     @JsonAdapter(CoreNLPDocumentAdapter.class)
     private CoreNLPProtos.Document mTitleAnnotationProto;
     /** The deserialized Annotation of the title */
-    private Annotation mTitleAnnotation;
+    private transient Annotation mTitleAnnotation;
 
     /** A list of authors of the file */
     private List<String> mAuthors;
