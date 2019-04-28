@@ -6,8 +6,8 @@ android {
         applicationId "com.aurora.aurora"
         minSdkVersion 22
         targetSdkVersion 28
-        versionCode 6
-        versionName "0.4.2"
+        versionCode 7
+        versionName "0.5"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
@@ -22,12 +22,14 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = '1.8'
-        targetCompatibility = '1.8'
+        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_1_8
     }
 
     // error about duplicates if some of these are not excluded
     packagingOptions {
+        pickFirst  'edu/stanford/nlp/pipeline/demo/*'
+
         pickFirst 'META-INF/DEPENDENCIES.txt'
         pickFirst 'META-INF/LICENSE.txt'
         pickFirst 'META-INF/NOTICE.txt'
@@ -53,7 +55,7 @@ tasks.withType(Test) {
 }
 
 dependencies {
-    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
     implementation 'com.android.support:appcompat-v7:28.0.0'
     implementation 'com.android.support.constraint:constraint-layout:1.1.3'
     /Added for the DrawerLayout/
@@ -76,16 +78,24 @@ dependencies {
 
     // Apache POI for word files
     // newer versions of xmlsec are compiled with JDK 8 which does not work in Android Studio 2.x!
-    implementation ('org.apache.santuario:xmlsec:2.0.0') {
+    implementation('org.apache.santuario:xmlsec:2.0.0') {
         // break compilation because it includes stax-api which is under forbidden package 'javax.xml.stream'
         exclude group: 'org.codehaus.woodstox'
     }
+
+    // IText library for pdf files
+    implementation 'com.itextpdf:itextg:5.5.10'
 
     implementation files('libs/poishadow-all.jar')
 
     // Firebase
     implementation 'com.google.firebase:firebase-core:16.0.1'
-
+    // CoreNLP
+    implementation('edu.stanford.nlp:stanford-corenlp:3.9.2') {
+        exclude group: 'org.apache.lucene'
+        exclude group: 'com.sun.xml.bind'
+    }
+    implementation files('libs/stanford-corenlp-3.9.2-models.jar-small')
 }
 
 // Firebase

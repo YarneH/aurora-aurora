@@ -2,6 +2,7 @@ package com.aurora.kernel;
 
 import android.content.Context;
 import android.content.Intent;
+import android.util.Log;
 import android.widget.Toast;
 
 import com.aurora.aurora.R;
@@ -94,6 +95,8 @@ public class PluginCommunicator extends Communicator {
     private void openFileWithPlugin(ExtractedText extractedText, Intent pluginAction, Intent chooser, Context context) {
         String extractedTextInJSON = extractedText.toJSON();
         pluginAction.putExtra(Constants.PLUGIN_INPUT_EXTRACTED_TEXT, extractedTextInJSON);
+
+        Log.d("JSON", extractedTextInJSON);
 
         boolean pluginOpens = pluginAction.resolveActivity(context.getPackageManager()) != null;
 

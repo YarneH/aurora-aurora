@@ -3,7 +3,7 @@ package com.aurora.kernel.event;
 import com.aurora.plugin.InternalServices;
 
 import java.io.InputStream;
-import java.util.Set;
+import java.util.List;
 
 /**
  * Event to request that a file is processed with a InternalProcessor
@@ -29,7 +29,7 @@ public class InternalProcessorRequest implements Event {
     /**
      * The internal services that should be run on the file
      */
-    private Set<InternalServices> mInternalServices;
+    private List<InternalServices> mInternalServices;
 
     /**
      * Creates a new InternalProcessorRequest
@@ -40,7 +40,7 @@ public class InternalProcessorRequest implements Event {
      * @param internalServices the set of internal services that should be run on the file
      */
     public InternalProcessorRequest(String fileRef, String fileType, InputStream file,
-                                    Set<InternalServices> internalServices) {
+                                    List<InternalServices> internalServices) {
         mFile = file;
         mFileType = fileType;
         mFileRef = fileRef;
@@ -71,7 +71,7 @@ public class InternalProcessorRequest implements Event {
     /**
      * @return The set of internal services that should be run on the file
      */
-    public Set<InternalServices> getInternalServices() {
+    public List<InternalServices> getInternalServices() {
         return mInternalServices;
     }
 }
