@@ -3,7 +3,6 @@ package com.aurora.internalservice.internalcache;
 import android.content.Context;
 import android.util.Log;
 
-import com.aurora.auroralib.PluginObject;
 import com.aurora.internalservice.InternalService;
 import com.google.gson.Gson;
 
@@ -71,7 +70,7 @@ public class InternalCache implements InternalService {
      * @param uniquePluginName the name of the plugin that built the processed pluginObject
      * @return true if the pluginObject was successfully processed
      */
-    public boolean cacheFile(String fileRef, PluginObject pluginObject, String uniquePluginName) {
+    public boolean cacheFile(String fileRef, String pluginObject, String uniquePluginName) {
         /*
         This method consists of two parts: We have to actually write the representation to a file.
         We should do this by mapping a file ref to another fileref that represents the cached representation.
@@ -399,12 +398,12 @@ public class InternalCache implements InternalService {
      * @param path         the location where to write the file
      * @param pluginObject the object to write to the cache
      */
-    private boolean writeCacheFile(String path, PluginObject pluginObject) {
+    private boolean writeCacheFile(String path, String pluginObject) {
         File cacheFile = new File(mContext.getFilesDir(), path);
 
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(cacheFile))) {
             // Write json representation of plugin object to the file
-            writer.write(pluginObject.toJSON());
+            writer.write(pluginObject);
         } catch (IOException e) {
             Log.e(CLASS_TAG, "Something went wrong while writing a cache file!", e);
 

@@ -6,6 +6,8 @@ import android.os.IBinder;
 import android.util.Log;
 
 import com.aurora.internalservice.internalcache.ICache;
+import com.aurora.kernel.Kernel;
+import com.aurora.kernel.ProcessingCommunicator;
 
 public class CacheService extends Service {
 
@@ -17,17 +19,18 @@ public class CacheService extends Service {
 
 
 
-    private static class CacheBinder extends ICache.Stub {
+    private class CacheBinder extends ICache.Stub {
 
         @Override
-        public int cache(String fileName, String uniquePluginName, String pluginObject) {
+        public int cache(String fileName, String pluginObject, String uniquePluginName) {
             Log.d("AURORA_CACHE", "SERVICE IS BEING RUN FOR:" + fileName + "\n" +
                     uniquePluginName  + "\n" + pluginObject);
 
-            // Get the kernel
+            // Get the kernel and appropriate communicator
+            Kernel kernel = Kernel.getInstance(CacheService.this.getApplicationContext());
+            ProcessingCommunicator processingCommunicator = kernel.getProcessingCommunicator();
 
-            return 0;
-
+            return processingCommunicator.cacheFile(fileName, pluginObject, uniquePluginName);
         }
     }
 }

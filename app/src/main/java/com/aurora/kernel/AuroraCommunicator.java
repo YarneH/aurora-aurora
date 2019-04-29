@@ -1,6 +1,5 @@
 package com.aurora.kernel;
 
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
@@ -126,6 +125,8 @@ public class AuroraCommunicator extends Communicator {
         mBus.post(request);
     }
 
+
+
     /**
      * Gets a list of all the available plugins
      *
@@ -147,20 +148,6 @@ public class AuroraCommunicator extends Communicator {
      */
     public boolean registerPlugin(Plugin plugin) {
         return mPluginRegistry.registerPlugin(plugin.getUniqueName(), plugin);
-    }
-
-    /**
-     * Gets the name of the chosen plugin. This name is to be used for caching and other internal purposes.
-     *
-     * @param pluginAction An intent to open a file with a plugin
-     * @param context      the android context
-     * @return the name of the plugin that was selected by the user
-     */
-    private String getChosenPlugin(Intent pluginAction, Context context) {
-        // Get the component name of the selected option
-        ComponentName selectedPlugin = pluginAction.resolveActivity(context.getPackageManager());
-
-        return selectedPlugin.getPackageName();
     }
 
     /**

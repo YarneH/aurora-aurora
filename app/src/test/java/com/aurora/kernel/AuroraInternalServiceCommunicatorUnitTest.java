@@ -61,7 +61,7 @@ public class AuroraInternalServiceCommunicatorUnitTest {
         observable.map(CacheFileResponse::isSuccessful).subscribe(testObserver);
 
         // Create cache file request and post on bus
-        PluginObject dummyPluginObject = new DummyPluginObject();
+        String dummyPluginObject = new DummyPluginObject().toJSON();
         CacheFileRequest request = new CacheFileRequest(fileRef, dummyPluginObject, pluginName);
         mBus.post(request);
 
@@ -213,7 +213,7 @@ public class AuroraInternalServiceCommunicatorUnitTest {
         }
 
         @Override
-        public boolean cacheFile(String fileRef, PluginObject pluginObject, String uniquePluginName) {
+        public boolean cacheFile(String fileRef, String pluginObject, String uniquePluginName) {
             // Just return true
             return true;
         }
