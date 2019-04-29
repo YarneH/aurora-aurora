@@ -152,7 +152,7 @@ public class InternalCache implements InternalService {
 
         // Return no more than given amount or full list
         int index = Math.min(amount, cachedFiles.size());
-        return cachedFiles.subList(0, index - 1);
+        return cachedFiles.subList(0, index);
     }
 
     /**
