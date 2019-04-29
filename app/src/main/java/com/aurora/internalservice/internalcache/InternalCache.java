@@ -16,6 +16,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -114,7 +115,7 @@ public class InternalCache implements InternalService {
         CachedFileInfo lookupFile = new CachedFileInfo(fileRef, uniquePluginName);
 
         // Check in the registry if the file is present under unique plugin name
-        List<CachedFileInfo> cachedFilesByPlugin = null;
+        List<CachedFileInfo> cachedFilesByPlugin;
         if (uniquePluginName != null
                 && (cachedFilesByPlugin = mCachedFiles.get(uniquePluginName)) != null
                 && cachedFilesByPlugin.contains(lookupFile)) {
@@ -128,50 +129,39 @@ public class InternalCache implements InternalService {
     }
 
     /**
-     * Gets a list of already processed file representations
+     * Gets a list of already processed file representations ordered on most recent date
      *
      * @param amount the amount of files that should be retrieved, if 0 or negative, all files will be retrieved.
-     * @return a list of filenames of cached files
+     * @return a list of metadata of cached files, ordered on the date most recently opened.
      */
     public List<CachedFileInfo> getFullCache(int amount) {
-        if (amount <= 0) {
-            return getFullCache();
-        }
-
         // Create an empty list where the results will be stored
         List<CachedFileInfo> cachedFiles = new ArrayList<>();
 
+        // Add all values to the list
         for (Map.Entry<String, List<CachedFileInfo>> entry : mCachedFiles.entrySet()) {
-            if (entry.getValue().size() < amount - cachedFiles.size()) {
-                // Add entire list
-                cachedFiles.addAll(entry.getValue());
-            } else {
-                // Add one by one until amount is reached
-                for (CachedFileInfo cachedFileInfo : entry.getValue()) {
-                    if (cachedFiles.size() < amount) {
-                        cachedFiles.add(cachedFileInfo);
-                    }
-                }
-            }
+            cachedFiles.addAll(entry.getValue());
         }
 
-        return cachedFiles;
+        // Sort list on date with most recent value first
+        Collections.sort(cachedFiles, (a, b) -> a.getLastOpened().compareTo(b.getLastOpened()));
+
+        if (amount <= 0) {
+            amount = cachedFiles.size();
+        }
+
+        // Return no more than given amount or full list
+        int index = Math.min(amount, cachedFiles.size());
+        return cachedFiles.subList(0, index - 1);
     }
 
     /**
      * Gets a list of already processed file representations
      *
-     * @return a list of filenames of cached files TODO: may change to CachedFile representation class!
+     * @return a list of of metadata about cached files
      */
     public List<CachedFileInfo> getFullCache() {
-        List<CachedFileInfo> cachedFiles = new ArrayList<>();
-
-        // Loop over all plugins and add all files to result list
-        for (Map.Entry<String, List<CachedFileInfo>> entry : mCachedFiles.entrySet()) {
-            cachedFiles.addAll(entry.getValue());
-        }
-
-        return cachedFiles;
+        return getFullCache(0);
     }
 
 
