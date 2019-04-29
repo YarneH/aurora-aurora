@@ -52,7 +52,7 @@ public class ProcessingCommunicator extends Communicator {
         mCacheFileResponseObservable
                 .take(1)
                 .map(CacheFileResponse::isSuccessful)
-                .map(successful -> {
+                .map((Boolean successful) -> {
                     if (successful) {
                         return CacheResults.CACHE_SUCCESS;
                     } else {

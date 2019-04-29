@@ -16,14 +16,28 @@ import com.aurora.internalservice.internalcache.ICache;
 import java.util.List;
 
 public class CacheServiceCaller implements ServiceConnection {
+    /**
+     * Tag used for log messages
+     */
     private static final String LOG_TAG = CacheServiceCaller.class.getSimpleName();
 
+    /**
+     * Binding to the remote interface
+     */
     private ICache mBinding = null;
-    //private ICache cacheBinding = null;
+
     // !!! Not sure yet if this is handled right by just passing an activity's context (See BasicPlugin_Old)
     private Context mAppContext;
-    //PackageManager pm = getPackageManager();
-    private Object monitor = new Object();
+
+    /**
+     * Object used for synchronisation
+     */
+    private final Object monitor = new Object();
+
+    /**
+     * Boolean indicating if service is connected
+     */
+    private boolean mServiceConnected = false;
 
     public CacheServiceCaller(Context context) {
         mAppContext = context;
@@ -44,14 +58,20 @@ public class CacheServiceCaller implements ServiceConnection {
             int result = -1000;
             bindService();
             try {
-                monitor.wait();
+                while (!mServiceConnected) {
+                    monitor.wait();
+                }
+
                 result = cache(fileName, uniquePluginName, pluginObjectJSON);
                 unbindService();
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                Log.e(LOG_TAG, "cacheOperation was interrupted!", e);
+
+                // Restore the interrupted state:
+                // https://www.ibm.com/developerworks/java/library/j-jtp05236/index.html?ca=drs-#2.1
+                Thread.currentThread().interrupt();
             }
 
-            //unbindService();
             return result;
         }
     }
@@ -62,9 +82,9 @@ public class CacheServiceCaller implements ServiceConnection {
      */
     private void bindService() {
         Intent implicit = new Intent(ICache.class.getName());
-        //Intent implicit = new Intent(IDownload.class.getName());
         List<ResolveInfo> matches = mAppContext.getPackageManager().queryIntentServices(implicit, 0);
-        if (matches.size() == 0) {
+
+        if (matches.isEmpty()) {
             Log.d(LOG_TAG, "No cache service found");
         } else if (matches.size() > 1) {
             Log.d(LOG_TAG, "Multiple cache services found");
@@ -104,15 +124,13 @@ public class CacheServiceCaller implements ServiceConnection {
             cacheThread.join();
         } catch (InterruptedException e) {
             Log.e(getClass().getSimpleName(), "Exception requesting cache", e);
+
+            // Restore the interrupted state:
+            // https://www.ibm.com/developerworks/java/library/j-jtp05236/index.html?ca=drs-#2.1
+            Thread.currentThread().interrupt();
         }
         return cacheThread.getCacheResult();
     }
-
-    /*
-    unbindService(AuroraServices.CACHE);
-        disconnect();
-     */
-
 
     /**
      * This function will be called by the android system
@@ -126,7 +144,8 @@ public class CacheServiceCaller implements ServiceConnection {
             mBinding = ICache.Stub.asInterface(binder);
             Log.d(LOG_TAG, "Plugin Bound");
 
-            monitor.notify();
+            mServiceConnected = true;
+            monitor.notifyAll();
         }
     }
 
@@ -144,6 +163,7 @@ public class CacheServiceCaller implements ServiceConnection {
      * Release the binding
      */
     private void disconnect() {
+        mServiceConnected = false;
         mBinding = null;
         Log.d(LOG_TAG, "Plugin Unbound");
     }
@@ -167,6 +187,7 @@ public class CacheServiceCaller implements ServiceConnection {
             return mCacheResult;
         }
 
+        @Override
         public void run() {
             Log.d(LOG_TAG, "cache called");
             try {
@@ -174,13 +195,8 @@ public class CacheServiceCaller implements ServiceConnection {
                 if (mBinding == null) {
                     synchronized (monitor) {
                         Log.d(LOG_TAG, "Entering sync block" + mCacheResult);
-                        try {
-                            monitor.wait();
-                        } catch (InterruptedException e) {
-                            Log.e(getClass().getSimpleName(), "Exception requesting cache", e);
-                        }
-                        mCacheResult = mBinding.cache(mFileName, mUniquePluginName, mPluginObjectJSON);
-                        Log.d(LOG_TAG, "" + mCacheResult);
+
+                        mCacheResult = cache();
                     }
                 } else {
                     mCacheResult = mBinding.cache(mFileName, mUniquePluginName, mPluginObjectJSON);
@@ -192,7 +208,25 @@ public class CacheServiceCaller implements ServiceConnection {
                 Log.e(getClass().getSimpleName(), "Exception requesting cache", e);
                 mCacheResult = CacheResults.REMOTE_FAIL;
             }
-            //unbindService();
+        }
+
+        private int cache() throws RemoteException {
+            synchronized (monitor) {
+                try {
+                    while (!mServiceConnected) {
+                        monitor.wait();
+                    }
+                } catch (InterruptedException e) {
+                    Log.e(getClass().getSimpleName(), "Exception requesting cache", e);
+
+                    // Restore the interrupted state:
+                    // https://www.ibm.com/developerworks/java/library/j-jtp05236/index.html?ca=drs-#2.1
+                    Thread.currentThread().interrupt();
+                }
+                int cacheResult = mBinding.cache(mFileName, mUniquePluginName, mPluginObjectJSON);
+                Log.d(LOG_TAG, "" + cacheResult);
+                return cacheResult;
+            }
         }
     }
 
