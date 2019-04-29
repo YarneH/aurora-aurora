@@ -152,7 +152,7 @@ public class CacheServiceCaller implements ServiceConnection {
      * A private thread class that will cache the file in another thread to avoid blocking of the main thread
      */
     private class CacheThread extends Thread {
-        private int mCacheResult = -1000; // - 1000 means that the cache service from Aurora has not been reached
+        private int mCacheResult = CacheResults.NOT_REACHED;
         private String mFileName;
         private String mUniquePluginName;
         private String mPluginObjectJSON;
@@ -190,7 +190,7 @@ public class CacheServiceCaller implements ServiceConnection {
 
             } catch (RemoteException e) {
                 Log.e(getClass().getSimpleName(), "Exception requesting cache", e);
-                mCacheResult = -1;
+                mCacheResult = CacheResults.REMOTE_FAIL;
             }
             //unbindService();
         }

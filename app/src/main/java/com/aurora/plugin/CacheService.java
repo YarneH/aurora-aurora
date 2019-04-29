@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.os.IBinder;
 import android.util.Log;
 
+import com.aurora.auroralib.CacheResults;
 import com.aurora.internalservice.internalcache.ICache;
 import com.aurora.kernel.ContextNullException;
 import com.aurora.kernel.Kernel;
@@ -37,7 +38,7 @@ public class CacheService extends Service {
                 return processingCommunicator.cacheFile(fileName, pluginObject, uniquePluginName);
             } catch (ContextNullException e) {
                 Log.e("CacheService", "The kernel was not initialized with a valid context", e);
-                return -2;
+                return CacheResults.KERNEL_FAIL;
             }
         }
     }

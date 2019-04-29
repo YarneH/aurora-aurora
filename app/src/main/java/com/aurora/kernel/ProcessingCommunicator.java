@@ -2,6 +2,7 @@ package com.aurora.kernel;
 
 import android.support.annotation.NonNull;
 
+import com.aurora.auroralib.CacheResults;
 import com.aurora.kernel.event.CacheFileRequest;
 import com.aurora.kernel.event.CacheFileResponse;
 
@@ -51,7 +52,13 @@ public class ProcessingCommunicator extends Communicator {
         mCacheFileResponseObservable
                 .take(1)
                 .map(CacheFileResponse::isSuccessful)
-                .map(successful -> successful ? 0 : -1)
+                .map(successful -> {
+                    if (successful) {
+                        return CacheResults.CACHE_SUCCESS;
+                    } else {
+                        return CacheResults.CACHE_FAIL;
+                    }
+                })
                 .blockingSubscribe(returnCode::set);
 
         return returnCode.get();
