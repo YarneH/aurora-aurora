@@ -12,6 +12,10 @@ import java.util.List;
  * Class to represent extracted text from an internal processor
  */
 public class ExtractedText implements InternallyProcessedFile, Serializable {
+    // Necessary to enable serialization during class evolution
+    // wiki.sei.cmu.edu/confluence/display/java/SER00-J.+Enable+serialization+compatibility+during+class+evolution
+    private static final long serialVersionUID = 1L;
+
     private String mFilename;
     private Date mDateLastEdit;
     private String mTitle;
@@ -37,10 +41,15 @@ public class ExtractedText implements InternallyProcessedFile, Serializable {
      * @param sections     the sections in the file (only plain sections)
      */
     public ExtractedText(String filename, Date dateLastEdit, List<String> sections) {
-        this.mFilename = filename;
-        this.mDateLastEdit = dateLastEdit;
+        mFilename = filename;
+        mDateLastEdit = dateLastEdit;
+
+        mSections = new ArrayList<>();
+
+        // Do not use overridable method because this can lead to strange behaviour in subclasses
+        // wiki.sei.cmu.edu/confluence/display/java/MET05-J.+Ensure+that+constructors+do+not+call+overridable+methods
         for (String section : sections) {
-            addSimpleSection(section);
+            mSections.add(new Section(section));
         }
     }
 
@@ -53,7 +62,8 @@ public class ExtractedText implements InternallyProcessedFile, Serializable {
      * @param mAuthors      the authors of the file
      * @param mSections     the sections in the file
      */
-    public ExtractedText(String mFilename, Date mDateLastEdit, String mTitle, List<String> mAuthors, List<Section> mSections) {
+    public ExtractedText(String mFilename, Date mDateLastEdit, String mTitle, List<String> mAuthors,
+                         List<Section> mSections) {
         this(mFilename, mDateLastEdit);
         this.mTitle = mTitle;
         this.mAuthors = mAuthors;
@@ -62,6 +72,7 @@ public class ExtractedText implements InternallyProcessedFile, Serializable {
 
     /**
      * Get the sections of this ExtractedText
+     *
      * @return the list of sections
      */
     public List<Section> getSections() {
@@ -70,6 +81,7 @@ public class ExtractedText implements InternallyProcessedFile, Serializable {
 
     /**
      * Adds the section to the list of sections for this extractedText
+     *
      * @param section the section to be added
      */
     public void addSection(Section section) {

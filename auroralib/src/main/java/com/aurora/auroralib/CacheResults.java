@@ -6,14 +6,7 @@ package com.aurora.auroralib;
  * one of the constant return codes in this class.
  * @see CacheServiceCaller
  */
-public class CacheResults {
-
-    /**
-     * Empty private constructor so people cannot instantiate the class (it it just constants)
-     */
-    private CacheResults() {
-    }
-
+public final class CacheResults {
     /**
      * Indicates that the cache operation succeeded
      */
@@ -38,4 +31,10 @@ public class CacheResults {
      * Indicates that the cache service could not be reached
      */
     public static final int NOT_REACHED = -1000;
+
+    /**
+     * Empty private constructor so people cannot instantiate the class (it it just constants)
+     */
+    private CacheResults() {
+    }
 }

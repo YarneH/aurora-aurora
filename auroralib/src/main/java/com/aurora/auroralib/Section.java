@@ -3,7 +3,7 @@ package com.aurora.auroralib;
 import java.util.List;
 
 public class Section {
-    
+
     /**
      * The title of a Section
      */
@@ -24,12 +24,13 @@ public class Section {
     /**
      * Constructor for creating an empty section
      */
-    public Section(){
+    public Section() {
 
     }
 
     /**
      * Constructor for creating a section without images or title
+     *
      * @param body the content of the section
      */
     public Section(String body) {
@@ -38,8 +39,9 @@ public class Section {
 
     /**
      * Constructor for creating a section with a title, content and images
-     * @param title the title of the section
-     * @param body the content of the section
+     *
+     * @param title  the title of the section
+     * @param body   the content of the section
      * @param images the images in the section
      */
     public Section(String title, String body, List<String> images) {
@@ -50,14 +52,18 @@ public class Section {
 
     @Override
     public String toString() {
-        if (mTitle != null && mBody != null){
-            return mTitle + "\n" + mBody + "\n";
-        } else if (mBody != null){
-            return mBody + "\n";
+        String result;
+        if (mTitle != null && mBody != null) {
+            result = mTitle + "\n" + mBody + "\n";
+        } else if (mBody != null) {
+            result = mBody + "\n";
         } else if (mTitle != null) {
-            return (mTitle + "\n");
+            result = (mTitle + "\n");
+        } else {
+            result = "Empty paragraph.\n";
         }
-        else return "Empty paragraph.\n";
+
+        return result;
     }
 
     public String getTitle() {
@@ -77,7 +83,7 @@ public class Section {
     }
 
     public void concatBody(String body) {
-        if(mBody == null) {
+        if (mBody == null) {
             this.mBody = body;
         } else {
             this.mBody = this.mBody.concat(body);
@@ -93,7 +99,7 @@ public class Section {
     }
 
     public void addImages(List<String> images) {
-        if(mImages == null) {
+        if (mImages == null) {
             this.mImages = images;
         } else {
             this.mImages.addAll(images);

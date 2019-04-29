@@ -1,6 +1,9 @@
 package com.aurora.auroralib;
 
-public class Constants {
+/**
+ * A class containing constants used for interaction between aurora and the plugins.
+ */
+public final class Constants {
     /**
      * Intent Action used to launch plugins
      */
@@ -27,5 +30,11 @@ public class Constants {
      * Key used for the Plugin Activity's Response to pass plugin object back to Aurora
      */
     public static final String PLUGIN_OUTPUT_OBJECT = "PLUGIN_OUTPUT_OBJECT";
+
+    /**
+     * Private constructor to prevent instantiation (the class only contains constants)
+     */
+    private Constants() {
+    }
 
 }

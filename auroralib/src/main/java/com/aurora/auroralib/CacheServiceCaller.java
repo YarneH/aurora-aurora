@@ -55,7 +55,7 @@ public class CacheServiceCaller implements ServiceConnection {
     public int cacheOperation(@NonNull String fileName, @NonNull String uniquePluginName,
                               @NonNull String pluginObjectJSON) {
         synchronized (monitor) {
-            int result = -1000;
+            int result = CacheResults.NOT_REACHED;
             bindService();
             try {
                 while (!mServiceConnected) {

@@ -8,9 +8,24 @@ import android.util.Log;
  * is automatically called on main thread, which leads to threading/waiting dificulties)
  */
 public class ProcessorCacheThread extends Thread {
+    /**
+     * Tag used for logging
+     */
     private static final String TAG = ProcessorCacheThread.class.getSimpleName();
-    protected int mCacheResult = -1000; // - 1000 means that the cache service from Aurora has not been reached
+
+    /**
+     * Result of caching operation
+     */
+    protected int mCacheResult = CacheResults.NOT_REACHED;
+
+    /**
+     * Plugin object containing processed text
+     */
     protected PluginObject mPluginObject;
+
+    /**
+     * a reference to the cache service caller that is responsible for actually calling the cache
+     */
     private CacheServiceCaller mCacheServiceCaller;
 
     public ProcessorCacheThread(PluginObject pluginObject, CacheServiceCaller cacheServiceCaller) {
@@ -22,24 +37,25 @@ public class ProcessorCacheThread extends Thread {
         return mCacheResult;
     }
 
-    protected int cache(){
+    protected int cache() {
         return mCacheServiceCaller.cacheOperation(mPluginObject.mFileName,
                 mPluginObject.mUniquePluginName, mPluginObject.toJSON());
     }
 
     /**
-     * This methad can be overridden to take particular actions depending on the cache result.
+     * This method can be overridden to take particular actions depending on the cache result.
      * Currently tries caching again if it failed during its first attempt.
      *
      * @param cacheResult result of the first caching operation. 0 means success.
      */
-    protected void handleCacheResult(int cacheResult){
+    protected void handleCacheResult(int cacheResult) {
         if (cacheResult != 0) {
             int secondResult = cache();
             Log.d(TAG, "Second cache operation result: " + secondResult);
         }
     }
 
+    @Override
     public void run() {
         int cacheResult = cache();
         Log.d(TAG, "" + cacheResult);

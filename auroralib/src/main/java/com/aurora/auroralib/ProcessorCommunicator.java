@@ -55,12 +55,6 @@ public abstract class ProcessorCommunicator {
 
     // TODO: remove this after testing
     public final PluginObject pipeline(String fileName, String inputText) {
-        //BasicPluginObject res = new BasicPluginObject();
-        //res.setResult("Basic Plugin processed and cached with result:" + "\n" + extractedText.toString());
-
-        //int cacheResult = serviceCaller.cacheOperation(res.toJSON());
-        //res.setResult("Basic Plugin processed and cached with result:" + cacheResult + "\n" + extractedText.toString());
-
         PluginObject pluginObject = process(fileName, inputText);
         ProcessorCacheThread processorCacheThread = new ProcessorCacheThread(pluginObject, mCacheServiceCaller);
         processorCacheThread.start();
