@@ -7,6 +7,7 @@ import android.widget.Toast;
 
 import com.aurora.aurora.R;
 import com.aurora.auroralib.ExtractedText;
+import com.aurora.internalservice.internalcache.CachedFileInfo;
 import com.aurora.internalservice.internalcache.CachedProcessedFile;
 import com.aurora.kernel.event.InternalProcessorRequest;
 import com.aurora.kernel.event.InternalProcessorResponse;
@@ -14,6 +15,8 @@ import com.aurora.kernel.event.ListPluginsRequest;
 import com.aurora.kernel.event.ListPluginsResponse;
 import com.aurora.kernel.event.OpenCachedFileWithPluginRequest;
 import com.aurora.kernel.event.OpenFileWithPluginRequest;
+import com.aurora.kernel.event.QueryCacheRequest;
+import com.aurora.kernel.event.QueryCacheResponse;
 import com.aurora.kernel.event.RetrieveFileFromCacheRequest;
 import com.aurora.kernel.event.RetrieveFileFromCacheResponse;
 import com.aurora.plugin.Plugin;
@@ -125,7 +128,23 @@ public class AuroraCommunicator extends Communicator {
         mBus.post(request);
     }
 
+    /**
+     * Gets a list of all cached files, ordered on date in ascending order
+     *
+     * @param maxLength The maximum number of entries that should be returned
+     * @return a list of metadata of the cached files, ordered on date in ascending order
+     */
+    public Observable<List<CachedFileInfo>> getListOfCachedFiles(int maxLength) {
+        // Create observable to listen to
+        Observable<QueryCacheResponse> queryCacheResponseObservable = mBus.register(QueryCacheResponse.class);
 
+        // Create request and post on bus
+        QueryCacheRequest request = new QueryCacheRequest(maxLength);
+        mBus.post(request);
+
+        return queryCacheResponseObservable
+                .map(QueryCacheResponse::getResults);
+    }
 
     /**
      * Gets a list of all the available plugins

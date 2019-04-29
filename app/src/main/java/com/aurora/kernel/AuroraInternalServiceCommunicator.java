@@ -68,7 +68,7 @@ public class AuroraInternalServiceCommunicator extends Communicator {
         // Call appropriate handle method when request comes in
         mQueryCacheRequestObservable.subscribe((QueryCacheRequest queryCacheRequest) -> {
             if (queryCacheRequest.isFullCacheRequest()) {
-                queryFullCache();
+                queryFullCache(queryCacheRequest.getMaxEntries());
             } else {
                 queryCache(queryCacheRequest.getFileRef(), queryCacheRequest.getUniquePluginName());
             }
@@ -116,10 +116,12 @@ public class AuroraInternalServiceCommunicator extends Communicator {
 
     /**
      * Private handle method to query the cache for all files
+     *
+     * @param maxEntries maximum number of entries that should be queried
      */
-    private void queryFullCache() {
+    private void queryFullCache(int maxEntries) {
         // Get all files from cache
-        List<CachedFileInfo> processedFiles = mInternalCache.getFullCache();
+        List<CachedFileInfo> processedFiles = mInternalCache.getFullCache(maxEntries);
 
         // Wrap in response and post on the bus
         QueryCacheResponse response = new QueryCacheResponse(processedFiles);
