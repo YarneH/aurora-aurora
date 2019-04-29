@@ -28,6 +28,7 @@ import android.widget.Toast;
 
 import com.aurora.auroralib.Constants;
 import com.aurora.kernel.AuroraCommunicator;
+import com.aurora.kernel.ContextNullException;
 import com.aurora.kernel.Kernel;
 import com.aurora.plugin.Plugin;
 import com.google.firebase.analytics.FirebaseAnalytics;
@@ -98,8 +99,13 @@ public class MainActivity extends AppCompatActivity
         setContentView(R.layout.activity_main);
 
         /* Set up kernel */
-        mKernel = Kernel.getInstance(this.getApplicationContext());
-        mAuroraCommunicator = mKernel.getAuroraCommunicator();
+        try {
+            mKernel = Kernel.getInstance(this.getApplicationContext());
+            mAuroraCommunicator = mKernel.getAuroraCommunicator();
+        } catch (ContextNullException e) {
+            Log.e("MainActivity",
+                    "The kernel was not initialized with a valid android application context", e);
+        }
 
         /*
         Set up plugins

@@ -6,6 +6,7 @@ import android.os.IBinder;
 import android.util.Log;
 
 import com.aurora.internalservice.internalcache.ICache;
+import com.aurora.kernel.ContextNullException;
 import com.aurora.kernel.Kernel;
 import com.aurora.kernel.ProcessingCommunicator;
 
@@ -13,7 +14,6 @@ public class CacheService extends Service {
 
     @Override
     public IBinder onBind(Intent intent) {
-        //Toast.makeText(getApplicationContext(), "binding", Toast.LENGTH_SHORT).show();
         return(new CacheBinder());
     }
 
@@ -27,10 +27,18 @@ public class CacheService extends Service {
                     uniquePluginName  + "\n" + pluginObject);
 
             // Get the kernel and appropriate communicator
-            Kernel kernel = Kernel.getInstance(CacheService.this.getApplicationContext());
-            ProcessingCommunicator processingCommunicator = kernel.getProcessingCommunicator();
+            Kernel kernel = null;
+            try {
+                kernel = Kernel.getInstance(CacheService.this.getApplicationContext());
 
-            return processingCommunicator.cacheFile(fileName, pluginObject, uniquePluginName);
+
+                ProcessingCommunicator processingCommunicator = kernel.getProcessingCommunicator();
+
+                return processingCommunicator.cacheFile(fileName, pluginObject, uniquePluginName);
+            } catch (ContextNullException e) {
+                Log.e("CacheService", "The kernel was not initialized with a valid context", e);
+                return -2;
+            }
         }
     }
 }

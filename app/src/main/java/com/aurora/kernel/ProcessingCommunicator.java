@@ -1,7 +1,6 @@
 package com.aurora.kernel;
 
 import android.support.annotation.NonNull;
-import android.util.Log;
 
 import com.aurora.kernel.event.CacheFileRequest;
 import com.aurora.kernel.event.CacheFileResponse;
@@ -38,8 +37,6 @@ public class ProcessingCommunicator extends Communicator {
      * @return a status code indicating if the cache operation was successful (0) or not (-1)
      */
     public int cacheFile(@NonNull String fileRef, @NonNull String pluginObject, @NonNull String uniquePluginName) {
-        Log.d("AURORA", "In cacheFile");
-
         // Create request to cache the file
         CacheFileRequest cacheFileRequest = new CacheFileRequest(fileRef, pluginObject, uniquePluginName);
 
@@ -54,13 +51,8 @@ public class ProcessingCommunicator extends Communicator {
         mCacheFileResponseObservable
                 .take(1)
                 .map(CacheFileResponse::isSuccessful)
-                .map(successful -> {
-                    int statusCode = successful ? 0 : -1;
-                    Log.d("AURORA", "Response code: " + statusCode);
-                    return statusCode;
-                })
+                .map(successful -> successful ? 0 : -1)
                 .blockingSubscribe(returnCode::set);
-
 
         return returnCode.get();
     }

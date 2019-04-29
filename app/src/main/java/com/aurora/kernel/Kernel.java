@@ -117,13 +117,13 @@ public final class Kernel {
      * @return the singleton kernel instance
      * @throws IllegalArgumentException when the kernel has not yet been initialized and the applicationContext is null
      */
-    public static Kernel getInstance(Context applicationContext) throws IllegalArgumentException {
+    public static Kernel getInstance(Context applicationContext) throws ContextNullException {
         if (sKernel == null && applicationContext != null) {
             // Initialize kernel
             return initialize(applicationContext);
         } else if (sKernel == null) {
             // Kernel not initialzed but application context cannot be used to initialized
-            throw new IllegalArgumentException("The kernel can not be initialized with " +
+            throw new ContextNullException("The kernel can not be initialized with " +
                     "applicationContext equal to null!");
         } else {
             // Already initialized, return existing instance
@@ -138,7 +138,7 @@ public final class Kernel {
      * @return the singleton kernel instance, if it was initialized before
      * @throws IllegalArgumentException when the kernel has not yet been initialized and the applicationContext is null
      */
-    public static Kernel getInstance() throws IllegalArgumentException {
+    public static Kernel getInstance() throws ContextNullException {
         return getInstance(null);
     }
 

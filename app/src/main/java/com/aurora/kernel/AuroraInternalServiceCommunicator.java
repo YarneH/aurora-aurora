@@ -1,7 +1,5 @@
 package com.aurora.kernel;
 
-import android.util.Log;
-
 import com.aurora.internalservice.internalcache.CachedFileInfo;
 import com.aurora.internalservice.internalcache.CachedProcessedFile;
 import com.aurora.internalservice.internalcache.InternalCache;
@@ -108,11 +106,8 @@ public class AuroraInternalServiceCommunicator extends Communicator {
      * @param uniquePluginName the name of the plugin that built the representation
      */
     private void cacheFile(String fileRef, String pluginObject, String uniquePluginName) {
-        Log.d("AURORA", "In cacheFile method of AuroraInternalServiceCommunicator");
         // Cache file
         boolean cacheSuccess = mInternalCache.cacheFile(fileRef, pluginObject, uniquePluginName);
-
-        Log.d("AURORA", "Cache was successful: " + cacheSuccess + ". Posting response...");
 
         // Create response and post it
         CacheFileResponse response = new CacheFileResponse(cacheSuccess);
