@@ -37,7 +37,7 @@ public abstract class ProcessorCommunicator {
     protected abstract PluginObject process(ExtractedText extractedText);
 
     // TODO This should not be included in final version but is still being used for testing
-    protected abstract PluginObject process(String fileName, String inputText);
+    // protected abstract PluginObject process(String fileName, String inputText);
 
 
     /**
@@ -54,11 +54,13 @@ public abstract class ProcessorCommunicator {
     }
 
     // TODO: remove this after testing
+    /*
     public final PluginObject pipeline(String fileName, String inputText) {
         PluginObject pluginObject = process(fileName, inputText);
         ProcessorCacheThread processorCacheThread = new ProcessorCacheThread(pluginObject, mCacheServiceCaller);
         processorCacheThread.start();
         return pluginObject;
     }
+    */
 }
 

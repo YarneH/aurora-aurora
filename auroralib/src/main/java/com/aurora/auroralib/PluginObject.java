@@ -28,6 +28,22 @@ public abstract class PluginObject implements Serializable {
         mUniquePluginName = uniquePluginName;
     }
 
+    public String getFileName() {
+        return mFileName;
+    }
+
+    public String getUniquePluginName() {
+        return mUniquePluginName;
+    }
+
+    public void setFileName(String fileName) {
+        mFileName = fileName;
+    }
+
+    public void setUniquePluginName(String uniquePluginName) {
+        mUniquePluginName = uniquePluginName;
+    }
+
     /**
      * Turns the PLuginObject to a JSON string for easy caching.
      *
