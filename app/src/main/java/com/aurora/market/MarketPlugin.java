@@ -5,13 +5,16 @@ import android.media.Image;
 import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * A Class representing a Plugin which can be downloaded from the PluginMarket
  */
 public class MarketPlugin implements Serializable {
     private static final long serialVersionUID = 1;
-    private Image mLogo;
+    // TODO: Change mLogo to Image!!
+    private String mLogo;
     private String mPluginName;
     private String mDescription;
     private URL mDownloadLink;
@@ -26,17 +29,17 @@ public class MarketPlugin implements Serializable {
      */
     public MarketPlugin(String logoLocation, String name, String description, String url){
         // TODO: Get image!
-        //this.mLogo = logo;
+        this.mLogo = logoLocation;
         this.mPluginName = name;
         this.mDescription = description;
         try {
             this.mDownloadLink = new URL(url);
         } catch (MalformedURLException e) {
-            e.printStackTrace();
+            Logger.getLogger(this.getClass().getSimpleName()).log(Level.SEVERE, null, e);
         }
     }
 
-    public Image getLogo() {
+    public String getLogo() {
         return mLogo;
     }
 

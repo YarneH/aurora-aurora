@@ -7,6 +7,10 @@ import com.aurora.market.PluginMarketViewModelFactory;
 
 public class InjectorUtils {
 
+    private InjectorUtils() {
+        throw new IllegalStateException("Utility class");
+    }
+
     public static AuroraRepository provideRepository(Context context) {
         AuroraNetworkDataSource auroraNetworkDataSource = AuroraNetworkDataSource.getInstance(context);
         return AuroraRepository.getInstance(auroraNetworkDataSource);

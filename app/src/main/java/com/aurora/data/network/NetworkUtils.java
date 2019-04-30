@@ -6,11 +6,17 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Scanner;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * These utilities will be used to communicate with the weather servers.
  */
 final class NetworkUtils {
+
+    private NetworkUtils() {
+        throw new IllegalStateException("Utility class");
+    }
 
     /**
      * The URL to the list of MarketPlugins
@@ -22,7 +28,8 @@ final class NetworkUtils {
         try {
             return new URL(PLUGINLIST_URL);
         } catch (MalformedURLException e) {
-            e.printStackTrace();
+            Logger.getLogger("NetworkUtils").log(Level.SEVERE, null, e);
+
         }
 
         return null;
@@ -37,10 +44,10 @@ final class NetworkUtils {
      */
     static String getResponseFromHttpUrl(URL url) throws IOException {
         HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
-        try {
-            InputStream in = urlConnection.getInputStream();
-
-            Scanner scanner = new Scanner(in);
+        try (
+                InputStream in = urlConnection.getInputStream();
+                Scanner scanner = new Scanner(in);
+                ){
             scanner.useDelimiter("\\A");
 
             boolean hasInput = scanner.hasNext();

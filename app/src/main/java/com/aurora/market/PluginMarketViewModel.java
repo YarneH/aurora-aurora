@@ -1,15 +1,10 @@
 package com.aurora.market;
 
-import android.app.Application;
-import android.arch.lifecycle.AndroidViewModel;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 import android.arch.lifecycle.ViewModel;
-import android.util.Log;
 import com.aurora.data.AuroraRepository;
-import io.reactivex.annotations.NonNull;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**

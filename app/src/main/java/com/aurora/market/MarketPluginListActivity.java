@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
@@ -36,7 +35,7 @@ public class MarketPluginListActivity extends AppCompatActivity {
      */
     private boolean mTwoPane = false;
 
-    private PluginMarketViewModel mViewModel;
+    private PluginMarketViewModel mViewModel = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

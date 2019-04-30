@@ -9,7 +9,7 @@ import java.util.List;
 /**
  * Handles the data operations of Aurora
  */
-public class AuroraRepository {
+public final class AuroraRepository {
     private static AuroraRepository sInstance;
     private boolean mInitialized = false;
     private final AuroraNetworkDataSource mNetworkDataSource;
@@ -18,7 +18,7 @@ public class AuroraRepository {
         mNetworkDataSource = networkDataSource;
     }
 
-    public synchronized static AuroraRepository getInstance(AuroraNetworkDataSource networkDataSource) {
+    public static synchronized AuroraRepository getInstance(AuroraNetworkDataSource networkDataSource) {
         if (sInstance == null) {
             sInstance = new AuroraRepository(networkDataSource);
         }

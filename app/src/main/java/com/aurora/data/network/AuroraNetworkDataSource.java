@@ -7,7 +7,12 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.util.Log;
 import com.aurora.market.MarketPlugin;
-import com.firebase.jobdispatcher.*;
+import com.firebase.jobdispatcher.Constraint;
+import com.firebase.jobdispatcher.Driver;
+import com.firebase.jobdispatcher.FirebaseJobDispatcher;
+import com.firebase.jobdispatcher.GooglePlayDriver;
+import com.firebase.jobdispatcher.Job;
+import com.firebase.jobdispatcher.Lifetime;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -15,8 +20,12 @@ import org.json.JSONObject;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
-public class AuroraNetworkDataSource {
+public final class AuroraNetworkDataSource {
+    private static final String DEBUG_STRING = "MARKET";
+
     private static final String AURORA_SYNC_TAG = "aurora-sync";
     private static final String JSON_LOCATION_KEY = "apk_location";
     private static final String JSON_DESCRIPTION_KEY = "description";
@@ -70,7 +79,7 @@ public class AuroraNetworkDataSource {
      */
     public void scheduleRecurringFetchPluginMarketSync() {
 
-        Log.d("MARKET", "Creating job");
+        Log.d("DEBUG_STRING", "Creating job");
         // Create the Job to periodically sync the PluginMarket
         Job syncPluginMarketJob = mDispatcher.newJobBuilder()
                 /* The Service that will be used to sync Sunshine's data */
@@ -103,7 +112,7 @@ public class AuroraNetworkDataSource {
 
         // Schedule the Job with the dispatcher
         mDispatcher.schedule(syncPluginMarketJob);
-        Log.d("MARKET", "Job created");
+        Log.d("DEBUG_STRING", "Job created");
     }
 
     /**
@@ -120,7 +129,7 @@ public class AuroraNetworkDataSource {
             try {
                 URL marketPluginListURL = NetworkUtils.getMarketPluginURL();
                 if (marketPluginListURL == null) {
-                    Log.d("MARKET", "URL is null");
+                    Log.d("DEBUG_STRING", "URL is null");
                     // TODO: Handle null
                     return null;
                 }
@@ -128,14 +137,12 @@ public class AuroraNetworkDataSource {
                 // Get response
                 String jsonPluginListResponse = NetworkUtils.getResponseFromHttpUrl(marketPluginListURL);
 
-                Log.d("MARKET", "Response: " + jsonPluginListResponse);
+                Log.d("DEBUG_STRING", "Response: " + jsonPluginListResponse);
 
                 // Parse response
-                JSONObject pluginList = new JSONObject(jsonPluginListResponse);
-
-                return pluginList;
+                return new JSONObject(jsonPluginListResponse);
             } catch (Exception e) {
-                e.printStackTrace();
+                Logger.getLogger(this.getClass().getSimpleName()).log(Level.SEVERE, null, e);
             }
 
             return null;
@@ -149,7 +156,7 @@ public class AuroraNetworkDataSource {
 
                     JSONArray jsonPlugins = pluginList.getJSONArray("plugins");
 
-                    Log.d("MARKET", "Result: " + jsonPlugins.toString());
+                    Log.d("DEBUG_STRING", "Result: " + jsonPlugins.toString());
 
                     for (int i = 0; i < jsonPlugins.length(); i++) {
                         JSONObject currentPlugin = jsonPlugins.getJSONObject(i);
@@ -167,7 +174,7 @@ public class AuroraNetworkDataSource {
                     mMarketPlugins.postValue(tempList);
 
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    Logger.getLogger(this.getClass().getSimpleName()).log(Level.SEVERE, null, e);
                 }
             }
         }
