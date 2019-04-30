@@ -386,14 +386,14 @@ public class InternalCache implements InternalService {
      * Writes a cache file for a given plugin object
      *
      * @param path         the location where to write the file
-     * @param pluginObject the object to write to the cache
+     * @param pluginObjectJson the object to write to the cache
      */
-    private boolean writeCacheFile(String path, String pluginObject) {
+    private boolean writeCacheFile(String path, String pluginObjectJson) {
         File cacheFile = new File(mContext.getFilesDir(), path);
 
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(cacheFile))) {
             // Write json representation of plugin object to the file
-            writer.write(pluginObject);
+            writer.write(pluginObjectJson);
         } catch (IOException e) {
             Log.e(CLASS_TAG, "Something went wrong while writing a cache file!", e);
 
