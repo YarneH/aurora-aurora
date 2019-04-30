@@ -51,7 +51,8 @@ public class PluginCommunicator extends Communicator {
     /**
      * Creates a PluginCommunicator. There should be only one instance at a time
      *
-     * @param bus            a reference to the unique bus instances that all communicators should use to communicate events
+     * @param bus            a reference to the unique bus instances that all communicators should use to
+     *                       communicate events
      * @param pluginRegistry a reference to the plugin registry
      */
     public PluginCommunicator(Bus bus, PluginRegistry pluginRegistry) {
@@ -87,10 +88,10 @@ public class PluginCommunicator extends Communicator {
     /**
      * Opens a file with a given plugin
      *
-     * @param extractedText the extracted text of the file to open
-     *                      TODO: add tests for this method
+     * @param extractedText    the extracted text of the file to open
+     *                         TODO: add tests for this method
      * @param uniquePluginName the unique name of the plugin to open the file with
-     * @param context       the android context
+     * @param context          the android context
      */
     private void openFileWithPlugin(ExtractedText extractedText, String uniquePluginName, Context context) {
         Intent launchIntent = context.getPackageManager().getLaunchIntentForPackage(uniquePluginName);
