@@ -6,8 +6,6 @@ import android.util.Log;
 import com.android.volley.toolbox.Volley;
 import com.aurora.internalservice.internalcache.InternalCache;
 import com.aurora.internalservice.internalprocessor.InternalTextProcessor;
-import com.aurora.internalservice.internaltranslation.Translator;
-import com.aurora.kernel.event.TranslationRequest;
 import com.aurora.plugin.Plugin;
 import com.google.gson.Gson;
 
@@ -25,50 +23,43 @@ import io.reactivex.schedulers.Schedulers;
  */
 public final class Kernel {
     /**
+     * A constant indicating how the plugin config file is named
+     */
+    private static final String PLUGINS_CFG = "plugin-config.json";
+    /**
      * A reference to the unique bus instance that should be used among all communicators
      */
     private Bus mBus;
-
     /**
      * A reference to the android context
      */
     private Context mContext;
-
     /**
      * A reference to the AuroraCommunicator
      */
     private AuroraCommunicator mAuroraCommunicator;
-
     /**
      * A reference to the PluginCommunicator
      */
     private PluginCommunicator mPluginCommunicator;
-
     /**
      * A reference to the ProcessingCommunicator
      */
     private ProcessingCommunicator mProcessingCommunicator;
-
     /**
      * A reference to the PluginInternalServiceCommunicator
      */
     private PluginInternalServiceCommunicator mPluginInternalServiceCommunicator;
-
     /**
      * A reference to the AuroraInternalServiceCommunicator
      */
     private AuroraInternalServiceCommunicator mAuroraInternalServiceCommunicator;
 
+    // TODO: change this if necessary
     /**
      * A reference to the plugin registry
      */
     private PluginRegistry mPluginRegistry;
-
-    // TODO: change this if necessary
-    /**
-     * A constant indicating how the plugin config file is named
-     */
-    private static final String PLUGINS_CFG = "plugin-config.json";
 
     /**
      * Starts and creates all communicators, keeping references

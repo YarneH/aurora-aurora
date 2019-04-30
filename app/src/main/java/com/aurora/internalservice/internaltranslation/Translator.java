@@ -11,7 +11,7 @@ import org.json.JSONObject;
 
 import java.io.UnsupportedEncodingException;
 
-public class Translator implements InternalService {
+public final class Translator implements InternalService {
 
     private static final String START_REQUEST = "https://translation.googleapis.com/language/translate/v2?";
     private static final String QUERY = "&q=";
@@ -23,7 +23,7 @@ public class Translator implements InternalService {
     private static final String KEY = "&key=" + API_KEY;
 
 
-    public Translator() {
+    private Translator() {
         // static elements
     }
 
