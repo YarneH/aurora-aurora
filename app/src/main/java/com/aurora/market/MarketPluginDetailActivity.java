@@ -18,6 +18,7 @@ import com.aurora.aurora.R;
  * in a {@link MarketPluginListActivity}.
  */
 public class MarketPluginDetailActivity extends AppCompatActivity {
+    private MarketPlugin mMarketPlugin;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,6 +52,8 @@ public class MarketPluginDetailActivity extends AppCompatActivity {
             Bundle arguments = new Bundle();
             arguments.putInt(MarketPluginDetailFragment.ARG_ITEM_ID,
                     getIntent().getIntExtra(MarketPluginDetailFragment.ARG_ITEM_ID, 0));
+            arguments.putSerializable(MarketPluginDetailFragment.ARG_MARKET_PLUGIN,
+                    getIntent().getSerializableExtra(MarketPluginDetailFragment.ARG_MARKET_PLUGIN));
             MarketPluginDetailFragment fragment = new MarketPluginDetailFragment();
             fragment.setArguments(arguments);
             getSupportFragmentManager().beginTransaction()
