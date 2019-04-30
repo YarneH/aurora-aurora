@@ -1,22 +1,29 @@
 package com.aurora.kernel.event;
 
 import android.content.Context;
+import android.content.Intent;
 
 import com.aurora.auroralib.ExtractedText;
 
+// TODO: delete when custom plugin chooser
 /**
  * Event to request that a file is opened with a plugin
  */
-public class OpenFileWithPluginRequest implements Event {
+public class OpenFileWithPluginChooserRequest implements Event {
     /**
      * The extracted text from the file to represent
      */
     private ExtractedText mExtractedText;
 
     /**
-     * The (unique) name of the plugin to open the file with
+     * The target intent of the chooser
      */
-    private String mUniquePluginName;
+    private Intent mPluginAction;
+
+    /**
+     * The selected plugin
+     */
+    private Intent mChooser;
 
     /**
      * The android context
@@ -27,12 +34,13 @@ public class OpenFileWithPluginRequest implements Event {
      * Creates a new OpenFileWithPluginRequest
      *
      * @param extractedText the extracted text from the file to represent
-     * @param uniquePluginName  the unique name of the plugin to open the file with
      * @param context       the android context
      */
-    public OpenFileWithPluginRequest(ExtractedText extractedText, String uniquePluginName, Context context) {
+    public OpenFileWithPluginChooserRequest(ExtractedText extractedText, Intent pluginAction,
+                                            Intent chooser, Context context) {
         mExtractedText = extractedText;
-        mUniquePluginName = uniquePluginName;
+        mPluginAction = pluginAction;
+        mChooser = chooser;
         mContext = context;
     }
 
@@ -43,11 +51,19 @@ public class OpenFileWithPluginRequest implements Event {
         return mExtractedText;
     }
 
+
     /**
-     * @return the unique name of the plugin to open the file with
+     * @return the target intent of the chooser
      */
-    public String getUniquePluginName() {
-        return mUniquePluginName;
+    public Intent getPluginAction() {
+        return mPluginAction;
+    }
+
+    /**
+     * @return the selected plugin
+     */
+    public Intent getChooser() {
+        return mChooser;
     }
 
     /**
