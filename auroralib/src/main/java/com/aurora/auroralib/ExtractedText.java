@@ -17,13 +17,10 @@ import edu.stanford.nlp.pipeline.ProtobufAnnotationSerializer;
  * Class to represent extracted text from an internal processor
  */
 public class ExtractedText implements InternallyProcessedFile, Serializable {
+
     /**
      * The filename, often the path to the file
      */
-    // Necessary to enable serialization during class evolution
-    // wiki.sei.cmu.edu/confluence/display/java/SER00-J.+Enable+serialization+compatibility+during+class+evolution
-    private static final long serialVersionUID = 1L;
-
     private String mFilename;
     /**
      * The Date of the last edit
