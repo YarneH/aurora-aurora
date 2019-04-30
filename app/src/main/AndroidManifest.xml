@@ -2,12 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     package="com.aurora.aurora">
-    <!--
-    <permission
-        android:name="com.aurora.aurora.permission.AURORA_SERVICES"
-        android:label="@string/service_permission_label"
-        android:description="@string/service_permission_description" />
-    -->
+
     <application
         android:allowBackup="false"
         android:icon="@mipmap/ic_launcher"
@@ -46,11 +41,7 @@
 
         </activity>
 
-
-        <!--
-        AuroraServices
-        android:permission="com.aurora.aurora.permission.AURORA_SERVICES" in service definition for permission
-        -->
+        
         <service android:name="com.aurora.plugin.CacheService">
 
 
