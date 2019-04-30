@@ -54,10 +54,11 @@ public class TextExtractorDOCX implements TextExtractor {
      *
      * @param file      InputStream to the file
      * @param fileRef   a reference to where the file can be found
+     * @param extractImages True if images need to be extracted, False otherwise
      * @return ExtractedText object with title and sections.
      */
     @Override
-    public ExtractedText extract(InputStream file, String fileRef) {
+    public ExtractedText extract(InputStream file, String fileRef, boolean extractImages) {
         mExtractedText = new ExtractedText(fileRef, null);
 
         // Set the values to defaults
@@ -69,7 +70,7 @@ public class TextExtractorDOCX implements TextExtractor {
 
             for (IBodyElement bodyElement : doc.getBodyElements()) {
                 if (bodyElement instanceof XWPFParagraph) {
-                    appendParagraphText((XWPFParagraph) bodyElement);
+                    appendParagraphText((XWPFParagraph) bodyElement, extractImages);
                 } else if (bodyElement instanceof XWPFTable) {
                     appendTableText((XWPFTable) bodyElement);
                 } else if (bodyElement instanceof XWPFSDT) {
@@ -170,6 +171,7 @@ public class TextExtractorDOCX implements TextExtractor {
                 mSectionInProgress = null;
             } else if (!formatted.isEmpty() || !encodedImages.isEmpty()) {
                 // It is not empty
+
                 if (mSectionInProgress == null) {
                     // Create a new Section
                     mSectionInProgress = new Section();
@@ -190,12 +192,13 @@ public class TextExtractorDOCX implements TextExtractor {
      * maintained to add them back together. New sections are started when a tab or newline is
      * found.
      *
-     * @param paragraph Object of Apache POI representing a docx paragraph.
+     * @param paragraph     Object of Apache POI representing a docx paragraph.
+     * @param extractImages True if images need to be extracted, False otherwise
      */
     //I suppress these warnings because there is no easy way to simplify or split this logic into
     // multiple methods without making it harder to understand.
     @java.lang.SuppressWarnings({"squid:MethodCyclomaticComplexity","squid:S3776"})
-    private void appendParagraphText(XWPFParagraph paragraph) {
+    private void appendParagraphText(XWPFParagraph paragraph, boolean extractImages) {
         // For some reason runs can be split randomly, even in the middle of sentences or words.
         // This code is an attempt to combine such runs to one coherent piece of text.
 
@@ -224,7 +227,9 @@ public class TextExtractorDOCX implements TextExtractor {
                 // Extract the images from the run and add them to the list of yet to process images
                 List<XWPFPicture> piclist = ((XWPFRun) run).getEmbeddedPictures();
                 for (XWPFPicture image: piclist) {
-                    images.add(image.getPictureData().getData());
+                    if (extractImages) {
+                        images.add(image.getPictureData().getData());
+                    }
                 }
 
                 XWPFRun currentRun = (XWPFRun) run;

@@ -3,9 +3,9 @@ package com.aurora.plugin;
 import android.support.annotation.NonNull;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.List;
 
 /**
  * Class that maintains references to the environment and processor of plugin
@@ -15,8 +15,8 @@ public class Plugin {
     /**
      * The set of default supported internal services when the user does not provide his own set
      */
-    private static final Set<InternalServices> DEFAULT_INTERNAL_SERVICES =
-            new HashSet<>(Collections.singletonList(InternalServices.TEXT_EXTRACTION));
+    private static final List<InternalServices> DEFAULT_INTERNAL_SERVICES =
+            new ArrayList<>(Collections.singletonList(InternalServices.TEXT_EXTRACTION));
 
     /**
      * The unique name for the plugin.
@@ -53,7 +53,7 @@ public class Plugin {
     /**
      * The internal services needed by the plugin.
      */
-    private Set<InternalServices> mInternalServices;
+    private List<InternalServices> mInternalServices;
 
     /**
      * Constructs a plugin metadata object
@@ -67,7 +67,8 @@ public class Plugin {
      * @param internalServices the internal services needed by the plugin
      */
     public Plugin(@NonNull String uniqueName, @NonNull String name, File pluginLogo, @NonNull String description,
-                  int versionNumber, @NonNull String versionCode, @NonNull Set<InternalServices> internalServices) {
+                  int versionNumber, @NonNull String versionCode,
+                  @NonNull List<InternalServices> internalServices) {
         mUniqueName = uniqueName;
         mName = name;
         mPluginLogo = pluginLogo;
@@ -137,14 +138,14 @@ public class Plugin {
     /**
      * @return the set of internal services that should be run on files processed by this plugin
      */
-    public Set<InternalServices> getInternalServices() {
+    public List<InternalServices> getInternalServices() {
         return mInternalServices;
     }
 
     /**
      * @return a default set of internal services in case the internal services were not explicitly set
      */
-    public static Set<InternalServices> getDefaultInternalServices() {
+    public static List<InternalServices> getDefaultInternalServices() {
         return DEFAULT_INTERNAL_SERVICES;
     }
 }

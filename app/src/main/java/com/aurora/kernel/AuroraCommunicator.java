@@ -19,9 +19,12 @@ import com.aurora.kernel.event.QueryCacheRequest;
 import com.aurora.kernel.event.QueryCacheResponse;
 import com.aurora.kernel.event.RetrieveFileFromCacheRequest;
 import com.aurora.kernel.event.RetrieveFileFromCacheResponse;
+import com.aurora.plugin.InternalServices;
 import com.aurora.plugin.Plugin;
 
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import io.reactivex.Observable;
@@ -77,15 +80,24 @@ public class AuroraCommunicator extends Communicator {
                 .map(InternalProcessorResponse::getExtractedText)
                 .take(1)
                 .subscribe((ExtractedText extractedText) ->
-                        sendOpenFileRequest(extractedText, pluginAction, chooser, applicationContext), (Throwable e) ->
-                        Log.e(CLASS_TAG,
-                                "Something went wrong when receiving the internally processed file.", e)
+                                sendOpenFileRequest(extractedText, pluginAction, chooser, applicationContext)
+                        , (Throwable e) ->
+                                Log.e(CLASS_TAG,
+                                        "Something went wrong when receiving the internally processed file.", e)
                 );
 
 
         // TODO: this is bypass code. As soon as plugins are registered in the registry, this should be removed
+        List<InternalServices> internalServices =
+                new ArrayList<>(Arrays.asList(
+                        InternalServices.TEXT_EXTRACTION,
+                        InternalServices.IMAGE_EXTRACTION
+                        //InternalServices.NLP_TOKENIZE,
+                        //InternalServices.NLP_SSPLIT,
+                        //InternalServices.NLP_POS
+                ));
         InternalProcessorRequest internalProcessorRequest =
-                new InternalProcessorRequest(fileRef, fileType, file, Plugin.getDefaultInternalServices());
+                new InternalProcessorRequest(fileRef, fileType, file, internalServices);
 
         // Post request on the bus
         mBus.post(internalProcessorRequest);

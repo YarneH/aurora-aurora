@@ -1,25 +1,56 @@
 package com.aurora.auroralib;
 
 import com.google.gson.Gson;
+import com.google.gson.annotations.JsonAdapter;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import edu.stanford.nlp.pipeline.Annotation;
+import edu.stanford.nlp.pipeline.CoreNLPProtos;
+import edu.stanford.nlp.pipeline.ProtobufAnnotationSerializer;
+
 
 /**
  * Class to represent extracted text from an internal processor
  */
 public class ExtractedText implements InternallyProcessedFile, Serializable {
+    /**
+     * The filename, often the path to the file
+     */
     // Necessary to enable serialization during class evolution
     // wiki.sei.cmu.edu/confluence/display/java/SER00-J.+Enable+serialization+compatibility+during+class+evolution
     private static final long serialVersionUID = 1L;
 
     private String mFilename;
+    /**
+     * The Date of the last edit
+     */
     private Date mDateLastEdit;
+
+    /**
+     * The text of the title of the file
+     */
     private String mTitle;
+    /**
+     * The CoreNLP annotations of the title in Google's protobuf format
+     */
+    @JsonAdapter(CoreNLPDocumentAdapter.class)
+    private CoreNLPProtos.Document mTitleAnnotationProto;
+    /**
+     * The deserialized Annotation of the title
+     */
+    private transient Annotation mTitleAnnotation;
+
+    /**
+     * A list of authors of the file
+     */
     private List<String> mAuthors;
+    /**
+     * A list of Sections of the file which represent the content
+     */
     private List<Section> mSections;
 
     /**
@@ -71,12 +102,18 @@ public class ExtractedText implements InternallyProcessedFile, Serializable {
     }
 
     /**
-     * Get the sections of this ExtractedText
+     * Get the sections of this ExtractedText. Will return an empty list when no Sections are
+     * present
      *
      * @return the list of sections
      */
     public List<Section> getSections() {
-        return this.mSections;
+        if (mSections != null) {
+            return this.mSections;
+        } else {
+            return new ArrayList<>();
+        }
+
     }
 
     /**
@@ -92,14 +129,17 @@ public class ExtractedText implements InternallyProcessedFile, Serializable {
     }
 
     /**
-     * Adds a new section without images or title
+     * Adds a new section with only a body
      *
      * @param sectionText the content of the section
      */
     public void addSimpleSection(String sectionText) {
-        addSection(new Section(sectionText));
+        Section section = new Section();
+        section.setBody(sectionText);
+        addSection(section);
     }
 
+    @SuppressWarnings("unused")
     public String getFilename() {
         return mFilename;
     }
@@ -108,6 +148,7 @@ public class ExtractedText implements InternallyProcessedFile, Serializable {
         this.mFilename = mFilename;
     }
 
+    @SuppressWarnings("unused")
     public Date getDateLastEdit() {
         return mDateLastEdit;
     }
@@ -124,6 +165,27 @@ public class ExtractedText implements InternallyProcessedFile, Serializable {
         this.mTitle = title;
     }
 
+    public void setTitleAnnotationProto(CoreNLPProtos.Document titleAnnotationProto) {
+        this.mTitleAnnotationProto = titleAnnotationProto;
+    }
+
+    @SuppressWarnings("unused")
+    public Annotation getTitleAnnotation() {
+        return mTitleAnnotation;
+    }
+
+    @SuppressWarnings("unused")
+    public List<String> getAuthors() {
+        if (mAuthors != null) {
+            return  mAuthors;
+        } else {
+            return new ArrayList<>();
+        }
+    }
+
+    public void setAuthors(List<String> authors) {
+        this.mAuthors = authors;
+    }
 
     public String toString() {
         StringBuilder res = new StringBuilder();
@@ -154,8 +216,33 @@ public class ExtractedText implements InternallyProcessedFile, Serializable {
      * @param json The extracted JSON string of the ExtractedText object
      * @return ExtractedText
      */
+    @SuppressWarnings("unused")
     public static ExtractedText fromJson(String json) {
         Gson gson = new Gson();
-        return gson.fromJson(json, ExtractedText.class);
+
+        ExtractedText extractedText = gson.fromJson(json, ExtractedText.class);
+        ProtobufAnnotationSerializer annotationSerializer =
+                new ProtobufAnnotationSerializer(true);
+
+        // Recover the title CoreNLP annotations
+        if (extractedText.mTitleAnnotationProto != null) {
+            extractedText.mTitleAnnotation =
+                    annotationSerializer.fromProto(extractedText.mTitleAnnotationProto);
+        }
+
+        // Recover the Section CoreNLP annotations
+        for (Section section : extractedText.getSections()) {
+            if (section.getTitleAnnotationProto() != null) {
+                section.setTitleAnnotation(
+                        annotationSerializer.fromProto(section.getTitleAnnotationProto()));
+            }
+
+            if (section.getBodyAnnotationProto() != null) {
+                section.setBodyAnnotation(
+                        annotationSerializer.fromProto(section.getBodyAnnotationProto()));
+            }
+        }
+
+        return extractedText;
     }
 }
