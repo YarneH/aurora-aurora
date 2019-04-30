@@ -15,6 +15,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.aurora.aurora.R;
+import com.aurora.utilities.InjectorUtils;
 
 import java.util.List;
 import java.util.Objects;
@@ -35,10 +36,10 @@ public class MarketPluginListActivity extends AppCompatActivity {
      */
     private boolean mTwoPane = false;
 
+    private PluginMarketViewModel mViewModel;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        ViewModelProviders.of(this).get(PluginMarketViewModel.class);
-
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_marketplugin_list);
 
@@ -52,34 +53,24 @@ public class MarketPluginListActivity extends AppCompatActivity {
             mTwoPane = true;
         }
 
-        // TODO: DELETE THIS
-        // Adds new dummy values to the RecyclerView via the PluginMarketViewModel
-        AppCompatActivity activity = this;
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                ViewModelProviders.of(activity).get(PluginMarketViewModel.class).getMore();
-            }
-        });
+        PluginMarketViewModelFactory factory = InjectorUtils.providePluginMarketViewModel(this.getApplicationContext());
+        mViewModel = ViewModelProviders.of(this, factory).get(PluginMarketViewModel.class);
 
         View recyclerView = findViewById(R.id.marketplugin_list);
         assert recyclerView != null;
         setupRecyclerView((RecyclerView) recyclerView);
+
     }
 
     // Set up the RecyclerView responsible for the CardViews of the MarketPlugins
     private void setupRecyclerView(@NonNull RecyclerView recyclerView) {
-        // Get the PluginMarketViewModel
-        PluginMarketViewModel pluginMarket = ViewModelProviders.of(Objects.requireNonNull(this))
-                .get(PluginMarketViewModel.class);
 
         // Get the List of MarketPlugins and initiate the MarketPluginsRecyclerViewAdapter with it
-        List<MarketPlugin> marketPlugins = pluginMarket.getMarketPlugins().getValue();
+        List<MarketPlugin> marketPlugins = mViewModel.getMarketPlugins().getValue();
         recyclerView.setAdapter(new MarketPluginsRecyclerViewAdapter(this, marketPlugins, mTwoPane));
 
         // Observe the LiveData and update the MarketPluginsRecyclerViewAdapter when the data changes
-        pluginMarket.getMarketPlugins().observe(this, (List<MarketPlugin> marketPlugins1) -> {
+        mViewModel.getMarketPlugins().observe(this, (List<MarketPlugin> marketPlugins1) -> {
             Objects.requireNonNull((MarketPluginsRecyclerViewAdapter) recyclerView.getAdapter()).setMarketPlugins(
                     marketPlugins);
             Objects.requireNonNull(recyclerView.getAdapter()).notifyDataSetChanged();
@@ -150,6 +141,9 @@ public class MarketPluginListActivity extends AppCompatActivity {
 
         @Override
         public int getItemCount() {
+            if (mMarketPlugins == null) {
+                return 0;
+            }
             return mMarketPlugins.size();
         }
 

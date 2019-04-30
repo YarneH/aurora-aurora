@@ -18,7 +18,7 @@ import com.aurora.aurora.R;
  * in a {@link MarketPluginListActivity}.
  */
 public class MarketPluginDetailActivity extends AppCompatActivity {
-    
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

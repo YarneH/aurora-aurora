@@ -4,7 +4,9 @@ import android.app.Application;
 import android.arch.lifecycle.AndroidViewModel;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
+import android.arch.lifecycle.ViewModel;
 import android.util.Log;
+import com.aurora.data.AuroraRepository;
 import io.reactivex.annotations.NonNull;
 
 import java.util.ArrayList;
@@ -13,26 +15,17 @@ import java.util.List;
 /**
  * Holds the data for the PluginMarket
  */
-public class PluginMarketViewModel extends AndroidViewModel {
+public class PluginMarketViewModel extends ViewModel {
     /**
      * The LiveData of all the plugins
      */
-    private MutableLiveData<List<MarketPlugin>> mMarketPlugins = new MutableLiveData<>();
+    private LiveData<List<MarketPlugin>> mMarketPlugins = new MutableLiveData<>();
 
-    public PluginMarketViewModel(@NonNull Application application){
-        super(application);
+    private AuroraRepository mRepository;
 
-        /*
-        Dummy values
-         */
-        MarketPlugin dummy1 = new MarketPlugin(null, "Plugin Name 1", "This is a new plugin!", null);
-        MarketPlugin dummy2 = new MarketPlugin(null, "Plugin Name 2", "This is also a new plugin!", null);
-        MarketPlugin dummy3 = new MarketPlugin(null, "Plugin Name 3", "This is also a new plugin! WAUW!", null);
-
-        mMarketPlugins.setValue(new ArrayList<>());
-        mMarketPlugins.getValue().add(dummy1);
-        mMarketPlugins.getValue().add(dummy2);
-        mMarketPlugins.getValue().add(dummy3);
+    public PluginMarketViewModel(AuroraRepository repository){
+        mRepository = repository;
+        mMarketPlugins = mRepository.getCurrentMarketPlugins();
     }
 
     public LiveData<List<MarketPlugin>> getMarketPlugins() {
@@ -41,22 +34,5 @@ public class PluginMarketViewModel extends AndroidViewModel {
 
     public MarketPlugin getMarketPlugin(int id){
         return mMarketPlugins.getValue().get(id);
-    }
-
-    // TODO: Delete this!
-    // Adds more dummy values to the list (for debugging UI)
-    public void getMore() {
-        MarketPlugin dummy1 = new MarketPlugin(null, "Plugin Name 1", "This is a new plugin!", null);
-        MarketPlugin dummy2 = new MarketPlugin(null, "Plugin Name 2", "This is also a new plugin!", null);
-        MarketPlugin dummy3 = new MarketPlugin(null, "Plugin Name 3", "This is also a new plugin! WAUW!", null);
-
-        List<MarketPlugin> temp = mMarketPlugins.getValue();
-        temp.add(dummy1);
-        temp.add(dummy2);
-        temp.add(dummy3);
-
-        Log.d("Observings ", "" + temp.size());
-
-        mMarketPlugins.setValue(temp);
     }
 }

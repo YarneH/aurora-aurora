@@ -3,6 +3,7 @@ package com.aurora.market;
 import android.media.Image;
 
 import java.io.Serializable;
+import java.net.MalformedURLException;
 import java.net.URL;
 
 /**
@@ -23,11 +24,16 @@ public class MarketPlugin implements Serializable {
      * @param description
      * @param url
      */
-    public MarketPlugin(Image logo, String name, String description, URL url){
-        this.mLogo = logo;
+    public MarketPlugin(String logoLocation, String name, String description, String url){
+        // TODO: Get image!
+        //this.mLogo = logo;
         this.mPluginName = name;
         this.mDescription = description;
-        this.mDownloadLink = url;
+        try {
+            this.mDownloadLink = new URL(url);
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        }
     }
 
     public Image getLogo() {
