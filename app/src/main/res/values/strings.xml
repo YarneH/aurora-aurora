@@ -42,7 +42,7 @@
 
     <!-- User warnings -->
     <string name="plugin_not_in_registry">The plugin was not found in the registry!</string>
-    <string name="cached_file_not_found">The cached file was not found</string>
+    <string name="cached_file_not_found_processing_file">The cached file was not found. Processing file.</string>
 
     <!-- Service Permission -->
     <string name="service_permission_label">Aurora Services</string>
