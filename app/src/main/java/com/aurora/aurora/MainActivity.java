@@ -26,7 +26,6 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.aurora.auroralib.Constants;
 import com.aurora.kernel.AuroraCommunicator;
 import com.aurora.kernel.ContextNullException;
 import com.aurora.kernel.Kernel;
@@ -233,14 +232,13 @@ public class MainActivity extends AppCompatActivity
                     // Make inputstream reader for aurora communicator
                     InputStream read = getContentResolver().openInputStream(textFile);
 
-                    // Create intent to open file with a certain plugin
-                    Intent pluginAction = new Intent(Constants.PLUGIN_ACTION);
-
-                    // Create chooser to let user choose the plugin
-                    Intent chooser = Intent.createChooser(pluginAction, getString(R.string.select_plugin));
+                    // TODO: create and call custom chooser here, and let it return the unique plugin name of the
+                    // plugin to open the file with (package name, e.g. "com.aurora.basicplugin")
+                    // For now hard coded constant
+                    String uniquePluginName = "com.aurora.basicplugin";
 
                     mAuroraCommunicator.openFileWithPlugin(textFile.toString(), type,
-                            read, pluginAction, chooser, getApplicationContext());
+                            read, uniquePluginName, getApplicationContext());
 
                 } else {
                     Toast.makeText(this, "The selected file was null", Snackbar.LENGTH_LONG).show();

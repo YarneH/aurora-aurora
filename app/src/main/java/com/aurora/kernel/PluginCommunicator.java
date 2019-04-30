@@ -50,7 +50,8 @@ public class PluginCommunicator extends Communicator {
 
     /**
      * Creates a PluginCommunicator. There should be only one instance at a time
-     * @param bus a reference to the unique bus instances that all communicators should use to communicate events
+     *
+     * @param bus            a reference to the unique bus instances that all communicators should use to communicate events
      * @param pluginRegistry a reference to the plugin registry
      */
     public PluginCommunicator(Bus bus, PluginRegistry pluginRegistry) {
@@ -63,8 +64,7 @@ public class PluginCommunicator extends Communicator {
 
         // When a request comes in, call appropriate function
         mOpenFileWithPluginRequestObservable.subscribe((OpenFileWithPluginRequest request) ->
-                openFileWithPlugin(request.getExtractedText(), request.getPluginAction(),
-                        request.getChooser(), request.getContext())
+                openFileWithPlugin(request.getExtractedText(), request.getUniquePluginName(), request.getContext())
         );
 
         // Register for requests to open a cached file with plugin
@@ -72,7 +72,8 @@ public class PluginCommunicator extends Communicator {
 
         // When a request comes in, call appropriate function
         mOpenCachedFileWithPluginRequestObservable.subscribe((OpenCachedFileWithPluginRequest request) ->
-                openCachedFileWithPlugin(request.getJsonRepresentation(), request.getContext())
+                openCachedFileWithPlugin(request.getJsonRepresentation(),
+                        request.getUniquePluginName(), request.getContext())
         );
 
         // Register for requests to list available plugins
@@ -88,28 +89,37 @@ public class PluginCommunicator extends Communicator {
      *
      * @param extractedText the extracted text of the file to open
      *                      TODO: add tests for this method
-     * @param pluginAction  the target intent of the chooser
-     * @param chooser       the plugin that was selected by the user in the chooser menu
+     * @param uniquePluginName the unique name of the plugin to open the file with
      * @param context       the android context
      */
-    private void openFileWithPlugin(ExtractedText extractedText, Intent pluginAction, Intent chooser, Context context) {
+    private void openFileWithPlugin(ExtractedText extractedText, String uniquePluginName, Context context) {
+        Intent launchIntent = context.getPackageManager().getLaunchIntentForPackage(uniquePluginName);
+
+        if (launchIntent == null) {
+            Toast.makeText(context, context.getString(R.string.could_not_open_plugin), Toast.LENGTH_LONG).show();
+            return;
+        }
+
+        launchIntent.setAction(Constants.PLUGIN_ACTION);
+
+
         String extractedTextInJSON = extractedText.toJSON();
-        pluginAction.putExtra(Constants.PLUGIN_INPUT_EXTRACTED_TEXT, extractedTextInJSON);
+        launchIntent.putExtra(Constants.PLUGIN_INPUT_EXTRACTED_TEXT, extractedTextInJSON);
 
         Log.d("JSON", extractedTextInJSON);
 
-        boolean pluginOpens = pluginAction.resolveActivity(context.getPackageManager()) != null;
+        boolean pluginOpens = launchIntent.resolveActivity(context.getPackageManager()) != null;
 
         // This is a bit of a hack, but it needs to be done because of trying to launch an
         // activity outside of and activity context
         // https://stackoverflow.com/questions/3918517/calling-startactivity-from-outside-of-an-activity-context
-        chooser.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        launchIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 
 
         if (pluginOpens) {
-            context.startActivity(chooser);
+            context.startActivity(launchIntent);
         } else {
-            Toast.makeText(context, context.getString(R.string.no_plugins_available),
+            Toast.makeText(context, context.getString(R.string.could_not_open_plugin),
                     Toast.LENGTH_LONG).show();
         }
     }
@@ -120,21 +130,25 @@ public class PluginCommunicator extends Communicator {
      * @param jsonRepresentation the json representation of the plugin object to represent
      * @param context            the android context
      */
-    private void openCachedFileWithPlugin(String jsonRepresentation, Context context) {
-        Intent pluginAction = new Intent(Constants.PLUGIN_ACTION);
+    private void openCachedFileWithPlugin(String jsonRepresentation, String uniquePluginName, Context context) {
+        Intent launchIntent = context.getPackageManager().getLaunchIntentForPackage(uniquePluginName);
 
-        // Create chooser TODO: this is not necessary anymore, plugin should be known
-        Intent chooser = Intent.createChooser(pluginAction, context.getString(R.string.select_plugin));
-        pluginAction.putExtra(Constants.PLUGIN_INPUT_OBJECT, jsonRepresentation);
+        // Check if plugin is found
+        if (launchIntent == null) {
+            Toast.makeText(context, context.getString(R.string.could_not_open_plugin), Toast.LENGTH_LONG).show();
+            return;
+        }
 
-        boolean cachedFileOpens = pluginAction.resolveActivity(context.getPackageManager()) != null;
+        launchIntent.setAction(Constants.PLUGIN_ACTION);
+        launchIntent.putExtra(Constants.PLUGIN_INPUT_OBJECT, jsonRepresentation);
+
+        boolean cachedFileOpens = launchIntent.resolveActivity(context.getPackageManager()) != null;
 
         if (cachedFileOpens) {
-            context.startActivity(chooser);
+            context.startActivity(launchIntent);
         } else {
             Toast.makeText(context, context.getString(R.string.no_plugins_available), Toast.LENGTH_LONG).show();
         }
-
     }
 
     /**

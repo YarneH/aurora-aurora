@@ -1,7 +1,6 @@
 package com.aurora.kernel.event;
 
 import android.content.Context;
-import android.content.Intent;
 
 import com.aurora.auroralib.ExtractedText;
 
@@ -15,14 +14,9 @@ public class OpenFileWithPluginRequest implements Event {
     private ExtractedText mExtractedText;
 
     /**
-     * The target intent of the chooser
+     * The (unique) name of the plugin to open the file with
      */
-    private Intent mPluginAction;
-
-    /**
-     * The selected plugin
-     */
-    private Intent mChooser;
+    private String mUniquePluginName;
 
     /**
      * The android context
@@ -37,11 +31,9 @@ public class OpenFileWithPluginRequest implements Event {
      * @param chooser       the selected plugin
      * @param context       the android context
      */
-    public OpenFileWithPluginRequest(ExtractedText extractedText, Intent pluginAction,
-                                     Intent chooser, Context context) {
+    public OpenFileWithPluginRequest(ExtractedText extractedText, String uniquePluginName, Context context) {
         mExtractedText = extractedText;
-        mPluginAction = pluginAction;
-        mChooser = chooser;
+        mUniquePluginName = uniquePluginName;
         mContext = context;
     }
 
@@ -53,17 +45,10 @@ public class OpenFileWithPluginRequest implements Event {
     }
 
     /**
-     * @return the target intent of the chooser
+     * @return the unique name of the plugin to open the file with
      */
-    public Intent getPluginAction() {
-        return mPluginAction;
-    }
-
-    /**
-     * @return the selected plugin
-     */
-    public Intent getChooser() {
-        return mChooser;
+    public String getUniquePluginName() {
+        return mUniquePluginName;
     }
 
     /**

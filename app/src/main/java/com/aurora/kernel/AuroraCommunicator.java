@@ -1,7 +1,6 @@
 package com.aurora.kernel;
 
 import android.content.Context;
-import android.content.Intent;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -63,12 +62,12 @@ public class AuroraCommunicator extends Communicator {
      * @param fileRef            a reference to the file that needs to be opened
      * @param fileType           the file type
      * @param file               the input stream of the file
-     * @param pluginAction       the target plugin that was selected by the user
-     * @param chooser            the chooser intent used for opening the plugin
+     * @param uniquePluginName   the (unique) name of the plugin to open the file with. This should be obtained from
+     *                           the own chooser.
      * @param applicationContext the android context
      */
     public void openFileWithPlugin(String fileRef, String fileType, InputStream file,
-                                   Intent pluginAction, Intent chooser, Context applicationContext) {
+                                   String uniquePluginName, Context applicationContext) {
 
         // Register observable
         Observable<InternalProcessorResponse> internalProcessorResponseObservable =
@@ -80,7 +79,7 @@ public class AuroraCommunicator extends Communicator {
                 .map(InternalProcessorResponse::getExtractedText)
                 .take(1)
                 .subscribe((ExtractedText extractedText) ->
-                                sendOpenFileRequest(extractedText, pluginAction, chooser, applicationContext)
+                                sendOpenFileRequest(extractedText, uniquePluginName, applicationContext)
                         , (Throwable e) ->
                                 Log.e(CLASS_TAG,
                                         "Something went wrong when receiving the internally processed file.", e)
@@ -128,8 +127,11 @@ public class AuroraCommunicator extends Communicator {
                                         context.getString(R.string.cached_file_not_found_processing_file),
                                         Toast.LENGTH_LONG).show();
                                 // TODO: change this such that it processes the original file
+
+
                             } else {
-                                sendOpenCachedFileRequest(processedFile.getJsonRepresentation(), context);
+                                sendOpenCachedFileRequest(processedFile.getJsonRepresentation(),
+                                        processedFile.getUniquePluginName(), context);
                             }
                         }, (Throwable e) ->
                                 Log.e(CLASS_TAG, "Something went wrong while retrieving a file from the cache!", e)
@@ -186,16 +188,14 @@ public class AuroraCommunicator extends Communicator {
      * Private handle method to send request to plugin communicator to open file with plugin
      *
      * @param extractedText the extracted text of the file that was internally processed
-     * @param pluginAction  the target intent of the chooser
-     * @param chooser       the plugin that the user selected
+     * @param uniquePluginName the (unique) name of the plugin to open the file with
      * @param context       the android context
      */
-    private void sendOpenFileRequest(ExtractedText extractedText, Intent pluginAction,
-                                     Intent chooser, Context context) {
+    private void sendOpenFileRequest(ExtractedText extractedText, String uniquePluginName, Context context) {
 
         // Create request and post it on bus
         OpenFileWithPluginRequest openFileWithPluginRequest =
-                new OpenFileWithPluginRequest(extractedText, pluginAction, chooser, context);
+                new OpenFileWithPluginRequest(extractedText, uniquePluginName, context);
         mBus.post(openFileWithPluginRequest);
     }
 
@@ -203,13 +203,14 @@ public class AuroraCommunicator extends Communicator {
      * Private handle method to send request to plugin communicator to open an already cached file with plugin
      *
      * @param jsonRepresentation the representation of the object to represent
+     * @param uniquePluginName   the name of the plugin that the file was processed with
      * @param context            the android context
      */
-    private void sendOpenCachedFileRequest(String jsonRepresentation, Context context) {
+    private void sendOpenCachedFileRequest(String jsonRepresentation, String uniquePluginName, Context context) {
         // Create request and post it on bus
 
         OpenCachedFileWithPluginRequest openCachedFileWithPluginRequest =
-                new OpenCachedFileWithPluginRequest(jsonRepresentation, context);
+                new OpenCachedFileWithPluginRequest(jsonRepresentation, uniquePluginName, context);
         mBus.post(openCachedFileWithPluginRequest);
     }
 }

@@ -199,7 +199,7 @@ public class CacheServiceCaller implements ServiceConnection {
                         mCacheResult = cache();
                     }
                 } else {
-                    mCacheResult = mBinding.cache(mFileName, mUniquePluginName, mPluginObjectJSON);
+                    mCacheResult = mBinding.cache(mFileName, mPluginObjectJSON, mUniquePluginName);
                     Log.d(LOG_TAG, "" + mCacheResult);
                 }
 

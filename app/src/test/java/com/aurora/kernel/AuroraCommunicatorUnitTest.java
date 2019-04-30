@@ -5,6 +5,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 
+import androidx.annotation.NonNull;
+
 import com.aurora.auroralib.ExtractedText;
 import com.aurora.kernel.event.InternalProcessorRequest;
 import com.aurora.kernel.event.InternalProcessorResponse;
@@ -25,7 +27,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import androidx.annotation.NonNull;
 import io.reactivex.Observable;
 import io.reactivex.observers.TestObserver;
 import io.reactivex.schedulers.Schedulers;
@@ -70,8 +71,8 @@ public class AuroraCommunicatorUnitTest {
         String fileRef = "Dummy/file/ref";
         String fileType = "txt";
         InputStream file = new DummyInputStream();
-        sAuroraCommunicator.openFileWithPlugin(fileRef, fileType, file,
-                new DummyIntent(), new DummyIntent(), new MockContext());
+        String pluginName = DUMMY_PLUGIN.getUniqueName();
+        sAuroraCommunicator.openFileWithPlugin(fileRef, fileType, file, pluginName, new MockContext());
 
         // Assert that arguments passed are as expected
         fileRefObserver.assertSubscribed();
@@ -106,8 +107,8 @@ public class AuroraCommunicatorUnitTest {
         String dummyFileRef = "dummy/path/to/file";
         String fileType = "docx";
         InputStream file = new DummyInputStream();
-        sAuroraCommunicator.openFileWithPlugin(dummyFileRef, fileType, file,
-                new DummyIntent(), new DummyIntent(), new MockContext());
+        String pluginName = DUMMY_PLUGIN.getUniqueName();
+        sAuroraCommunicator.openFileWithPlugin(dummyFileRef, fileType, file, pluginName, new MockContext());
 
         // Assure that the correct values are contained in request event
         extractedTextObserver.assertSubscribed();
