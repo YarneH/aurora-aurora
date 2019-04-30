@@ -5,7 +5,7 @@ import com.aurora.data.AuroraRepository;
 import com.aurora.data.network.AuroraNetworkDataSource;
 import com.aurora.market.PluginMarketViewModelFactory;
 
-public class InjectorUtils {
+public final class InjectorUtils {
 
     private InjectorUtils() {
         throw new IllegalStateException("Utility class");

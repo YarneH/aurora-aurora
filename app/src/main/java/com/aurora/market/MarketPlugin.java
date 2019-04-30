@@ -1,7 +1,5 @@
 package com.aurora.market;
 
-import android.media.Image;
-
 import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -12,7 +10,7 @@ import java.util.logging.Logger;
  * A Class representing a Plugin which can be downloaded from the PluginMarket
  */
 public class MarketPlugin implements Serializable {
-    private static final long serialVersionUID = 1;
+    //private static final long serialVersionUID = 1;
     // TODO: Change mLogo to Image!!
     private String mLogo;
     private String mPluginName;

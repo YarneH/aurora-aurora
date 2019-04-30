@@ -13,16 +13,16 @@ import java.util.logging.Logger;
  * These utilities will be used to communicate with the weather servers.
  */
 final class NetworkUtils {
-
-    private NetworkUtils() {
-        throw new IllegalStateException("Utility class");
-    }
-
     /**
      * The URL to the list of MarketPlugins
      */
     private static final String PLUGINLIST_URL =
             "http://pluginmarket.aurora-files.ml/plugins";
+
+
+    private NetworkUtils() {
+        throw new IllegalStateException("Utility class");
+    }
 
     static URL getMarketPluginURL() {
         try {
@@ -46,7 +46,7 @@ final class NetworkUtils {
         HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
         try (
                 InputStream in = urlConnection.getInputStream();
-                Scanner scanner = new Scanner(in);
+                Scanner scanner = new Scanner(in)
                 ){
             scanner.useDelimiter("\\A");
 
@@ -55,7 +55,6 @@ final class NetworkUtils {
             if (hasInput) {
                 response = scanner.next();
             }
-            scanner.close();
             return response;
         } finally {
             urlConnection.disconnect();

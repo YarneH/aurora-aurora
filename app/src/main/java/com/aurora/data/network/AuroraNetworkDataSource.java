@@ -24,7 +24,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public final class AuroraNetworkDataSource {
-    private static final String DEBUG_STRING = "MARKET";
+    private static final String DEBUG_TAG = "MARKET";
 
     private static final String AURORA_SYNC_TAG = "aurora-sync";
     private static final String JSON_LOCATION_KEY = "apk_location";
@@ -79,7 +79,7 @@ public final class AuroraNetworkDataSource {
      */
     public void scheduleRecurringFetchPluginMarketSync() {
 
-        Log.d("DEBUG_STRING", "Creating job");
+        Log.d(DEBUG_TAG, "Creating job");
         // Create the Job to periodically sync the PluginMarket
         Job syncPluginMarketJob = mDispatcher.newJobBuilder()
                 /* The Service that will be used to sync Sunshine's data */
@@ -112,7 +112,7 @@ public final class AuroraNetworkDataSource {
 
         // Schedule the Job with the dispatcher
         mDispatcher.schedule(syncPluginMarketJob);
-        Log.d("DEBUG_STRING", "Job created");
+        Log.d(DEBUG_TAG, "Job created");
     }
 
     /**
@@ -129,7 +129,7 @@ public final class AuroraNetworkDataSource {
             try {
                 URL marketPluginListURL = NetworkUtils.getMarketPluginURL();
                 if (marketPluginListURL == null) {
-                    Log.d("DEBUG_STRING", "URL is null");
+                    Log.d(DEBUG_TAG, "URL is null");
                     // TODO: Handle null
                     return null;
                 }
@@ -137,7 +137,7 @@ public final class AuroraNetworkDataSource {
                 // Get response
                 String jsonPluginListResponse = NetworkUtils.getResponseFromHttpUrl(marketPluginListURL);
 
-                Log.d("DEBUG_STRING", "Response: " + jsonPluginListResponse);
+                Log.d(DEBUG_TAG, "Response: " + jsonPluginListResponse);
 
                 // Parse response
                 return new JSONObject(jsonPluginListResponse);
@@ -156,7 +156,7 @@ public final class AuroraNetworkDataSource {
 
                     JSONArray jsonPlugins = pluginList.getJSONArray("plugins");
 
-                    Log.d("DEBUG_STRING", "Result: " + jsonPlugins.toString());
+                    Log.d(DEBUG_TAG, "Result: " + jsonPlugins.toString());
 
                     for (int i = 0; i < jsonPlugins.length(); i++) {
                         JSONObject currentPlugin = jsonPlugins.getJSONObject(i);
