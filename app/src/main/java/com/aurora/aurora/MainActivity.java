@@ -156,7 +156,6 @@ public class MainActivity extends AppCompatActivity
             // This method is also called when a file is opened from the file chooser
             onActivityResult(REQUEST_FILE_GET,RESULT_OK, getIntent());
         }
-
     }
 
 

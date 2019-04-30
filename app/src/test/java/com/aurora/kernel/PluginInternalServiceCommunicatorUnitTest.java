@@ -1,5 +1,6 @@
 package com.aurora.kernel;
 
+import com.android.volley.RequestQueue;
 import com.aurora.auroralib.ExtractedText;
 import com.aurora.internalservice.internalprocessor.FileTypeNotSupportedException;
 import com.aurora.internalservice.internalprocessor.InternalTextProcessor;
@@ -7,6 +8,7 @@ import com.aurora.internalservice.internaltranslation.Translator;
 import com.aurora.kernel.event.InternalProcessorRequest;
 import com.aurora.kernel.event.InternalProcessorResponse;
 import com.aurora.plugin.Plugin;
+import com.aurora.util.FakeRequestQueue;
 import com.aurora.util.MockContext;
 
 import org.junit.BeforeClass;
@@ -41,14 +43,14 @@ public class PluginInternalServiceCommunicatorUnitTest {
 
         // Initialize communicator
         // add dummy translator
-        mCommunicator = new PluginInternalServiceCommunicator(mBus, mProcessor, new Translator(), new MockContext());
+
+        mCommunicator = new PluginInternalServiceCommunicator(mBus, mProcessor, new FakeRequestQueue());
 
         // Initialize extracted text with dummy contents
         mExtractedText = new ExtractedText(mTitle, null, mParagraphs);
     }
 
     @Test
-    @Ignore("Volley objects in PluginInternalServiceCommunicator not mocked yet")
     public void PluginInternalServiceCommunicator_processFileWithInternalProcessor_shouldPostExtractedTextResponse() {
         // Fake string ref
         String ref = "Fake/path/to/file";

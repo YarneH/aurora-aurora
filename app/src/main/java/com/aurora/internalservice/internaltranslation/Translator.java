@@ -1,12 +1,9 @@
 package com.aurora.internalservice.internaltranslation;
 
 
-import android.util.Log;
-
+import com.aurora.aurora.BuildConfig;
 import com.aurora.internalservice.InternalService;
 import com.aurora.kernel.event.TranslationResponse;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -21,28 +18,25 @@ public class Translator implements InternalService {
     private static final String TARGET = "&target=";
     private static final String SOURCE = "&source=";
 
-
-    //TODO hide this in the app
-    private static final String API_KEY = "AIzaSyBT0I7M_hZlTmpD1hqC8beY1ILzpWGSU4s";
+    private static final String API_KEY = BuildConfig.TRANSLATION_API;
 
     private static final String KEY = "&key=" + API_KEY;
 
 
     public Translator() {
         // static elements
-
     }
 
     /**
      * Makes the url to use google translate API
      *
      * @param sentencesToTranslate The sentences to translate
-     * @param sourceLanguage       the source language
-     * @param targetLanguage       the target language
+     * @param sourceLanguage       the source language (ISO-639-1 Code)
+     * @param targetLanguage       the target language (ISO-639-1 Code)
      * @return The url to access
      * @throws UnsupportedEncodingException if the sentences cannot be encoded into url
      */
-    public String makeUrl(String[] sentencesToTranslate, String sourceLanguage, String targetLanguage)
+    public static String makeUrl(String[] sentencesToTranslate, String sourceLanguage, String targetLanguage)
             throws UnsupportedEncodingException {
         StringBuilder bld = new StringBuilder(START_REQUEST);
         boolean first = true;
@@ -71,16 +65,15 @@ public class Translator implements InternalService {
 
     /**
      * Gets the translation from the JSON object using google api"s standard
-     *
+     * <p>
      * The JSONObject is structured as follows: {"data": {"translations" : {"translatedText": return of translation}}}
-     *
      *
      * @param response The response from google api
      * @return a translation response that contains the translated sentenced
      * @throws JSONException An exception that signifies this object is not according to the google translate
      *                       api
      */
-    public TranslationResponse getTranslationRespons(JSONObject response) throws JSONException {
+    public static TranslationResponse getTranslationResponse(JSONObject response) throws JSONException {
 
         // Get the translations
         JSONArray jsonTranslations = response.getJSONObject("data").getJSONArray("translations");
@@ -90,7 +83,6 @@ public class Translator implements InternalService {
         for (int i = 0; i < jsonTranslations.length(); i++) {
             String translation = jsonTranslations.getJSONObject(i).getString("translatedText");
             translations[i] = (translation);
-            Log.d("Translation", translation);
         }
         // Return the response
         return new TranslationResponse(translations);

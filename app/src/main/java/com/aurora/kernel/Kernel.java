@@ -96,20 +96,12 @@ public final class Kernel {
 
         // Create internal text processor for the PluginInternalServiceCommunicator
         InternalTextProcessor internalTextProcessing = new InternalTextProcessor();
-        Translator translator = new Translator();
         this.mPluginInternalServiceCommunicator = new PluginInternalServiceCommunicator(mBus,
-                internalTextProcessing, translator,
-             Volley.newRequestQueue(applicationContext));
+                internalTextProcessing, Volley.newRequestQueue(applicationContext));
 
         // Create cache
         InternalCache internalCache = new InternalCache(applicationContext);
         this.mAuroraInternalServiceCommunicator = new AuroraInternalServiceCommunicator(mBus, internalCache);
-
-
-        // Test code for translation
-        String [] sentences = {"Translate this", "My name is Luca"};
-        TranslationRequest req = new TranslationRequest(sentences, "en", "nl");
-        mBus.post(req);
     }
 
 

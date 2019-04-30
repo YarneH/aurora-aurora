@@ -1,12 +1,10 @@
 package com.aurora.kernel;
 
-import android.content.Context;
 import android.util.Log;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.JsonObjectRequest;
-import com.android.volley.toolbox.Volley;
 import com.aurora.auroralib.ExtractedText;
 import com.aurora.internalservice.internalnlp.InternalNLP;
 import com.aurora.internalservice.internalprocessor.FileTypeNotSupportedException;
@@ -17,7 +15,6 @@ import com.aurora.kernel.event.InternalProcessorResponse;
 import com.aurora.kernel.event.TranslationRequest;
 import com.aurora.kernel.event.TranslationResponse;
 import com.aurora.plugin.InternalServices;
-import com.google.gson.JsonObject;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -46,10 +43,6 @@ public class PluginInternalServiceCommunicator extends Communicator {
     /** CoreNLP pipeline */
     private InternalNLP mNLPPipeline;
 
-    /**
-     * Translator
-     */
-    private Translator mTranslator;
 
     /**
      * A queue to post http requests to
@@ -72,11 +65,10 @@ public class PluginInternalServiceCommunicator extends Communicator {
      *                  communicating events
      * @param processor a reference to the InternalTextProcessor
      */
-    public PluginInternalServiceCommunicator(Bus mBus, InternalTextProcessor processor, Translator translator,
+    public PluginInternalServiceCommunicator(Bus mBus, InternalTextProcessor processor,
                                              RequestQueue requestQueue) {
         super(mBus);
         mInternalTextProcessor = processor;
-        mTranslator = translator;
         mRequestQueue = requestQueue;
 
 
@@ -89,6 +81,10 @@ public class PluginInternalServiceCommunicator extends Communicator {
         mTranslationRequestObservable.subscribe((TranslationRequest request) ->
             translate(request.getSentencesToTranslate(), request.getSourceLanguage(), request.getTargetLanguage()));
 
+
+        // test code for translation
+        String[] sentences = {"hello my name is Luca", "Does the translating work?"};
+        mBus.post(new TranslationRequest(sentences, "en", "nl"));
 
     }
 
@@ -166,7 +162,7 @@ public class PluginInternalServiceCommunicator extends Communicator {
      */
     private void translate(String[] sentencesToTranslate, String sourceLanguage, String targetLanguage) {
         try {
-            String url = mTranslator.makeUrl(sentencesToTranslate, sourceLanguage, targetLanguage);
+            String url = Translator.makeUrl(sentencesToTranslate, sourceLanguage, targetLanguage);
             Log.d("TRANSLATE", url);
             // Request a json response from the provided URL.
             // TODO needs to be checked after acquiring key
@@ -187,9 +183,10 @@ public class PluginInternalServiceCommunicator extends Communicator {
      *
      * @param response the respons from the {@link RequestQueue} to the Google API
      */
-    public void postTranslationResponseEvent(JSONObject response) {
+    private void postTranslationResponseEvent(JSONObject response) {
         try {
-            mBus.post(mTranslator.getTranslationRespons(response));
+            mBus.post(Translator.getTranslationResponse(response));
+
         } catch (JSONException e) {
             Log.e("JSON", "getting from json failed", e);
             postTranslationResponseEvent(e);
@@ -203,7 +200,7 @@ public class PluginInternalServiceCommunicator extends Communicator {
      *
      * @param error the reason why the translation failed
      */
-    public void postTranslationResponseEvent(Exception error) {
+    private void postTranslationResponseEvent(Exception error) {
         TranslationResponse errorResponse = new TranslationResponse(error.getMessage());
         mBus.post(errorResponse);
     }

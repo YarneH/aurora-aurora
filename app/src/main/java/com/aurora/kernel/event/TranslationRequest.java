@@ -1,7 +1,10 @@
 package com.aurora.kernel.event;
 
 /**
- * Request for the translation service
+ * Request for the translation service. It has three fields:
+ * {@link #mSentencesToTranslate} The sentences to translate
+ * {@link #mSourceLanguage} The source language of the sentences in ISO-639-1 Code
+ * {@link #mTargetLanguage} The target language to translate to also in ISO-639-1 Code
  * TODO post this event
  */
 public class TranslationRequest implements Event {
