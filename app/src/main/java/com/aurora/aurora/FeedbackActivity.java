@@ -32,7 +32,7 @@ public class FeedbackActivity extends AppCompatActivity {
     /**
      * Message prefixed to the actual feedback that arrives in the Slack.
      */
-    private static final String FEEDBACK_MESSAGE_BASE = "*:fire::fire:New feedback:fire::fire:* \\n";
+    private static final String FEEDBACK_MESSAGE_BASE = "*:fire::fire:New feedback:fire::fire:* \n";
 
     /**
      * @hide
