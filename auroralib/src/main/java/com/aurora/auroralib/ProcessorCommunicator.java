@@ -36,12 +36,11 @@ public abstract class ProcessorCommunicator {
      */
     protected abstract PluginObject process(ExtractedText extractedText);
 
-    // TODO This should not be included in final version but is still being used for testing
-    // protected abstract PluginObject process(String fileName, String inputText);
 
 
     /**
-     * IMPORTANT: use this function instead of process, this way also the caching operation will be executed
+     * Executes the pipeline that consists of processing the ExtractedText to receive a PluginObject
+     * and then caching this
      *
      * @param extractedText the text extracted by aurora
      * @return
@@ -53,14 +52,5 @@ public abstract class ProcessorCommunicator {
         return pluginObject;
     }
 
-    // TODO: remove this after testing
-    /*
-    public final PluginObject pipeline(String fileName, String inputText) {
-        PluginObject pluginObject = process(fileName, inputText);
-        ProcessorCacheThread processorCacheThread = new ProcessorCacheThread(pluginObject, mCacheServiceCaller);
-        processorCacheThread.start();
-        return pluginObject;
-    }
-    */
 }
 
