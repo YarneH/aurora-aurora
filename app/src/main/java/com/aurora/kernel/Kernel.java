@@ -3,6 +3,7 @@ package com.aurora.kernel;
 import android.content.Context;
 import android.util.Log;
 
+import com.android.volley.toolbox.Volley;
 import com.aurora.internalservice.internalcache.InternalCache;
 import com.aurora.internalservice.internalprocessor.InternalTextProcessor;
 import com.aurora.plugin.Plugin;
@@ -25,33 +26,28 @@ import io.reactivex.schedulers.Schedulers;
  */
 public final class Kernel {
 
-    private static Kernel sKernel = null;
-
     /**
-     * A reference to the unique bus instance that should be used among all communicators
+     * A constant indicating how the plugin config file is named
      */
+    private static final String PLUGINS_CFG = "plugin-config.json";
+    private static Kernel sKernel = null;
     private static Bus sBus;
-
     /**
      * A reference to the AuroraCommunicator
      */
     private static AuroraCommunicator sAuroraCommunicator;
-
     /**
      * A reference to the PluginCommunicator
      */
     private static PluginCommunicator sPluginCommunicator;
-
     /**
      * A reference to the ProcessingCommunicator
      */
     private static ProcessingCommunicator sProcessingCommunicator;
-
     /**
      * A reference to the PluginInternalServiceCommunicator
      */
     private static PluginInternalServiceCommunicator sPluginInternalServiceCommunicator;
-
     /**
      * A reference to the AuroraInternalServiceCommunicator
      */
@@ -62,16 +58,58 @@ public final class Kernel {
      */
     private static PluginRegistry sPluginRegistry;
 
+    private Context mContext;
+
+
+    /**
+     * A reference to the ProcessingCommunicator
+     */
+    private ProcessingCommunicator mProcessingCommunicator;
+
     // TODO: change this if necessary
     /**
-     * A constant indicating how the plugin config file is named
+     * A reference to the PluginInternalServiceCommunicator
      */
-    private static final String PLUGINS_CFG = "plugin-config.json";
+    private PluginInternalServiceCommunicator mPluginInternalServiceCommunicator;
 
     /**
      * private constructor so no new instance can be constructed
      */
     private Kernel() {
+    }
+
+    /**
+     * Returns the singleton kernel if it has already been initialized.
+     * In case the kernel was not yet initialized, this method will throw an exception
+     *
+     * @return the singleton kernel instance, if it was initialized before
+     * @throws IllegalArgumentException when the kernel has not yet been initialized and the applicationContext is null
+     */
+    public static Kernel getInstance() throws ContextNullException {
+        return getInstance(null);
+    }
+
+    /**
+     * Returns the singleton kernel instance after it has been created.
+     * If no instance exists yet, this method will take care of it, but the applicationContext may not be null in that
+     * case. If the instance already exists the applicationContext argument will not be used
+     *
+     * @param applicationContext the android application context
+     * @return the singleton kernel instance
+     * @throws IllegalArgumentException when the kernel has not yet been initialized and the applicationContext is null
+     */
+    public static Kernel getInstance(Context applicationContext) throws ContextNullException {
+        if (sKernel == null && applicationContext != null) {
+            // Initialize kernel
+            return initialize(applicationContext);
+        } else if (sKernel == null) {
+            // Kernel not initialzed but application context cannot be used to initialized
+            throw new ContextNullException("The kernel can not be initialized with " +
+                    "applicationContext equal to null!");
+        } else {
+            // Already initialized, return existing instance
+            return sKernel;
+        }
     }
 
     /**
@@ -99,7 +137,10 @@ public final class Kernel {
 
         // Create internal text processor for the PluginInternalServiceCommunicator
         InternalTextProcessor internalTextProcessing = new InternalTextProcessor();
-        sPluginInternalServiceCommunicator = new PluginInternalServiceCommunicator(sBus, internalTextProcessing);
+
+        sPluginInternalServiceCommunicator = new PluginInternalServiceCommunicator(sBus,
+                internalTextProcessing, Volley.newRequestQueue(applicationContext));
+
 
         // Create cache
         InternalCache internalCache = new InternalCache(applicationContext);
@@ -109,37 +150,26 @@ public final class Kernel {
     }
 
     /**
-     * Returns the singleton kernel instance after it has been created.
-     * If no instance exists yet, this method will take care of it, but the applicationContext may not be null in that
-     * case. If the instance already exists the applicationContext argument will not be used
+     * Private helper method that checks if the plugin-config file already exists, and creates one when necessary
      *
-     * @param applicationContext the android application context
-     * @return the singleton kernel instance
-     * @throws IllegalArgumentException when the kernel has not yet been initialized and the applicationContext is null
+     * @param applicationContext the android application context, needed for writing files
      */
-    public static Kernel getInstance(Context applicationContext) throws ContextNullException {
-        if (sKernel == null && applicationContext != null) {
-            // Initialize kernel
-            return initialize(applicationContext);
-        } else if (sKernel == null) {
-            // Kernel not initialzed but application context cannot be used to initialized
-            throw new ContextNullException("The kernel can not be initialized with " +
-                    "applicationContext equal to null!");
-        } else {
-            // Already initialized, return existing instance
-            return sKernel;
-        }
-    }
+    private static void initializePluginConfig(Context applicationContext) {
+        File file = new File(applicationContext.getFilesDir(), PLUGINS_CFG);
 
-    /**
-     * Returns the singleton kernel if it has already been initialized.
-     * In case the kernel was not yet initialized, this method will throw an exception
-     *
-     * @return the singleton kernel instance, if it was initialized before
-     * @throws IllegalArgumentException when the kernel has not yet been initialized and the applicationContext is null
-     */
-    public static Kernel getInstance() throws ContextNullException {
-        return getInstance(null);
+        // If the file does not exist, create one and write an empty JSON array to it
+        if (!file.exists()) {
+            try (Writer writer = new BufferedWriter(new FileWriter(file))) {
+                Gson gson = new Gson();
+                String jsonPlugin = gson.toJson(new Plugin[]{}, Plugin[].class);
+
+                writer.write(jsonPlugin);
+                writer.flush();
+
+            } catch (IOException e) {
+                Log.e("Kernel", "Something went wrong trying to create the file " + PLUGINS_CFG + ".");
+            }
+        }
     }
 
     /**
@@ -177,28 +207,5 @@ public final class Kernel {
      */
     public AuroraInternalServiceCommunicator getAuroraInternalServiceCommunicator() {
         return sAuroraInternalServiceCommunicator;
-    }
-
-    /**
-     * Private helper method that checks if the plugin-config file already exists, and creates one when necessary
-     *
-     * @param applicationContext the android application context, needed for writing files
-     */
-    private static void initializePluginConfig(Context applicationContext) {
-        File file = new File(applicationContext.getFilesDir(), PLUGINS_CFG);
-
-        // If the file does not exist, create one and write an empty JSON array to it
-        if (!file.exists()) {
-            try (Writer writer = new BufferedWriter(new FileWriter(file))) {
-                Gson gson = new Gson();
-                String jsonPlugin = gson.toJson(new Plugin[]{}, Plugin[].class);
-
-                writer.write(jsonPlugin);
-                writer.flush();
-
-            } catch (IOException e) {
-                Log.e("Kernel", "Something went wrong trying to create the file " + PLUGINS_CFG + ".");
-            }
-        }
     }
 }

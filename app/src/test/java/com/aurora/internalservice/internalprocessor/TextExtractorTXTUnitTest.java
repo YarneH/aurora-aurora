@@ -1,20 +1,27 @@
 package com.aurora.internalservice.internalprocessor;
 
 import com.aurora.auroralib.ExtractedText;
+import com.aurora.internalservice.internalnlp.InternalNLP;
+import com.aurora.plugin.InternalServices;
 
 import org.junit.Before;
 import org.junit.Test;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 public class TextExtractorTXTUnitTest {
-    private ExtractedText mExtractedText;
     private final static String RES_PATH = "src/test/res/";
+    private ExtractedText mExtractedText;
 
     @Before
     public void initialize() throws FileNotFoundException {
@@ -33,14 +40,14 @@ public class TextExtractorTXTUnitTest {
 
 
     @Test
-    public void extract_shouldExtractTitleCorrectly(){
+    public void extract_shouldExtractTitleCorrectly() {
         assertEquals("TXT text extraction: Titles are not the same",
                 "Pasta puttanesca",
                 mExtractedText.getTitle());
     }
 
     @Test
-    public void extract_shouldExtractSectionZeroCorrectly(){
+    public void extract_shouldExtractSectionZeroCorrectly() {
         assertEquals("TXT text extraction: Section is not extracted correctly",
                 "Yield\n    4 servings\n" +
                         "Active Time\n    30 minutes\n" +
@@ -49,11 +56,12 @@ public class TextExtractorTXTUnitTest {
     }
 
     @Test
-    public void extract_shouldExtractSectionOneCorrectly(){
+    public void extract_shouldExtractSectionOneCorrectly() {
         assertEquals("TXT text extraction: Section is not extracted correctly",
                 "Ingredients",
                 mExtractedText.getSections().get(1).getBody());
     }
+
 
 
 }

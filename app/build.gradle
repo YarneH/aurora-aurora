@@ -11,9 +11,13 @@ android {
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
+        debug {
+            buildConfigField 'String', "TRANSLATION_API", AuroraTranslationAPIKey
+        }
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            buildConfigField 'String', "TRANSLATION_API", AuroraTranslationAPIKey
         }
     }
     testOptions {
@@ -88,7 +92,12 @@ dependencies {
 
     implementation files('libs/poishadow-all.jar')
 
-    // Firebase
+    //Translation
+    implementation  'com.android.volley:volley:1.1.1'
+    // mocking in tests
+    testImplementation group: 'org.apache.httpcomponents', name: 'httpclient', version: '4.5.6'
+
+
     implementation 'com.google.firebase:firebase-core:16.0.1'
     // CoreNLP
     implementation('edu.stanford.nlp:stanford-corenlp:3.9.2') {
@@ -96,6 +105,9 @@ dependencies {
         exclude group: 'com.sun.xml.bind'
     }
     implementation files('libs/stanford-corenlp-3.9.2-models.jar-small')
+
+
+
 }
 
 // Firebase
