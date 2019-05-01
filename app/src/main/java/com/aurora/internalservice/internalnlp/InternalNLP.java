@@ -93,8 +93,6 @@ public class InternalNLP implements InternalService {
                 throw new NotImplementedException(annotator.name() + " Is currently not yet " +
                         "supported");
         }
-
-            //Log.e(CLASS_TAG, "Creating the annotation pipeline failed", e);
     }
 
     /**

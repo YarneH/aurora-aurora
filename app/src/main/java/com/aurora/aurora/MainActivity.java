@@ -244,15 +244,6 @@ public class MainActivity extends AppCompatActivity
                             read, uniquePluginName, getApplicationContext());
                     */
 
-
-                    /*
-                    // For now hard coded constant
-                    String uniquePluginName = "com.aurora.basicplugin";
-
-                    mAuroraCommunicator.openFileWithPlugin(textFile.toString(), type,
-                            read, uniquePluginName, getApplicationContext());
-                    */
-
                 } else {
                     Toast.makeText(this, "The selected file was null", Snackbar.LENGTH_LONG).show();
                 }
