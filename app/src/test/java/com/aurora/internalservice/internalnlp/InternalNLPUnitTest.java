@@ -6,6 +6,7 @@ import com.aurora.internalservice.internalprocessor.FileTypeNotSupportedExceptio
 import com.aurora.internalservice.internalprocessor.InternalTextProcessor;
 import com.aurora.plugin.InternalServices;
 
+import org.apache.commons.lang3.NotImplementedException;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -80,7 +81,7 @@ public class InternalNLPUnitTest {
         try {
             mInternalNLP.addAnnotator(InternalServices.IMAGE_EXTRACTION);
 
-        } catch (Exception e) {
+        } catch (NotImplementedException e) {
             thrown = true;
         }
 
