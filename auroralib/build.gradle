@@ -41,3 +41,13 @@ dependencies {
     implementation group: 'com.google.protobuf', name: 'protobuf-java-util', version: '3.7.1'
 }
 
+
+apply plugin: 'jacoco-android'
+
+jacoco {
+    toolVersion = "0.8.3"
+}
+
+tasks.withType(Test) {
+    jacoco.includeNoLocationClasses = true
+}
