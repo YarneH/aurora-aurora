@@ -4,6 +4,7 @@ import android.util.Log;
 
 import com.aurora.util.MockContext;
 
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import static junit.framework.TestCase.assertEquals;
@@ -13,7 +14,8 @@ public class KernelUnitTest {
 
     private static Kernel mKernel;
 
-    static {
+    @BeforeClass
+    public static void initialize() {
         try {
             mKernel = Kernel.getInstance(new MockContext());
         } catch (ContextNullException e) {
