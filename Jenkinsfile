@@ -30,8 +30,10 @@ pipeline {
                     // Compile and run the unit tests for the app and its dependencies
                     if (env.BRANCH_NAME == 'master' || env.BRANCH_NAME == 'dev') {
                         sh "./gradlew testReleaseUnitTest --tests '*UnitTest'"
+                        sh "./gradlew auroralib:testReleaseUnitTest --tests '*UnitTest'"
                     } else {
                         sh "./gradlew testDebugUnitTest --tests '*UnitTest'"
+                        sh "./gradlew auroralib:testDebugUnitTest --tests '*UnitTest'"
                     }
 
 
@@ -95,8 +97,10 @@ pipeline {
                 script {
                     if (env.BRANCH_NAME == 'master' || env.BRANCH_NAME == 'dev') {
                         sh "./gradlew testReleaseUnitTest --tests '*LongTest'"
+                        sh "./gradlew auroralib:testReleaseUnitTest --tests '*LongTest'"
                     } else {
                         sh "./gradlew testDebugUnitTest --tests '*LongTest'"
+                        sh "./gradlew auroralib:testDebugUnitTest --tests '*LongTest'"
                     }
 
 
@@ -121,8 +125,10 @@ pipeline {
                 script {
                     if (env.BRANCH_NAME == 'master' || env.BRANCH_NAME == 'dev') {
                         sh "./gradlew testReleaseUnitTest --tests '*IntegTest'"
+                        sh "./gradlew auroralib:testReleaseUnitTest --tests '*IntegTest'"
                     } else {
                         sh "./gradlew testDebugUnitTest --tests '*IntegTest'"
+                        sh "./gradlew auroralib:testDebugUnitTest --tests '*IntegTest'"
                     }
 
                     // Analyse the test results and update the build result as appropriate
