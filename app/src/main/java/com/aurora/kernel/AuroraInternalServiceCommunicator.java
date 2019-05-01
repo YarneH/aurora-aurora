@@ -1,6 +1,7 @@
 package com.aurora.kernel;
 
-import com.aurora.auroralib.PluginObject;
+import android.util.Log;
+
 import com.aurora.internalservice.internalcache.CachedFileInfo;
 import com.aurora.internalservice.internalcache.CachedProcessedFile;
 import com.aurora.internalservice.internalcache.InternalCache;
@@ -22,6 +23,11 @@ import io.reactivex.Observable;
  * Communicator that communicates with internal services offered to Aurora
  */
 public class AuroraInternalServiceCommunicator extends Communicator {
+    /**
+     * A tag used for logging
+     */
+    private static final String LOG_TAG = "AuroraIntrnlSvcComm";
+
     /**
      * reference to internal cache instance
      */
@@ -62,7 +68,8 @@ public class AuroraInternalServiceCommunicator extends Communicator {
 
         // When event comes in, call the appropriate handle method
         mCacheFileRequestObservable.subscribe(cacheFileRequest -> cacheFile(cacheFileRequest.getFileRef(),
-                cacheFileRequest.getPluginObject(), cacheFileRequest.getUniquePluginName()));
+                cacheFileRequest.getPluginObject(), cacheFileRequest.getUniquePluginName()),
+                error -> Log.e(LOG_TAG, "Something went wrong caching the file", error));
 
         // Subscribe to incoming query requests
         mQueryCacheRequestObservable = mBus.register(QueryCacheRequest.class);
@@ -70,7 +77,7 @@ public class AuroraInternalServiceCommunicator extends Communicator {
         // Call appropriate handle method when request comes in
         mQueryCacheRequestObservable.subscribe((QueryCacheRequest queryCacheRequest) -> {
             if (queryCacheRequest.isFullCacheRequest()) {
-                queryFullCache();
+                queryFullCache(queryCacheRequest.getMaxEntries());
             } else {
                 queryCache(queryCacheRequest.getFileRef(), queryCacheRequest.getUniquePluginName());
             }
@@ -107,7 +114,7 @@ public class AuroraInternalServiceCommunicator extends Communicator {
      * @param pluginObject     the processed text representation that needs to be cached
      * @param uniquePluginName the name of the plugin that built the representation
      */
-    private void cacheFile(String fileRef, PluginObject pluginObject, String uniquePluginName) {
+    private void cacheFile(String fileRef, String pluginObject, String uniquePluginName) {
         // Cache file
         boolean cacheSuccess = mInternalCache.cacheFile(fileRef, pluginObject, uniquePluginName);
 
@@ -118,10 +125,12 @@ public class AuroraInternalServiceCommunicator extends Communicator {
 
     /**
      * Private handle method to query the cache for all files
+     *
+     * @param maxEntries maximum number of entries that should be queried
      */
-    private void queryFullCache() {
+    private void queryFullCache(int maxEntries) {
         // Get all files from cache
-        List<CachedFileInfo> processedFiles = mInternalCache.getFullCache();
+        List<CachedFileInfo> processedFiles = mInternalCache.getFullCache(maxEntries);
 
         // Wrap in response and post on the bus
         QueryCacheResponse response = new QueryCacheResponse(processedFiles);

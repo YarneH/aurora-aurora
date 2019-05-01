@@ -31,7 +31,7 @@ public class InternalCacheUnitTest {
         String fileRef = "testFile.pdf";
         String title = "title";
         String text = "text";
-        PluginObject pluginObject = new DummyPluginObject1(title, text);
+        String pluginObject = new DummyPluginObject1(title, text).toJSON();
         String uniquePluginName = "DummyPlugin";
 
         // Call method under test
@@ -64,7 +64,7 @@ public class InternalCacheUnitTest {
         String fileRef = "testFile.pdf";
         String title = "title";
         String text = "text";
-        PluginObject pluginObject = new DummyPluginObject1(title, text);
+        String pluginObject = new DummyPluginObject1(title, text).toJSON();
         String uniquePluginName = "DummyPlugin";
 
         // Call method under test
@@ -80,7 +80,7 @@ public class InternalCacheUnitTest {
         String invalidFileRef = "te///st??File!.pdf";
         String title = "title";
         String text = "text";
-        PluginObject pluginObject = new DummyPluginObject1(title, text);
+        String pluginObject = new DummyPluginObject1(title, text).toJSON();
         String uniquePluginName = "DummyPlugin";
 
         // Call method under test
@@ -95,7 +95,7 @@ public class InternalCacheUnitTest {
         String fileRef = "testFile.pdf";
         String title = "title";
         String text = "text";
-        PluginObject pluginObject = new DummyPluginObject1(title, text);
+        String pluginObject = new DummyPluginObject1(title, text).toJSON();
         String uniquePluginName = "DummyPlugin";
         mInternalCache.cacheFile(fileRef, pluginObject, uniquePluginName);
 
@@ -151,7 +151,7 @@ public class InternalCacheUnitTest {
         String text = "This is a very good text. Nobel prize worthy, even!";
         String pluginName = "DummyPlugin";
 
-        DummyPluginObject1 object1 = new DummyPluginObject1(title, text);
+        String object1 = new DummyPluginObject1(title, text).toJSON();
         mInternalCache.cacheFile(fileRef, object1, pluginName);
 
         // Now, we want to retrieve the text again
@@ -162,8 +162,8 @@ public class InternalCacheUnitTest {
                 DummyPluginObject1.fromJson(cachedProcessedFile.getJsonRepresentation(), DummyPluginObject1.class);
 
         // Assert that the two objects are equal
-        Assert.assertEquals(object1.getTitle(), reconstructedObject.getTitle());
-        Assert.assertEquals(object1.getText(), reconstructedObject.getText());
+        Assert.assertEquals(title, reconstructedObject.getTitle());
+        Assert.assertEquals(text, reconstructedObject.getText());
     }
 
     @Test
@@ -177,7 +177,7 @@ public class InternalCacheUnitTest {
         String text = "This is a very good text. Nobel prize worthy, even!";
         String pluginName = "DummyPlugin";
 
-        DummyPluginObject1 object1 = new DummyPluginObject1(title, text);
+        String object1 = new DummyPluginObject1(title, text).toJSON();
         mInternalCache.cacheFile(fileRef, object1, pluginName);
 
         // Now we want to remove this one file
@@ -215,8 +215,8 @@ public class InternalCacheUnitTest {
         String text2 = "This text will never win any prize!";
         String pluginName = "DummyPlugin";
 
-        DummyPluginObject1 object1 = new DummyPluginObject1(title1, text1);
-        DummyPluginObject1 object2 = new DummyPluginObject1(title2, text2);
+        String object1 = new DummyPluginObject1(title1, text1).toJSON();
+        String object2 = new DummyPluginObject1(title2, text2).toJSON();
         mInternalCache.cacheFile(fileRef1, object1, pluginName);
         mInternalCache.cacheFile(fileRef2, object2, pluginName);
 
@@ -272,7 +272,7 @@ public class InternalCacheUnitTest {
 
         for (int i = 0; i < titles1.length; i++) {
             // Create plugin object
-            DummyPluginObject1 object1 = new DummyPluginObject1(titles1[i], texts1[i]);
+            String object1 = new DummyPluginObject1(titles1[i], texts1[i]).toJSON();
 
             // Add to cache
             mInternalCache.cacheFile(filerefs1[i], object1, pluginName1);
@@ -286,7 +286,7 @@ public class InternalCacheUnitTest {
 
         for (int i = 0; i < titles2.length; i++) {
             // Create plugin object
-            DummyPluginObject2 object2 = new DummyPluginObject2(titles1[i], numbers[i], names[i]);
+            String object2 = new DummyPluginObject2(titles1[i], numbers[i], names[i]).toJSON();
 
             // Add to cache
             mInternalCache.cacheFile(filerefs2[i], object2, pluginName2);
@@ -301,6 +301,7 @@ public class InternalCacheUnitTest {
         private String mText;
 
         public DummyPluginObject1(String title, String text) {
+            super("dummyfilename", "dummyplugin");
             mTitle = title;
             mText = text;
         }
@@ -321,6 +322,7 @@ public class InternalCacheUnitTest {
         private String mName;
 
         public DummyPluginObject2(String title, int number, String name) {
+            super("dummyfilename", "dummyplugin");
             mTitle = title;
             mNumber = number;
             mName = name;
