@@ -41,6 +41,19 @@
 
         </activity>
 
+
+        <service android:name="com.aurora.plugin.CacheService">
+
+
+            <intent-filter>
+                <!--
+                Did not use the full package name here to hide internal code/package structure
+                -->
+                <action android:name="com.aurora.internalservice.internalcache.ICache" />
+            </intent-filter>
+        </service>
+
+
         <provider
             android:name="android.support.v4.content.FileProvider"
             android:authorities="com.aurora.aurora.provider"

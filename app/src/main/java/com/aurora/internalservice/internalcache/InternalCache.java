@@ -3,7 +3,6 @@ package com.aurora.internalservice.internalcache;
 import android.content.Context;
 import android.util.Log;
 
-import com.aurora.auroralib.PluginObject;
 import com.aurora.internalservice.InternalService;
 import com.google.gson.Gson;
 
@@ -17,6 +16,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -71,7 +71,7 @@ public class InternalCache implements InternalService {
      * @param uniquePluginName the name of the plugin that built the processed pluginObject
      * @return true if the pluginObject was successfully processed
      */
-    public boolean cacheFile(String fileRef, PluginObject pluginObject, String uniquePluginName) {
+    public boolean cacheFile(String fileRef, String pluginObject, String uniquePluginName) {
         /*
         This method consists of two parts: We have to actually write the representation to a file.
         We should do this by mapping a file ref to another fileref that represents the cached representation.
@@ -94,9 +94,16 @@ public class InternalCache implements InternalService {
             CachedFileInfo cachedFileInfo = new CachedFileInfo(fileRef, uniquePluginName, new Date());
 
             // Require non null not really necessary because of precondition above
-            Objects.requireNonNull(mCachedFiles.get(uniquePluginName)).add(cachedFileInfo);
+            List<CachedFileInfo> pluginEntry = mCachedFiles.get(uniquePluginName);
 
-            return true;
+            if (pluginEntry != null) {
+                pluginEntry.add(cachedFileInfo);
+
+                // Persist
+                writeCacheRegistry();
+
+                return true;
+            }
         }
 
         return false;
@@ -115,7 +122,7 @@ public class InternalCache implements InternalService {
         CachedFileInfo lookupFile = new CachedFileInfo(fileRef, uniquePluginName);
 
         // Check in the registry if the file is present under unique plugin name
-        List<CachedFileInfo> cachedFilesByPlugin = null;
+        List<CachedFileInfo> cachedFilesByPlugin;
         if (uniquePluginName != null
                 && (cachedFilesByPlugin = mCachedFiles.get(uniquePluginName)) != null
                 && cachedFilesByPlugin.contains(lookupFile)) {
@@ -129,50 +136,39 @@ public class InternalCache implements InternalService {
     }
 
     /**
-     * Gets a list of already processed file representations
+     * Gets a list of already processed file representations ordered on most recent date
      *
      * @param amount the amount of files that should be retrieved, if 0 or negative, all files will be retrieved.
-     * @return a list of filenames of cached files
+     * @return a list of metadata of cached files, ordered on the date most recently opened.
      */
     public List<CachedFileInfo> getFullCache(int amount) {
-        if (amount <= 0) {
-            return getFullCache();
-        }
-
         // Create an empty list where the results will be stored
         List<CachedFileInfo> cachedFiles = new ArrayList<>();
 
+        // Add all values to the list
         for (Map.Entry<String, List<CachedFileInfo>> entry : mCachedFiles.entrySet()) {
-            if (entry.getValue().size() < amount - cachedFiles.size()) {
-                // Add entire list
-                cachedFiles.addAll(entry.getValue());
-            } else {
-                // Add one by one until amount is reached
-                for (CachedFileInfo cachedFileInfo : entry.getValue()) {
-                    if (cachedFiles.size() < amount) {
-                        cachedFiles.add(cachedFileInfo);
-                    }
-                }
-            }
+            cachedFiles.addAll(entry.getValue());
         }
 
-        return cachedFiles;
+        // Sort list on date with most recent value first
+        Collections.sort(cachedFiles, (a, b) -> a.getLastOpened().compareTo(b.getLastOpened()));
+
+        if (amount <= 0) {
+            amount = cachedFiles.size();
+        }
+
+        // Return no more than given amount or full list
+        int index = Math.min(amount, cachedFiles.size());
+        return cachedFiles.subList(0, index);
     }
 
     /**
      * Gets a list of already processed file representations
      *
-     * @return a list of filenames of cached files TODO: may change to CachedFile representation class!
+     * @return a list of of metadata about cached files
      */
     public List<CachedFileInfo> getFullCache() {
-        List<CachedFileInfo> cachedFiles = new ArrayList<>();
-
-        // Loop over all plugins and add all files to result list
-        for (Map.Entry<String, List<CachedFileInfo>> entry : mCachedFiles.entrySet()) {
-            cachedFiles.addAll(entry.getValue());
-        }
-
-        return cachedFiles;
+        return getFullCache(0);
     }
 
 
@@ -237,6 +233,8 @@ public class InternalCache implements InternalService {
             // If list is now empty, remove entry from map
             if (Objects.requireNonNull(mCachedFiles.get(uniquePluginName)).isEmpty()) {
                 mCachedFiles.remove(uniquePluginName);
+
+                writeCacheRegistry();
             }
 
             return true;
@@ -342,7 +340,8 @@ public class InternalCache implements InternalService {
         Map<String, List<CachedFileInfo>> cacheMap = new HashMap<>();
         for (CacheRegistryElement el : elements) {
             // Convert cached fileRefs to list
-            List<CachedFileInfo> fileRefs = Arrays.asList(el.cachedFileRefs);
+            // Needs to be wrapped in new list because else it is not mutable
+            List<CachedFileInfo> fileRefs = new ArrayList<>(Arrays.asList(el.cachedFileRefs));
 
             // Add element to map
             cacheMap.put(el.uniquePluginName, fileRefs);
@@ -396,15 +395,15 @@ public class InternalCache implements InternalService {
     /**
      * Writes a cache file for a given plugin object
      *
-     * @param path         the location where to write the file
-     * @param pluginObject the object to write to the cache
+     * @param path             the location where to write the file
+     * @param pluginObjectJson the object to write to the cache
      */
-    private boolean writeCacheFile(String path, PluginObject pluginObject) {
+    private boolean writeCacheFile(String path, String pluginObjectJson) {
         File cacheFile = new File(mContext.getFilesDir(), path);
 
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(cacheFile))) {
             // Write json representation of plugin object to the file
-            writer.write(pluginObject.toJSON());
+            writer.write(pluginObjectJson);
         } catch (IOException e) {
             Log.e(CLASS_TAG, "Something went wrong while writing a cache file!", e);
 

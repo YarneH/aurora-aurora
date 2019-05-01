@@ -17,22 +17,37 @@ import edu.stanford.nlp.pipeline.ProtobufAnnotationSerializer;
  * Class to represent extracted text from an internal processor
  */
 public class ExtractedText implements InternallyProcessedFile, Serializable {
-    /** The filename, often the path to the file */
+
+    /**
+     * The filename, often the path to the file
+     */
     private String mFilename;
-    /** The Date of the last edit*/
+    /**
+     * The Date of the last edit
+     */
     private Date mDateLastEdit;
 
-    /** The text of the title of the file */
+    /**
+     * The text of the title of the file
+     */
     private String mTitle;
-    /** The CoreNLP annotations of the title in Google's protobuf format */
+    /**
+     * The CoreNLP annotations of the title in Google's protobuf format
+     */
     @JsonAdapter(CoreNLPDocumentAdapter.class)
     private CoreNLPProtos.Document mTitleAnnotationProto;
-    /** The deserialized Annotation of the title */
+    /**
+     * The deserialized Annotation of the title
+     */
     private transient Annotation mTitleAnnotation;
 
-    /** A list of authors of the file */
+    /**
+     * A list of authors of the file
+     */
     private List<String> mAuthors;
-    /** A list of Sections of the file which represent the content */
+    /**
+     * A list of Sections of the file which represent the content
+     */
     private List<Section> mSections;
 
     /**
@@ -54,10 +69,15 @@ public class ExtractedText implements InternallyProcessedFile, Serializable {
      * @param sections     the sections in the file (only plain sections)
      */
     public ExtractedText(String filename, Date dateLastEdit, List<String> sections) {
-        this.mFilename = filename;
-        this.mDateLastEdit = dateLastEdit;
+        mFilename = filename;
+        mDateLastEdit = dateLastEdit;
+
+        mSections = new ArrayList<>();
+
+        // Do not use overridable method because this can lead to strange behaviour in subclasses
+        // wiki.sei.cmu.edu/confluence/display/java/MET05-J.+Ensure+that+constructors+do+not+call+overridable+methods
         for (String section : sections) {
-            addSimpleSection(section);
+            mSections.add(new Section(section));
         }
     }
 
@@ -70,7 +90,8 @@ public class ExtractedText implements InternallyProcessedFile, Serializable {
      * @param mAuthors      the authors of the file
      * @param mSections     the sections in the file
      */
-    public ExtractedText(String mFilename, Date mDateLastEdit, String mTitle, List<String> mAuthors, List<Section> mSections) {
+    public ExtractedText(String mFilename, Date mDateLastEdit, String mTitle, List<String> mAuthors,
+                         List<Section> mSections) {
         this(mFilename, mDateLastEdit);
         this.mTitle = mTitle;
         this.mAuthors = mAuthors;
@@ -80,10 +101,11 @@ public class ExtractedText implements InternallyProcessedFile, Serializable {
     /**
      * Get the sections of this ExtractedText. Will return an empty list when no Sections are
      * present
+     *
      * @return the list of sections
      */
     public List<Section> getSections() {
-        if(mSections != null) {
+        if (mSections != null) {
             return this.mSections;
         } else {
             return new ArrayList<>();
@@ -93,6 +115,7 @@ public class ExtractedText implements InternallyProcessedFile, Serializable {
 
     /**
      * Adds the section to the list of sections for this extractedText
+     *
      * @param section the section to be added
      */
     public void addSection(Section section) {
