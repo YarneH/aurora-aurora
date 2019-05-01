@@ -9,11 +9,16 @@ import com.aurora.kernel.event.InternalProcessorResponse;
 import com.aurora.plugin.InternalServices;
 import com.aurora.plugin.Plugin;
 
+import org.junit.After;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -31,12 +36,15 @@ import io.reactivex.schedulers.Schedulers;
 public class PluginInternalServiceCommunicatorUnitTest {
 
     private static Bus mBus;
-    private static InternalTextProcessor mProcessor;
+    private static InternalTextProcessor mInternalTextProcessor;
     private static PluginInternalServiceCommunicator mCommunicator;
 
     private static String mTitle = "Dummy Title";
+    private static String mFileRef = "src/test/res/Pasta.txt";
+    private static String mFileType = "txt";
     private static List<String> mParagraphs = Arrays.asList("Paragraph1", "Paragraph2");
     private static ExtractedText mExtractedText;
+    private InputStream mInputStream = null;
 
     @BeforeClass
     public static void initialize() {
@@ -44,21 +52,36 @@ public class PluginInternalServiceCommunicatorUnitTest {
         mBus = new Bus(Schedulers.trampoline());
 
         // Initialize processor
-        mProcessor = new DummyInternalTextProcessing();
+        mInternalTextProcessor = new DummyInternalTextProcessing();
 
         // Initialize communicator
-        mCommunicator = new PluginInternalServiceCommunicator(mBus, mProcessor);
+        mCommunicator = new PluginInternalServiceCommunicator(mBus, mInternalTextProcessor);
 
         // Initialize extracted text with dummy contents
         mExtractedText = new ExtractedText(mTitle, null, mParagraphs);
     }
 
+    @Before
+    public void readFile() {
+        File file = new File(mFileRef);
+        try {
+            mInputStream = new FileInputStream(file);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @After
+    public void cleanUp() {
+        try {
+            mInputStream.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     @Test
     public void PluginInternalServiceCommunicator_processFileWithInternalProcessor_shouldPostExtractedTextResponse() {
-        // Fake string ref
-        String ref = "Fake/path/to/file";
-        String type = "docx";
-
         // Listen for internal processor response
         Observable<InternalProcessorResponse> observable = mBus.register(InternalProcessorResponse.class);
 
@@ -69,22 +92,20 @@ public class PluginInternalServiceCommunicatorUnitTest {
         observable.map(InternalProcessorResponse::getExtractedText).subscribe(testObserver);
 
         // Create request to process file and put on bus
-        InternalProcessorRequest request = new InternalProcessorRequest(ref, type, null,
+        InternalProcessorRequest request = new InternalProcessorRequest(mFileRef, mFileType, mInputStream,
                 Plugin.getDefaultInternalServices());
         mBus.post(request);
 
         // Assert that dummy extracted text was received
         testObserver.assertSubscribed();
         testObserver.assertValue(mExtractedText);
+
+        //testObserver.assertValue(mExtractedText);
         testObserver.dispose();
     }
 
     @Test
     public void PluginInternalServiceCommunicator_processFileWithInternalProcessor_shouldDoNLPWhenAsked(){
-        // Fake string ref
-        String ref = "Fake/path/to/file";
-        String type = "docx";
-
         // Listen for internal processor response
         Observable<InternalProcessorResponse> observable = mBus.register(InternalProcessorResponse.class);
 
@@ -104,7 +125,7 @@ public class PluginInternalServiceCommunicatorUnitTest {
                         InternalServices.NLP_POS
                 ));
 
-        InternalProcessorRequest request = new InternalProcessorRequest(ref, type, null,
+        InternalProcessorRequest request = new InternalProcessorRequest(mFileRef, mFileType, mInputStream,
                 internalServices);
         mBus.post(request);
 
@@ -114,8 +135,6 @@ public class PluginInternalServiceCommunicatorUnitTest {
         annotationPipeline.addAnnotator(new TokenizerAnnotator(false, "en"));
         annotationPipeline.addAnnotator(new WordsToSentencesAnnotator(false));
         annotationPipeline.addAnnotator(new POSTaggerAnnotator(false));
-
-
 
         if(extractedText.getTitle() != null) {
             Assert.assertNotNull(extractedText.getTitleAnnotation());
@@ -149,12 +168,7 @@ public class PluginInternalServiceCommunicatorUnitTest {
     }
 
     @Test
-    @Ignore // This test works by itself but not when executed after the previous one
     public void PluginInternalServiceCommunicator_processFileWithInternalProcessor_shouldNotDoNLPWhenNotAsked(){
-        // Fake string ref
-        String ref = "Fake/path/to/file";
-        String type = "docx";
-
         // Listen for internal processor response
         Observable<InternalProcessorResponse> observable = mBus.register(InternalProcessorResponse.class);
 
@@ -171,7 +185,7 @@ public class PluginInternalServiceCommunicatorUnitTest {
                         InternalServices.IMAGE_EXTRACTION
                 ));
 
-        InternalProcessorRequest request = new InternalProcessorRequest(ref, type, null,
+        InternalProcessorRequest request = new InternalProcessorRequest(mFileRef, mFileType, mInputStream,
                 internalServices);
         mBus.post(request);
 
@@ -206,6 +220,7 @@ public class PluginInternalServiceCommunicatorUnitTest {
         public ExtractedText processFile(InputStream file, String fileRef, String type,
                                          boolean extractImages) throws FileTypeNotSupportedException {
             // Just return the dummy extracted text
+            mExtractedText = super.processFile(file, fileRef, type, extractImages);
             return mExtractedText;
         }
     }

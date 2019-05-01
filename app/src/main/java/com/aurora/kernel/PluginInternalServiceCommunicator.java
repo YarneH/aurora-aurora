@@ -10,6 +10,8 @@ import com.aurora.kernel.event.InternalProcessorRequest;
 import com.aurora.kernel.event.InternalProcessorResponse;
 import com.aurora.plugin.InternalServices;
 
+import org.apache.commons.lang3.NotImplementedException;
+
 import java.io.InputStream;
 import java.util.List;
 
@@ -92,6 +94,8 @@ public class PluginInternalServiceCommunicator extends Communicator {
             extractedText = new ExtractedText("", null);
         }
 
+        boolean doNLP = false;
+
         // Add all NLP steps to the pipeline
         for (InternalServices internalService: internalServices) {
 
@@ -100,13 +104,17 @@ public class PluginInternalServiceCommunicator extends Communicator {
                     mNLPPipeline = new InternalNLP();
                 }
 
-                mNLPPipeline.addAnnotator(internalService);
+                try {
+                    mNLPPipeline.addAnnotator(internalService);
+                    doNLP = true;
+                } catch (NotImplementedException e) {
+                    Log.e(CLASS_TAG, "Something went wrong when building the NLP pipeline", e);
+                }
             }
-
         }
 
-        if(mNLPPipeline != null) {
-             mNLPPipeline.annotate(extractedText);
+        if(doNLP) {
+            mNLPPipeline.annotate(extractedText);
             Log.d(CLASS_TAG, "Service completed: " + "NLP ANNOTATION");
         }
 

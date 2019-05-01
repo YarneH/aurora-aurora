@@ -20,14 +20,6 @@ public class TextExtractorDOCXUnitTest {
     // Extracts the text before the test so the tests can reuse the ExtractedText
     @Before
     public void initialize() throws FileNotFoundException {
-        /* Set system properties for DOCX */
-        System.setProperty("org.apache.poi.javax.xml.stream.XMLInputFactory",
-                "com.fasterxml.aalto.stax.InputFactoryImpl");
-        System.setProperty("org.apache.poi.javax.xml.stream.XMLOutputFactory",
-                "com.fasterxml.aalto.stax.OutputFactoryImpl");
-        System.setProperty("org.apache.poi.javax.xml.stream.XMLEventFactory",
-                "com.fasterxml.aalto.stax.EventFactoryImpl");
-
         // Initialize the extractor
         TextExtractorDOCX textExtractorDOCX = new TextExtractorDOCX();
         String mfileRef = RES_PATH + "Pasta.docx";
