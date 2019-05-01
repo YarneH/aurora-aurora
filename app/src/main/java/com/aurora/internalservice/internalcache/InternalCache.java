@@ -94,9 +94,16 @@ public class InternalCache implements InternalService {
             CachedFileInfo cachedFileInfo = new CachedFileInfo(fileRef, uniquePluginName, new Date());
 
             // Require non null not really necessary because of precondition above
-            Objects.requireNonNull(mCachedFiles.get(uniquePluginName)).add(cachedFileInfo);
+            List<CachedFileInfo> pluginEntry = mCachedFiles.get(uniquePluginName);
 
-            return true;
+            if (pluginEntry != null) {
+                pluginEntry.add(cachedFileInfo);
+
+                // Persist
+                writeCacheRegistry();
+
+                return true;
+            }
         }
 
         return false;
@@ -226,6 +233,8 @@ public class InternalCache implements InternalService {
             // If list is now empty, remove entry from map
             if (Objects.requireNonNull(mCachedFiles.get(uniquePluginName)).isEmpty()) {
                 mCachedFiles.remove(uniquePluginName);
+
+                writeCacheRegistry();
             }
 
             return true;
@@ -331,7 +340,8 @@ public class InternalCache implements InternalService {
         Map<String, List<CachedFileInfo>> cacheMap = new HashMap<>();
         for (CacheRegistryElement el : elements) {
             // Convert cached fileRefs to list
-            List<CachedFileInfo> fileRefs = Arrays.asList(el.cachedFileRefs);
+            // Needs to be wrapped in new list because else it is not mutable
+            List<CachedFileInfo> fileRefs = new ArrayList<>(Arrays.asList(el.cachedFileRefs));
 
             // Add element to map
             cacheMap.put(el.uniquePluginName, fileRefs);
@@ -385,7 +395,7 @@ public class InternalCache implements InternalService {
     /**
      * Writes a cache file for a given plugin object
      *
-     * @param path         the location where to write the file
+     * @param path             the location where to write the file
      * @param pluginObjectJson the object to write to the cache
      */
     private boolean writeCacheFile(String path, String pluginObjectJson) {

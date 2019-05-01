@@ -1,5 +1,7 @@
 package com.aurora.kernel;
 
+import android.util.Log;
+
 import com.aurora.internalservice.internalcache.CachedFileInfo;
 import com.aurora.internalservice.internalcache.CachedProcessedFile;
 import com.aurora.internalservice.internalcache.InternalCache;
@@ -21,6 +23,11 @@ import io.reactivex.Observable;
  * Communicator that communicates with internal services offered to Aurora
  */
 public class AuroraInternalServiceCommunicator extends Communicator {
+    /**
+     * A tag used for logging
+     */
+    private static final String LOG_TAG = "AuroraIntrnlSvcComm";
+
     /**
      * reference to internal cache instance
      */
@@ -48,7 +55,8 @@ public class AuroraInternalServiceCommunicator extends Communicator {
 
     /**
      * Creates an AuroraInternalServiceCommunicator. There should be only one instance at a time
-     * @param bus a reference to the unique bus instance over which the communicators will communicate events
+     *
+     * @param bus           a reference to the unique bus instance over which the communicators will communicate events
      * @param internalCache a reference to the internal cache
      */
     public AuroraInternalServiceCommunicator(Bus bus, InternalCache internalCache) {
@@ -60,7 +68,8 @@ public class AuroraInternalServiceCommunicator extends Communicator {
 
         // When event comes in, call the appropriate handle method
         mCacheFileRequestObservable.subscribe(cacheFileRequest -> cacheFile(cacheFileRequest.getFileRef(),
-                cacheFileRequest.getPluginObject(), cacheFileRequest.getUniquePluginName()));
+                cacheFileRequest.getPluginObject(), cacheFileRequest.getUniquePluginName()),
+                error -> Log.e(LOG_TAG, "Something went wrong caching the file", error));
 
         // Subscribe to incoming query requests
         mQueryCacheRequestObservable = mBus.register(QueryCacheRequest.class);

@@ -111,31 +111,25 @@ public class PluginCommunicator extends Communicator {
      * @param context          the android context
      */
     private void openFileWithPlugin(ExtractedText extractedText, String uniquePluginName, Context context) {
-        Intent launchIntent = context.getPackageManager().getLaunchIntentForPackage(uniquePluginName);
-
-        if (launchIntent == null) {
-            Toast.makeText(context, context.getString(R.string.could_not_open_plugin), Toast.LENGTH_LONG).show();
-            return;
-        }
-
-        launchIntent.setAction(Constants.PLUGIN_ACTION);
-
+        // Create intent to open plugin
+        Intent launchPluginIntent = new Intent(Constants.PLUGIN_ACTION);
+        launchPluginIntent.setPackage(uniquePluginName);
 
         String extractedTextInJSON = extractedText.toJSON();
-        launchIntent.putExtra(Constants.PLUGIN_INPUT_EXTRACTED_TEXT, extractedTextInJSON);
+        launchPluginIntent.putExtra(Constants.PLUGIN_INPUT_EXTRACTED_TEXT, extractedTextInJSON);
 
         Log.d("JSON", extractedTextInJSON);
 
-        boolean pluginOpens = launchIntent.resolveActivity(context.getPackageManager()) != null;
+        boolean pluginOpens = launchPluginIntent.resolveActivity(context.getPackageManager()) != null;
 
         // This is a bit of a hack, but it needs to be done because of trying to launch an
         // activity outside of and activity context
         // https://stackoverflow.com/questions/3918517/calling-startactivity-from-outside-of-an-activity-context
-        launchIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        launchPluginIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 
 
         if (pluginOpens) {
-            context.startActivity(launchIntent);
+            context.startActivity(launchPluginIntent);
         } else {
             Toast.makeText(context, context.getString(R.string.could_not_open_plugin),
                     Toast.LENGTH_LONG).show();
@@ -144,16 +138,18 @@ public class PluginCommunicator extends Communicator {
 
 
     //TODO delete is custom picker works
+
     /**
      * Opens a file with a given plugin
      *
-     * @param extractedText    the extracted text of the file to open
-     *                         TODO: add tests for this method
+     * @param extractedText the extracted text of the file to open
+     *                      TODO: add tests for this method
      * @param pluginAction  the target intent of the chooser
      * @param chooser       the plugin that was selected by the user in the chooser menu
-     * @param context          the android context
+     * @param context       the android context
      */
-    private void openFileWithPluginChooser(ExtractedText extractedText, Intent pluginAction, Intent chooser, Context context) {
+    private void openFileWithPluginChooser(ExtractedText extractedText, Intent pluginAction,
+                                           Intent chooser, Context context) {
         String extractedTextInJSON = extractedText.toJSON();
         pluginAction.putExtra(Constants.PLUGIN_INPUT_EXTRACTED_TEXT, extractedTextInJSON);
 
@@ -182,21 +178,16 @@ public class PluginCommunicator extends Communicator {
      * @param context            the android context
      */
     private void openCachedFileWithPlugin(String jsonRepresentation, String uniquePluginName, Context context) {
-        Intent launchIntent = context.getPackageManager().getLaunchIntentForPackage(uniquePluginName);
+        // Create intent to open plugin
+        Intent launchPluginIntent = new Intent(Constants.PLUGIN_ACTION);
+        launchPluginIntent.setPackage(uniquePluginName);
 
-        // Check if plugin is found
-        if (launchIntent == null) {
-            Toast.makeText(context, context.getString(R.string.could_not_open_plugin), Toast.LENGTH_LONG).show();
-            return;
-        }
+        launchPluginIntent.putExtra(Constants.PLUGIN_INPUT_OBJECT, jsonRepresentation);
 
-        launchIntent.setAction(Constants.PLUGIN_ACTION);
-        launchIntent.putExtra(Constants.PLUGIN_INPUT_OBJECT, jsonRepresentation);
-
-        boolean cachedFileOpens = launchIntent.resolveActivity(context.getPackageManager()) != null;
+        boolean cachedFileOpens = launchPluginIntent.resolveActivity(context.getPackageManager()) != null;
 
         if (cachedFileOpens) {
-            context.startActivity(launchIntent);
+            context.startActivity(launchPluginIntent);
         } else {
             Toast.makeText(context, context.getString(R.string.no_plugins_available), Toast.LENGTH_LONG).show();
         }
