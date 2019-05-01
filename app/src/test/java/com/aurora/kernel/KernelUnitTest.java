@@ -2,7 +2,6 @@ package com.aurora.kernel;
 
 import com.aurora.util.MockContext;
 
-import org.junit.Ignore;
 import org.junit.Test;
 
 import static junit.framework.TestCase.assertEquals;

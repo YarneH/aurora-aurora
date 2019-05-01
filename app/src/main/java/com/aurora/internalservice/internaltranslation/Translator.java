@@ -11,7 +11,7 @@ import org.json.JSONObject;
 
 import java.io.UnsupportedEncodingException;
 
-public final class Translator implements InternalService {
+public class Translator implements InternalService {
 
     private static final String START_REQUEST = "https://translation.googleapis.com/language/translate/v2?";
     private static final String QUERY = "&q=";
@@ -69,7 +69,7 @@ public final class Translator implements InternalService {
      * The JSONObject is structured as follows: {"data": {"translations" : {"translatedText": return of translation}}}
      *
      * @param response The response from google api
-     * @return a translation response that contains the translated sentenced
+     * @return a translation response that contains the translated sentences
      * @throws JSONException An exception that signifies this object is not according to the google translate
      *                       api
      */

@@ -12,12 +12,12 @@ android {
     }
     buildTypes {
         debug {
-            buildConfigField 'String', "TRANSLATION_API", Aurora_Translation_API_Key
+            buildConfigField 'String', "TRANSLATION_API", AuroraTranslationAPIKey
         }
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-            buildConfigField 'String', "TRANSLATION_API", Aurora_Translation_API_Key
+            buildConfigField 'String', "TRANSLATION_API", AuroraTranslationAPIKey
         }
     }
     testOptions {
