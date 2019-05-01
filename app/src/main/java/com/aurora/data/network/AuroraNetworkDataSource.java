@@ -168,7 +168,7 @@ public final class AuroraNetworkDataSource {
                         MarketPlugin currentMarketPlugin =
                                 new MarketPlugin(imageLocation, name, description, downloadLocation);
 
-                        Log.d("MARKET", "New plugin: " + currentMarketPlugin);
+                        Log.d(DEBUG_TAG, "New plugin: " + currentMarketPlugin);
 
                         tempList.add(currentMarketPlugin);
                     }
