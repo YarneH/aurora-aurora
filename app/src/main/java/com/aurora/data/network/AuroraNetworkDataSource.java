@@ -29,7 +29,7 @@ public final class AuroraNetworkDataSource {
     private static final String AURORA_SYNC_TAG = "aurora-sync";
     private static final String JSON_LOCATION_KEY = "apk_location";
     private static final String JSON_DESCRIPTION_KEY = "description";
-    private static final String JSON_LOGO_LOCATION_KEY = "logo_location";
+    private static final String JSON_LOGO_KEY = "logo";
     private static final String JSON_NAME_KEY = "name";
 
     // For Singleton
@@ -160,13 +160,15 @@ public final class AuroraNetworkDataSource {
 
                     for (int i = 0; i < jsonPlugins.length(); i++) {
                         JSONObject currentPlugin = jsonPlugins.getJSONObject(i);
-                        String imageLocation = currentPlugin.getString(JSON_LOGO_LOCATION_KEY);
+                        String imageLocation = currentPlugin.getString(JSON_LOGO_KEY);
                         String name = currentPlugin.getString(JSON_NAME_KEY);
                         String downloadLocation = currentPlugin.getString(JSON_LOCATION_KEY);
                         String description = currentPlugin.getString(JSON_DESCRIPTION_KEY);
 
                         MarketPlugin currentMarketPlugin =
                                 new MarketPlugin(imageLocation, name, description, downloadLocation);
+
+                        Log.d("MARKET", "New plugin: " + currentMarketPlugin);
 
                         tempList.add(currentMarketPlugin);
                     }

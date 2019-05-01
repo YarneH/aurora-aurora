@@ -1,5 +1,9 @@
 package com.aurora.market;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.util.Base64;
+
 import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -25,9 +29,9 @@ public class MarketPlugin implements Serializable {
      * @param description
      * @param url
      */
-    public MarketPlugin(String logoLocation, String name, String description, String url){
+    public MarketPlugin(String logo, String name, String description, String url){
         // TODO: Get image!
-        this.mLogo = logoLocation;
+        this.mLogo = logo;
         this.mPluginName = name;
         this.mDescription = description;
         try {
@@ -37,8 +41,11 @@ public class MarketPlugin implements Serializable {
         }
     }
 
-    public String getLogo() {
-        return mLogo;
+    public Bitmap getLogo() {
+
+        byte[] decodedString = Base64.decode(mLogo, Base64.DEFAULT);
+        Bitmap decodedByte = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
+        return decodedByte;
     }
 
     public String getDescription() {

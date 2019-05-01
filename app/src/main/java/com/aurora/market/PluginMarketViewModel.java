@@ -3,6 +3,7 @@ package com.aurora.market;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 import android.arch.lifecycle.ViewModel;
+import android.util.Log;
 import com.aurora.data.AuroraRepository;
 
 import java.util.List;
@@ -24,6 +25,7 @@ public class PluginMarketViewModel extends ViewModel {
     }
 
     public LiveData<List<MarketPlugin>> getMarketPlugins() {
+        Log.d("MARKET", "Getting marketplugins: " + mMarketPlugins);
         return mMarketPlugins;
     }
 

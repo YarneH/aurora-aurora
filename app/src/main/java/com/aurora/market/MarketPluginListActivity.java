@@ -3,14 +3,17 @@ package com.aurora.market;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.aurora.aurora.R;
@@ -70,8 +73,9 @@ public class MarketPluginListActivity extends AppCompatActivity {
 
         // Observe the LiveData and update the MarketPluginsRecyclerViewAdapter when the data changes
         mViewModel.getMarketPlugins().observe(this, (List<MarketPlugin> marketPlugins1) -> {
+            Log.d("MARKET", "Observing " + marketPlugins1);
             Objects.requireNonNull((MarketPluginsRecyclerViewAdapter) recyclerView.getAdapter()).setMarketPlugins(
-                    marketPlugins);
+                    marketPlugins1);
             Objects.requireNonNull(recyclerView.getAdapter()).notifyDataSetChanged();
         });
     }
@@ -136,6 +140,12 @@ public class MarketPluginListActivity extends AppCompatActivity {
             holder.mContentView.setText(mMarketPlugins.get(position).getPluginName());
             holder.itemView.setTag(mMarketPlugins.get(position));
             holder.itemView.setOnClickListener(mOnClickListener);
+            Bitmap imgBitmap = mMarketPlugins.get(position).getLogo();
+            int logoDimen = (int) holder.mContentView.getResources().getDimension(R.dimen.market_plugin_logo);
+            Bitmap tempBitmap = Bitmap.createScaledBitmap(imgBitmap, logoDimen,
+                   logoDimen, true);
+
+            holder.mImageView.setImageBitmap(tempBitmap);
         }
 
         @Override
@@ -151,15 +161,18 @@ public class MarketPluginListActivity extends AppCompatActivity {
          * @param items
          */
         public void setMarketPlugins(List<MarketPlugin> items) {
+            Log.d("Market", "Plugins in adapter set: " + items);
             mMarketPlugins = items;
         }
 
         class ViewHolder extends RecyclerView.ViewHolder {
             private final TextView mContentView;
+            private final ImageView mImageView;
 
             ViewHolder(View view) {
                 super(view);
                 mContentView = (TextView) view.findViewById(R.id.content);
+                mImageView = (ImageView) view.findViewById(R.id.img_logo);
             }
         }
     }
