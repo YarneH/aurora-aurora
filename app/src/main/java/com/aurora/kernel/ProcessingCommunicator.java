@@ -1,11 +1,13 @@
 package com.aurora.kernel;
 
 import android.support.annotation.NonNull;
+import android.util.Log;
 
 import com.aurora.auroralib.CacheResults;
 import com.aurora.kernel.event.CacheFileRequest;
 import com.aurora.kernel.event.CacheFileResponse;
 
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import io.reactivex.Observable;
@@ -14,6 +16,7 @@ import io.reactivex.Observable;
  * Communicator that communicates with Plugin processors
  */
 public class ProcessingCommunicator extends Communicator {
+    private static final String LOG_TAG = "ProcessingCommunicator";
 
     private Observable<CacheFileResponse> mCacheFileResponseObservable;
 
@@ -38,16 +41,9 @@ public class ProcessingCommunicator extends Communicator {
      * @return a status code indicating if the cache operation was successful (0) or not (-1)
      */
     public int cacheFile(@NonNull String fileRef, @NonNull String pluginObject, @NonNull String uniquePluginName) {
-        // Create request to cache the file
-        CacheFileRequest cacheFileRequest = new CacheFileRequest(fileRef, pluginObject, uniquePluginName);
-
-        // Post on the bus
-        mBus.post(cacheFileRequest);
-
         // response contains boolean, which is converted to a status code which is then synchronously returned
-        // blockingSubscribe will wait for the result to come in, and will then return it by setting the atomic
-        // integer variable
-        AtomicInteger returnCode = new AtomicInteger(-1);
+        AtomicBoolean isSet = new AtomicBoolean(false);
+        AtomicInteger returnCode = new AtomicInteger(CacheResults.CACHE_FAIL);
 
         mCacheFileResponseObservable
                 .take(1)
@@ -59,8 +55,33 @@ public class ProcessingCommunicator extends Communicator {
                         return CacheResults.CACHE_FAIL;
                     }
                 })
-                .blockingSubscribe(returnCode::set);
+                .subscribe((Integer cacheResult) -> {
+                    synchronized (this) {
+                        returnCode.set(cacheResult);
+                        isSet.set(true);
+                        notifyAll();
+                    }
+                });
 
-        return returnCode.get();
+        // Create request to cache the file
+
+        CacheFileRequest cacheFileRequest = new CacheFileRequest(fileRef, pluginObject, uniquePluginName);
+
+        // Post on the bus
+        mBus.post(cacheFileRequest);
+
+        synchronized (this) {
+            while(!isSet.get()) {
+                try {
+                    wait();
+                } catch (InterruptedException e) {
+                    Log.e(LOG_TAG, "Interrupted in ProcessingCommunicator", e);
+
+                    Thread.currentThread().interrupt();
+                }
+            }
+
+            return returnCode.get();
+        }
     }
 }
