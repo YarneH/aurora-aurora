@@ -104,12 +104,16 @@ public class PluginCommunicator extends Communicator {
         // Start by clearing the full android cache directory of our app
         clearCacheDir(context.getCacheDir());
 
+        // Write the processed file to the cache directory
+        File file = null;
         try {
-            // Write the processed file to the cache directory
-            File file = File.createTempFile("processed-", ".aur", context.getCacheDir());
-            FileWriter fileWriter = new FileWriter(file);
+            file = File.createTempFile("processed-", ".aur", context.getCacheDir());
+        } catch (IOException e) {
+            Log.e(CLASS_TAG, "Writing to temporary files went wrong", e);
+        }
+
+        try (FileWriter fileWriter = new FileWriter(file)){
             fileWriter.write(extractedTextInJSON);
-            fileWriter.close();
 
             // Get the URI of the file
             Uri fileUri = FileProvider.getUriForFile(context, "com.aurora.aurora.provider",
@@ -190,6 +194,7 @@ public class PluginCommunicator extends Communicator {
      * @param dir the directory that needs to be cleared
      * @return true if success, false otherwise
      */
+    @SuppressWarnings("squid:S4042")
     private static boolean clearCacheDir(File dir) {
         if (dir != null && dir.isDirectory()) {
             String[] children = dir.list();
