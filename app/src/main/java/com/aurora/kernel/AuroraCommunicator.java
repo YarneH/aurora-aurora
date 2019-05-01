@@ -92,10 +92,10 @@ public class AuroraCommunicator extends Communicator {
         List<InternalServices> internalServices =
                 new ArrayList<>(Arrays.asList(
                         InternalServices.TEXT_EXTRACTION,
-                        InternalServices.IMAGE_EXTRACTION
-                        //InternalServices.NLP_TOKENIZE,
-                        //InternalServices.NLP_SSPLIT,
-                        //InternalServices.NLP_POS
+                        InternalServices.IMAGE_EXTRACTION,
+                        InternalServices.NLP_TOKENIZE,
+                        InternalServices.NLP_SSPLIT,
+                        InternalServices.NLP_POS
                 ));
         InternalProcessorRequest internalProcessorRequest =
                 new InternalProcessorRequest(fileRef, fileType, file, internalServices);
@@ -141,10 +141,10 @@ public class AuroraCommunicator extends Communicator {
         List<InternalServices> internalServices =
                 new ArrayList<>(Arrays.asList(
                         InternalServices.TEXT_EXTRACTION,
-                        InternalServices.IMAGE_EXTRACTION
-                        //InternalServices.NLP_TOKENIZE,
-                        //InternalServices.NLP_SSPLIT,
-                        //InternalServices.NLP_POS
+                        InternalServices.IMAGE_EXTRACTION,
+                        InternalServices.NLP_TOKENIZE,
+                        InternalServices.NLP_SSPLIT,
+                        InternalServices.NLP_POS
                 ));
         InternalProcessorRequest internalProcessorRequest =
                 new InternalProcessorRequest(fileRef, fileType, file, internalServices);
