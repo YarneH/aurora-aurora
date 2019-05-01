@@ -64,6 +64,92 @@ public class InternalCache implements InternalService {
     }
 
     /**
+     * This method will check if there exists a registry of the files that are cached.
+     * If not, it will create a new one and write it to disk.
+     */
+    private void initCacheRegistry() {
+        try (FileInputStream cacheRegistryFile = mContext.openFileInput(CACHE_LOCATION);
+             BufferedReader reader = new BufferedReader(new InputStreamReader(cacheRegistryFile))) {
+            Gson gson = new Gson();
+
+            CacheRegistryElement[] cacheRegistryElements = gson.fromJson(reader, CacheRegistryElement[].class);
+            mCachedFiles = convertToMap(cacheRegistryElements);
+
+        } catch (FileNotFoundException e) {
+            // If file not found, create a new file containing an empty map
+            mCachedFiles = new HashMap<>();
+            writeCacheRegistry();
+        } catch (IOException e) {
+            // If something goes wrong when reading the file, log the exception
+            Log.e(CLASS_TAG, "Something went wrong while reading the cache registry file", e);
+        }
+    }
+
+    /**
+     * Converts an array of CacheRegistryElements to a map
+     *
+     * @param elements the elements to be converted to a map
+     * @return a map with Strings (unique plugin names) as key and a list of associated file references as a value
+     */
+    private static Map<String, List<CachedFileInfo>> convertToMap(CacheRegistryElement[] elements) {
+        Map<String, List<CachedFileInfo>> cacheMap = new HashMap<>();
+        for (CacheRegistryElement el : elements) {
+            // Convert cached fileRefs to list
+            // Needs to be wrapped in new list because else it is not mutable
+            List<CachedFileInfo> fileRefs = new ArrayList<>(Arrays.asList(el.cachedFileRefs));
+
+            // Add element to map
+            cacheMap.put(el.uniquePluginName, fileRefs);
+        }
+
+        return cacheMap;
+    }
+
+    /**
+     * Writes the cache registry state back to a file. This should be called when the cache registry state is changed
+     */
+    private void writeCacheRegistry() {
+        // Convert map to array of CacheRegistryElements
+        CacheRegistryElement[] elements = convertFromMap(mCachedFiles);
+
+        File cacheFile = new File(mContext.getFilesDir(), CACHE_LOCATION);
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(cacheFile))) {
+            Gson gson = new Gson();
+
+            // Convert array to json string
+            String cachedElementsString = gson.toJson(elements, CacheRegistryElement[].class);
+
+            // Write string to file
+            writer.write(cachedElementsString);
+        } catch (IOException e) {
+            Log.e(CLASS_TAG, "Something went wrong while writing the cache registry", e);
+        }
+    }
+
+    /**
+     * Converts a map with unique plugin names as key and a list of associated file references as value
+     * to an array of CacheRegistryElements for easier serialization.
+     *
+     * @param cacheMap the map to convert
+     * @return an array of easier to serialize elements
+     */
+    private static CacheRegistryElement[] convertFromMap(Map<String, List<CachedFileInfo>> cacheMap) {
+        // Create list of cache registry elements
+        List<CacheRegistryElement> cacheRegistryElements = new ArrayList<>();
+
+        // Loop over all entries in the map to add them to the array
+        for (Map.Entry<String, List<CachedFileInfo>> el : cacheMap.entrySet()) {
+            // Convert the list to an array
+            CachedFileInfo[] fileInfos = el.getValue().toArray(new CachedFileInfo[]{});
+
+            cacheRegistryElements.add(new CacheRegistryElement(el.getKey(), fileInfos));
+        }
+
+        // Convert list to array
+        return cacheRegistryElements.toArray(new CacheRegistryElement[0]);
+    }
+
+    /**
      * Adds a processed pluginObject to the cache
      *
      * @param fileRef          a reference to the file that was processed
@@ -110,6 +196,47 @@ public class InternalCache implements InternalService {
     }
 
     /**
+     * Gets the path of the cached file given the fileRef
+     *
+     * @param fileRef a reference to a file
+     * @return the path to where the cached representation corresponding to this file can be found
+     */
+    private static String getCachedPath(String fileRef) {
+        // Get the file ref to it without extension
+        String cachedPath;
+        if (fileRef.contains(".")) {
+            cachedPath = fileRef.substring(0, fileRef.indexOf('.'));
+        } else {
+            cachedPath = fileRef;
+        }
+
+        // Concatenate .aur extension
+        return cachedPath + CACHE_EXTENSION;
+    }
+
+    /**
+     * Writes a cache file for a given plugin object
+     *
+     * @param path             the location where to write the file
+     * @param pluginObjectJson the object to write to the cache
+     */
+    private boolean writeCacheFile(String path, String pluginObjectJson) {
+        File cacheFile = new File(mContext.getFilesDir(), path);
+
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(cacheFile))) {
+            // Write json representation of plugin object to the file
+
+            writer.write(pluginObjectJson);
+        } catch (IOException e) {
+
+            Log.e(CLASS_TAG, "Something went wrong while writing a cache file!", e);
+
+            return false;
+        }
+        return true;
+    }
+
+    /**
      * Checks the cache if a processed version of the file is present and returns it if it is the case
      *
      * @param fileRef          a reference to the file to check the cache for
@@ -133,6 +260,15 @@ public class InternalCache implements InternalService {
 
         // Return null if the parameters are invalid or if the file is not present
         return null;
+    }
+
+    /**
+     * Gets a list of already processed file representations
+     *
+     * @return a list of of metadata about cached files
+     */
+    public List<CachedFileInfo> getFullCache() {
+        return getFullCache(0);
     }
 
     /**
@@ -161,16 +297,6 @@ public class InternalCache implements InternalService {
         int index = Math.min(amount, cachedFiles.size());
         return cachedFiles.subList(0, index);
     }
-
-    /**
-     * Gets a list of already processed file representations
-     *
-     * @return a list of of metadata about cached files
-     */
-    public List<CachedFileInfo> getFullCache() {
-        return getFullCache(0);
-    }
-
 
     /**
      * Retrieves a processed file from the cache
@@ -213,35 +339,36 @@ public class InternalCache implements InternalService {
     }
 
     /**
-     * Removes a file from the cache given its path and plugin name
+     * Helper method that checks if a file is in the cache registry
      *
-     * @param fileRef          a reference to the file that should be removed from the cache
-     * @param uniquePluginName the name of the plugin to remove the file from
-     *                         It could be that a file was processed by different plugins (or different versions)
-     *                         so it should be possible to only remove those for no longer supported versions.
-     * @return true if the file was successfully removed
+     * @param fileRef          the reference to the file to check if it is in the cache registry
+     * @param uniquePluginName the name of the plugin that the file would be processed with
+     * @return true if the file is in the cache, false otherwise
      */
-    public boolean removeFile(String fileRef, String uniquePluginName) {
-        // Create cachedfileinfo object
+    private boolean isInCache(String fileRef, String uniquePluginName) {
+        // Create cachedFileInfo object
         CachedFileInfo cachedFileInfo = new CachedFileInfo(fileRef, uniquePluginName);
 
-        // First check if the file is in the cache registry, if it is, remove it
-        if (isInCache(fileRef, uniquePluginName) && mContext.deleteFile(getCachedPath(fileRef))) {
-            // If file was successfully removed, remove the fileRef from the list
-            Objects.requireNonNull(mCachedFiles.get(uniquePluginName)).remove(cachedFileInfo);
+        List<CachedFileInfo> cachedFilesByPlugin = mCachedFiles.get(uniquePluginName);
 
-            // If list is now empty, remove entry from map
-            if (Objects.requireNonNull(mCachedFiles.get(uniquePluginName)).isEmpty()) {
-                mCachedFiles.remove(uniquePluginName);
+        return cachedFilesByPlugin != null && cachedFilesByPlugin.contains(cachedFileInfo);
+    }
 
-                writeCacheRegistry();
-            }
+    /**
+     * Clears the entire cache
+     *
+     * @return true if the entire operation was successful or if the cache was empty, false otherwise
+     */
+    public boolean clear() {
+        boolean successful = true;
 
-            return true;
+        // Call removeFilesByPlugin for each plugin in the registry
+        // Iterate over copy to avoid concurrent modification exceptions
+        for (String uniquePluginName : new HashSet<>(mCachedFiles.keySet())) {
+            successful = removeFilesByPlugin(uniquePluginName) && successful;
         }
 
-        // If file is not in cache, return false
-        return false;
+        return successful;
     }
 
     /**
@@ -271,161 +398,35 @@ public class InternalCache implements InternalService {
     }
 
     /**
-     * Clears the entire cache
+     * Removes a file from the cache given its path and plugin name
      *
-     * @return true if the entire operation was successful or if the cache was empty, false otherwise
+     * @param fileRef          a reference to the file that should be removed from the cache
+     * @param uniquePluginName the name of the plugin to remove the file from
+     *                         It could be that a file was processed by different plugins (or different versions)
+     *                         so it should be possible to only remove those for no longer supported versions.
+     * @return true if the file was successfully removed
      */
-    public boolean clear() {
-        boolean successful = true;
-
-        // Call removeFilesByPlugin for each plugin in the registry
-        // Iterate over copy to avoid concurrent modification exceptions
-        for (String uniquePluginName : new HashSet<>(mCachedFiles.keySet())) {
-            successful = removeFilesByPlugin(uniquePluginName) && successful;
-        }
-
-        return successful;
-    }
-
-    /**
-     * This method will check if there exists a registry of the files that are cached.
-     * If not, it will create a new one and write it to disk.
-     */
-    private void initCacheRegistry() {
-        try (FileInputStream cacheRegistryFile = mContext.openFileInput(CACHE_LOCATION);
-             BufferedReader reader = new BufferedReader(new InputStreamReader(cacheRegistryFile))) {
-            Gson gson = new Gson();
-
-            CacheRegistryElement[] cacheRegistryElements = gson.fromJson(reader, CacheRegistryElement[].class);
-            mCachedFiles = convertToMap(cacheRegistryElements);
-
-        } catch (FileNotFoundException e) {
-            // If file not found, create a new file containing an empty map
-            mCachedFiles = new HashMap<>();
-            writeCacheRegistry();
-        } catch (IOException e) {
-            // If something goes wrong when reading the file, log the exception
-            Log.e(CLASS_TAG, "Something went wrong while reading the cache registry file", e);
-        }
-    }
-
-    /**
-     * Writes the cache registry state back to a file. This should be called when the cache registry state is changed
-     */
-    private void writeCacheRegistry() {
-        // Convert map to array of CacheRegistryElements
-        CacheRegistryElement[] elements = convertFromMap(mCachedFiles);
-
-        File cacheFile = new File(mContext.getFilesDir(), CACHE_LOCATION);
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(cacheFile))) {
-            Gson gson = new Gson();
-
-            // Convert array to json string
-            String cachedElementsString = gson.toJson(elements, CacheRegistryElement[].class);
-
-            // Write string to file
-            writer.write(cachedElementsString);
-        } catch (IOException e) {
-            Log.e(CLASS_TAG, "Something went wrong while writing the cache registry", e);
-        }
-    }
-
-    /**
-     * Converts an array of CacheRegistryElements to a map
-     *
-     * @param elements the elements to be converted to a map
-     * @return a map with Strings (unique plugin names) as key and a list of associated file references as a value
-     */
-    private static Map<String, List<CachedFileInfo>> convertToMap(CacheRegistryElement[] elements) {
-        Map<String, List<CachedFileInfo>> cacheMap = new HashMap<>();
-        for (CacheRegistryElement el : elements) {
-            // Convert cached fileRefs to list
-            // Needs to be wrapped in new list because else it is not mutable
-            List<CachedFileInfo> fileRefs = new ArrayList<>(Arrays.asList(el.cachedFileRefs));
-
-            // Add element to map
-            cacheMap.put(el.uniquePluginName, fileRefs);
-        }
-
-        return cacheMap;
-    }
-
-    /**
-     * Converts a map with unique plugin names as key and a list of associated file references as value
-     * to an array of CacheRegistryElements for easier serialization.
-     *
-     * @param cacheMap the map to convert
-     * @return an array of easier to serialize elements
-     */
-    private static CacheRegistryElement[] convertFromMap(Map<String, List<CachedFileInfo>> cacheMap) {
-        // Create list of cache registry elements
-        List<CacheRegistryElement> cacheRegistryElements = new ArrayList<>();
-
-        // Loop over all entries in the map to add them to the array
-        for (Map.Entry<String, List<CachedFileInfo>> el : cacheMap.entrySet()) {
-            // Convert the list to an array
-            CachedFileInfo[] fileInfos = el.getValue().toArray(new CachedFileInfo[]{});
-
-            cacheRegistryElements.add(new CacheRegistryElement(el.getKey(), fileInfos));
-        }
-
-        // Convert list to array
-        return cacheRegistryElements.toArray(new CacheRegistryElement[0]);
-    }
-
-    /**
-     * Gets the path of the cached file given the fileRef
-     *
-     * @param fileRef a reference to a file
-     * @return the path to where the cached representation corresponding to this file can be found
-     */
-    private static String getCachedPath(String fileRef) {
-        // Get the file ref to it without extension
-        String cachedPath;
-        if (fileRef.contains(".")) {
-            cachedPath = fileRef.substring(0, fileRef.indexOf('.'));
-        } else {
-            cachedPath = fileRef;
-        }
-
-        // Concatenate .aur extension
-        return cachedPath + CACHE_EXTENSION;
-    }
-
-    /**
-     * Writes a cache file for a given plugin object
-     *
-     * @param path             the location where to write the file
-     * @param pluginObjectJson the object to write to the cache
-     */
-    private boolean writeCacheFile(String path, String pluginObjectJson) {
-        File cacheFile = new File(mContext.getFilesDir(), path);
-
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(cacheFile))) {
-            // Write json representation of plugin object to the file
-            writer.write(pluginObjectJson);
-        } catch (IOException e) {
-            Log.e(CLASS_TAG, "Something went wrong while writing a cache file!", e);
-
-            return false;
-        }
-        return true;
-    }
-
-    /**
-     * Helper method that checks if a file is in the cache registry
-     *
-     * @param fileRef          the reference to the file to check if it is in the cache registry
-     * @param uniquePluginName the name of the plugin that the file would be processed with
-     * @return true if the file is in the cache, false otherwise
-     */
-    private boolean isInCache(String fileRef, String uniquePluginName) {
-        // Create cachedFileInfo object
+    public boolean removeFile(String fileRef, String uniquePluginName) {
+        // Create cachedfileinfo object
         CachedFileInfo cachedFileInfo = new CachedFileInfo(fileRef, uniquePluginName);
 
-        List<CachedFileInfo> cachedFilesByPlugin = mCachedFiles.get(uniquePluginName);
+        // First check if the file is in the cache registry, if it is, remove it
+        if (isInCache(fileRef, uniquePluginName) && mContext.deleteFile(getCachedPath(fileRef))) {
+            // If file was successfully removed, remove the fileRef from the list
+            Objects.requireNonNull(mCachedFiles.get(uniquePluginName)).remove(cachedFileInfo);
 
-        return cachedFilesByPlugin != null && cachedFilesByPlugin.contains(cachedFileInfo);
+            // If list is now empty, remove entry from map
+            if (Objects.requireNonNull(mCachedFiles.get(uniquePluginName)).isEmpty()) {
+                mCachedFiles.remove(uniquePluginName);
+
+                writeCacheRegistry();
+            }
+
+            return true;
+        }
+
+        // If file is not in cache, return false
+        return false;
     }
 
     /**

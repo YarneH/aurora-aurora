@@ -90,6 +90,7 @@ public class MainActivity extends AppCompatActivity
      */
     private FirebaseAnalytics mFirebaseAnalytics = null;
 
+
     /**
      * {@inheritDoc}
      */
@@ -147,13 +148,14 @@ public class MainActivity extends AppCompatActivity
         CardFileAdapter adapter = new CardFileAdapter(mKernel, this);
         mRecyclerView.setAdapter(adapter);
 
+
         // If opening the file is done from a file explorer
         if (Intent.ACTION_VIEW.equals(getIntent().getAction())) {
             // This method is also called when a file is opened from the file chooser
             onActivityResult(REQUEST_FILE_GET,RESULT_OK, getIntent());
         }
-
     }
+
 
     /**
      * Creates an intent to open the file manager.

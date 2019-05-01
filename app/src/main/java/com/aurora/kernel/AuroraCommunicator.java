@@ -92,10 +92,10 @@ public class AuroraCommunicator extends Communicator {
         List<InternalServices> internalServices =
                 new ArrayList<>(Arrays.asList(
                         InternalServices.TEXT_EXTRACTION,
-                        InternalServices.IMAGE_EXTRACTION
-                        //InternalServices.NLP_TOKENIZE,
-                        //InternalServices.NLP_SSPLIT,
-                        //InternalServices.NLP_POS
+                        InternalServices.IMAGE_EXTRACTION,
+                        InternalServices.NLP_TOKENIZE,
+                        InternalServices.NLP_SSPLIT,
+                        InternalServices.NLP_POS
                 ));
         InternalProcessorRequest internalProcessorRequest =
                 new InternalProcessorRequest(fileRef, fileType, file, internalServices);
@@ -141,10 +141,10 @@ public class AuroraCommunicator extends Communicator {
         List<InternalServices> internalServices =
                 new ArrayList<>(Arrays.asList(
                         InternalServices.TEXT_EXTRACTION,
-                        InternalServices.IMAGE_EXTRACTION
-                        //InternalServices.NLP_TOKENIZE,
-                        //InternalServices.NLP_SSPLIT,
-                        //InternalServices.NLP_POS
+                        InternalServices.IMAGE_EXTRACTION,
+                        InternalServices.NLP_TOKENIZE,
+                        InternalServices.NLP_SSPLIT,
+                        InternalServices.NLP_POS
                 ));
         InternalProcessorRequest internalProcessorRequest =
                 new InternalProcessorRequest(fileRef, fileType, file, internalServices);
@@ -179,7 +179,6 @@ public class AuroraCommunicator extends Communicator {
                                         Toast.LENGTH_LONG).show();
                                 // TODO: change this such that it processes the original file
 
-
                             } else {
                                 sendOpenCachedFileRequest(processedFile.getJsonRepresentation(),
                                         processedFile.getUniquePluginName(), context);
@@ -197,7 +196,7 @@ public class AuroraCommunicator extends Communicator {
     /**
      * Gets a list of all cached files, ordered on date in ascending order
      *
-     * @param maxLength The maximum number of entries that should be returned
+     * @param maxLength The maximum number of entries that should be returned, or <= 0 if you want all files
      * @return a list of metadata of the cached files, ordered on date in ascending order
      */
     public Observable<List<CachedFileInfo>> getListOfCachedFiles(int maxLength) {
