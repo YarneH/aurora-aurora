@@ -2,6 +2,8 @@ package com.aurora.kernel;
 
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
+import android.support.v4.content.FileProvider;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -15,6 +17,9 @@ import com.aurora.kernel.event.OpenFileWithPluginChooserRequest;
 import com.aurora.kernel.event.OpenFileWithPluginRequest;
 import com.aurora.plugin.Plugin;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.List;
 
 import io.reactivex.Observable;
@@ -155,6 +160,40 @@ public class PluginCommunicator extends Communicator {
 
         Log.d("JSON", extractedTextInJSON);
 
+        // Start by clearing the full android cache directory of our app
+        clearCacheDir(context.getCacheDir());
+
+        // Write the processed file to the cache directory
+        File file = null;
+        try {
+            file = File.createTempFile("processed-", ".aur", context.getCacheDir());
+        } catch (IOException e) {
+            Log.e(CLASS_TAG, "Writing to temporary files went wrong", e);
+        }
+
+        try (FileWriter fileWriter = new FileWriter(file)){
+            fileWriter.write(extractedTextInJSON);
+
+            // Get the URI of the file
+            Uri fileUri = FileProvider.getUriForFile(context, "com.aurora.aurora.provider",
+                    file);
+
+            // Make the file readable by the plugin, this permission last until the activity of
+            // the receiving app ends
+            pluginAction.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            // Add the uri of the file as data
+            pluginAction.setData(fileUri);
+
+        } catch (IOException e) {
+            Log.e(CLASS_TAG, "Writing to temporary files went wrong", e);
+        }
+
+        // This field now gets used as a boolean to let the plugin know the kind of data will be
+        // read from the file.
+        pluginAction.putExtra(Constants.PLUGIN_INPUT_EXTRACTED_TEXT, "");
+
+
+        // Check if at least one app exists that can execute the task
         boolean pluginOpens = pluginAction.resolveActivity(context.getPackageManager()) != null;
 
         // This is a bit of a hack, but it needs to be done because of trying to launch an
@@ -166,6 +205,7 @@ public class PluginCommunicator extends Communicator {
         if (pluginOpens) {
             context.startActivity(chooser);
         } else {
+            // This toast crashes the app
             Toast.makeText(context, context.getString(R.string.no_plugins_available),
                     Toast.LENGTH_LONG).show();
         }
@@ -191,6 +231,7 @@ public class PluginCommunicator extends Communicator {
         } else {
             Toast.makeText(context, context.getString(R.string.no_plugins_available), Toast.LENGTH_LONG).show();
         }
+
     }
 
     /**
@@ -204,5 +245,29 @@ public class PluginCommunicator extends Communicator {
         // Make a response event and post it
         ListPluginsResponse response = new ListPluginsResponse(pluginList);
         mBus.post(response);
+    }
+
+    /**
+     * Private helper function to clear the cache directory
+     * @param dir the directory that needs to be cleared
+     * @return true if success, false otherwise
+     */
+    @SuppressWarnings("squid:S4042")
+    private static boolean clearCacheDir(File dir) {
+        if (dir != null && dir.isDirectory()) {
+            String[] children = dir.list();
+            for (String child: children) {
+                boolean success = clearCacheDir(new File(dir, child));
+                if (!success) {
+                    return false;
+                }
+            }
+        }
+
+        // The directory is now empty so delete it
+        if(dir != null) {
+            return dir.delete();
+        }
+        return false;
     }
 }
