@@ -7,6 +7,8 @@ import com.aurora.auroralib.Section;
 import com.aurora.internalservice.InternalService;
 import com.aurora.plugin.InternalServices;
 
+import org.apache.commons.lang3.NotImplementedException;
+
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -48,7 +50,7 @@ public class InternalNLP implements InternalService {
     private ProtobufAnnotationSerializer mAnnotationSerializer;
 
     /** Set of satisfied dependencies */
-    private Set<java.lang.Class<? extends edu.stanford.nlp.ling.CoreAnnotation>>
+    private final Set<java.lang.Class<? extends edu.stanford.nlp.ling.CoreAnnotation>>
             mSatisfiedDependencies = new HashSet<>();
 
     static {
@@ -75,26 +77,24 @@ public class InternalNLP implements InternalService {
      * @param annotator Element from the InternalService Enum, should start with NLP_
      */
     public void addAnnotator(InternalServices annotator) {
+        switch (annotator) {
+            case NLP_TOKENIZE:
+                addAnnotatorIfSatisfied(sBasicAnnotators.get(TOKENIZE), annotator);
+                break;
+            case NLP_SSPLIT:
+                addAnnotatorIfSatisfied(sBasicAnnotators.get(SSPLIT), annotator);
+                break;
+            case NLP_POS:
+                addAnnotatorIfSatisfied(sBasicAnnotators.get(POS), annotator);
+                break;
 
-        try {
-            switch (annotator) {
-                case NLP_TOKENIZE:
-                    addAnnotatorIfSatisfied(sBasicAnnotators.get(TOKENIZE), annotator);
-                    break;
-                case NLP_SSPLIT:
-                    addAnnotatorIfSatisfied(sBasicAnnotators.get(SSPLIT), annotator);
-                    break;
-                case NLP_POS:
-                    addAnnotatorIfSatisfied(sBasicAnnotators.get(POS), annotator);
-                    break;
-
-                default:
-                    Log.d(CLASS_TAG, annotator.name() + " Is currently not yet supported");
-
-            }
-        } catch (Exception e) {
-            Log.e(CLASS_TAG, "Creating the annotation pipeline failed", e);
+            default:
+                Log.d(CLASS_TAG, annotator.name() + " Is currently not yet supported");
+                throw new NotImplementedException(annotator.name() + " Is currently not yet " +
+                        "supported");
         }
+
+            //Log.e(CLASS_TAG, "Creating the annotation pipeline failed", e);
     }
 
     /**
