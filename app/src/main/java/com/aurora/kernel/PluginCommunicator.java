@@ -3,6 +3,7 @@ package com.aurora.kernel;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+import android.support.annotation.NonNull;
 import android.support.v4.content.FileProvider;
 import android.util.Log;
 import android.widget.Toast;
@@ -41,23 +42,23 @@ public class PluginCommunicator extends Communicator {
     /**
      * An observable keeping track of incoming OpenFileWithPluginRequests
      */
-    private Observable<OpenFileWithPluginRequest> mOpenFileWithPluginRequestObservable;
+    private final Observable<OpenFileWithPluginRequest> mOpenFileWithPluginRequestObservable;
 
     //TODO delete when custom picker is finished
     /**
      * An observable keeping track of incoming OpenFileWithPluginChooserRequests
      */
-    private Observable<OpenFileWithPluginChooserRequest> mOpenFileWithPluginChooserRequestObservable;
+    private final Observable<OpenFileWithPluginChooserRequest> mOpenFileWithPluginChooserRequestObservable;
 
     /**
      * An observable keeping track of incoming OpenCachedFileWithPluginRequests
      */
-    private Observable<OpenCachedFileWithPluginRequest> mOpenCachedFileWithPluginRequestObservable;
+    private final Observable<OpenCachedFileWithPluginRequest> mOpenCachedFileWithPluginRequestObservable;
 
     /**
      * An observable keeping track of incoming ListPluginsRequests
      */
-    private Observable<ListPluginsRequest> mListPluginsRequestObservable;
+    private final Observable<ListPluginsRequest> mListPluginsRequestObservable;
 
 
     /**
@@ -67,7 +68,7 @@ public class PluginCommunicator extends Communicator {
      *                       communicate events
      * @param pluginRegistry a reference to the plugin registry
      */
-    public PluginCommunicator(Bus bus, PluginRegistry pluginRegistry) {
+    public PluginCommunicator(@NonNull Bus bus, @NonNull PluginRegistry pluginRegistry) {
         super(bus);
 
         this.mPluginRegistry = pluginRegistry;
@@ -225,7 +226,8 @@ public class PluginCommunicator extends Communicator {
      * @param jsonRepresentation the json representation of the plugin object to represent
      * @param context            the android context
      */
-    private void openCachedFileWithPlugin(String jsonRepresentation, String uniquePluginName, Context context) {
+    private void openCachedFileWithPlugin(@NonNull final String jsonRepresentation,
+                                          @NonNull final String uniquePluginName, @NonNull final Context context) {
         // Create intent to open plugin
         Log.d(getClass().getCanonicalName(), uniquePluginName);
         Intent launchIntent = context.getPackageManager().getLaunchIntentForPackage(uniquePluginName);

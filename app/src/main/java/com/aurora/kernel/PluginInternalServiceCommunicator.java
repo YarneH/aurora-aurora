@@ -1,5 +1,6 @@
 package com.aurora.kernel;
 
+import android.support.annotation.NonNull;
 import android.util.Log;
 
 import com.android.volley.Request;
@@ -65,8 +66,8 @@ public class PluginInternalServiceCommunicator extends Communicator {
      *                  communicating events
      * @param processor a reference to the InternalTextProcessor
      */
-    public PluginInternalServiceCommunicator(Bus mBus, InternalTextProcessor processor,
-                                             RequestQueue requestQueue) {
+    public PluginInternalServiceCommunicator(@NonNull final Bus mBus, @NonNull final InternalTextProcessor processor,
+                                             @NonNull final RequestQueue requestQueue) {
         super(mBus);
         mInternalTextProcessor = processor;
         mRequestQueue = requestQueue;
@@ -97,8 +98,9 @@ public class PluginInternalServiceCommunicator extends Communicator {
      * @param file             the file input stream
      * @param internalServices the set of internal services that should be run on the file
      */
-    private void processFileWithInternalProcessor(String fileRef, String type, InputStream file,
-                                                  List<InternalServices> internalServices) {
+    private void processFileWithInternalProcessor(@NonNull final String fileRef, @NonNull final String type,
+                                                  @NonNull final InputStream file,
+                                                  @NonNull List<InternalServices> internalServices) {
         ExtractedText extractedText = null;
 
         // Perform internal services that are in the given set
@@ -160,7 +162,8 @@ public class PluginInternalServiceCommunicator extends Communicator {
      * @param sourceLanguage       language to translate from
      * @param targetLanguage       language to translate to
      */
-    private void translate(String[] sentencesToTranslate, String sourceLanguage, String targetLanguage) {
+    private void translate(@NonNull final String[] sentencesToTranslate, @NonNull final String sourceLanguage,
+                           @NonNull final String targetLanguage) {
         try {
             String url = Translator.makeUrl(sentencesToTranslate, sourceLanguage, targetLanguage);
             Log.d("TRANSLATE", url);
@@ -183,7 +186,7 @@ public class PluginInternalServiceCommunicator extends Communicator {
      *
      * @param response the respons from the {@link RequestQueue} to the Google API
      */
-    private void postTranslationResponseEvent(JSONObject response) {
+    private void postTranslationResponseEvent(@NonNull final JSONObject response) {
         try {
             mBus.post(Translator.getTranslationResponse(response));
 
@@ -200,7 +203,7 @@ public class PluginInternalServiceCommunicator extends Communicator {
      *
      * @param error the reason why the translation failed
      */
-    private void postTranslationResponseEvent(Exception error) {
+    private void postTranslationResponseEvent(@NonNull final Exception error) {
         TranslationResponse errorResponse = new TranslationResponse(error.getMessage());
         mBus.post(errorResponse);
     }

@@ -356,11 +356,11 @@ public class AuroraCommunicatorUnitTest {
         Map<String, Plugin> mPluginMap = new HashMap<>();
 
         DummyPluginRegistry(ProcessingCommunicator processingCommunicator, String configFileRef, Context context) {
-            super(processingCommunicator, configFileRef, context);
+            super(configFileRef, context);
         }
 
         @Override
-        boolean registerPlugin(String pluginName, Plugin plugin) {
+        public boolean registerPlugin(String pluginName, Plugin plugin) {
             if (!mPluginMap.containsKey(pluginName)) {
                 mPluginMap.put(pluginName, plugin);
                 return true;

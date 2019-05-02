@@ -2,6 +2,7 @@ package com.aurora.kernel;
 
 import android.content.Context;
 import android.content.Intent;
+import android.support.annotation.NonNull;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -52,7 +53,7 @@ public class AuroraCommunicator extends Communicator {
      * @param bus            A reference to the unique bus instance over which the communicators will communicate events
      * @param pluginRegistry a reference to the plugin registry
      */
-    public AuroraCommunicator(Bus bus, PluginRegistry pluginRegistry) {
+    public AuroraCommunicator(@NonNull final Bus bus, @NonNull final PluginRegistry pluginRegistry) {
         super(bus);
         mPluginRegistry = pluginRegistry;
     }
@@ -202,8 +203,8 @@ public class AuroraCommunicator extends Communicator {
      * @param observer  an observer instance containing code that will be executed when the result comes in
      * @return a list of metadata of the cached files, ordered on date in ascending order
      */
-    public void getListOfCachedFiles(int maxLength,
-                                     Observer<List<CachedFileInfo>> observer) {
+    public void getListOfCachedFiles(final int maxLength,
+                                     @NonNull final Observer<List<CachedFileInfo>> observer) {
         // Create observable to listen to
         Observable<QueryCacheResponse> queryCacheResponseObservable = mBus.register(QueryCacheResponse.class);
 
@@ -223,7 +224,7 @@ public class AuroraCommunicator extends Communicator {
      * @param observer an observer containing code that will be executed when the list of plugins comes in
      * @return a list of basic information on every plugin wrapped in an observable
      */
-    public void getListOfPlugins(Observer<List<Plugin>> observer) {
+    public void getListOfPlugins(@NonNull final Observer<List<Plugin>> observer) {
         Observable<ListPluginsResponse> mListPluginsResponse
                 = this.mBus.register(ListPluginsResponse.class);
 
@@ -238,7 +239,7 @@ public class AuroraCommunicator extends Communicator {
      * @param plugin the plugin metadata object
      * @return true if the plugin was successfully saved in the plugin registry, false otherwise
      */
-    public boolean registerPlugin(Plugin plugin) {
+    public boolean registerPlugin(@NonNull final Plugin plugin) {
         return mPluginRegistry.registerPlugin(plugin.getUniqueName(), plugin);
     }
 
@@ -249,7 +250,8 @@ public class AuroraCommunicator extends Communicator {
      * @param uniquePluginName the (unique) name of the plugin to open the file with
      * @param context          the android context
      */
-    private void sendOpenFileRequest(ExtractedText extractedText, String uniquePluginName, Context context) {
+    private void sendOpenFileRequest(final ExtractedText extractedText, final String uniquePluginName,
+                                     final Context context) {
 
         // Create request and post it on bus
         OpenFileWithPluginRequest openFileWithPluginRequest =
@@ -267,8 +269,8 @@ public class AuroraCommunicator extends Communicator {
      * @param chooser       the plugin that the user selected
      * @param context       the android context
      */
-    private void sendOpenFileChooserRequest(ExtractedText extractedText, Intent pluginAction,
-                                            Intent chooser, Context context) {
+    private void sendOpenFileChooserRequest(final ExtractedText extractedText, final Intent pluginAction,
+                                            final Intent chooser, final Context context) {
 
         // Create request and post it on bus
         OpenFileWithPluginChooserRequest openFileWithPluginChooserRequest =
@@ -283,7 +285,8 @@ public class AuroraCommunicator extends Communicator {
      * @param uniquePluginName   the name of the plugin that the file was processed with
      * @param context            the android context
      */
-    private void sendOpenCachedFileRequest(String jsonRepresentation, String uniquePluginName, Context context) {
+    private void sendOpenCachedFileRequest(final String jsonRepresentation, final String uniquePluginName,
+                                           final Context context) {
         // Create request and post it on bus
 
         OpenCachedFileWithPluginRequest openCachedFileWithPluginRequest =

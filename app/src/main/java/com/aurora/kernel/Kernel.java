@@ -1,6 +1,7 @@
 package com.aurora.kernel;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
 import android.util.Log;
 
 import com.android.volley.toolbox.Volley;
@@ -31,7 +32,7 @@ public final class Kernel {
      */
     private static final String PLUGINS_CFG = "plugin-config.json";
     private static Kernel sKernel = null;
-    private static Bus sBus;
+
     /**
      * A reference to the AuroraCommunicator
      */
@@ -54,25 +55,6 @@ public final class Kernel {
     private static AuroraInternalServiceCommunicator sAuroraInternalServiceCommunicator;
 
     /**
-     * A reference to the plugin registry
-     */
-    private static PluginRegistry sPluginRegistry;
-
-    private Context mContext;
-
-
-    /**
-     * A reference to the ProcessingCommunicator
-     */
-    private ProcessingCommunicator mProcessingCommunicator;
-
-    // TODO: change this if necessary
-    /**
-     * A reference to the PluginInternalServiceCommunicator
-     */
-    private PluginInternalServiceCommunicator mPluginInternalServiceCommunicator;
-
-    /**
      * private constructor so no new instance can be constructed
      */
     private Kernel() {
@@ -85,7 +67,7 @@ public final class Kernel {
      * @return the singleton kernel instance, if it was initialized before
      * @throws IllegalArgumentException when the kernel has not yet been initialized and the applicationContext is null
      */
-    public static Kernel getInstance() throws ContextNullException {
+    public static @NonNull Kernel getInstance() throws ContextNullException {
         return getInstance(null);
     }
 
@@ -98,7 +80,7 @@ public final class Kernel {
      * @return the singleton kernel instance
      * @throws IllegalArgumentException when the kernel has not yet been initialized and the applicationContext is null
      */
-    public static Kernel getInstance(Context applicationContext) throws ContextNullException {
+    public static @NonNull Kernel getInstance(Context applicationContext) throws ContextNullException {
         if (sKernel == null && applicationContext != null) {
             // Initialize kernel
             return initialize(applicationContext);
@@ -118,22 +100,22 @@ public final class Kernel {
      * @param applicationContext the android application context needed for some communicators
      * @return the singleton kernel instance
      */
-    private static Kernel initialize(Context applicationContext) {
+    private static @NonNull Kernel initialize(@NonNull final Context applicationContext) {
         sKernel = new Kernel();
 
         // Create 1 bus to be shared among all communicators
-        sBus = new Bus(Schedulers.computation());
+        Bus sBus = new Bus(Schedulers.computation());
 
         // Initialize plugin config
         initializePluginConfig(applicationContext);
 
         // Create plugin registry that keeps info of the plugins
-        sPluginRegistry = new PluginRegistry(sProcessingCommunicator, PLUGINS_CFG, applicationContext);
+        PluginRegistry pluginRegistry = new PluginRegistry(PLUGINS_CFG, applicationContext);
 
         // Create the different communicators
-        sAuroraCommunicator = new AuroraCommunicator(sBus, sPluginRegistry);
+        sAuroraCommunicator = new AuroraCommunicator(sBus, pluginRegistry);
         sProcessingCommunicator = new ProcessingCommunicator(sBus);
-        sPluginCommunicator = new PluginCommunicator(sBus, sPluginRegistry);
+        sPluginCommunicator = new PluginCommunicator(sBus, pluginRegistry);
 
         // Create internal text processor for the PluginInternalServiceCommunicator
         InternalTextProcessor internalTextProcessing = new InternalTextProcessor();
@@ -154,7 +136,7 @@ public final class Kernel {
      *
      * @param applicationContext the android application context, needed for writing files
      */
-    private static void initializePluginConfig(Context applicationContext) {
+    private static void initializePluginConfig(@NonNull final Context applicationContext) {
         File file = new File(applicationContext.getFilesDir(), PLUGINS_CFG);
 
         // If the file does not exist, create one and write an empty JSON array to it
@@ -177,35 +159,35 @@ public final class Kernel {
      *
      * @return AuroraCommunicator
      */
-    public AuroraCommunicator getAuroraCommunicator() {
+    public @NonNull AuroraCommunicator getAuroraCommunicator() {
         return sAuroraCommunicator;
     }
 
     /**
      * @return the PluginCommunicator
      */
-    public PluginCommunicator getPluginCommunicator() {
+    public @NonNull PluginCommunicator getPluginCommunicator() {
         return sPluginCommunicator;
     }
 
     /**
      * @return the ProcessingCommunicator
      */
-    public ProcessingCommunicator getProcessingCommunicator() {
+    public @NonNull ProcessingCommunicator getProcessingCommunicator() {
         return sProcessingCommunicator;
     }
 
     /**
      * @return the PluginInternalServiceCommunicator
      */
-    public PluginInternalServiceCommunicator getPluginInternalServiceCommunicator() {
+    public @NonNull PluginInternalServiceCommunicator getPluginInternalServiceCommunicator() {
         return sPluginInternalServiceCommunicator;
     }
 
     /**
      * @return the AuroraInternalServiceCommunicator
      */
-    public AuroraInternalServiceCommunicator getAuroraInternalServiceCommunicator() {
+    public @NonNull AuroraInternalServiceCommunicator getAuroraInternalServiceCommunicator() {
         return sAuroraInternalServiceCommunicator;
     }
 }
