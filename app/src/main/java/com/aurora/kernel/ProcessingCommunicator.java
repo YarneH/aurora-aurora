@@ -103,7 +103,9 @@ public class ProcessingCommunicator extends Communicator {
      * @param destinationLanguage   the desired language of the translations in ISO format
      * @return the list of translated sentences
      */
-    public List<String> translateSentences(@NonNull List<String> sentences, String sourceLanguage, @NonNull String destinationLanguage) {
+    public List<String> translateSentences(@NonNull List<String> sentences,
+                                           String sourceLanguage,
+                                           @NonNull String destinationLanguage) {
         // response contains boolean, which is converted to a status code which is then synchronously returned
         AtomicBoolean isSet = new AtomicBoolean(false);
         final AtomicInteger errorCode = new AtomicInteger(TranslationErrorCodes.TRANSLATION_FAIL);
@@ -116,8 +118,7 @@ public class ProcessingCommunicator extends Communicator {
                         if (errorMessage == null){
                             errorCode.set(TranslationErrorCodes.TRANSLATION_SUCCESS);
                             translatedSentences.set(response.getTranslatedSentences());
-                        }
-                        else{
+                        } else{
                             Log.e(LOG_TAG, errorMessage);
                         }
                         notifyAll();
@@ -126,7 +127,8 @@ public class ProcessingCommunicator extends Communicator {
 
         // Create request to cache the file
 
-        TranslationRequest translationRequest = new TranslationRequest(sentences.toArray(new String[0]), sourceLanguage, destinationLanguage);
+        TranslationRequest translationRequest = new TranslationRequest(
+                sentences.toArray(new String[0]), sourceLanguage, destinationLanguage);
 
         // Post on the bus
         mBus.post(translationRequest);
@@ -142,7 +144,7 @@ public class ProcessingCommunicator extends Communicator {
                 }
             }
 
-            return new ArrayList<String>(Arrays.asList(translatedSentences.get()));
+            return new ArrayList<>(Arrays.asList(translatedSentences.get()));
             //return new TranslationResult(errorCode.get(), translatedSentences.get());
         }
     }
