@@ -29,6 +29,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import io.reactivex.Observable;
+import io.reactivex.Observer;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 
 /**
@@ -105,6 +106,7 @@ public class AuroraCommunicator extends Communicator {
     }
 
     //TODO: delete once custom pluginPicker is finished
+
     /**
      * Open file with a given plugin. This method will first extract
      * the text from the given file reference,
@@ -197,31 +199,37 @@ public class AuroraCommunicator extends Communicator {
      * Gets a list of all cached files, ordered on date in ascending order
      *
      * @param maxLength The maximum number of entries that should be returned, or <= 0 if you want all files
+     * @param observer  an observer instance containing code that will be executed when the result comes in
      * @return a list of metadata of the cached files, ordered on date in ascending order
      */
-    public Observable<List<CachedFileInfo>> getListOfCachedFiles(int maxLength) {
+    public void getListOfCachedFiles(int maxLength,
+                                     Observer<List<CachedFileInfo>> observer) {
         // Create observable to listen to
         Observable<QueryCacheResponse> queryCacheResponseObservable = mBus.register(QueryCacheResponse.class);
+
+        queryCacheResponseObservable
+                .map(QueryCacheResponse::getResults)
+                .subscribe(observer);
 
         // Create request and post on bus
         QueryCacheRequest request = new QueryCacheRequest(maxLength);
         mBus.post(request);
 
-        return queryCacheResponseObservable
-                .map(QueryCacheResponse::getResults);
     }
 
     /**
      * Gets a list of all the available plugins
      *
+     * @param observer an observer containing code that will be executed when the list of plugins comes in
      * @return a list of basic information on every plugin wrapped in an observable
      */
-    public Observable<List<Plugin>> getListOfPlugins() {
+    public void getListOfPlugins(Observer<List<Plugin>> observer) {
         Observable<ListPluginsResponse> mListPluginsResponse
                 = this.mBus.register(ListPluginsResponse.class);
-        this.mBus.post(new ListPluginsRequest());
 
-        return mListPluginsResponse.map(ListPluginsResponse::getPlugins);
+        mListPluginsResponse.map(ListPluginsResponse::getPlugins).subscribe(observer);
+
+        this.mBus.post(new ListPluginsRequest());
     }
 
     /**
@@ -237,9 +245,9 @@ public class AuroraCommunicator extends Communicator {
     /**
      * Private handle method to send request to plugin communicator to open file with plugin
      *
-     * @param extractedText the extracted text of the file that was internally processed
+     * @param extractedText    the extracted text of the file that was internally processed
      * @param uniquePluginName the (unique) name of the plugin to open the file with
-     * @param context       the android context
+     * @param context          the android context
      */
     private void sendOpenFileRequest(ExtractedText extractedText, String uniquePluginName, Context context) {
 
@@ -250,6 +258,7 @@ public class AuroraCommunicator extends Communicator {
     }
 
     //TODO delete when there is a custom picker
+
     /**
      * Private handle method to send request to plugin communicator to open file with plugin
      *
