@@ -1,6 +1,5 @@
 package com.aurora.kernel;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
