@@ -42,6 +42,6 @@
     <string name="no_plugins_available">No plugins available</string>
     <string name="plugin_not_in_registry">The plugin was not found in the registry!</string>
     <string name="cached_file_not_found">The cached file was not found</string>
-    <string name="title_marketplugin_list">MarketPlugins</string>
+    <string name="title_marketplugin_list">Plugin Market</string>
     <string name="title_marketplugin_detail">MarketPlugin Detail</string>
 </resources>

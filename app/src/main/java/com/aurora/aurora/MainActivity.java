@@ -341,33 +341,14 @@ public class MainActivity extends AppCompatActivity
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
-        // TODO: Remove string and boolean if all activities are implemented
-        // String for demo
-        String text = "";
-        boolean home = false;
-        if (id == R.id.nav_about_us) {
-            text = "About us";
-            // Change text and visibility (Used for demo)
-            mTextViewMain.setText(text);
-        } else if (id == R.id.nav_help_feedback) {
+        if (id == R.id.nav_help_feedback) {
             Intent intent = new Intent(MainActivity.this, FeedbackActivity.class);
             startActivity(intent);
         } else if (id == R.id.nav_plugin_market) {
             Intent intent = new Intent(MainActivity.this, MarketPluginListActivity.class);
             startActivity(intent);
-        } else if (id == R.id.nav_home) {
-            home = true;
         } else {
-            text = "Settings";
-            // Change text and visibility (Used for demo)
-            mTextViewMain.setText(text);
-        }
-        if (home) {
-            mRecyclerView.setVisibility(View.VISIBLE);
-            mTextViewMain.setVisibility(View.INVISIBLE);
-        } else {
-            mRecyclerView.setVisibility(View.INVISIBLE);
-            mTextViewMain.setVisibility(View.VISIBLE);
+            // Home is selected, nothing to do here
         }
 
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
