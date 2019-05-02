@@ -1,6 +1,6 @@
 package com.aurora.auroralib.translation;
 
-public class TranslationErrorCodes {
+public final class TranslationErrorCodes {
     /**
      * Indicates that the translation operation succeeded
      */

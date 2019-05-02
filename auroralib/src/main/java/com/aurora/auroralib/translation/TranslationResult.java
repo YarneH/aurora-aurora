@@ -15,19 +15,6 @@ public class TranslationResult implements Parcelable {
      */
     private String[] mTranslatedSentences;
 
-    protected TranslationResult(Parcel in) {
-
-        mErrorCode = in.readInt();
-        mTranslatedSentences  = in.createStringArray();
-
-    }
-
-    public TranslationResult(Integer errorCode, String[] translatedSentences) {
-        this.mErrorCode = errorCode;
-        this.mTranslatedSentences = translatedSentences;
-    }
-
-
     public static final Creator<TranslationResult> CREATOR = new Creator<TranslationResult>() {
         @Override
         public TranslationResult createFromParcel(Parcel in) {
@@ -39,6 +26,18 @@ public class TranslationResult implements Parcelable {
             return new TranslationResult[size];
         }
     };
+
+    protected TranslationResult(Parcel in) {
+
+        mErrorCode = in.readInt();
+        mTranslatedSentences  = in.createStringArray();
+
+    }
+
+    public TranslationResult(Integer errorCode, String[] translatedSentences) {
+        this.mErrorCode = errorCode;
+        this.mTranslatedSentences = translatedSentences;
+    }
 
 
     @Override

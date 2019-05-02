@@ -1,7 +1,5 @@
 package com.aurora.auroralib.cache;
 
-import com.aurora.auroralib.cache.CacheServiceCaller;
-
 /**
  * Class of constants indicating results of the caching operation.
  * The {@link CacheServiceCaller} has a cache method that will try to cache a file in Aurora, and it will return
