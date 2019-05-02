@@ -200,7 +200,6 @@ public class AuroraCommunicator extends Communicator {
      *
      * @param maxLength The maximum number of entries that should be returned, or <= 0 if you want all files
      * @param observer  an observer instance containing code that will be executed when the result comes in
-     * @return a list of metadata of the cached files, ordered on date in ascending order
      */
     public void getListOfCachedFiles(int maxLength,
                                      Observer<List<CachedFileInfo>> observer) {
@@ -222,7 +221,6 @@ public class AuroraCommunicator extends Communicator {
      * Gets a list of all the available plugins
      *
      * @param observer an observer containing code that will be executed when the list of plugins comes in
-     * @return a list of basic information on every plugin wrapped in an observable
      */
     public void getListOfPlugins(Observer<List<Plugin>> observer) {
         Observable<ListPluginsResponse> mListPluginsResponse
