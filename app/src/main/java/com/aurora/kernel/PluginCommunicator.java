@@ -29,6 +29,9 @@ import io.reactivex.Observable;
 /**
  * Communicator that communicates with Plugin environments
  */
+
+@SuppressWarnings("common-java:DuplicatedBlocks")
+//Duplicated code because OpenFileWithPluginChooser will be removed soon
 public class PluginCommunicator extends Communicator {
     /**
      * Tag for logging purposes
@@ -184,8 +187,7 @@ public class PluginCommunicator extends Communicator {
      * @param chooser       the plugin that was selected by the user in the chooser menu
      * @param context       the android context
      */
-    @SuppressWarnings("common-java:DuplicatedBlocks") //Duplicated code because method will be
-    // removed soon
+
     private void openFileWithPluginChooser(ExtractedText extractedText, Intent pluginAction,
                                            Intent chooser, Context context) {
 
