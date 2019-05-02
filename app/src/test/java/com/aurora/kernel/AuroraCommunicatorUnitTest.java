@@ -253,10 +253,8 @@ public class AuroraCommunicatorUnitTest {
         TestObserver<List<CachedFileInfo>> testObserver = new TestObserver<>();
 
         // Call method under test
-        Observable<List<CachedFileInfo>> listObservable = sAuroraCommunicator.getListOfCachedFiles(0);
+        sAuroraCommunicator.getListOfCachedFiles(0, testObserver);
 
-        // Subscribe to observable with test observer
-        listObservable.subscribe(testObserver);
 
         // Make dummy list
         List<CachedFileInfo> cachedFilesList = new ArrayList<>();
@@ -286,7 +284,7 @@ public class AuroraCommunicatorUnitTest {
         TestObserver<List<Plugin>> observer = new TestObserver<>();
 
         // Call the method under test
-        Observable<List<Plugin>> listObservable = sAuroraCommunicator.getListOfPlugins();
+        sAuroraCommunicator.getListOfPlugins(observer);
 
         // Make dummy list
         List<Plugin> pluginList = new ArrayList<>();
@@ -297,9 +295,6 @@ public class AuroraCommunicatorUnitTest {
 
         // Make response containing the list
         ListPluginsResponse response = new ListPluginsResponse(pluginList);
-
-        // Subscribe to observable and assert that list is what expected
-        listObservable.subscribe(observer);
 
         // Post response
         sBus.post(response);

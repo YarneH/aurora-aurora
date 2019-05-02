@@ -12,5 +12,6 @@ app/testConfigFile.json
 # Cache
 app/cached-files.json
 *.aur
-*.iml
-auroralib/auroralib.iml
+
+# auroralib
+auroralib.iml
