@@ -1,8 +1,5 @@
 package com.aurora.kernel;
 
-import android.app.Activity;
-import android.support.v4.app.Fragment;
-
 import com.aurora.kernel.event.ListPluginsRequest;
 import com.aurora.kernel.event.ListPluginsResponse;
 import com.aurora.plugin.Plugin;
@@ -29,7 +26,6 @@ public class PluginCommunicatorUnitTest {
 
     private static Plugin mPlugin;
 
-    private static Fragment mDummyFragment;
 
     @BeforeClass
     public static void initialize() {
@@ -38,8 +34,6 @@ public class PluginCommunicatorUnitTest {
         mProcessingCommunicator = new ProcessingCommunicator(mBus);
         mPluginRegistry = new PluginRegistry(mProcessingCommunicator, PLUGINS_CFG, new MockContext());
         mPluginCommunicator = new PluginCommunicator(mBus, mPluginRegistry);
-
-        mDummyFragment = new DummyFragment();
     }
 
     /**
@@ -82,18 +76,6 @@ public class PluginCommunicatorUnitTest {
         observer.assertSubscribed();
         observer.assertValue(mPlugin.getName());
         observer.dispose();
-    }
-
-    /**
-     * Dummy activity for testing purposes
-     */
-    private class DummyActivity extends Activity {
-    }
-
-    /**
-     * Dummy fragment for testing purposes
-     */
-    private static class DummyFragment extends Fragment {
     }
 
 }

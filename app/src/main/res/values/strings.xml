@@ -40,8 +40,16 @@
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="select_plugin">Select a plugin</string>
     <string name="no_plugins_available">No plugins available</string>
+
+    <!-- User warnings -->
     <string name="plugin_not_in_registry">The plugin was not found in the registry!</string>
     <string name="cached_file_not_found">The cached file was not found</string>
     <string name="title_marketplugin_list">Plugin Market</string>
     <string name="title_marketplugin_detail">MarketPlugin Detail</string>
+    <string name="cached_file_not_found_processing_file">The cached file was not found. Processing file.</string>
+    <string name="could_not_open_plugin">The plugin could not be opened.</string>
+
+    <!-- Service Permission -->
+    <string name="service_permission_label">Aurora Services</string>
+    <string name="service_permission_description">Allows the app to make use of Aurora services</string>
 </resources>

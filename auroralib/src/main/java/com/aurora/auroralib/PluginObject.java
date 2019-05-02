@@ -7,12 +7,43 @@ import java.io.Serializable;
  * Class to represent text processed by the plugin
  */
 public abstract class PluginObject implements Serializable {
+
+    /**
+     * The name of the file that contained the text that is now displayed in the PluginObject
+     */
+    protected String mFileName;
+
+    /**
+     * The name of the plugin that the file was processed with
+     */
+    protected String mUniquePluginName;
+
     /**
      * Gson object for turning PluginObject to Json string
      */
     protected static Gson sGson = new Gson();
 
-    // TODO: check polymorphism
+    public PluginObject(String fileName, String uniquePluginName) {
+        mFileName = fileName;
+        mUniquePluginName = uniquePluginName;
+    }
+
+    public String getFileName() {
+        return mFileName;
+    }
+
+    public String getUniquePluginName() {
+        return mUniquePluginName;
+    }
+
+    public void setFileName(String fileName) {
+        mFileName = fileName;
+    }
+
+    public void setUniquePluginName(String uniquePluginName) {
+        mUniquePluginName = uniquePluginName;
+    }
+
     /**
      * Turns the PLuginObject to a JSON string for easy caching.
      *
@@ -24,7 +55,6 @@ public abstract class PluginObject implements Serializable {
 
     /**
      * Turn the JSON string back into a PluginObject object.
-     * This method needs to be overridden by subclasses
      *
      * @param json  The extracted JSON string of the PluginObject object
      * @return PluginObject

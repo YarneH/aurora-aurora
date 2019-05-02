@@ -1,13 +1,18 @@
 package com.aurora.kernel;
 
+import com.android.volley.RequestQueue;
 import com.aurora.auroralib.ExtractedText;
 import com.aurora.internalservice.internalprocessor.FileTypeNotSupportedException;
 import com.aurora.internalservice.internalprocessor.InternalTextProcessor;
+import com.aurora.internalservice.internaltranslation.Translator;
 import com.aurora.kernel.event.InternalProcessorRequest;
 import com.aurora.kernel.event.InternalProcessorResponse;
 import com.aurora.plugin.Plugin;
+import com.aurora.util.FakeRequestQueue;
+import com.aurora.util.MockContext;
 
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.InputStream;
@@ -37,7 +42,9 @@ public class PluginInternalServiceCommunicatorUnitTest {
         mProcessor = new DummyInternalTextProcessing();
 
         // Initialize communicator
-        mCommunicator = new PluginInternalServiceCommunicator(mBus, mProcessor);
+        // add dummy translator
+
+        mCommunicator = new PluginInternalServiceCommunicator(mBus, mProcessor, new FakeRequestQueue());
 
         // Initialize extracted text with dummy contents
         mExtractedText = new ExtractedText(mTitle, null, mParagraphs);

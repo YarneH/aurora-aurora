@@ -26,11 +26,12 @@ public class ParsedPDF {
 
     /**
      * Adds structure to the text
+     *
      * @param fileRef the reference to the file
      * @return the same ExtractedText but now filled with text
      */
     public ExtractedText toExtractedText(String fileRef) {
-        mExtractedText = new ExtractedText(fileRef,null);
+        mExtractedText = new ExtractedText(fileRef, null);
         if (mContainsHeaders) {
             toExtractedTextWithHeaders();
         } else {
@@ -64,8 +65,9 @@ public class ParsedPDF {
 
     /**
      * Adds an PDFStructureElement to a Section, depending on which type of element it is
+     *
      * @param pdfStructureElement The element to add
-     * @param section the section to add the element to
+     * @param section             the section to add the element to
      */
     private void addElementToSection(PDFStructureElement pdfStructureElement, Section section) {
         if (pdfStructureElement.getType().equals(ImageFromPDF.TYPE)) {
@@ -73,7 +75,7 @@ public class ParsedPDF {
             images.add(pdfStructureElement.getContent());
             section.addImages((images));
         } else {
-            section.setBody(section.getBody() + "\n" + pdfStructureElement.getContent());
+            section.concatBody(pdfStructureElement.getContent() + "\n");
         }
     }
 
@@ -101,22 +103,23 @@ public class ParsedPDF {
 
     /**
      * Logic to find the title of a file
+     *
      * @return the line number after possibly finding a title
      */
     private int searchTitle() {
         int currentLine = skipEmptyLines(0);
         if (mPDFElements.get(currentLine).getType().equals(ParagraphFromPDF.TYPE)) {
             int nextline = skipEmptyLines(currentLine + 1);
-            if (mPDFElements.get(nextline).getType().equals(HeadingFromPDF.TYPE)) {
-                mExtractedText.setTitle(mPDFElements.get(currentLine).getContent());
-                return nextline;
-            }
+            mExtractedText.setTitle(mPDFElements.get(currentLine).getContent());
+            return nextline;
+
         }
         return currentLine;
     }
 
     /**
      * Skips lines only containing whitespace
+     *
      * @param startIndex index from which to start searching for content
      * @return index of list containing content
      */

@@ -88,7 +88,6 @@ public class TextExtractorDOCX implements TextExtractor {
             }
         }
 
-
         return mExtractedText;
     }
 

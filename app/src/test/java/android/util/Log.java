@@ -46,5 +46,15 @@ public class Log {
         throwable.printStackTrace();
         return 0;
     }
+
+    public static boolean isLoggable(String tag, int level ){
+        return false;
+
+    }
+
+    /**
+     * Priority constant for the println method; use Log.v.
+     */
+    public static final int VERBOSE = 2;
 }
 

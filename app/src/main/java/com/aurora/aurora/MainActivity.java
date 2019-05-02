@@ -28,6 +28,7 @@ import android.widget.Toast;
 
 import com.aurora.auroralib.Constants;
 import com.aurora.kernel.AuroraCommunicator;
+import com.aurora.kernel.ContextNullException;
 import com.aurora.kernel.Kernel;
 import com.aurora.market.ui.MarketPluginListActivity;
 import com.aurora.market.ui.PluginMarketViewModel;
@@ -96,6 +97,7 @@ public class MainActivity extends AppCompatActivity
      */
     private FirebaseAnalytics mFirebaseAnalytics = null;
 
+
     /**
      * {@inheritDoc}
      */
@@ -105,8 +107,13 @@ public class MainActivity extends AppCompatActivity
         setContentView(R.layout.activity_main);
 
         /* Set up kernel */
-        mKernel = new Kernel(this.getApplicationContext());
-        mAuroraCommunicator = mKernel.getAuroraCommunicator();
+        try {
+            mKernel = Kernel.getInstance(this.getApplicationContext());
+            mAuroraCommunicator = mKernel.getAuroraCommunicator();
+        } catch (ContextNullException e) {
+            Log.e("MainActivity",
+                    "The kernel was not initialized with a valid android application context", e);
+        }
 
         /*
         Set up plugins
@@ -155,13 +162,14 @@ public class MainActivity extends AppCompatActivity
         CardFileAdapter adapter = new CardFileAdapter(mKernel, this);
         mRecyclerView.setAdapter(adapter);
 
+
         // If opening the file is done from a file explorer
         if (Intent.ACTION_VIEW.equals(getIntent().getAction())) {
             // This method is also called when a file is opened from the file chooser
             onActivityResult(REQUEST_FILE_GET, RESULT_OK, getIntent());
         }
-
     }
+
 
     /**
      * Creates an intent to open the file manager.
@@ -233,14 +241,33 @@ public class MainActivity extends AppCompatActivity
                     // Make inputstream reader for aurora communicator
                     InputStream read = getContentResolver().openInputStream(textFile);
 
+                    // TODO: create and call custom chooser here, and let it return the unique plugin name of the
+                    // plugin to open the file with (package name, e.g. "com.aurora.basicplugin")
+
+
                     // Create intent to open file with a certain plugin
                     Intent pluginAction = new Intent(Constants.PLUGIN_ACTION);
 
                     // Create chooser to let user choose the plugin
                     Intent chooser = Intent.createChooser(pluginAction, getString(R.string.select_plugin));
+                    mAuroraCommunicator.openFileWithPluginChooser(textFile.toString(), type,
+                            read, pluginAction, chooser, getApplicationContext());
+                    /*
+                    // For now hard coded constant
+                    String uniquePluginName = "com.aurora.basicplugin";
 
                     mAuroraCommunicator.openFileWithPlugin(textFile.toString(), type,
-                            read, pluginAction, chooser, getApplicationContext());
+                            read, uniquePluginName, getApplicationContext());
+                    */
+
+
+                    /*
+                    // For now hard coded constant
+                    String uniquePluginName = "com.aurora.basicplugin";
+
+                    mAuroraCommunicator.openFileWithPlugin(textFile.toString(), type,
+                            read, uniquePluginName, getApplicationContext());
+                    */
 
                 } else {
                     Toast.makeText(this, "The selected file was null", Snackbar.LENGTH_LONG).show();
