@@ -3,6 +3,8 @@ package com.aurora.kernel;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Handler;
+import android.os.Looper;
 import android.support.v4.content.FileProvider;
 import android.util.Log;
 import android.widget.Toast;
@@ -120,7 +122,11 @@ public class PluginCommunicator extends Communicator {
         Intent launchIntent = context.getPackageManager().getLaunchIntentForPackage(uniquePluginName);
 
         if (launchIntent == null) {
-            Toast.makeText(context, context.getString(R.string.could_not_open_plugin), Toast.LENGTH_LONG).show();
+            Handler handler = new Handler(Looper.getMainLooper());
+            handler.post(() -> Toast.makeText(context,
+                    context.getString(R.string.could_not_open_plugin), Toast.LENGTH_LONG).show());
+
+
             return;
         }
 
@@ -144,8 +150,9 @@ public class PluginCommunicator extends Communicator {
         if (pluginOpens) {
             context.startActivity(launchIntent);
         } else {
-            Toast.makeText(context, context.getString(R.string.could_not_open_plugin),
-                    Toast.LENGTH_LONG).show();
+            Handler handler = new Handler(Looper.getMainLooper());
+            handler.post(() -> Toast.makeText(context, context.getString(R.string.could_not_open_plugin),
+                    Toast.LENGTH_LONG).show());
         }
     }
 
@@ -213,9 +220,9 @@ public class PluginCommunicator extends Communicator {
         if (pluginOpens) {
             context.startActivity(chooser);
         } else {
-            // This toast crashes the app
-            Toast.makeText(context, context.getString(R.string.no_plugins_available),
-                    Toast.LENGTH_LONG).show();
+            Handler handler = new Handler(Looper.getMainLooper());
+            handler.post(() -> Toast.makeText(context, context.getString(R.string.no_plugins_available),
+                    Toast.LENGTH_LONG).show());
         }
     }
 
