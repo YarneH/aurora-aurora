@@ -76,7 +76,7 @@ public abstract class PluginObject implements Serializable {
     @SuppressWarnings("unused")
     public static <T extends PluginObject> T getPluginObjectFromFile(@NonNull Uri fileUri,
                                                       @NonNull Context context, @NonNull Class<T> type)
-            throws IOException, IllegalArgumentException {
+            throws IOException {
 
         // Open the file
         ParcelFileDescriptor inputPFD = context.getContentResolver().openFileDescriptor(fileUri, "r");

@@ -264,7 +264,7 @@ public class ExtractedText implements InternallyProcessedFile, Serializable {
      */
     @SuppressWarnings("unused")
     public static ExtractedText getExtractedTextFromFile(@NonNull Uri fileUri, @NonNull Context context)
-            throws IOException, IllegalArgumentException {
+            throws IOException {
 
         // Open the file
         ParcelFileDescriptor inputPFD = context.getContentResolver().openFileDescriptor(fileUri, "r");
