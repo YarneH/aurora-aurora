@@ -1,6 +1,8 @@
-package com.aurora.auroralib;
+package com.aurora.auroralib.cache;
 
 import android.util.Log;
+
+import com.aurora.auroralib.PluginObject;
 
 /**
  * This class should be used to call the CacheServiceCaller
@@ -38,8 +40,8 @@ public class ProcessorCacheThread extends Thread {
     }
 
     protected int cache() {
-        return mCacheServiceCaller.cacheOperation(mPluginObject.mFileName,
-                mPluginObject.mUniquePluginName, mPluginObject.toJSON());
+        return mCacheServiceCaller.cacheOperation(mPluginObject.getFileName(),
+                mPluginObject.getUniquePluginName(), mPluginObject.toJSON());
     }
 
     /**

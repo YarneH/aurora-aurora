@@ -7,7 +7,7 @@ package com.aurora.kernel.event;
 public class TranslationResponse implements Event {
 
     /**
-     * The translated sentences. Is null when {@link #isError()} is true
+     * The translated sentences. Is null when {@link #getErrorMessage()} is true
      */
     private String[] mTranslatedSentences;
 

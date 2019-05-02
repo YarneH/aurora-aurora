@@ -1,6 +1,6 @@
 package com.aurora.kernel;
 
-import com.aurora.auroralib.CacheResults;
+import com.aurora.auroralib.cache.CacheResults;
 import com.aurora.kernel.event.CacheFileRequest;
 import com.aurora.kernel.event.CacheFileResponse;
 

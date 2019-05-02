@@ -1,4 +1,4 @@
-package com.aurora.auroralib;
+package com.aurora.auroralib.translation;
 
 import android.content.ComponentName;
 import android.content.Context;
@@ -11,20 +11,23 @@ import android.os.RemoteException;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
-import com.aurora.internalservice.internalcache.ICache;
+import com.aurora.auroralib.cache.CacheResults;
+import com.aurora.auroralib.cache.CacheServiceCaller;
+import com.aurora.internalservice.internaltranslation.ITranslate;
 
+import java.util.ArrayList;
 import java.util.List;
 
-public class CacheServiceCaller implements ServiceConnection {
+public class TranslationServiceCaller implements ServiceConnection {
     /**
      * Tag used for log messages
      */
-    private static final String LOG_TAG = CacheServiceCaller.class.getSimpleName();
+    private static final String LOG_TAG = TranslationServiceCaller.class.getSimpleName();
 
     /**
      * Binding to the remote interface
      */
-    private ICache mBinding = null;
+    private ITranslate mBinding = null;
 
     // !!! Not sure yet if this is handled right by just passing an activity's context (See BasicPlugin_Old)
     private Context mAppContext;
@@ -39,40 +42,43 @@ public class CacheServiceCaller implements ServiceConnection {
      */
     private boolean mServiceConnected = false;
 
-    public CacheServiceCaller(Context context) {
+    public TranslationServiceCaller(Context context) {
         mAppContext = context;
     }
 
 
     /**
-     * Tries to cache a file in aurora through the service
+     * Tries to translate a list of strings in aurora through the service
      *
-     * @param fileName         the name of the file that contained the plain text
-     * @param uniquePluginName the name of the plugin that the file was processed with
-     * @param pluginObjectJSON the json representation of the processed text
-     * @return a status code indicating whether or not the operation was successful
+     * @param sentences             the list of strings to be translated
+     * @param sourceLanguage        the language of the input sentences in ISO code
+     * @param destinationLanguage   the desired language of the translations in ISO format
+     * @return the list of translated sentences
      */
-    public int cacheOperation(@NonNull String fileName, @NonNull String uniquePluginName,
-                              @NonNull String pluginObjectJSON) {
+    public List<String> translateOperation(@NonNull List<String> sentences, String sourceLanguage,
+                                  @NonNull String destinationLanguage ) {
+        //TODO
         synchronized (monitor) {
-            int result = CacheResults.NOT_REACHED;
+            //int result = CacheResults.NOT_REACHED;
+            List<String> translatedSentences = null;
             bindService();
             try {
                 while (!mServiceConnected) {
                     monitor.wait();
                 }
 
-                result = cache(fileName, uniquePluginName, pluginObjectJSON);
+                translatedSentences = translate(sentences, sourceLanguage, destinationLanguage);
+
                 unbindService();
             } catch (InterruptedException e) {
-                Log.e(LOG_TAG, "cacheOperation was interrupted!", e);
+                Log.e(LOG_TAG, "translateOperation was interrupted!", e);
 
                 // Restore the interrupted state:
                 // https://www.ibm.com/developerworks/java/library/j-jtp05236/index.html?ca=drs-#2.1
                 Thread.currentThread().interrupt();
             }
 
-            return result;
+            return translatedSentences;
         }
     }
 
@@ -81,15 +87,15 @@ public class CacheServiceCaller implements ServiceConnection {
      * Binds the service so that a call to the AIDL defined function cache(String) can be executed
      */
     private void bindService() {
-        Intent implicit = new Intent(ICache.class.getName());
+        Intent implicit = new Intent(ITranslate.class.getName());
         List<ResolveInfo> matches = mAppContext.getPackageManager().queryIntentServices(implicit, 0);
 
         if (matches.isEmpty()) {
-            Log.d(LOG_TAG, "No cache service found");
+            Log.d(LOG_TAG, "No translation service found");
         } else if (matches.size() > 1) {
-            Log.d(LOG_TAG, "Multiple cache services found");
+            Log.d(LOG_TAG, "Multiple translation services found");
         } else {
-            Log.d(LOG_TAG, "1 cache service found");
+            Log.d(LOG_TAG, "1 translation service found");
             Intent explicit = new Intent(implicit);
             ServiceInfo svcInfo = matches.get(0).serviceInfo;
             ComponentName cn = new ComponentName(svcInfo.applicationInfo.packageName,
@@ -112,24 +118,26 @@ public class CacheServiceCaller implements ServiceConnection {
     /**
      * Will start a new thread to cache the file
      *
-     * @param fileName         the name of the file that contained the original plain text
-     * @param uniquePluginName the name of the plugin that processed the file
-     * @param pluginObjectJSON the JSON string of the object that needs to be cached
+     * @param sentences             the list of strings to be translated
+     * @param sourceLanguage        the language of the input sentences in ISO code
+     * @param destinationLanguage   the desired language of the translations in ISO format
      * @return status code of the cache operation from Cache Service in Aurora Internal Services
      */
-    private int cache(@NonNull String fileName, @NonNull String uniquePluginName, @NonNull String pluginObjectJSON) {
-        CacheThread cacheThread = new CacheThread(fileName, uniquePluginName, pluginObjectJSON);
-        cacheThread.start();
+    private List<String> translate(@NonNull List<String> sentences, String sourceLanguage,
+                                   @NonNull String destinationLanguage ) {
+        TranslationServiceCaller.TranslateThread translateThread =
+                new TranslationServiceCaller.TranslateThread(sentences, sourceLanguage, destinationLanguage);
+        translateThread.start();
         try {
-            cacheThread.join();
+            translateThread.join();
         } catch (InterruptedException e) {
-            Log.e(getClass().getSimpleName(), "Exception requesting cache", e);
+            Log.e(getClass().getSimpleName(), "Exception requesting translation", e);
 
             // Restore the interrupted state:
             // https://www.ibm.com/developerworks/java/library/j-jtp05236/index.html?ca=drs-#2.1
             Thread.currentThread().interrupt();
         }
-        return cacheThread.getCacheResult();
+        return translateThread.getTranslatedSentences();
     }
 
     /**
@@ -141,7 +149,7 @@ public class CacheServiceCaller implements ServiceConnection {
     @Override
     public void onServiceConnected(ComponentName className, IBinder binder) {
         synchronized (monitor) {
-            mBinding = ICache.Stub.asInterface(binder);
+            mBinding = ITranslate.Stub.asInterface(binder);
             Log.d(LOG_TAG, "Plugin Bound");
 
             mServiceConnected = true;
@@ -171,63 +179,65 @@ public class CacheServiceCaller implements ServiceConnection {
     /**
      * A private thread class that will cache the file in another thread to avoid blocking of the main thread
      */
-    private class CacheThread extends Thread {
-        private int mCacheResult = CacheResults.NOT_REACHED;
-        private String mFileName;
-        private String mUniquePluginName;
-        private String mPluginObjectJSON;
+    private class TranslateThread extends Thread {
+        private List<String> mTranslatedSentences = null;
+        private List<String> mSentences;
+        private String mSourceLanguage;
+        private String mDestinationLanguage;
 
-        protected CacheThread(String fileName, String uniquePluginName, String pluginObjectJSON) {
-            mFileName = fileName;
-            mUniquePluginName = uniquePluginName;
-            mPluginObjectJSON = pluginObjectJSON;
+        protected TranslateThread(List<String> sentences, String sourceLanguage,
+                                    String destinationLanguage) {
+            mSentences = sentences;
+            mSourceLanguage = sourceLanguage;
+            mDestinationLanguage = destinationLanguage;
         }
 
-        protected int getCacheResult() {
-            return mCacheResult;
+        protected List<String> getTranslatedSentences() {
+            return mTranslatedSentences;
         }
 
         @Override
         public void run() {
-            Log.d(LOG_TAG, "cache called");
+            Log.d(LOG_TAG, "translation called");
             try {
 
                 if (mBinding == null) {
                     synchronized (monitor) {
-                        Log.d(LOG_TAG, "Entering sync block" + mCacheResult);
+                        Log.d(LOG_TAG, "Entering sync block" + mTranslatedSentences);
 
-                        mCacheResult = cache();
+                        mTranslatedSentences = translate();
                     }
                 } else {
-                    mCacheResult = mBinding.cache(mFileName, mPluginObjectJSON, mUniquePluginName);
-                    Log.d(LOG_TAG, "" + mCacheResult);
+                    mTranslatedSentences = mBinding.translate(mSentences, mSourceLanguage,
+                            mDestinationLanguage);
+                    Log.d(LOG_TAG, "" + mTranslatedSentences);
                 }
 
 
             } catch (RemoteException e) {
-                Log.e(getClass().getSimpleName(), "Exception requesting cache", e);
-                mCacheResult = CacheResults.REMOTE_FAIL;
+                Log.e(getClass().getSimpleName(), "Exception requesting translation", e);
+                mTranslatedSentences = null;
             }
         }
 
-        private int cache() throws RemoteException {
+        private List<String> translate() throws RemoteException {
             synchronized (monitor) {
                 try {
                     while (!mServiceConnected) {
                         monitor.wait();
                     }
                 } catch (InterruptedException e) {
-                    Log.e(getClass().getSimpleName(), "Exception requesting cache", e);
+                    Log.e(getClass().getSimpleName(), "Exception requesting translation", e);
 
                     // Restore the interrupted state:
                     // https://www.ibm.com/developerworks/java/library/j-jtp05236/index.html?ca=drs-#2.1
                     Thread.currentThread().interrupt();
                 }
-                int cacheResult = mBinding.cache(mFileName, mUniquePluginName, mPluginObjectJSON);
-                Log.d(LOG_TAG, "" + cacheResult);
-                return cacheResult;
+                List<String> translatedSentences = mBinding.translate(mSentences,
+                        mSourceLanguage, mDestinationLanguage);
+                Log.d(LOG_TAG, "" + translatedSentences);
+                return translatedSentences;
             }
         }
     }
-
 }

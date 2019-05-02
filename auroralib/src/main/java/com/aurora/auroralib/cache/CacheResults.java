@@ -1,4 +1,6 @@
-package com.aurora.auroralib;
+package com.aurora.auroralib.cache;
+
+import com.aurora.auroralib.cache.CacheServiceCaller;
 
 /**
  * Class of constants indicating results of the caching operation.

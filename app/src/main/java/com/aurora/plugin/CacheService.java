@@ -5,7 +5,7 @@ import android.content.Intent;
 import android.os.IBinder;
 import android.util.Log;
 
-import com.aurora.auroralib.CacheResults;
+import com.aurora.auroralib.cache.CacheResults;
 import com.aurora.internalservice.internalcache.ICache;
 import com.aurora.kernel.ContextNullException;
 import com.aurora.kernel.Kernel;
