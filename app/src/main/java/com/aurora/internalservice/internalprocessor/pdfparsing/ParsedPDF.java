@@ -47,6 +47,7 @@ public class ParsedPDF {
         int index = searchTitle();
         while (index < mPDFElements.size()) {
             Section section = new Section();
+            section.setImages(new ArrayList<>());
             if (mPDFElements.get(index).getType().equals(HeadingFromPDF.TYPE)) {
                 section.setTitle(mPDFElements.get(index).getContent());
                 section.setLevel(mPDFElements.get(index).getLevel());
@@ -88,6 +89,7 @@ public class ParsedPDF {
 
         while (index < mPDFElements.size()) {
             Section section = new Section();
+            section.setImages(new ArrayList<>());
             StringBuilder body = new StringBuilder();
             if (index + 1 < mPDFElements.size() && mPDFElements.get(index + 1).getContent().trim().isEmpty()) {
                 section.setTitle(mPDFElements.get(index).getContent());
