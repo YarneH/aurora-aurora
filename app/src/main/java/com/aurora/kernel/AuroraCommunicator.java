@@ -1,5 +1,6 @@
 package com.aurora.kernel;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
@@ -209,6 +210,7 @@ public class AuroraCommunicator extends Communicator {
 
         queryCacheResponseObservable
                 .map(QueryCacheResponse::getResults)
+                .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(observer);
 
         // Create request and post on bus
@@ -227,7 +229,10 @@ public class AuroraCommunicator extends Communicator {
         Observable<ListPluginsResponse> mListPluginsResponse
                 = this.mBus.register(ListPluginsResponse.class);
 
-        mListPluginsResponse.map(ListPluginsResponse::getPlugins).subscribe(observer);
+        mListPluginsResponse
+                .map(ListPluginsResponse::getPlugins)
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(observer);
 
         this.mBus.post(new ListPluginsRequest());
     }
