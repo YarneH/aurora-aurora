@@ -1,10 +1,11 @@
-package com.aurora.market;
+package com.aurora.market.ui;
 
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 import android.arch.lifecycle.ViewModel;
 import android.util.Log;
-import com.aurora.data.AuroraRepository;
+import com.aurora.market.data.MarketRepository;
+import com.aurora.market.data.database.MarketPlugin;
 
 import java.util.List;
 
@@ -17,9 +18,9 @@ public class PluginMarketViewModel extends ViewModel {
      */
     private LiveData<List<MarketPlugin>> mMarketPlugins = new MutableLiveData<>();
 
-    private AuroraRepository mRepository;
+    private MarketRepository mRepository;
 
-    public PluginMarketViewModel(AuroraRepository repository){
+    public PluginMarketViewModel(MarketRepository repository){
         mRepository = repository;
         mMarketPlugins = mRepository.getCurrentMarketPlugins();
     }

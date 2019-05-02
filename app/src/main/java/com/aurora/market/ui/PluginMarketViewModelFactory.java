@@ -1,14 +1,14 @@
-package com.aurora.market;
+package com.aurora.market.ui;
 
 import android.arch.lifecycle.ViewModel;
 import android.arch.lifecycle.ViewModelProvider;
-import com.aurora.data.AuroraRepository;
+import com.aurora.market.data.MarketRepository;
 
 public class PluginMarketViewModelFactory extends ViewModelProvider.NewInstanceFactory {
 
-    private final AuroraRepository mRepository;
+    private final MarketRepository mRepository;
 
-    public PluginMarketViewModelFactory(AuroraRepository repository) {
+    public PluginMarketViewModelFactory(MarketRepository repository) {
         mRepository = repository;
     }
 

@@ -1,4 +1,4 @@
-package com.aurora.market;
+package com.aurora.market.ui;
 
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;

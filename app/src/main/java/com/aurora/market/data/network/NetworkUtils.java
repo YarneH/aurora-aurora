@@ -1,4 +1,4 @@
-package com.aurora.data.network;
+package com.aurora.market.data.network;
 
 import java.io.IOException;
 import java.io.InputStream;

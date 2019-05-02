@@ -1,4 +1,4 @@
-package com.aurora.market;
+package com.aurora.market.ui;
 
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
@@ -17,6 +17,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.aurora.aurora.R;
+import com.aurora.market.data.database.MarketPlugin;
 import com.aurora.utilities.InjectorUtils;
 
 import java.util.List;

@@ -14,7 +14,7 @@
             android:usesCleartextTraffic="true"
             android:theme="@style/AppTheme">
         <activity
-                android:name="com.aurora.market.MarketPluginListActivity"
+                android:name="com.aurora.market.ui.MarketPluginListActivity"
                 android:label="@string/title_marketplugin_list"
                 android:theme="@style/AppTheme.NoActionBar">
             <meta-data
@@ -22,13 +22,13 @@
                     android:value=".MainActivity"/>
         </activity>
         <activity
-                android:name="com.aurora.market.MarketPluginDetailActivity"
+                android:name="com.aurora.market.ui.MarketPluginDetailActivity"
                 android:label="@string/title_marketplugin_detail"
-                android:parentActivityName="com.aurora.market.MarketPluginListActivity"
+                android:parentActivityName="com.aurora.market.ui.MarketPluginListActivity"
                 android:theme="@style/AppTheme.NoActionBar">
             <meta-data
                     android:name="android.support.PARENT_ACTIVITY"
-                    android:value="com.aurora.market.MarketPluginListActivity"/>
+                    android:value="com.aurora.market.ui.MarketPluginListActivity"/>
         </activity>
         <activity android:name=".FeedbackActivity">
             <meta-data
@@ -56,20 +56,6 @@
                 <data android:mimeType="application/pdf"/>
             </intent-filter>
         </activity>
-
-        <!-- Needed for immediate syncs -->
-        <service
-                android:name="com.aurora.data.network.AuroraSyncIntentService"
-                android:exported="false"/>
-
-        <!-- Service declaration for the FirebaseJobDispatcher -->
-        <service
-                android:name="com.aurora.data.network.AuroraFirebaseJobService"
-                android:exported="false">
-            <intent-filter>
-                <action android:name="com.firebase.jobdispatcher.ACTION_EXECUTE"/>
-            </intent-filter>
-        </service>
     </application>
 
 </manifest>

@@ -1,4 +1,4 @@
-package com.aurora.market;
+package com.aurora.market.data.database;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;

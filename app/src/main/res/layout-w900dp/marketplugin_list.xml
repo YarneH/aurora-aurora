@@ -10,7 +10,7 @@
     android:divider="?android:attr/dividerHorizontal"
     android:orientation="horizontal"
     android:showDividers="middle"
-    tools:context="com.aurora.market.MarketPluginListActivity">
+    tools:context="com.aurora.market.ui.MarketPluginListActivity">
 
     <!--
     This layout is a two-pane layout for the MarketPlugins

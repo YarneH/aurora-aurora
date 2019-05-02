@@ -29,8 +29,8 @@ import android.widget.Toast;
 import com.aurora.auroralib.Constants;
 import com.aurora.kernel.AuroraCommunicator;
 import com.aurora.kernel.Kernel;
-import com.aurora.market.MarketPluginListActivity;
-import com.aurora.market.PluginMarketViewModel;
+import com.aurora.market.ui.MarketPluginListActivity;
+import com.aurora.market.ui.PluginMarketViewModel;
 import com.aurora.plugin.Plugin;
 import com.google.firebase.analytics.FirebaseAnalytics;
 

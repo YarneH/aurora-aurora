@@ -1,4 +1,4 @@
-package com.aurora.market;
+package com.aurora.market.ui;
 
 import android.app.Activity;
 import android.os.Bundle;
@@ -10,6 +10,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.aurora.aurora.R;
+import com.aurora.market.data.database.MarketPlugin;
 
 /**
  * A fragment representing a single MarketPlugin detail screen.

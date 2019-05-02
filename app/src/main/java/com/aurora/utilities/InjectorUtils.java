@@ -1,9 +1,9 @@
 package com.aurora.utilities;
 
 import android.content.Context;
-import com.aurora.data.AuroraRepository;
-import com.aurora.data.network.AuroraNetworkDataSource;
-import com.aurora.market.PluginMarketViewModelFactory;
+import com.aurora.market.data.MarketRepository;
+import com.aurora.market.data.network.MarketNetworkDataSource;
+import com.aurora.market.ui.PluginMarketViewModelFactory;
 
 public final class InjectorUtils {
 
@@ -11,18 +11,18 @@ public final class InjectorUtils {
         throw new IllegalStateException("Utility class");
     }
 
-    public static AuroraRepository provideRepository(Context context) {
-        AuroraNetworkDataSource auroraNetworkDataSource = AuroraNetworkDataSource.getInstance(context);
-        return AuroraRepository.getInstance(auroraNetworkDataSource);
+    public static MarketRepository provideRepository(Context context) {
+        MarketNetworkDataSource auroraNetworkDataSource = MarketNetworkDataSource.getInstance(context);
+        return MarketRepository.getInstance(auroraNetworkDataSource);
     }
 
-    public static AuroraNetworkDataSource provideNetworkDataSource(Context context) {
+    public static MarketNetworkDataSource provideNetworkDataSource(Context context) {
         provideRepository(context);
-        return AuroraNetworkDataSource.getInstance(context);
+        return MarketNetworkDataSource.getInstance(context);
     }
 
     public static PluginMarketViewModelFactory providePluginMarketViewModel(Context context) {
-        AuroraRepository repository = provideRepository(context);
+        MarketRepository repository = provideRepository(context);
         return new PluginMarketViewModelFactory(repository);
     }
 }
