@@ -10,7 +10,7 @@ import io.reactivex.subjects.Subject;
 /**
  * Communication bus that is used in the kernel. All communicators should use the same bus instance
  */
-class Bus {
+public class Bus {
     /**
      * The bus subject is an observable and observer of events at the same time.
      * It acts as a link between the different communicating parties.
