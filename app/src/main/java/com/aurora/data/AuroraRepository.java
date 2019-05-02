@@ -36,8 +36,4 @@ public final class AuroraRepository {
         initializeData();
         return mNetworkDataSource.getCurrentMarketPlugins();
     }
-
-    public void startFetchPluginService() {
-        mNetworkDataSource.startFetchMarketPluginService();
-    }
 }
