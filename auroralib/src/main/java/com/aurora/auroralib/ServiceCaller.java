@@ -8,8 +8,6 @@ import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.util.Log;
 
-import com.aurora.internalservice.internaltranslation.ITranslate;
-
 import java.util.List;
 
 public abstract class ServiceCaller implements ServiceConnection {
@@ -73,5 +71,5 @@ public abstract class ServiceCaller implements ServiceConnection {
         disconnect();
     }
 
-    abstract protected void disconnect();
+    protected abstract void disconnect();
 }

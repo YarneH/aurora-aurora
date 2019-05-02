@@ -10,8 +10,6 @@ import android.util.Log;
 import com.aurora.auroralib.ServiceCaller;
 import com.aurora.internalservice.internalcache.ICache;
 
-import java.util.List;
-
 public class CacheServiceCaller extends ServiceCaller {
     /**
      * Tag used for log messages
