@@ -1,8 +1,18 @@
 package com.aurora.auroralib;
 
+import android.content.Context;
+import android.net.Uri;
+import android.os.ParcelFileDescriptor;
+import android.support.annotation.NonNull;
+
 import com.google.gson.Gson;
 import com.google.gson.annotations.JsonAdapter;
 
+import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
@@ -241,5 +251,32 @@ public class ExtractedText implements InternallyProcessedFile, Serializable {
         }
 
         return extractedText;
+    }
+
+
+    @SuppressWarnings("unused")
+    public static ExtractedText getExtractedTextFromFile(@NonNull Uri fileUri, @NonNull Context context)
+            throws IOException, NullPointerException {
+
+        StringBuilder total = new StringBuilder();
+
+        ExtractedText extractedText = null;
+
+        // Open the file
+        ParcelFileDescriptor inputPFD = context.getContentResolver().openFileDescriptor(fileUri, "r");
+
+        if(inputPFD == null) {
+            throw new NullPointerException("The file could not be opened");
+        }
+
+        // Read the file
+        InputStream fileStream = new FileInputStream(inputPFD.getFileDescriptor());
+        BufferedReader r = new BufferedReader(new InputStreamReader(fileStream));
+        for (String line; (line = r.readLine()) != null; ) {
+            total.append(line).append('\n');
+        }
+
+        // Convert the read file to an ExtractedText object
+        return ExtractedText.fromJson(total.toString());
     }
 }
