@@ -8,7 +8,7 @@ import com.aurora.plugin.InternalServices;
 
 import org.apache.commons.lang3.NotImplementedException;
 import org.junit.Assert;
-import org.junit.BeforeClass;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.io.File;
@@ -21,8 +21,8 @@ public class InternalNLPUnitTest {
     private static InternalNLP mInternalNLP;
     private static InternalTextProcessor mInternalTextProcessor = new InternalTextProcessor();
 
-    @BeforeClass
-    public static void initialize() {
+    @Before
+    public void initialize() {
         mInternalNLP = new InternalNLP();
     }
 
@@ -82,6 +82,19 @@ public class InternalNLPUnitTest {
             mInternalNLP.addAnnotator(InternalServices.IMAGE_EXTRACTION);
 
         } catch (NotImplementedException e) {
+            thrown = true;
+        }
+
+        assert (thrown);
+    }
+
+    @Test
+    public void InternalNLP_addUnsatisfiedAnnotator_ExceptionIsThrown(){
+        boolean thrown = false;
+        try {
+            mInternalNLP.addAnnotator(InternalServices.NLP_SSPLIT);
+
+        } catch (UnsupportedOperationException e) {
             thrown = true;
         }
 

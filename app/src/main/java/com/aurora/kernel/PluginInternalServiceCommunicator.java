@@ -191,6 +191,7 @@ public class PluginInternalServiceCommunicator extends Communicator {
             mInternalNLP.annotate(extractedText);
             Log.d(CLASS_TAG, "Service completed: " + "NLP ANNOTATION");
         }
+        mInternalNLP = null;
     }
 
     /**

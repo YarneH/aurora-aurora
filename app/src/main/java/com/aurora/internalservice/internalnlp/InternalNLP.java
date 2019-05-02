@@ -106,6 +106,9 @@ public class InternalNLP implements InternalService {
             mAnnotationPipeline.addAnnotator(annotator);
             mSatisfiedDependencies.addAll(annotator.requirementsSatisfied());
             Log.d(CLASS_TAG, annotatorName.name() + " has been added to the NLP pipeline");
+        } else {
+            throw new UnsupportedOperationException("Not all dependencies for " + annotatorName.name() +
+                    " are satisfied.");
         }
     }
 
