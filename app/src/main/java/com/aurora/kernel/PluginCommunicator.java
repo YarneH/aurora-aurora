@@ -61,6 +61,11 @@ public class PluginCommunicator extends Communicator {
      */
     private Observable<ListPluginsRequest> mListPluginsRequestObservable;
 
+    /**
+     *
+     */
+    private static final String ERROR_LOG = "Writing to temporary files went wrong";
+
 
     /**
      * Creates a PluginCommunicator. There should be only one instance at a time
@@ -140,8 +145,8 @@ public class PluginCommunicator extends Communicator {
         try {
             uri = writeToTempFile(context, extractedTextInJSON, "processed-", ".aur");
         } catch (IOException e) {
-            Log.e(CLASS_TAG, "Writing to temporary files went wrong", e);
-            showToast(context, "Writing to temporary files went wrong");
+            Log.e(CLASS_TAG, ERROR_LOG, e);
+            showToast(context, ERROR_LOG);
             return;
         }
 
@@ -194,8 +199,8 @@ public class PluginCommunicator extends Communicator {
         try {
             uri = writeToTempFile(context, extractedTextInJSON, "processed-", ".aur");
         } catch (IOException e) {
-            Log.e(CLASS_TAG, "Writing to temporary files went wrong", e);
-            showToast(context, "Writing to temporary files went wrong");
+            Log.e(CLASS_TAG, ERROR_LOG, e);
+            showToast(context, ERROR_LOG);
             return;
         }
 
@@ -250,8 +255,8 @@ public class PluginCommunicator extends Communicator {
         try {
             uri = writeToTempFile(context, jsonRepresentation, "cached-", ".aur");
         } catch (IOException e) {
-            Log.e(CLASS_TAG, "Writing to temporary files went wrong", e);
-            showToast(context, "Writing to temporary files went wrong");
+            Log.e(CLASS_TAG, ERROR_LOG, e);
+            showToast(context, ERROR_LOG);
             return;
         }
 
@@ -338,9 +343,9 @@ public class PluginCommunicator extends Communicator {
         // Write the processed file to the cache directory
         File file = File.createTempFile(prefix, suffix, context.getCacheDir());
 
-        FileWriter fileWriter = new FileWriter(file);
-        fileWriter.write(content);
-        fileWriter.close();
+        try (FileWriter fileWriter = new FileWriter(file)) {
+            fileWriter.write(content);
+        }
 
         return FileProvider.getUriForFile(context, "com.aurora.aurora.provider", file);
     }

@@ -76,24 +76,22 @@ public abstract class PluginObject implements Serializable {
     @SuppressWarnings("unused")
     public static <T extends PluginObject> T getPluginObjectFromFile(@NonNull Uri fileUri,
                                                       @NonNull Context context, @NonNull Class<T> type)
-            throws IOException, NullPointerException {
-
-        StringBuilder total = new StringBuilder();
-
-        PluginObject pluginObject = null;
+            throws IOException, IllegalArgumentException {
 
         // Open the file
         ParcelFileDescriptor inputPFD = context.getContentResolver().openFileDescriptor(fileUri, "r");
 
         if(inputPFD == null) {
-            throw new NullPointerException("The file could not be opened");
+            throw new IllegalArgumentException("The file could not be opened");
         }
 
         // Read the file
+        StringBuilder total = new StringBuilder();
         InputStream fileStream = new FileInputStream(inputPFD.getFileDescriptor());
-        BufferedReader r = new BufferedReader(new InputStreamReader(fileStream));
-        for (String line; (line = r.readLine()) != null; ) {
-            total.append(line).append('\n');
+        try (BufferedReader r = new BufferedReader(new InputStreamReader(fileStream))) {
+            for (String line; (line = r.readLine()) != null; ) {
+                total.append(line).append('\n');
+            }
         }
 
         // Convert the read file to an ExtractedText object

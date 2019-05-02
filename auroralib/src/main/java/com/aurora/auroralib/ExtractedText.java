@@ -253,27 +253,33 @@ public class ExtractedText implements InternallyProcessedFile, Serializable {
         return extractedText;
     }
 
-
+    /**
+     * Method to convert the file accessed by the Uri to an ExtractedText object
+     *
+     * @param fileUri   The Uri to the temp file
+     * @param context   The conext
+     * @return  ExtractedText object
+     * @throws IOException          On IO trouble
+     * @throws NullPointerException When the file cannot be found.
+     */
     @SuppressWarnings("unused")
     public static ExtractedText getExtractedTextFromFile(@NonNull Uri fileUri, @NonNull Context context)
-            throws IOException, NullPointerException {
-
-        StringBuilder total = new StringBuilder();
-
-        ExtractedText extractedText = null;
+            throws IOException, IllegalArgumentException {
 
         // Open the file
         ParcelFileDescriptor inputPFD = context.getContentResolver().openFileDescriptor(fileUri, "r");
 
         if(inputPFD == null) {
-            throw new NullPointerException("The file could not be opened");
+            throw new IllegalArgumentException("The file could not be opened");
         }
 
         // Read the file
+        StringBuilder total = new StringBuilder();
         InputStream fileStream = new FileInputStream(inputPFD.getFileDescriptor());
-        BufferedReader r = new BufferedReader(new InputStreamReader(fileStream));
-        for (String line; (line = r.readLine()) != null; ) {
-            total.append(line).append('\n');
+        try (BufferedReader r = new BufferedReader(new InputStreamReader(fileStream))) {
+            for (String line; (line = r.readLine()) != null; ) {
+                total.append(line).append('\n');
+            }
         }
 
         // Convert the read file to an ExtractedText object
