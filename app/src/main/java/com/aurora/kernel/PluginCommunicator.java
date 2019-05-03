@@ -196,16 +196,16 @@ public class PluginCommunicator extends Communicator {
         Log.d("JSON", extractedTextInJSON);
 
         // Start by clearing the full android cache directory of our app
-        clearCacheDir(context.getCacheDir());
+        clearCacheDir(context.getCacheDir()); //NOSONAR
 
-        Uri uri;
+        Uri uri; //NOSONAR
 
         try {
-            uri = writeToTempFile(context, extractedTextInJSON, "processed-", ".aur");
-        } catch (IOException e) {
-            Log.e(CLASS_TAG, ERROR_LOG, e);
-            showToast(context, ERROR_LOG);
-            return;
+            uri = writeToTempFile(context, extractedTextInJSON, "processed-", ".aur"); //NOSONAR
+        } catch (IOException e) { //NOSONAR
+            Log.e(CLASS_TAG, ERROR_LOG, e); //NOSONAR
+            showToast(context, ERROR_LOG); //NOSONAR
+            return;//NOSONAR 
         }
 
         // Make the file readable by the plugin, this permission last until the activity of
