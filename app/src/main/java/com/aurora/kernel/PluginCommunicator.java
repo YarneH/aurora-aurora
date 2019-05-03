@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
+import android.support.annotation.Nullable;
 import android.support.v4.content.FileProvider;
 import android.util.Log;
 import android.widget.Toast;
@@ -130,7 +131,7 @@ public class PluginCommunicator extends Communicator {
         Intent launchIntent = context.getPackageManager().getLaunchIntentForPackage(uniquePluginName);
 
         if (launchIntent == null) {
-            showToast(context, context.getString(R.string.could_not_open_plugin));
+            showToastAndLog(context, context.getString(R.string.could_not_open_plugin), null);
             return;
         }
 
@@ -148,18 +149,11 @@ public class PluginCommunicator extends Communicator {
         try {
             uri = writeToTempFile(context, extractedTextInJSON, "processed-", ".aur");
         } catch (IOException e) {
-            Log.e(CLASS_TAG, ERROR_LOG, e);
-            showToast(context, ERROR_LOG);
+            showToastAndLog(context, ERROR_LOG, e);
             return;
         }
 
-        // Make the file readable by the plugin, this permission last until the activity of
-        // the receiving app ends
-        launchIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-        // Add the uri of the file as data
-        launchIntent.setData(uri);
-        // Specify the datatype
-        launchIntent.putExtra(Constants.PLUGIN_INPUT_TYPE, Constants.PLUGIN_INPUT_TYPE_EXTRACTED_TEXT);
+        setDataAndFlags(launchIntent, uri, Constants.PLUGIN_INPUT_TYPE_EXTRACTED_TEXT);
 
         // This is a bit of a hack, but it needs to be done because of trying to launch an
         // activity outside of and activity context
@@ -168,11 +162,10 @@ public class PluginCommunicator extends Communicator {
 
         // Check if at least one app exists that can execute the task
         boolean pluginOpens = launchIntent.resolveActivity(context.getPackageManager()) != null;
-
         if (pluginOpens) {
             context.startActivity(launchIntent);
         } else {
-            showToast(context, context.getString(R.string.could_not_open_plugin));
+            showToastAndLog(context, context.getString(R.string.could_not_open_plugin), null);
         }
     }
 
@@ -189,32 +182,25 @@ public class PluginCommunicator extends Communicator {
      */
 
     private void openFileWithPluginChooser(ExtractedText extractedText, Intent pluginAction,
-                                           Intent chooser, Context context) { //NOSONAR
+                                           Intent chooser, Context context) {
 
         // Convert the extracted text to JSON
         String extractedTextInJSON = extractedText.toJSON();
         Log.d("JSON", extractedTextInJSON);
 
         // Start by clearing the full android cache directory of our app
-        clearCacheDir(context.getCacheDir()); //NOSONAR
+        clearCacheDir(context.getCacheDir());
 
-        Uri uri; //NOSONAR
+        Uri uri;
 
         try {
-            uri = writeToTempFile(context, extractedTextInJSON, "processed-", ".aur"); //NOSONAR
-        } catch (IOException e) { //NOSONAR
-            Log.e(CLASS_TAG, ERROR_LOG, e); //NOSONAR
-            showToast(context, ERROR_LOG); //NOSONAR
-            return;//NOSONAR 
+            uri = writeToTempFile(context, extractedTextInJSON, "processed-", ".aur");
+        } catch (IOException e) {
+            showToastAndLog(context, ERROR_LOG, e);
+            return;
         }
 
-        // Make the file readable by the plugin, this permission last until the activity of
-        // the receiving app ends
-        pluginAction.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-        // Add the uri of the file as data
-        pluginAction.setData(uri);
-        // Specify the datatype
-        pluginAction.putExtra(Constants.PLUGIN_INPUT_TYPE, Constants.PLUGIN_INPUT_TYPE_EXTRACTED_TEXT);
+        setDataAndFlags(pluginAction, uri, Constants.PLUGIN_INPUT_TYPE_EXTRACTED_TEXT);
 
         // This is a bit of a hack, but it needs to be done because of trying to launch an
         // activity outside of and activity context
@@ -223,11 +209,10 @@ public class PluginCommunicator extends Communicator {
 
         // Check if at least one app exists that can execute the task
         boolean pluginOpens = pluginAction.resolveActivity(context.getPackageManager()) != null;
-
         if (pluginOpens) {
             context.startActivity(chooser);
         } else {
-            showToast(context, context.getString(R.string.no_plugins_available));
+            showToastAndLog(context, context.getString(R.string.no_plugins_available), null);
         }
     }
 
@@ -245,7 +230,7 @@ public class PluginCommunicator extends Communicator {
         // Check if plugin is found
 
         if (launchIntent == null) {
-            showToast(context, context.getString(R.string.could_not_open_plugin));
+            showToastAndLog(context, context.getString(R.string.could_not_open_plugin), null);
             return;
         }
 
@@ -259,26 +244,17 @@ public class PluginCommunicator extends Communicator {
         try {
             uri = writeToTempFile(context, jsonRepresentation, "cached-", ".aur");
         } catch (IOException e) {
-            Log.e(CLASS_TAG, ERROR_LOG, e);
-            showToast(context, ERROR_LOG);
+            showToastAndLog(context, ERROR_LOG, e);
             return;
         }
 
-        // Make the file readable by the plugin, this permission last until the activity of
-        // the receiving app ends
-        launchIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-        // Add the uri of the file as data
-        launchIntent.setData(uri);
-        // Specify the datatype
-        launchIntent.putExtra(Constants.PLUGIN_INPUT_TYPE, Constants.PLUGIN_INPUT_TYPE_OBJECT);
-
+        setDataAndFlags(launchIntent, uri, Constants.PLUGIN_INPUT_TYPE_OBJECT);
 
         boolean cachedFileOpens = launchIntent.resolveActivity(context.getPackageManager()) != null;
-
         if (cachedFileOpens) {
             context.startActivity(launchIntent);
         } else {
-            showToast(context, context.getString(R.string.could_not_open_plugin));
+            showToastAndLog(context, context.getString(R.string.could_not_open_plugin), null);
         }
 }
 
@@ -333,6 +309,23 @@ public class PluginCommunicator extends Communicator {
     }
 
     /**
+     * Private helper method that shows a toast on the main tread and also logs the message
+     *
+     * @param context   the application context
+     * @param message   the message that needs to be shown
+     * @param e         the throwable error
+     */
+    private void showToastAndLog(Context context, String message, @Nullable Throwable e) {
+        showToast(context, message);
+        if(e != null) {
+            Log.e(CLASS_TAG, message, e);
+        } else {
+            Log.d(CLASS_TAG, message);
+        }
+
+    }
+
+    /**
      * Private helper function that writes content to a file with a name that starts with a
      * prefix, ends with suffix, and a random number in between.
      *
@@ -352,5 +345,23 @@ public class PluginCommunicator extends Communicator {
         }
 
         return FileProvider.getUriForFile(context, "com.aurora.aurora.provider", file);
+    }
+
+    /**
+     * Set all the data field and flags of the intent correctly for letting the receiver be able
+     * to open the file.
+     *
+     * @param intent    The intent where the fields need to be set
+     * @param uri       The Uri to the file
+     * @param dataType  The datatype of the file, should be a constant of {@link Constants}
+     */
+    private void setDataAndFlags(Intent intent, Uri uri, String dataType) {
+        // Make the file readable by the plugin, this permission last until the activity of
+        // the receiving app ends
+        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        // Add the uri of the file as data
+        intent.setData(uri);
+        // Specify the datatype
+        intent.putExtra(Constants.PLUGIN_INPUT_TYPE, dataType);
     }
 }
