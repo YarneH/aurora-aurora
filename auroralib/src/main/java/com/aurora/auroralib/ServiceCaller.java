@@ -15,6 +15,7 @@ public abstract class ServiceCaller implements ServiceConnection {
      * Context used for binding
      */
     protected Context mAppContext;
+
     /**
      * Object used for synchronisation
      */
@@ -30,7 +31,10 @@ public abstract class ServiceCaller implements ServiceConnection {
 
 
     /**
-     * Binds the service so that a call to the AIDL defined function cache(String) can be executed
+     * Binds the service so that a call to the AIDL defined function of the Service can be called
+     *
+     * @param c        The class of the AIDL defined interface
+     * @param logTag   the logTag to be used (should be the logtag of the subclass
      */
     protected void bindService(Class c, String logTag) {
         Intent implicit = new Intent(c.getName());
@@ -71,5 +75,8 @@ public abstract class ServiceCaller implements ServiceConnection {
         disconnect();
     }
 
+    /**
+     * Release the specific binding object, which is specific to the AIDL defined service/interface
+     */
     protected abstract void disconnect();
 }

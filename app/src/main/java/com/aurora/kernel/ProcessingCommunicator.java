@@ -26,7 +26,13 @@ import io.reactivex.Observable;
 public class ProcessingCommunicator extends Communicator {
     private static final String LOG_TAG = "ProcessingCommunicator";
 
+    /**
+     * Observable for a Cache operation response
+     */
     private Observable<CacheFileResponse> mCacheFileResponseObservable;
+    /**
+     * Observable for a Translation operation response
+     */
     private Observable<TranslationResponse> mTranslationResponseObservable;
 
     /**
@@ -96,7 +102,7 @@ public class ProcessingCommunicator extends Communicator {
     }
 
     /**
-     * translate sentences sent by a plugin
+     * Translate sentences sent by a plugin
      *
      * @param sentences             the list of strings to be translated
      * @param sourceLanguage        the language of the input sentences in ISO code
@@ -125,8 +131,7 @@ public class ProcessingCommunicator extends Communicator {
                     }
                 });
 
-        // Create request to cache the file
-
+        // Create request to translate the sentences
         TranslationRequest translationRequest = new TranslationRequest(
                 sentences.toArray(new String[0]), sourceLanguage, destinationLanguage);
 
@@ -145,7 +150,6 @@ public class ProcessingCommunicator extends Communicator {
             }
 
             return new ArrayList<>(Arrays.asList(translatedSentences.get()));
-            //return new TranslationResult(errorCode.get(), translatedSentences.get());
         }
     }
 

@@ -4,7 +4,6 @@ import android.util.Log;
 
 import java.util.List;
 
-//TODO
 public class ProcessorTranslationThread extends Thread {
     /**
      * Tag used for logging

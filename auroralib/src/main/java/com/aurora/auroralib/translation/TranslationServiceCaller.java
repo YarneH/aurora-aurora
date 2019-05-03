@@ -37,7 +37,6 @@ public class TranslationServiceCaller extends ServiceCaller {
      */
     public List<String> translateOperation(@NonNull List<String> sentences, String sourceLanguage,
                                   @NonNull String destinationLanguage ) {
-        //TODO
         synchronized (mMonitor) {
             List<String> translatedSentences = null;
             bindService(ITranslate.class, LOG_TAG);
@@ -108,6 +107,7 @@ public class TranslationServiceCaller extends ServiceCaller {
     /**
      * Release the binding
      */
+    @Override
     protected void disconnect() {
         mServiceConnected = false;
         mTranslateBinding = null;
@@ -134,6 +134,9 @@ public class TranslationServiceCaller extends ServiceCaller {
             return mTranslatedSentences;
         }
 
+        /**
+         * Waits in case the binding is not ready and executes the translation operation
+         */
         @Override
         public void run() {
             Log.d(LOG_TAG, "translation called");

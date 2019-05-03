@@ -103,6 +103,7 @@ public class CacheServiceCaller extends ServiceCaller {
     /**
      * Release the binding
      */
+    @Override
     protected void disconnect() {
         mServiceConnected = false;
         mCacheBinding = null;
@@ -128,6 +129,9 @@ public class CacheServiceCaller extends ServiceCaller {
             return mCacheResult;
         }
 
+        /**
+         * Waits in case the binding is not ready and executes the cache operation
+         */
         @Override
         public void run() {
             Log.d(LOG_TAG, "cache called");

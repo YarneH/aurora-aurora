@@ -1,15 +1,12 @@
 // ITranslate.aidl
 package com.aurora.internalservice.internaltranslation;
 
-// Declare any non-default types here with import statements
-//import com.aurora.auroralib.internalservice.internaltranslation.TranslationResult;
-
+/**
+ * AIDL interface for the translation operation
+ */
 interface ITranslate {
     /**
-     * Demonstrates some basic types that you can use as parameters
-     * and return values in AIDL.
+     * Translates a list of sentences from the sourceLanguage to the destinationLanguage
      */
-
-    //TranslationResult translate(in List<String> sentences, String sourceLanguage, String destinationLanguage);
     List<String> translate(in List<String> sentences, String sourceLanguage, String destinationLanguage);
 }
