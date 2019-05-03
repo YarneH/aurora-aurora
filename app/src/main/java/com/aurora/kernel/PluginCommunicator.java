@@ -189,7 +189,7 @@ public class PluginCommunicator extends Communicator {
      */
 
     private void openFileWithPluginChooser(ExtractedText extractedText, Intent pluginAction,
-                                           Intent chooser, Context context) {
+                                           Intent chooser, Context context) { //NOSONAR
 
         // Convert the extracted text to JSON
         String extractedTextInJSON = extractedText.toJSON();
