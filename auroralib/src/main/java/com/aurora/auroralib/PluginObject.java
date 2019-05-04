@@ -1,7 +1,17 @@
 package com.aurora.auroralib;
 
+import android.content.Context;
+import android.net.Uri;
+import android.os.ParcelFileDescriptor;
+import android.support.annotation.NonNull;
+
 import com.google.gson.Gson;
 
+import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.Serializable;
 /**
  * Class to represent text processed by the plugin
@@ -61,6 +71,31 @@ public abstract class PluginObject implements Serializable {
      */
     public static final <T extends PluginObject> T fromJson(String json, Class<T> type){
         return sGson.fromJson(json, type);
+    }
+
+    @SuppressWarnings("unused")
+    public static <T extends PluginObject> T getPluginObjectFromFile(@NonNull Uri fileUri,
+                                                      @NonNull Context context, @NonNull Class<T> type)
+            throws IOException {
+
+        // Open the file
+        ParcelFileDescriptor inputPFD = context.getContentResolver().openFileDescriptor(fileUri, "r");
+
+        if(inputPFD == null) {
+            throw new IllegalArgumentException("The file could not be opened");
+        }
+
+        // Read the file
+        StringBuilder total = new StringBuilder();
+        InputStream fileStream = new FileInputStream(inputPFD.getFileDescriptor());
+        try (BufferedReader r = new BufferedReader(new InputStreamReader(fileStream))) {
+            for (String line; (line = r.readLine()) != null; ) {
+                total.append(line).append('\n');
+            }
+        }
+
+        // Convert the read file to an ExtractedText object
+        return fromJson(total.toString(), type);
     }
 
 }
