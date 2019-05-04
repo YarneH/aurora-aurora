@@ -66,7 +66,7 @@ public class Bus {
      *
      * @param event the event to post
      */
-    void post(Event event) {
+    public void post(Event event) {
         mBusSubject.onNext(event);
     }
 }

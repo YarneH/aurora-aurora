@@ -48,22 +48,19 @@ public class PluginInternalServiceCommunicator extends Communicator {
     private InternalNLP mInternalNLP;
 
 
-    /**
-     * A queue to post http requests to
-     */
-    private RequestQueue mRequestQueue;
+    private Translator mTranslator;
     /**
      * Observable keeping track of internal processor requests
      */
     private Observable<InternalProcessorRequest> mInternalProcessorRequestObservable;
 
     /**
-     * Observable keeping track of internal processor requests
+     * Observable keeping track of translation requests
      */
     private Observable<TranslationRequest> mTranslationRequestObservable;
 
     /**
-     * Creates a PluginInternalServiceCommunicator. There should be only one instance at a time
+     * Creates a PluginInternalServiceCommunficator. There should be only one instance at a time
      *
      * @param mBus      a reference to the unique bus instance that all communicators should be using for
      *                  communicating events
@@ -73,7 +70,7 @@ public class PluginInternalServiceCommunicator extends Communicator {
                                              RequestQueue requestQueue) {
         super(mBus);
         mInternalTextProcessor = processor;
-        mRequestQueue = requestQueue;
+        mTranslator = new Translator(mBus, requestQueue);
 
 
         mInternalProcessorRequestObservable = mBus.register(InternalProcessorRequest.class);
@@ -83,12 +80,8 @@ public class PluginInternalServiceCommunicator extends Communicator {
 
         mTranslationRequestObservable = mBus.register(TranslationRequest.class);
         mTranslationRequestObservable.subscribe((TranslationRequest request) ->
-            translate(request.getSentencesToTranslate(), request.getSourceLanguage(), request.getTargetLanguage()));
+            mTranslator.translate(request.getSentencesToTranslate(), request.getSourceLanguage(), request.getTargetLanguage()));
 
-
-        // test code for translation
-        String[] sentences = {"hello my name is Luca", "Does the translating work?"};
-        mBus.post(new TranslationRequest(sentences, "en", "nl"));
 
     }
 
@@ -194,57 +187,8 @@ public class PluginInternalServiceCommunicator extends Communicator {
         mInternalNLP = null;
     }
 
-    /**
-     * private helper method for when a {@link TranslationRequest} comes in. It calls
-     * {@link Translator#makeUrl(String[], String, String)} to get a url and posts this to the {@link #mRequestQueue}
-     *
-     * @param sentencesToTranslate the sentences to translate
-     * @param sourceLanguage       language to translate from
-     * @param targetLanguage       language to translate to
-     */
-    private void translate(String[] sentencesToTranslate, String sourceLanguage, String targetLanguage) {
-        try {
-            String url = Translator.makeUrl(sentencesToTranslate, sourceLanguage, targetLanguage);
-            Log.d("TRANSLATE", url);
-            // Request a json response from the provided URL.
-            // TODO needs to be checked after acquiring key
-            JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET, url,
-                    null, this::postTranslationResponseEvent, this::postTranslationResponseEvent);
-            jsonObjectRequest.setTag("TRANSLATOR");
-
-            mRequestQueue.add(jsonObjectRequest);
-            Log.d("TRANSLATE", "request added");
-        } catch (IOException e) {
-            Log.e("TRANSLATION", "Translation failed", e);
-            postTranslationResponseEvent(e);
-        }
-    }
-
-    /**
-     * Posts a {@link TranslationResponse} event getting the translated data from the argument
-     *
-     * @param response the respons from the {@link RequestQueue} to the Google API
-     */
-    private void postTranslationResponseEvent(JSONObject response) {
-        try {
-            mBus.post(Translator.getTranslationResponse(response));
-
-        } catch (JSONException e) {
-            Log.e("JSON", "getting from json failed", e);
-            postTranslationResponseEvent(e);
-        }
 
 
-    }
 
-    /**
-     * Posts a {@link TranslationResponse} that signifies the transation failed
-     *
-     * @param error the reason why the translation failed
-     */
-    private void postTranslationResponseEvent(Exception error) {
-        TranslationResponse errorResponse = new TranslationResponse(error.getMessage());
-        mBus.post(errorResponse);
-    }
 
 }

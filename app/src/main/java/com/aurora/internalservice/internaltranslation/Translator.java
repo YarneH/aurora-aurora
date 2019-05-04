@@ -1,30 +1,66 @@
 package com.aurora.internalservice.internaltranslation;
 
 
+import android.util.Log;
+
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.toolbox.JsonObjectRequest;
 import com.aurora.aurora.BuildConfig;
 import com.aurora.internalservice.InternalService;
+import com.aurora.kernel.Bus;
+import com.aurora.kernel.event.TranslationRequest;
 import com.aurora.kernel.event.TranslationResponse;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 
 public final class Translator implements InternalService {
 
-    private static final String START_REQUEST = "https://translation.googleapis.com/language/translate/v2?";
+    /**
+     * A queue to post http requests to
+     */
+    private RequestQueue mRequestQueue;
+
+    /**
+     * The unique bus
+     */
+    private Bus mBus;
+
+    /**
+     * A static variable for accessing the google API service, it is the beginning of the url that
+     * translates the added queries
+     */
+    private static final String HTTP_BEGIN = "https://translation.googleapis.com/language/translate/v2?";
+    /**
+     * Beginning tag for a query in the url to send to the API
+     */
     private static final String QUERY = "&q=";
+    /**
+     * Beginning tag for the target language in the url to send to the API
+     */
     private static final String TARGET = "&target=";
+
+    /**
+     * Beginning tag for the target language in the url to send to the API
+     */
     private static final String SOURCE = "&source=";
 
-    private static final String API_KEY = BuildConfig.TRANSLATION_API;
+    /**
+     * Beginning tag and key for in the url to send to the API
+     */
+    private static final String KEY = "&key=" +BuildConfig.TRANSLATION_API;
 
-    private static final String KEY = "&key=" + API_KEY;
+
+    public Translator(Bus bus, RequestQueue requestQueue) {
+        mBus = bus;
+        mRequestQueue = requestQueue;
 
 
-    private Translator() {
-        // static elements
     }
 
     /**
@@ -38,7 +74,7 @@ public final class Translator implements InternalService {
      */
     public static String makeUrl(String[] sentencesToTranslate, String sourceLanguage, String targetLanguage)
             throws UnsupportedEncodingException {
-        StringBuilder bld = new StringBuilder(START_REQUEST);
+        StringBuilder bld = new StringBuilder(HTTP_BEGIN);
         boolean first = true;
         for (String sentence : sentencesToTranslate) {
             //add start of query
@@ -73,7 +109,7 @@ public final class Translator implements InternalService {
      * @throws JSONException An exception that signifies this object is not according to the google translate
      *                       api
      */
-    public static TranslationResponse getTranslationResponse(JSONObject response) throws JSONException {
+    private static TranslationResponse getTranslationResponse(JSONObject response) throws JSONException {
 
         // Get the translations
         JSONArray jsonTranslations = response.getJSONObject("data").getJSONArray("translations");
@@ -88,5 +124,57 @@ public final class Translator implements InternalService {
         return new TranslationResponse(translations);
 
 
+    }
+
+    /**
+     * private helper method for when a {@link TranslationRequest} comes in. It calls
+     * {@link Translator#makeUrl(String[], String, String)} to get a url and posts this to the {@link #mRequestQueue}
+     *
+     * @param sentencesToTranslate the sentences to translate
+     * @param sourceLanguage       language to translate from
+     * @param targetLanguage       language to translate to
+     */
+    public void translate(String[] sentencesToTranslate, String sourceLanguage, String targetLanguage) {
+        try {
+            String url = makeUrl(sentencesToTranslate, sourceLanguage, targetLanguage);
+            Log.d("TRANSLATE", url);
+            // Request a json response from the provided URL.
+            JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET, url,
+                    null, this::postTranslationResponseEvent, this::postTranslationResponseEvent);
+            jsonObjectRequest.setTag("TRANSLATOR");
+
+            mRequestQueue.add(jsonObjectRequest);
+            Log.d("TRANSLATE", "request added");
+        } catch (IOException e) {
+            Log.e("TRANSLATION", "Translation failed", e);
+            postTranslationResponseEvent(e);
+        }
+    }
+
+    /**
+     * Posts a {@link TranslationResponse} event getting the translated data from the argument
+     *
+     * @param response the response from the {@link RequestQueue} to the Google API
+     */
+    private void postTranslationResponseEvent(JSONObject response) {
+        try {
+            mBus.post(Translator.getTranslationResponse(response));
+
+        } catch (JSONException e) {
+            Log.e("JSON", "getting from json failed", e);
+            postTranslationResponseEvent(e);
+        }
+
+
+    }
+
+    /**
+     * Posts a {@link TranslationResponse} that signifies the transation failed
+     *
+     * @param error the reason why the translation failed
+     */
+    private void postTranslationResponseEvent(Exception error) {
+        TranslationResponse errorResponse = new TranslationResponse(error.getMessage());
+        mBus.post(errorResponse);
     }
 }
