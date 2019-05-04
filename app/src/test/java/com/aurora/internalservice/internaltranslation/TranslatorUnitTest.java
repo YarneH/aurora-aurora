@@ -1,5 +1,8 @@
 package com.aurora.internalservice.internaltranslation;
 
+import com.aurora.kernel.event.TranslationResponse;
+import com.aurora.util.FakeRequestQueue;
+
 import org.junit.Test;
 
 import java.io.UnsupportedEncodingException;

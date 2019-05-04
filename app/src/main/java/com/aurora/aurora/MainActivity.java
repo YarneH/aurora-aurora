@@ -30,6 +30,7 @@ import com.aurora.auroralib.Constants;
 import com.aurora.kernel.AuroraCommunicator;
 import com.aurora.kernel.ContextNullException;
 import com.aurora.kernel.Kernel;
+import com.aurora.kernel.event.TranslationRequest;
 import com.aurora.plugin.Plugin;
 import com.google.firebase.analytics.FirebaseAnalytics;
 

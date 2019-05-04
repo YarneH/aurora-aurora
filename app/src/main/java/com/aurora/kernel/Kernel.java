@@ -145,7 +145,6 @@ public final class Kernel {
         // Create cache
         InternalCache internalCache = new InternalCache(applicationContext);
         sAuroraInternalServiceCommunicator = new AuroraInternalServiceCommunicator(sBus, internalCache);
-
         return sKernel;
     }
 

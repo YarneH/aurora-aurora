@@ -2,9 +2,7 @@ package com.aurora.kernel;
 
 import android.util.Log;
 
-import com.android.volley.Request;
 import com.android.volley.RequestQueue;
-import com.android.volley.toolbox.JsonObjectRequest;
 import com.aurora.auroralib.ExtractedText;
 import com.aurora.internalservice.internalnlp.InternalNLP;
 import com.aurora.internalservice.internalprocessor.FileTypeNotSupportedException;
@@ -18,10 +16,6 @@ import com.aurora.plugin.InternalServices;
 
 import org.apache.commons.lang3.NotImplementedException;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 
@@ -42,7 +36,8 @@ public class PluginInternalServiceCommunicator extends Communicator {
      */
     private InternalTextProcessor mInternalTextProcessor;
 
-    /** InternalNLP object, loads some annotators statically so needs to keep living for
+    /**
+     * InternalNLP object, loads some annotators statically so needs to keep living for
      * performance
      */
     private InternalNLP mInternalNLP;
@@ -70,7 +65,7 @@ public class PluginInternalServiceCommunicator extends Communicator {
                                              RequestQueue requestQueue) {
         super(mBus);
         mInternalTextProcessor = processor;
-        mTranslator = new Translator(mBus, requestQueue);
+        mTranslator = new Translator(requestQueue);
 
 
         mInternalProcessorRequestObservable = mBus.register(InternalProcessorRequest.class);
@@ -79,9 +74,14 @@ public class PluginInternalServiceCommunicator extends Communicator {
                         request.getInternalServices()));
 
         mTranslationRequestObservable = mBus.register(TranslationRequest.class);
-        mTranslationRequestObservable.subscribe((TranslationRequest request) ->
-            mTranslator.translate(request.getSentencesToTranslate(), request.getSourceLanguage(), request.getTargetLanguage()));
-
+        mTranslationRequestObservable.subscribe((TranslationRequest request) -> {
+            TranslationResponse response = mTranslator.translate(request);
+            if (response != null) {
+                mBus.post(response);
+            } else {
+                mBus.post(new TranslationResponse("Something went wrong in the translation"));
+            }
+        });
 
     }
 
@@ -120,9 +120,9 @@ public class PluginInternalServiceCommunicator extends Communicator {
      * Private method that does the ImageExtraction and TextExtraction tasks if requested
      *
      * @param internalServices the set of internal services that should be run on the file
-     * @param file              the file inputstream
-     * @param fileRef           a reference to the file that should be processed
-     * @param type              the file type (extension)
+     * @param file             the file inputstream
+     * @param fileRef          a reference to the file that should be processed
+     * @param type             the file type (extension)
      * @return ExtractedText object
      */
     private ExtractedText doTextAndImageExtractionTasks(List<InternalServices> internalServices,
@@ -140,9 +140,9 @@ public class PluginInternalServiceCommunicator extends Communicator {
                 extractedText = mInternalTextProcessor.processFile(file, fileRef, type,
                         extractImages);
 
-                Log.d( CLASS_TAG,
+                Log.d(CLASS_TAG,
                         "Service completed: " + InternalServices.TEXT_EXTRACTION.name());
-                if(extractImages) {
+                if (extractImages) {
                     Log.d(CLASS_TAG,
                             "Service completed: " + InternalServices.IMAGE_EXTRACTION.name());
                 }
@@ -157,17 +157,17 @@ public class PluginInternalServiceCommunicator extends Communicator {
     /**
      * Private method that does the InternalNLP annotation if requested
      *
-     * @param extractedText     extractedText object that should be annotated
-     * @param internalServices  the services to determine if the NLP service is requested
+     * @param extractedText    extractedText object that should be annotated
+     * @param internalServices the services to determine if the NLP service is requested
      */
     private void doNLPTask(ExtractedText extractedText, List<InternalServices> internalServices) {
         boolean doNLP = false;
 
         // Add all NLP steps to the pipeline
-        for (InternalServices internalService: internalServices) {
+        for (InternalServices internalService : internalServices) {
 
-            if(internalService.name().startsWith("NLP_")) {
-                if(mInternalNLP == null) {
+            if (internalService.name().startsWith("NLP_")) {
+                if (mInternalNLP == null) {
                     mInternalNLP = new InternalNLP();
                 }
 
@@ -180,15 +180,11 @@ public class PluginInternalServiceCommunicator extends Communicator {
             }
         }
 
-        if(doNLP) {
+        if (doNLP) {
             mInternalNLP.annotate(extractedText);
             Log.d(CLASS_TAG, "Service completed: " + "NLP ANNOTATION");
         }
         mInternalNLP = null;
     }
-
-
-
-
 
 }
