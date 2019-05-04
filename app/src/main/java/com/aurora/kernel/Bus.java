@@ -10,7 +10,7 @@ import io.reactivex.subjects.Subject;
 /**
  * Communication bus that is used in the kernel. All communicators should use the same bus instance
  */
-public class Bus {
+class Bus {
     /**
      * The bus subject is an observable and observer of events at the same time.
      * It acts as a link between the different communicating parties.
@@ -66,7 +66,7 @@ public class Bus {
      *
      * @param event the event to post
      */
-    public void post(Event event) {
+    void post(Event event) {
         mBusSubject.onNext(event);
     }
 }
