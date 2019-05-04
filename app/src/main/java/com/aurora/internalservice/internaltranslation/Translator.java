@@ -68,7 +68,8 @@ public final class Translator implements InternalService {
     public TranslationResponse translate(TranslationRequest request) {
 
         try {
-            String url = makeUrl(request.getSentencesToTranslate(), request.getSourceLanguage(), request.getTargetLanguage());
+            String url = makeUrl(request.getSentencesToTranslate(), request.getSourceLanguage(),
+                    request.getTargetLanguage());
             Log.d("TRANSLATE", url);
             // Request a json mInternalResponse from the provided URL.
             JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET, url,
@@ -77,26 +78,28 @@ public final class Translator implements InternalService {
 
             mRequestQueue.add(jsonObjectRequest);
             Log.d("TRANSLATE", "request added");
-            synchronized (lock) {
-                while (mInternalResponse == null) {
-                    try {
-                        lock.wait();
-                    } catch (InterruptedException e) {
-                        //TODO interrupt
-                    }
-                }
-                // copy the internal response
-                TranslationResponse result = mInternalResponse;
-                // set the internalresponse back to null
-                mInternalResponse = null;
-                // return the copy
-                return result;
-            }
         } catch (IOException e) {
             Log.e("TRANSLATION", "Translation failed", e);
             evaluateResponse(e);
         }
-        return null;
+        // either the request is added or an error response will be created so wait untill a response
+        // is made
+        synchronized (lock) {
+            while (mInternalResponse == null) {
+                try {
+                    lock.wait();
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+            }
+            // copy the internal response
+            TranslationResponse result = mInternalResponse;
+            // set the internalresponse back to null
+            mInternalResponse = null;
+            // return the copy
+            return result;
+        }
+
     }
 
     /**

@@ -5,7 +5,6 @@ import android.util.Log;
 
 import com.aurora.auroralib.cache.CacheResults;
 import com.aurora.auroralib.translation.TranslationErrorCodes;
-import com.aurora.auroralib.translation.TranslationResult;
 import com.aurora.kernel.event.CacheFileRequest;
 import com.aurora.kernel.event.CacheFileResponse;
 import com.aurora.kernel.event.TranslationRequest;
@@ -87,7 +86,7 @@ public class ProcessingCommunicator extends Communicator {
         mBus.post(cacheFileRequest);
 
         synchronized (this) {
-            while(!isSet.get()) {
+            while (!isSet.get()) {
                 try {
                     wait();
                 } catch (InterruptedException e) {
@@ -104,9 +103,9 @@ public class ProcessingCommunicator extends Communicator {
     /**
      * Translate sentences sent by a plugin
      *
-     * @param sentences             the list of strings to be translated
-     * @param sourceLanguage        the language of the input sentences in ISO code
-     * @param destinationLanguage   the desired language of the translations in ISO format
+     * @param sentences           the list of strings to be translated
+     * @param sourceLanguage      the language of the input sentences in ISO code
+     * @param destinationLanguage the desired language of the translations in ISO format
      * @return the list of translated sentences
      */
     public List<String> translateSentences(@NonNull List<String> sentences,
@@ -115,21 +114,21 @@ public class ProcessingCommunicator extends Communicator {
         // response contains boolean, which is converted to a status code which is then synchronously returned
         AtomicBoolean isSet = new AtomicBoolean(false);
         final AtomicInteger errorCode = new AtomicInteger(TranslationErrorCodes.TRANSLATION_FAIL);
-        final AtomicReference<String []> translatedSentences = new AtomicReference<>();
+        final AtomicReference<String[]> translatedSentences = new AtomicReference<>();
 
         mTranslationResponseObservable.subscribe((TranslationResponse response) -> {
             synchronized (this) {
-                        isSet.set(true);
-                        String errorMessage = response.getErrorMessage();
-                        if (errorMessage == null){
-                            errorCode.set(TranslationErrorCodes.TRANSLATION_SUCCESS);
-                            translatedSentences.set(response.getTranslatedSentences());
-                        } else{
-                            Log.e(LOG_TAG, errorMessage);
-                        }
-                        notifyAll();
-                    }
-                });
+                isSet.set(true);
+                String errorMessage = response.getErrorMessage();
+                if (errorMessage == null) {
+                    errorCode.set(TranslationErrorCodes.TRANSLATION_SUCCESS);
+                    translatedSentences.set(response.getTranslatedSentences());
+                } else {
+                    Log.e(LOG_TAG, errorMessage);
+                }
+                notifyAll();
+            }
+        });
 
         // Create request to translate the sentences
         TranslationRequest translationRequest = new TranslationRequest(
@@ -139,7 +138,7 @@ public class ProcessingCommunicator extends Communicator {
         mBus.post(translationRequest);
 
         synchronized (this) {
-            while(!isSet.get()) {
+            while (!isSet.get()) {
                 try {
                     wait();
                 } catch (InterruptedException e) {

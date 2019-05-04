@@ -30,7 +30,6 @@ import com.aurora.auroralib.Constants;
 import com.aurora.kernel.AuroraCommunicator;
 import com.aurora.kernel.ContextNullException;
 import com.aurora.kernel.Kernel;
-import com.aurora.kernel.event.TranslationRequest;
 import com.aurora.plugin.Plugin;
 import com.google.firebase.analytics.FirebaseAnalytics;
 
@@ -153,10 +152,44 @@ public class MainActivity extends AppCompatActivity
         // If opening the file is done from a file explorer
         if (Intent.ACTION_VIEW.equals(getIntent().getAction())) {
             // This method is also called when a file is opened from the file chooser
-            onActivityResult(REQUEST_FILE_GET,RESULT_OK, getIntent());
+            onActivityResult(REQUEST_FILE_GET, RESULT_OK, getIntent());
         }
     }
 
+    /**
+     * Helper method that register the plugins with their info in the pluginregistry
+     * TODO: when the pluginmarket is implemented, remove this method
+     */
+    private void registerPlugins() {
+        final Plugin basicPlugin = new Plugin(
+                "com.aurora.basicplugin",
+                "Basic Plugin",
+                null,
+                "Basic plugin to open any file and display extracted text.",
+                4,
+                "v0.4");
+
+        final Plugin souschefPlugin = new Plugin(
+                "com.aurora.souschef",
+                "Souschef",
+                null,
+                "Plugin to open recipes and display them in an enhanced way.",
+                4,
+                "v0.4");
+
+        final Plugin paperViewerPlugin = new Plugin(
+                "com.aurora.paperviewer",
+                "Paperviewer",
+                null,
+                "Plugin to open papers and display them in an enhanced way.",
+                4,
+                "v0.4");
+
+        // Register plugins in the registry
+        mAuroraCommunicator.registerPlugin(basicPlugin);
+        mAuroraCommunicator.registerPlugin(souschefPlugin);
+        mAuroraCommunicator.registerPlugin(paperViewerPlugin);
+    }
 
     /**
      * Creates an intent to open the file manager.
@@ -375,41 +408,6 @@ public class MainActivity extends AppCompatActivity
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
-    }
-
-    /**
-     * Helper method that register the plugins with their info in the pluginregistry
-     * TODO: when the pluginmarket is implemented, remove this method
-     */
-    private void registerPlugins() {
-        final Plugin basicPlugin = new Plugin(
-                "com.aurora.basicplugin",
-                "Basic Plugin",
-                null,
-                "Basic plugin to open any file and display extracted text.",
-                4,
-                "v0.4");
-
-        final Plugin souschefPlugin = new Plugin(
-                "com.aurora.souschef",
-                "Souschef",
-                null,
-                "Plugin to open recipes and display them in an enhanced way.",
-                4,
-                "v0.4");
-
-        final Plugin paperViewerPlugin = new Plugin(
-                "com.aurora.paperviewer",
-                "Paperviewer",
-                null,
-                "Plugin to open papers and display them in an enhanced way.",
-                4,
-                "v0.4");
-
-        // Register plugins in the registry
-        mAuroraCommunicator.registerPlugin(basicPlugin);
-        mAuroraCommunicator.registerPlugin(souschefPlugin);
-        mAuroraCommunicator.registerPlugin(paperViewerPlugin);
     }
 }
 
