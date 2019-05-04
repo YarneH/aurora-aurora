@@ -68,10 +68,19 @@ public class PluginCommunicator extends Communicator {
      */
     private static final String ERROR_LOG = "Writing to temporary files went wrong";
 
+    /**
+     * Prefix used for Extracted-text temporary files
+     */
     private static final String PROCESSED_PREFIX = "processed-";
 
+    /**
+     * Prefix used for Cached PluginObject temporary files
+     */
     private static final String CACHED_PREFIX = "cached-";
 
+    /**
+     * File extension used as suffix
+     */
     private static final String EXTENSION = ".aur";
 
 
@@ -281,7 +290,6 @@ public class PluginCommunicator extends Communicator {
      *
      * @param dir       the directory that needs files to be removed from
      * @param prefix    the files that will be deleted start with this prefix
-     * @return true if success, false otherwise
      */
     @SuppressWarnings("squid:S4042")
     // This warning is suppressed because it's not android compliant.
