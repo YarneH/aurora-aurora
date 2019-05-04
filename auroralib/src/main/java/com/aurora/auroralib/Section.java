@@ -6,6 +6,7 @@ import java.util.List;
 
 import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.pipeline.CoreNLPProtos;
+import edu.stanford.nlp.pipeline.ProtobufAnnotationSerializer;
 
 public class Section {
 
@@ -113,6 +114,13 @@ public class Section {
 
     @SuppressWarnings("unused")
     public Annotation getTitleAnnotation() {
+        // Recover the title CoreNLP annotations
+        if (mTitleAnnotationProto != null && mTitleAnnotation == null) {
+            ProtobufAnnotationSerializer annotationSerializer =
+                    new ProtobufAnnotationSerializer(true);
+            mTitleAnnotation = annotationSerializer.fromProto(mTitleAnnotationProto);
+        }
+
         return mTitleAnnotation;
     }
 
@@ -146,6 +154,13 @@ public class Section {
 
     @SuppressWarnings("unused")
     public Annotation getBodyAnnotation() {
+        // Recover the body CoreNLP annotations
+        if (mBodyAnnotationProto != null && mBodyAnnotation == null) {
+            ProtobufAnnotationSerializer annotationSerializer =
+                    new ProtobufAnnotationSerializer(true);
+            mBodyAnnotation = annotationSerializer.fromProto(mBodyAnnotationProto);
+        }
+
         return mBodyAnnotation;
     }
 
