@@ -2,6 +2,9 @@ package com.aurora.auroralib;
 
 import android.content.Context;
 
+import com.aurora.auroralib.cache.CacheServiceCaller;
+import com.aurora.auroralib.cache.ProcessorCacheThread;
+
 /**
  * Superclass for a 'Communicator', i.e. the interface between plugin environment and plugin processor
  */

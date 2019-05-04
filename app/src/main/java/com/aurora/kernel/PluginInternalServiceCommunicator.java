@@ -16,6 +16,8 @@ import com.aurora.kernel.event.TranslationRequest;
 import com.aurora.kernel.event.TranslationResponse;
 import com.aurora.plugin.InternalServices;
 
+import org.apache.commons.lang3.NotImplementedException;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -40,8 +42,10 @@ public class PluginInternalServiceCommunicator extends Communicator {
      */
     private InternalTextProcessor mInternalTextProcessor;
 
-    /** CoreNLP pipeline */
-    private InternalNLP mNLPPipeline;
+    /** InternalNLP object, loads some annotators statically so needs to keep living for
+     * performance
+     */
+    private InternalNLP mInternalNLP;
 
 
     /**
@@ -99,16 +103,49 @@ public class PluginInternalServiceCommunicator extends Communicator {
      */
     private void processFileWithInternalProcessor(String fileRef, String type, InputStream file,
                                                   List<InternalServices> internalServices) {
+
+        // STEP ONE
+        ExtractedText extractedText = doTextAndImageExtractionTasks(internalServices, file,
+                fileRef, type);
+
+        // If extractedText is null for some reason: return default extracted text
+        if (extractedText == null) {
+            extractedText = new ExtractedText("", null);
+        }
+
+        // STEP TWO
+        doNLPTask(extractedText, internalServices);
+
+        // Create response
+        InternalProcessorResponse response = new InternalProcessorResponse(extractedText);
+
+        // Post response
+        mBus.post(response);
+    }
+
+    /**
+     * Private method that does the ImageExtraction and TextExtraction tasks if requested
+     *
+     * @param internalServices the set of internal services that should be run on the file
+     * @param file              the file inputstream
+     * @param fileRef           a reference to the file that should be processed
+     * @param type              the file type (extension)
+     * @return ExtractedText object
+     */
+    private ExtractedText doTextAndImageExtractionTasks(List<InternalServices> internalServices,
+                                                        InputStream file, String fileRef, String type) {
+        // Perform internal services that are in the given set
+
         ExtractedText extractedText = null;
 
-        // Perform internal services that are in the given set
         if (internalServices.contains(InternalServices.TEXT_EXTRACTION)) {
             // Call internal text processor
             try {
                 boolean extractImages =
                         internalServices.contains(InternalServices.IMAGE_EXTRACTION);
 
-                extractedText = mInternalTextProcessor.processFile(file, fileRef, type, extractImages);
+                extractedText = mInternalTextProcessor.processFile(file, fileRef, type,
+                        extractImages);
 
                 Log.d( CLASS_TAG,
                         "Service completed: " + InternalServices.TEXT_EXTRACTION.name());
@@ -116,40 +153,45 @@ public class PluginInternalServiceCommunicator extends Communicator {
                     Log.d(CLASS_TAG,
                             "Service completed: " + InternalServices.IMAGE_EXTRACTION.name());
                 }
+
             } catch (FileTypeNotSupportedException e) {
                 Log.e(CLASS_TAG, "File type is not supported!", e);
             }
         }
+        return extractedText;
+    }
 
-        // If extractedText is null for some reason: return default extracted text
-        if (extractedText == null) {
-            extractedText = new ExtractedText("", null);
-        }
+    /**
+     * Private method that does the InternalNLP annotation if requested
+     *
+     * @param extractedText     extractedText object that should be annotated
+     * @param internalServices  the services to determine if the NLP service is requested
+     */
+    private void doNLPTask(ExtractedText extractedText, List<InternalServices> internalServices) {
+        boolean doNLP = false;
 
         // Add all NLP steps to the pipeline
         for (InternalServices internalService: internalServices) {
 
             if(internalService.name().startsWith("NLP_")) {
-                if(mNLPPipeline == null) {
-                    mNLPPipeline = new InternalNLP();
+                if(mInternalNLP == null) {
+                    mInternalNLP = new InternalNLP();
                 }
 
-                mNLPPipeline.addAnnotator(internalService);
+                try {
+                    mInternalNLP.addAnnotator(internalService);
+                    doNLP = true;
+                } catch (NotImplementedException e) {
+                    Log.e(CLASS_TAG, "Something went wrong when building the NLP pipeline", e);
+                }
             }
-
         }
 
-        if(mNLPPipeline != null) {
-             mNLPPipeline.annotate(extractedText);
+        if(doNLP) {
+            mInternalNLP.annotate(extractedText);
             Log.d(CLASS_TAG, "Service completed: " + "NLP ANNOTATION");
         }
-
-
-        // Create response
-        InternalProcessorResponse response = new InternalProcessorResponse(extractedText);
-
-        // Post response
-        mBus.post(response);
+        mInternalNLP = null;
     }
 
     /**

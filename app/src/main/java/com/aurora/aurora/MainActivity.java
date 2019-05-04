@@ -124,14 +124,6 @@ public class MainActivity extends AppCompatActivity
         /* Initialize FirebaseAnalytics */
         mFirebaseAnalytics = FirebaseAnalytics.getInstance(this);
 
-        /* Set system properties for DOCX */
-        System.setProperty("org.apache.poi.javax.xml.stream.XMLInputFactory",
-                "com.fasterxml.aalto.stax.InputFactoryImpl");
-        System.setProperty("org.apache.poi.javax.xml.stream.XMLOutputFactory",
-                "com.fasterxml.aalto.stax.OutputFactoryImpl");
-        System.setProperty("org.apache.poi.javax.xml.stream.XMLEventFactory",
-                "com.fasterxml.aalto.stax.EventFactoryImpl");
-
         /* Add toolbar when activity is created */
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -252,15 +244,6 @@ public class MainActivity extends AppCompatActivity
                     Intent chooser = Intent.createChooser(pluginAction, getString(R.string.select_plugin));
                     mAuroraCommunicator.openFileWithPluginChooser(textFile.toString(), type,
                             read, pluginAction, chooser, getApplicationContext());
-                    /*
-                    // For now hard coded constant
-                    String uniquePluginName = "com.aurora.basicplugin";
-
-                    mAuroraCommunicator.openFileWithPlugin(textFile.toString(), type,
-                            read, uniquePluginName, getApplicationContext());
-                    */
-
-
                     /*
                     // For now hard coded constant
                     String uniquePluginName = "com.aurora.basicplugin";

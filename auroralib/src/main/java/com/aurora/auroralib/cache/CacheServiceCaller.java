@@ -1,21 +1,16 @@
-package com.aurora.auroralib;
+package com.aurora.auroralib.cache;
 
 import android.content.ComponentName;
 import android.content.Context;
-import android.content.Intent;
-import android.content.ServiceConnection;
-import android.content.pm.ResolveInfo;
-import android.content.pm.ServiceInfo;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
+import com.aurora.auroralib.ServiceCaller;
 import com.aurora.internalservice.internalcache.ICache;
 
-import java.util.List;
-
-public class CacheServiceCaller implements ServiceConnection {
+public class CacheServiceCaller extends ServiceCaller {
     /**
      * Tag used for log messages
      */
@@ -24,23 +19,11 @@ public class CacheServiceCaller implements ServiceConnection {
     /**
      * Binding to the remote interface
      */
-    private ICache mBinding = null;
+    private ICache mCacheBinding = null;
 
-    // !!! Not sure yet if this is handled right by just passing an activity's context (See BasicPlugin_Old)
-    private Context mAppContext;
-
-    /**
-     * Object used for synchronisation
-     */
-    private final Object monitor = new Object();
-
-    /**
-     * Boolean indicating if service is connected
-     */
-    private boolean mServiceConnected = false;
 
     public CacheServiceCaller(Context context) {
-        mAppContext = context;
+        super(context);
     }
 
 
@@ -54,12 +37,12 @@ public class CacheServiceCaller implements ServiceConnection {
      */
     public int cacheOperation(@NonNull String fileName, @NonNull String uniquePluginName,
                               @NonNull String pluginObjectJSON) {
-        synchronized (monitor) {
+        synchronized (mMonitor) {
             int result = CacheResults.NOT_REACHED;
-            bindService();
+            bindService(ICache.class, LOG_TAG);
             try {
                 while (!mServiceConnected) {
-                    monitor.wait();
+                    mMonitor.wait();
                 }
 
                 result = cache(fileName, uniquePluginName, pluginObjectJSON);
@@ -76,38 +59,6 @@ public class CacheServiceCaller implements ServiceConnection {
         }
     }
 
-
-    /**
-     * Binds the service so that a call to the AIDL defined function cache(String) can be executed
-     */
-    private void bindService() {
-        Intent implicit = new Intent(ICache.class.getName());
-        List<ResolveInfo> matches = mAppContext.getPackageManager().queryIntentServices(implicit, 0);
-
-        if (matches.isEmpty()) {
-            Log.d(LOG_TAG, "No cache service found");
-        } else if (matches.size() > 1) {
-            Log.d(LOG_TAG, "Multiple cache services found");
-        } else {
-            Log.d(LOG_TAG, "1 cache service found");
-            Intent explicit = new Intent(implicit);
-            ServiceInfo svcInfo = matches.get(0).serviceInfo;
-            ComponentName cn = new ComponentName(svcInfo.applicationInfo.packageName,
-                    svcInfo.name);
-
-            explicit.setComponent(cn);
-            mAppContext.bindService(explicit, this, Context.BIND_AUTO_CREATE);
-            Log.d(LOG_TAG, "Binding service");
-        }
-    }
-
-    /**
-     * Release the binding
-     */
-    private void unbindService() {
-        mAppContext.unbindService(this);
-        disconnect();
-    }
 
     /**
      * Will start a new thread to cache the file
@@ -140,31 +91,22 @@ public class CacheServiceCaller implements ServiceConnection {
      */
     @Override
     public void onServiceConnected(ComponentName className, IBinder binder) {
-        synchronized (monitor) {
-            mBinding = ICache.Stub.asInterface(binder);
+        synchronized (mMonitor) {
+            mCacheBinding = ICache.Stub.asInterface(binder);
             Log.d(LOG_TAG, "Plugin Bound");
 
             mServiceConnected = true;
-            monitor.notifyAll();
+            mMonitor.notifyAll();
         }
-    }
-
-    /**
-     * This function is called by the android system if the service gets disconnected
-     *
-     * @param className
-     */
-    @Override
-    public void onServiceDisconnected(ComponentName className) {
-        disconnect();
     }
 
     /**
      * Release the binding
      */
-    private void disconnect() {
+    @Override
+    protected void disconnect() {
         mServiceConnected = false;
-        mBinding = null;
+        mCacheBinding = null;
         Log.d(LOG_TAG, "Plugin Unbound");
     }
 
@@ -187,19 +129,22 @@ public class CacheServiceCaller implements ServiceConnection {
             return mCacheResult;
         }
 
+        /**
+         * Waits in case the binding is not ready and executes the cache operation
+         */
         @Override
         public void run() {
             Log.d(LOG_TAG, "cache called");
             try {
 
-                if (mBinding == null) {
-                    synchronized (monitor) {
+                if (mCacheBinding == null) {
+                    synchronized (mMonitor) {
                         Log.d(LOG_TAG, "Entering sync block" + mCacheResult);
 
                         mCacheResult = cache();
                     }
                 } else {
-                    mCacheResult = mBinding.cache(mFileName, mPluginObjectJSON, mUniquePluginName);
+                    mCacheResult = mCacheBinding.cache(mFileName, mPluginObjectJSON, mUniquePluginName);
                     Log.d(LOG_TAG, "" + mCacheResult);
                 }
 
@@ -211,10 +156,10 @@ public class CacheServiceCaller implements ServiceConnection {
         }
 
         private int cache() throws RemoteException {
-            synchronized (monitor) {
+            synchronized (mMonitor) {
                 try {
                     while (!mServiceConnected) {
-                        monitor.wait();
+                        mMonitor.wait();
                     }
                 } catch (InterruptedException e) {
                     Log.e(getClass().getSimpleName(), "Exception requesting cache", e);
@@ -223,7 +168,7 @@ public class CacheServiceCaller implements ServiceConnection {
                     // https://www.ibm.com/developerworks/java/library/j-jtp05236/index.html?ca=drs-#2.1
                     Thread.currentThread().interrupt();
                 }
-                int cacheResult = mBinding.cache(mFileName, mUniquePluginName, mPluginObjectJSON);
+                int cacheResult = mCacheBinding.cache(mFileName, mUniquePluginName, mPluginObjectJSON);
                 Log.d(LOG_TAG, "" + cacheResult);
                 return cacheResult;
             }
