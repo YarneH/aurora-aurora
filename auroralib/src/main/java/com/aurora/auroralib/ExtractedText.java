@@ -178,6 +178,13 @@ public class ExtractedText implements InternallyProcessedFile, Serializable {
 
     @SuppressWarnings("unused")
     public Annotation getTitleAnnotation() {
+        // Recover the title CoreNLP annotations
+        if (mTitleAnnotationProto != null && mTitleAnnotation == null) {
+            ProtobufAnnotationSerializer annotationSerializer =
+                    new ProtobufAnnotationSerializer(true);
+                    mTitleAnnotation = annotationSerializer.fromProto(mTitleAnnotationProto);
+        }
+
         return mTitleAnnotation;
     }
 
@@ -227,30 +234,7 @@ public class ExtractedText implements InternallyProcessedFile, Serializable {
     public static ExtractedText fromJson(String json) {
         Gson gson = new Gson();
 
-        ExtractedText extractedText = gson.fromJson(json, ExtractedText.class);
-        ProtobufAnnotationSerializer annotationSerializer =
-                new ProtobufAnnotationSerializer(true);
-
-        // Recover the title CoreNLP annotations
-        if (extractedText.mTitleAnnotationProto != null) {
-            extractedText.mTitleAnnotation =
-                    annotationSerializer.fromProto(extractedText.mTitleAnnotationProto);
-        }
-
-        // Recover the Section CoreNLP annotations
-        for (Section section : extractedText.getSections()) {
-            if (section.getTitleAnnotationProto() != null) {
-                section.setTitleAnnotation(
-                        annotationSerializer.fromProto(section.getTitleAnnotationProto()));
-            }
-
-            if (section.getBodyAnnotationProto() != null) {
-                section.setBodyAnnotation(
-                        annotationSerializer.fromProto(section.getBodyAnnotationProto()));
-            }
-        }
-
-        return extractedText;
+        return gson.fromJson(json, ExtractedText.class);
     }
 
     /**

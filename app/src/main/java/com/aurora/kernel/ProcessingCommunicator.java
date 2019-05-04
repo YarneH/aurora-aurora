@@ -3,12 +3,20 @@ package com.aurora.kernel;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
-import com.aurora.auroralib.CacheResults;
+import com.aurora.auroralib.cache.CacheResults;
+import com.aurora.auroralib.translation.TranslationErrorCodes;
+import com.aurora.auroralib.translation.TranslationResult;
 import com.aurora.kernel.event.CacheFileRequest;
 import com.aurora.kernel.event.CacheFileResponse;
+import com.aurora.kernel.event.TranslationRequest;
+import com.aurora.kernel.event.TranslationResponse;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 
 import io.reactivex.Observable;
 
@@ -18,7 +26,14 @@ import io.reactivex.Observable;
 public class ProcessingCommunicator extends Communicator {
     private static final String LOG_TAG = "ProcessingCommunicator";
 
+    /**
+     * Observable for a Cache operation response
+     */
     private Observable<CacheFileResponse> mCacheFileResponseObservable;
+    /**
+     * Observable for a Translation operation response
+     */
+    private Observable<TranslationResponse> mTranslationResponseObservable;
 
     /**
      * Creates a ProcessingCommunicator. There should be only one instance at a time
@@ -30,6 +45,7 @@ public class ProcessingCommunicator extends Communicator {
 
         // Subscribe to observable
         mCacheFileResponseObservable = mBus.register(CacheFileResponse.class);
+        mTranslationResponseObservable = mBus.register(TranslationResponse.class);
     }
 
     /**
@@ -84,4 +100,57 @@ public class ProcessingCommunicator extends Communicator {
             return returnCode.get();
         }
     }
+
+    /**
+     * Translate sentences sent by a plugin
+     *
+     * @param sentences             the list of strings to be translated
+     * @param sourceLanguage        the language of the input sentences in ISO code
+     * @param destinationLanguage   the desired language of the translations in ISO format
+     * @return the list of translated sentences
+     */
+    public List<String> translateSentences(@NonNull List<String> sentences,
+                                           String sourceLanguage,
+                                           @NonNull String destinationLanguage) {
+        // response contains boolean, which is converted to a status code which is then synchronously returned
+        AtomicBoolean isSet = new AtomicBoolean(false);
+        final AtomicInteger errorCode = new AtomicInteger(TranslationErrorCodes.TRANSLATION_FAIL);
+        final AtomicReference<String []> translatedSentences = new AtomicReference<>();
+
+        mTranslationResponseObservable.subscribe((TranslationResponse response) -> {
+            synchronized (this) {
+                        isSet.set(true);
+                        String errorMessage = response.getErrorMessage();
+                        if (errorMessage == null){
+                            errorCode.set(TranslationErrorCodes.TRANSLATION_SUCCESS);
+                            translatedSentences.set(response.getTranslatedSentences());
+                        } else{
+                            Log.e(LOG_TAG, errorMessage);
+                        }
+                        notifyAll();
+                    }
+                });
+
+        // Create request to translate the sentences
+        TranslationRequest translationRequest = new TranslationRequest(
+                sentences.toArray(new String[0]), sourceLanguage, destinationLanguage);
+
+        // Post on the bus
+        mBus.post(translationRequest);
+
+        synchronized (this) {
+            while(!isSet.get()) {
+                try {
+                    wait();
+                } catch (InterruptedException e) {
+                    Log.e(LOG_TAG, "Interrupted in ProcessingCommunicator", e);
+
+                    Thread.currentThread().interrupt();
+                }
+            }
+
+            return new ArrayList<>(Arrays.asList(translatedSentences.get()));
+        }
+    }
+
 }
