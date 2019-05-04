@@ -31,8 +31,6 @@ import io.reactivex.Observable;
  * Communicator that communicates with Plugin environments
  */
 
-@SuppressWarnings("common-java:DuplicatedBlocks")
-//Duplicated code because OpenFileWithPluginChooser will be removed soon
 public class PluginCommunicator extends Communicator {
     /**
      * Tag for logging purposes
@@ -66,9 +64,15 @@ public class PluginCommunicator extends Communicator {
     private Observable<ListPluginsRequest> mListPluginsRequestObservable;
 
     /**
-     *
+     * String that is logged on a writing error
      */
     private static final String ERROR_LOG = "Writing to temporary files went wrong";
+
+    private static final String PROCESSED_PREFIX = "processed-";
+
+    private static final String CACHED_PREFIX = "cached-";
+
+    private static final String EXTENSION = ".aur";
 
 
     /**
@@ -141,13 +145,13 @@ public class PluginCommunicator extends Communicator {
         String extractedTextInJSON = extractedText.toJSON();
         Log.d("JSON", extractedTextInJSON);
 
-        // Start by clearing the full android cache directory of our app
-        clearCacheDir(context.getCacheDir());
+        // Start by clearing the old transfer files
+        removeFilesThatStartWithFromDir(context.getCacheDir(), PROCESSED_PREFIX);
 
         Uri uri;
 
         try {
-            uri = writeToTempFile(context, extractedTextInJSON, "processed-", ".aur");
+            uri = writeToTempFile(context, extractedTextInJSON, PROCESSED_PREFIX, EXTENSION);
         } catch (IOException e) {
             showToastAndLog(context, ERROR_LOG, e);
             return;
@@ -188,13 +192,13 @@ public class PluginCommunicator extends Communicator {
         String extractedTextInJSON = extractedText.toJSON();
         Log.d("JSON", extractedTextInJSON);
 
-        // Start by clearing the full android cache directory of our app
-        clearCacheDir(context.getCacheDir());
+        // Start by clearing the old transfer files
+        removeFilesThatStartWithFromDir(context.getCacheDir(), PROCESSED_PREFIX);
 
         Uri uri;
 
         try {
-            uri = writeToTempFile(context, extractedTextInJSON, "processed-", ".aur");
+            uri = writeToTempFile(context, extractedTextInJSON, PROCESSED_PREFIX, EXTENSION);
         } catch (IOException e) {
             showToastAndLog(context, ERROR_LOG, e);
             return;
@@ -236,13 +240,13 @@ public class PluginCommunicator extends Communicator {
 
         launchIntent.setAction(Constants.PLUGIN_ACTION);
 
-        // Start by clearing the full android cache directory of our app
-        clearCacheDir(context.getCacheDir());
+        // Start by clearing the old transfer files
+        removeFilesThatStartWithFromDir(context.getCacheDir(), CACHED_PREFIX);
 
         Uri uri;
 
         try {
-            uri = writeToTempFile(context, jsonRepresentation, "cached-", ".aur");
+            uri = writeToTempFile(context, jsonRepresentation, CACHED_PREFIX, EXTENSION);
         } catch (IOException e) {
             showToastAndLog(context, ERROR_LOG, e);
             return;
@@ -271,29 +275,31 @@ public class PluginCommunicator extends Communicator {
         mBus.post(response);
     }
 
+
     /**
-     * Private helper function to clear the cache directory
+     * Private non recursive helper function to clear a directory from files that start with prefix
      *
-     * @param dir the directory that needs to be cleared
+     * @param dir       the directory that needs files to be removed from
+     * @param prefix    the files that will be deleted start with this prefix
      * @return true if success, false otherwise
      */
     @SuppressWarnings("squid:S4042")
-    private static boolean clearCacheDir(File dir) {
+    // This warning is suppressed because it's not android compliant.
+    private static void removeFilesThatStartWithFromDir(File dir, String prefix) {
         if (dir != null && dir.isDirectory()) {
-            String[] children = dir.list();
-            for (String child: children) {
-                boolean success = clearCacheDir(new File(dir, child));
-                if (!success) {
-                    return false;
+            File[] files = dir.listFiles();
+
+            for (File file : files) {
+                if (file.getName().startsWith(prefix)) {
+                    boolean success = file.delete();
+                    if (!success) {
+                        Log.d(CLASS_TAG, "There was a problem removing old files from "
+                                + dir.getName());
+                        return;
+                    }
                 }
             }
         }
-
-        // The directory is now empty so delete it
-        if(dir != null) {
-            return dir.delete();
-        }
-        return false;
     }
 
     /**

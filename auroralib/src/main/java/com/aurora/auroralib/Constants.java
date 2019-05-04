@@ -21,12 +21,14 @@ public final class Constants {
     public static final String PLUGIN_INPUT_TYPE = "PLUGIN_INPUT_TYPE";
 
     /**
-     * Key used for the Intent Extra value to that the file is ExtractedText
+     * Value used for the Intent Extra key PLUGIN_INPUT_TYPE to signal that the file is an
+     * ExtractedText
      */
     public static final String PLUGIN_INPUT_TYPE_EXTRACTED_TEXT = "PLUGIN_INPUT_TYPE_EXTRACTED_TEXT";
 
     /**
-     * Key used for the Intent Extra value to that the file is PluginObject
+     * Value used for the Intent Extra key PLUGIN_INPUT_TYPE to signal that the file is a
+     * PluginObject
      */
     public static final String PLUGIN_INPUT_TYPE_OBJECT = "PLUGIN_INPUT_TYPE_OBJECT";
 
