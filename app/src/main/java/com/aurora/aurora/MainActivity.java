@@ -293,6 +293,19 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
+    /**
+     * Private helper method to extract the displayed filename from the Cursor combined with the
+     * Uri.
+     *
+     * <p>
+     *     This method is needed because files from for example Google Drive get an automatically
+     *     generated uri that does not contain the actual file name. This method allows to
+     *     extract the filename displayed in the Android file picker.
+     * </p>
+     *
+     * @param uri the Uri to get the displayed filename from
+     * @return The displayed filename
+     */
     private String getFileName(Uri uri) {
 
         try (Cursor cursor = getContentResolver()

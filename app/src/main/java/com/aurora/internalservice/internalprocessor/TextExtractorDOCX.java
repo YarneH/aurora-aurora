@@ -1,5 +1,6 @@
 package com.aurora.internalservice.internalprocessor;
 
+import android.support.annotation.NonNull;
 import android.util.Base64;
 import android.util.Log;
 
@@ -28,6 +29,11 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class TextExtractorDOCX implements TextExtractor {
+
+    /**
+     * Tag for logging purposes
+     */
+    private static final String CLASS_TAG = TextExtractorDOCX.class.getSimpleName();
 
     /**
      * Extracted text object
@@ -90,7 +96,7 @@ public class TextExtractorDOCX implements TextExtractor {
                 }
             }
         } catch (IOException e) {
-            Log.e("EXTRACT_DOCX",
+            Log.e(CLASS_TAG,
                     "a problem occurred while reading the file as a docx: " + fileRef, e);
 
         } finally {
@@ -118,23 +124,18 @@ public class TextExtractorDOCX implements TextExtractor {
     //I suppress these warnings because there is no easy way to simplify or split this logic into
     // multiple methods without making it harder to understand.
     @java.lang.SuppressWarnings({"squid:MethodCyclomaticComplexity","squid:S3776"})
-    private void addRun(String run, int paragraphLevel, int runSize, List<byte[]> images) {
+    private void addRun(@NonNull String run, int paragraphLevel, int runSize,
+                        @NonNull List<Image> images) {
         String formatted = run.trim();
-
-        // Convert the images to Base64
-        List<Image> imageObjects = new ArrayList<>();
-        for (byte[] image : images) {
-            imageObjects.add(new Image(Base64.encodeToString(image, Base64.DEFAULT)));
-        }
 
         // First text line is always a title for simplicity
         if(mExtractedText.getTitle() == null && !formatted.isEmpty()) {
             mExtractedText.setTitle(formatted);
 
             // The title section contains images, add them to their own section.
-            if(!imageObjects.isEmpty()) {
+            if(!images.isEmpty()) {
                 Section imageSection = new Section();
-                imageSection.setImageObjects(imageObjects);
+                imageSection.setImageObjects(images);
                 mExtractedText.addSection(imageSection);
             }
 
@@ -156,7 +157,7 @@ public class TextExtractorDOCX implements TextExtractor {
             // Create a new Section
             mSectionInProgress = new Section();
             mSectionInProgress.setTitle(formatted);
-            mSectionInProgress.setImageObjects(imageObjects);
+            mSectionInProgress.setImageObjects(images);
 
             // If the default headers of word are used, we can extract a paragraph level, non
             // header sections will get the last seen paragraph level.
@@ -177,10 +178,10 @@ public class TextExtractorDOCX implements TextExtractor {
             // If its empty, flush the previous section (if it has body or images)
             if(formatted.isEmpty() && mSectionInProgress != null &&
                     (mSectionInProgress.getBody()!=null || !mSectionInProgress.getImageObjects().isEmpty())) {
-                mSectionInProgress.addImageObjects(imageObjects);
+                mSectionInProgress.addImageObjects(images);
                 mExtractedText.addSection(mSectionInProgress);
                 mSectionInProgress = null;
-            } else if (!formatted.isEmpty() || !imageObjects.isEmpty()) {
+            } else if (!formatted.isEmpty() || !images.isEmpty()) {
                 // It is not empty
 
                 if (mSectionInProgress == null) {
@@ -189,7 +190,7 @@ public class TextExtractorDOCX implements TextExtractor {
                     mSectionInProgress.setLevel(mLastSeenParagraphLevel);
                 }
 
-                mSectionInProgress.addImageObjects(imageObjects);
+                mSectionInProgress.addImageObjects(images);
                 mSectionInProgress.concatBody(formatted + "\n");
 
                 mPreviousRunSize = runSize;
@@ -220,7 +221,7 @@ public class TextExtractorDOCX implements TextExtractor {
         XWPFRun runInProgress = null;
 
         /* List of images that has yet to be added */
-        List<byte[]> images = new ArrayList<>();
+        List<Image> images = new ArrayList<>();
 
         if(paragraph.getRuns().isEmpty()) {
               addRun(paragraph.getText(), getLevel(paragraph), -1, new ArrayList<>());
@@ -234,7 +235,10 @@ public class TextExtractorDOCX implements TextExtractor {
                 List<XWPFPicture> piclist = ((XWPFRun) run).getEmbeddedPictures();
                 for (XWPFPicture image: piclist) {
                     if (extractImages) {
-                        images.add(image.getPictureData().getData());
+                        Image imageObject =
+                                new Image(Base64.encodeToString(image.getPictureData().getData(),
+                                        Base64.DEFAULT));
+                        images.add(imageObject);
                     }
                 }
 
