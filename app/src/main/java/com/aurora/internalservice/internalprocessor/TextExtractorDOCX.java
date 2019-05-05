@@ -4,6 +4,7 @@ import android.util.Base64;
 import android.util.Log;
 
 import com.aurora.auroralib.ExtractedText;
+import com.aurora.auroralib.Image;
 import com.aurora.auroralib.Section;
 
 import org.apache.poi.xwpf.usermodel.IBodyElement;
@@ -121,9 +122,9 @@ public class TextExtractorDOCX implements TextExtractor {
         String formatted = run.trim();
 
         // Convert the images to Base64
-        List<String> encodedImages = new ArrayList<>();
-        for (byte[] image: images) {
-            encodedImages.add(Base64.encodeToString(image, Base64.DEFAULT));
+        List<Image> imageObjects = new ArrayList<>();
+        for (byte[] image : images) {
+            imageObjects.add(new Image(Base64.encodeToString(image, Base64.DEFAULT)));
         }
 
         // First text line is always a title for simplicity
@@ -131,9 +132,9 @@ public class TextExtractorDOCX implements TextExtractor {
             mExtractedText.setTitle(formatted);
 
             // The title section contains images, add them to their own section.
-            if(!encodedImages.isEmpty()) {
+            if(!imageObjects.isEmpty()) {
                 Section imageSection = new Section();
-                imageSection.setImages(encodedImages);
+                imageSection.setImageObjects(imageObjects);
                 mExtractedText.addSection(imageSection);
             }
 
@@ -155,7 +156,7 @@ public class TextExtractorDOCX implements TextExtractor {
             // Create a new Section
             mSectionInProgress = new Section();
             mSectionInProgress.setTitle(formatted);
-            mSectionInProgress.setImages(encodedImages);
+            mSectionInProgress.setImageObjects(imageObjects);
 
             // If the default headers of word are used, we can extract a paragraph level, non
             // header sections will get the last seen paragraph level.
@@ -175,11 +176,11 @@ public class TextExtractorDOCX implements TextExtractor {
 
             // If its empty, flush the previous section (if it has body or images)
             if(formatted.isEmpty() && mSectionInProgress != null &&
-                    (mSectionInProgress.getBody()!=null || !mSectionInProgress.getImages().isEmpty())) {
-                mSectionInProgress.addImages(encodedImages);
+                    (mSectionInProgress.getBody()!=null || !mSectionInProgress.getImageObjects().isEmpty())) {
+                mSectionInProgress.addImageObjects(imageObjects);
                 mExtractedText.addSection(mSectionInProgress);
                 mSectionInProgress = null;
-            } else if (!formatted.isEmpty() || !encodedImages.isEmpty()) {
+            } else if (!formatted.isEmpty() || !imageObjects.isEmpty()) {
                 // It is not empty
 
                 if (mSectionInProgress == null) {
@@ -188,7 +189,7 @@ public class TextExtractorDOCX implements TextExtractor {
                     mSectionInProgress.setLevel(mLastSeenParagraphLevel);
                 }
 
-                mSectionInProgress.addImages(encodedImages);
+                mSectionInProgress.addImageObjects(imageObjects);
                 mSectionInProgress.concatBody(formatted + "\n");
 
                 mPreviousRunSize = runSize;

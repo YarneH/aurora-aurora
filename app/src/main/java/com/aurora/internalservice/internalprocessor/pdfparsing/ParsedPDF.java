@@ -2,6 +2,7 @@ package com.aurora.internalservice.internalprocessor.pdfparsing;
 
 
 import com.aurora.auroralib.ExtractedText;
+import com.aurora.auroralib.Image;
 import com.aurora.auroralib.Section;
 
 import java.util.ArrayList;
@@ -71,9 +72,9 @@ public class ParsedPDF {
      */
     private void addElementToSection(PDFStructureElement pdfStructureElement, Section section) {
         if (pdfStructureElement.getType().equals(ImageFromPDF.TYPE)) {
-            List<String> images = new ArrayList<>();
-            images.add(pdfStructureElement.getContent());
-            section.addImages((images));
+            List<Image> images = new ArrayList<>();
+            images.add(new Image(pdfStructureElement.getContent()));
+            section.addImageObjects(images);
         } else {
             section.concatBody(pdfStructureElement.getContent() + "\n");
         }

@@ -177,6 +177,7 @@ public class Section {
      */
     @Deprecated
     public void setImages(List<String> images) {
+        mImages = new ArrayList<>();
         addImages(images);
     }
 
