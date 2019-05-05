@@ -11,26 +11,26 @@ import java.io.InputStream;
 
 public class Image {
 
-    private String mBase64EncodeImage;
+    private String mBase64EncodedImage;
 
     private String mCaption;
 
     /**
      * Constructor to create a base64Encoded image
      *
-     * @param base64EncodeImage the base64 encode String
+     * @param base64EncodedImage the base64 encode String
      */
-    public Image(@NonNull String base64EncodeImage) {
-        mBase64EncodeImage = base64EncodeImage;
+    public Image(@NonNull String base64EncodedImage) {
+        mBase64EncodedImage = base64EncodedImage;
     }
 
     /**
      * Constructor to create a base64Encoded image with a caption
-     * @param base64EncodeImage the base64 encode String
+     * @param base64EncodedImage the base64 encode String
      * @param caption           the caption String
      */
-    public Image(@NonNull String base64EncodeImage, @Nullable String caption) {
-        mBase64EncodeImage = base64EncodeImage;
+    public Image(@NonNull String base64EncodedImage, @Nullable String caption) {
+        mBase64EncodedImage = base64EncodedImage;
         mCaption = caption;
     }
 
@@ -40,7 +40,7 @@ public class Image {
      * @return the base64 encoded image
      */
     public String getBase64EncodedImage() {
-        return mBase64EncodeImage;
+        return mBase64EncodedImage;
     }
 
     /**
@@ -50,13 +50,13 @@ public class Image {
      */
     @SuppressWarnings("unused")
     public Bitmap getImage() {
-        InputStream stream = new ByteArrayInputStream(Base64.decode(mBase64EncodeImage.getBytes()
+        InputStream stream = new ByteArrayInputStream(Base64.decode(mBase64EncodedImage.getBytes()
                 , Base64.DEFAULT));
         return BitmapFactory.decodeStream(stream);
     }
 
-    public void setBase64EncodeImage(String base64EncodeImage) {
-        this.mBase64EncodeImage = mBase64EncodeImage;
+    public void setBase64EncodedImage(String base64EncodedImage) {
+        this.mBase64EncodedImage = base64EncodedImage;
     }
 
     public String getCaption() {
@@ -64,6 +64,6 @@ public class Image {
     }
 
     public void setCaption(String caption) {
-        this.mCaption = mCaption;
+        this.mCaption = caption;
     }
 }

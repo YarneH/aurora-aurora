@@ -144,6 +144,7 @@ public class Section {
      * The old method for getting images, instead use {@link #getImageObjects()}
      *
      * @return the list of base64 encode images
+     * @deprecated
      */
     @Deprecated
     public List<String> getImages() {
@@ -174,6 +175,7 @@ public class Section {
      * The old method of setting images, instead use {@link #setImageObjects(List)}
      *
      * @param images List of base64 encode images
+     * @deprecated
      */
     @Deprecated
     public void setImages(List<String> images) {
@@ -194,9 +196,10 @@ public class Section {
      * The old method of adding images, instead use {@link #addImageObjects(List)}
      *
      * @param images List of base64 encoded images
+     * @deprecated
      */
     @Deprecated
-    public void addImages(List<String> images) {
+    public void addImages(Iterable<String> images) {
         for (String image: images) {
             mImages.add(new Image(image));
         }
