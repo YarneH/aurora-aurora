@@ -62,7 +62,7 @@ public class PluginInternalServiceCommunicatorUnitTest {
         // Initialize communicator
         // add dummy translator
 
-        mCommunicator = new PluginInternalServiceCommunicator(mBus, mInternalTextProcessor, new FakeRequestQueue());
+        mCommunicator = new PluginInternalServiceCommunicator(mBus, mInternalTextProcessor, new Translator(new FakeRequestQueue()));
 
         // Initialize extracted text with dummy contents
         mExtractedText = new ExtractedText(mTitle, null, mParagraphs);
