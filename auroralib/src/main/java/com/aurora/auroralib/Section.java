@@ -2,6 +2,7 @@ package com.aurora.auroralib;
 
 import com.google.gson.annotations.JsonAdapter;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import edu.stanford.nlp.pipeline.Annotation;
@@ -43,9 +44,9 @@ public class Section {
     private transient Annotation mBodyAnnotation;
 
     /**
-     * The images in a section, as a Base64 String
+     * The images in a section, as an {@link Image} object
      */
-    private List<String> mImages;
+    private List<Image> mImages = new ArrayList<>();
     /**
      * The level of the section, default level is 0
      */
@@ -65,19 +66,6 @@ public class Section {
      */
     public Section(String body) {
         this.mBody = body;
-    }
-
-    /**
-     * Constructor for creating a section with a title, content and images
-     *
-     * @param title  the title of the section
-     * @param body   the content of the section
-     * @param images the images in the section
-     */
-    public Section(String title, String body, List<String> images) {
-        this.mTitle = title;
-        this.mBody = body;
-        this.mImages = images;
     }
 
     @Override
@@ -104,10 +92,6 @@ public class Section {
         this.mTitle = title;
     }
 
-    CoreNLPProtos.Document getTitleAnnotationProto() {
-        return mTitleAnnotationProto;
-    }
-
     public void setTitleAnnotationProto(CoreNLPProtos.Document titleAnnotations) {
         this.mTitleAnnotationProto = titleAnnotations;
     }
@@ -122,10 +106,6 @@ public class Section {
         }
 
         return mTitleAnnotation;
-    }
-
-    void setTitleAnnotation(Annotation annotation) {
-        this.mTitleAnnotation = annotation;
     }
 
     public String getBody() {
@@ -144,10 +124,6 @@ public class Section {
         }
     }
 
-    CoreNLPProtos.Document getBodyAnnotationProto() {
-        return mBodyAnnotationProto;
-    }
-
     public void setBodyAnnotationProto(CoreNLPProtos.Document bodyAnnotationProto) {
         this.mBodyAnnotationProto = bodyAnnotationProto;
     }
@@ -164,19 +140,73 @@ public class Section {
         return mBodyAnnotation;
     }
 
-    void setBodyAnnotation(Annotation mBodyAnnotation) {
-        this.mBodyAnnotation = mBodyAnnotation;
-    }
-
+    /**
+     * The old method for getting images, instead use {@link #getImageObjects()}
+     *
+     * @return the list of base64 encode images
+     */
+    @Deprecated
     public List<String> getImages() {
-        return mImages;
+        List<String> base64Images = new ArrayList<>();
+
+        for (Image image: mImages) {
+            base64Images.add(image.getBase64EncodedImage());
+        }
+        return base64Images;
     }
 
+    /**
+     * Get the {@link Image} objects of this Section. Will return an empty
+     * list when no images are present.
+     *
+     * @return the list of images
+     */
+    @SuppressWarnings("unused")
+    public List<Image> getImageObjects() {
+        if (mImages != null) {
+            return  mImages;
+        } else {
+            return new ArrayList<>();
+        }
+    }
+
+    /**
+     * The old method of setting images, instead use {@link #setImageObjects(List)}
+     *
+     * @param images List of base64 encode images
+     */
+    @Deprecated
     public void setImages(List<String> images) {
+        addImages(images);
+    }
+
+    /**
+     * Set the list of {@link Image} objects
+     *
+     * @param images the List of {@link Image} objects
+     */
+    public void setImageObjects(List<Image> images) {
         this.mImages = images;
     }
 
+    /**
+     * The old method of adding images, instead use {@link #addImageObjects(List)}
+     *
+     * @param images List of base64 encoded images
+     */
+    @Deprecated
     public void addImages(List<String> images) {
+        for (String image: images) {
+            mImages.add(new Image(image));
+        }
+    }
+
+    /**
+     * Add the list of {@link Image} objects to the existing list
+     *
+     * @param images the List of {@link Image} objects
+     */
+    public void addImageObjects(List<Image> images) {
         if (mImages == null) {
             this.mImages = images;
         } else {
