@@ -1,10 +1,11 @@
 package com.aurora.aurora;
 
-import android.content.ContentResolver;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.OpenableColumns;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
@@ -245,9 +246,11 @@ public class MainActivity extends AppCompatActivity
             try {
                 if (textFile != null) {
                     Log.i("URI", textFile.toString());
-                    ContentResolver cR = getApplicationContext().getContentResolver();
-                    String type = MimeTypeMap.getSingleton().getExtensionFromMimeType(cR.getType(textFile));
+                    String type = MimeTypeMap.getSingleton().getExtensionFromMimeType(
+                            getApplicationContext().getContentResolver().getType(textFile));
                     Log.i("MIME", type);
+                    String fileName = getFileName(textFile);
+                    Log.i("FILENAME", fileName);
 
                     /*
                      * Firebase Analytics
@@ -270,7 +273,7 @@ public class MainActivity extends AppCompatActivity
 
                     // Create chooser to let user choose the plugin
                     Intent chooser = Intent.createChooser(pluginAction, getString(R.string.select_plugin));
-                    mAuroraCommunicator.openFileWithPluginChooser(textFile.toString(), type,
+                    mAuroraCommunicator.openFileWithPluginChooser(fileName, type,
                             read, pluginAction, chooser, getApplicationContext());
                     /*
                     // For now hard coded constant
@@ -288,6 +291,23 @@ public class MainActivity extends AppCompatActivity
                 Log.e("FILE_NOT_FOUND", "The file could not be found", e);
             }
         }
+    }
+
+    private String getFileName(Uri uri) {
+
+        try (Cursor cursor = getContentResolver()
+                .query(uri, null, null, null, null, null)) {
+            // moveToFirst() returns false if the cursor has 0 rows.  Very handy for
+            // "if there's anything to look at, look at it" conditionals.
+            if (cursor != null && cursor.moveToFirst()) {
+
+                // Note it's called "Display Name".  This is
+                // provider-specific, and might not necessarily be the file name.
+                return cursor.getString(
+                        cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME));
+            }
+        }
+        return null;
     }
 
     /**
