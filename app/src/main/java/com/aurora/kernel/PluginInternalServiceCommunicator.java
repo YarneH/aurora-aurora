@@ -42,7 +42,9 @@ public class PluginInternalServiceCommunicator extends Communicator {
      */
     private InternalNLP mInternalNLP;
 
-
+    /**
+     * A reference to the translator for translating requests
+     */
     private Translator mTranslator;
     /**
      * Observable keeping track of internal processor requests
@@ -55,17 +57,18 @@ public class PluginInternalServiceCommunicator extends Communicator {
     private Observable<TranslationRequest> mTranslationRequestObservable;
 
     /**
-     * Creates a PluginInternalServiceCommunficator. There should be only one instance at a time
+     * Creates a PluginInternalServiceCommunicator. There should be only one instance at a time
      *
      * @param mBus      a reference to the unique bus instance that all communicators should be using for
      *                  communicating events
      * @param processor a reference to the InternalTextProcessor
+     * @param translator a reference to the internal translator
      */
     public PluginInternalServiceCommunicator(Bus mBus, InternalTextProcessor processor,
-                                             RequestQueue requestQueue) {
+                                             Translator translator) {
         super(mBus);
         mInternalTextProcessor = processor;
-        mTranslator = new Translator(requestQueue);
+        mTranslator = translator;
 
 
         mInternalProcessorRequestObservable = mBus.register(InternalProcessorRequest.class);

@@ -41,6 +41,9 @@ public final class Translator implements InternalService {
      * Beginning tag and key for in the url to send to the API
      */
     private static final String KEY = "&key=" + BuildConfig.TRANSLATION_API;
+    /**
+     * A lock for parallel programming
+     */
     private final Object lock = new Object();
     /**
      * A queue to post http requests to
