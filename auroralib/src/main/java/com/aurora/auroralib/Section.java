@@ -2,6 +2,7 @@ package com.aurora.auroralib;
 
 import com.google.gson.annotations.JsonAdapter;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import edu.stanford.nlp.pipeline.Annotation;
@@ -169,7 +170,11 @@ public class Section {
     }
 
     public List<String> getImages() {
-        return mImages;
+        if (mImages != null) {
+            return this.mImages;
+        } else {
+            return new ArrayList<>();
+        }
     }
 
     public void setImages(List<String> images) {
