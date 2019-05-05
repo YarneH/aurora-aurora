@@ -222,16 +222,11 @@ public class TextExtractorDOCX implements TextExtractor {
         List<byte[]> images = new ArrayList<>();
 
         if(paragraph.getRuns().isEmpty()) {
-
-            Log.d("DOCX_RUN","Text: " + paragraph.getText());
-
-            addRun(paragraph.getText(), getLevel(paragraph), -1,
-                    new ArrayList<>());
+              addRun(paragraph.getText(), getLevel(paragraph), -1, new ArrayList<>());
         }
 
         // Loop over all the runs in a single paragraph.
         for (IRunElement run : paragraph.getRuns()) {
-            Log.d("DOCX_RUN","Text: " + run.toString());
             // Normal flow
             if (run instanceof XWPFRun) {
                 // Extract the images from the run and add them to the list of yet to process images
