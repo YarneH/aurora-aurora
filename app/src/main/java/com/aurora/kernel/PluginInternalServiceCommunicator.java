@@ -1,13 +1,22 @@
 package com.aurora.kernel;
 
+import android.support.annotation.NonNull;
+import android.util.Log;
+
 import com.aurora.auroralib.ExtractedText;
+import com.aurora.internalservice.internalnlp.InternalNLP;
 import com.aurora.internalservice.internalprocessor.FileTypeNotSupportedException;
 import com.aurora.internalservice.internalprocessor.InternalTextProcessor;
+import com.aurora.internalservice.internaltranslation.Translator;
 import com.aurora.kernel.event.InternalProcessorRequest;
 import com.aurora.kernel.event.InternalProcessorResponse;
+import com.aurora.kernel.event.TranslationRequest;
+import com.aurora.kernel.event.TranslationResponse;
+import com.aurora.plugin.InternalServices;
+
+import org.apache.commons.lang3.NotImplementedException;
 
 import java.io.InputStream;
-import java.util.Arrays;
 import java.util.List;
 
 import io.reactivex.Observable;
@@ -18,91 +27,168 @@ import io.reactivex.Observable;
 public class PluginInternalServiceCommunicator extends Communicator {
 
     /**
+     * Tag for logging purposes
+     */
+    private static final String CLASS_TAG = "PIServiceCommunicator";
+
+    /**
      * internal text processor
      */
-    private InternalTextProcessor mProcessor;
+    private InternalTextProcessor mInternalTextProcessor;
 
+    /**
+     * InternalNLP object, loads some annotators statically so needs to keep living for
+     * performance
+     */
+    private InternalNLP mInternalNLP;
+
+    /**
+     * A reference to the translator for translating requests
+     */
+    private Translator mTranslator;
     /**
      * Observable keeping track of internal processor requests
      */
-    private Observable<InternalProcessorRequest> internalProcessorEventObservable;
+    private Observable<InternalProcessorRequest> mInternalProcessorRequestObservable;
 
-    public PluginInternalServiceCommunicator(Bus mBus, InternalTextProcessor processor) {
+    /**
+     * Observable keeping track of translation requests
+     */
+    private Observable<TranslationRequest> mTranslationRequestObservable;
+
+    /**
+     * Creates a PluginInternalServiceCommunicator. There should be only one instance at a time
+     *
+     * @param mBus      a reference to the unique bus instance that all communicators should be using for
+     *                  communicating events
+     * @param processor a reference to the InternalTextProcessor
+     * @param translator a reference to the internal translator
+     */
+    public PluginInternalServiceCommunicator(@NonNull final Bus mBus, @NonNull final InternalTextProcessor processor,
+                                             @NonNull final Translator translator) {
         super(mBus);
-        mProcessor = processor;
+        mInternalTextProcessor = processor;
+        mTranslator = translator;
 
-        internalProcessorEventObservable = mBus.register(InternalProcessorRequest.class);
-        internalProcessorEventObservable.subscribe((InternalProcessorRequest internalProcessorRequest) ->
-                processFileWithInternalProcessor(internalProcessorRequest.getFile(),
-                        internalProcessorRequest.getFileRef(), internalProcessorRequest.getType()));
+
+        mInternalProcessorRequestObservable = mBus.register(InternalProcessorRequest.class);
+        mInternalProcessorRequestObservable.subscribe((InternalProcessorRequest request) ->
+                processFileWithInternalProcessor(request.getFileRef(), request.getFileType(), request.getFile(),
+                        request.getInternalServices()));
+
+        mTranslationRequestObservable = mBus.register(TranslationRequest.class);
+        mTranslationRequestObservable.subscribe((TranslationRequest request) -> {
+            TranslationResponse response = mTranslator.translate(request);
+            if (response != null) {
+                mBus.post(response);
+            } else {
+                mBus.post(new TranslationResponse("Something went wrong in the translation"));
+            }
+        });
+
     }
 
-    private void processFileWithInternalProcessor(InputStream file, String fileRef, String type) {
-        // Call internal processor
-        ExtractedText extractedText = null;
-        try {
-            extractedText = mProcessor.processFile(file, fileRef, type);
-        } catch (FileTypeNotSupportedException e) {
-            // TODO remove this (added for testing PluginIntegration while extractors not finished)
-            List<String> paragraphs = Arrays.asList(
-                    "Yield\n" +
-                            "    6 servings\n" +
-                            "Active Time\n" +
-                            "    30 minutes\n" +
-                            "Total Time\n" +
-                            "    35 minutes\n" +
-                            "\n" +
-                            "Ingredients",
 
-                    "        1 lb. linguine or other long pasta\n" +
-                            "        Kosher salt\n" +
-                            "        1 (14-oz.) can diced tomatoes\n" +
-                            "        1/2 cup extra-virgin olive oil, divided\n" +
-                            "        1/4 cup capers, drained\n" +
-                            "        6 oil-packed anchovy fillets\n" +
-                            "        1 Tbsp. tomato paste\n" +
-                            "        1/3 cup pitted Kalamata olives, halved\n" +
-                            "        2 tsp. dried oregano\n" +
-                            "        1/2 tsp. crushed red pepper flakes\n" +
-                            "        6 oz. oil-packed tuna",
+    /**
+     * Helper method to process a file with the internal processor when a request comes in
+     *
+     * @param fileRef          a reference to the file that should be processed
+     * @param type             the file type
+     * @param file             the file input stream
+     * @param internalServices the set of internal services that should be run on the file
+     */
+    private void processFileWithInternalProcessor(@NonNull final String fileRef, @NonNull String type,
+                                                  final InputStream file,
+                                                  @NonNull final List<InternalServices> internalServices) {
 
-                    "Preparation",
+        // STEP ONE
+        ExtractedText extractedText = doTextAndImageExtractionTasks(internalServices, file,
+                fileRef, type);
 
-                    "        Cook pasta in a large pot of boiling salted water, stirring " +
-                            "occasionally, until al dente. Drain pasta, reserving 1 cup pasta cooking " +
-                            "liquid; return pasta to pot.\n" +
-                            "        While pasta cooks, pour tomatoes into a fine-mesh sieve set over " +
-                            "a medium bowl. Shake to release as much juice as possible, then let tomatoes " +
-                            "drain in sieve, collecting juices in bowl, until ready to use.\n" +
-                            "        Heat 1/4 cup oil in a large deep-sided skillet over medium-high. " +
-                            "Add capers and cook, swirling pan occasionally, until they burst and are " +
-                            "crisp, about 3 minutes. Using a slotted spoon, transfer capers to a paper " +
-                            "towel-lined plate, reserving oil in skillet.\n" +
-                            "        Combine anchovies, tomato paste, and drained tomatoes in skillet. " +
-                            "Cook over medium-high heat, stirring occasionally, until tomatoes begin " +
-                            "to caramelize and anchovies start to break down, about 5 minutes. Add " +
-                            "collected tomato juices, olives, oregano, and red pepper flakes and bring " +
-                            "to a simmer. Cook, stirring occasionally, until sauce is slightly thickened, " +
-                            "about 5 minutes. Add pasta, remaining 1/4 cup oil, and 3/4 cup pasta " +
-                            "cooking liquid to pan. Cook over medium heat, stirring and adding remaining " +
-                            "1/4 cup pasta cooking liquid to loosen if needed, until sauce is thickened " +
-                            "and emulsified, about 2 minutes. Flake tuna into pasta and toss to combine.\n" +
-                            "        Divide pasta among plates. Top with fried capers.\n"
-
-            );
-
-            extractedText = new ExtractedText("ExtractedTextTitle", null);
-            for (String section : paragraphs) {
-                extractedText.addSimpleSection(section);
-            }
-            e.printStackTrace();
+        // If extractedText is null for some reason: return default extracted text
+        if (extractedText == null) {
+            extractedText = new ExtractedText("", null);
         }
+
+        // STEP TWO
+        doNLPTask(extractedText, internalServices);
 
         // Create response
         InternalProcessorResponse response = new InternalProcessorResponse(extractedText);
 
         // Post response
         mBus.post(response);
+    }
+
+    /**
+     * Private method that does the ImageExtraction and TextExtraction tasks if requested
+     *
+     * @param internalServices the set of internal services that should be run on the file
+     * @param file             the file inputstream
+     * @param fileRef          a reference to the file that should be processed
+     * @param type             the file type (extension)
+     * @return ExtractedText object
+     */
+    private ExtractedText doTextAndImageExtractionTasks(List<InternalServices> internalServices,
+                                                        InputStream file, String fileRef, String type) {
+        // Perform internal services that are in the given set
+
+        ExtractedText extractedText = null;
+
+        if (internalServices.contains(InternalServices.TEXT_EXTRACTION)) {
+            // Call internal text processor
+            try {
+                boolean extractImages =
+                        internalServices.contains(InternalServices.IMAGE_EXTRACTION);
+
+                extractedText = mInternalTextProcessor.processFile(file, fileRef, type,
+                        extractImages);
+
+                Log.d(CLASS_TAG,
+                        "Service completed: " + InternalServices.TEXT_EXTRACTION.name());
+                if (extractImages) {
+                    Log.d(CLASS_TAG,
+                            "Service completed: " + InternalServices.IMAGE_EXTRACTION.name());
+                }
+
+            } catch (FileTypeNotSupportedException e) {
+                Log.e(CLASS_TAG, "File type is not supported!", e);
+            }
+        }
+        return extractedText;
+    }
+
+    /**
+     * Private method that does the InternalNLP annotation if requested
+     *
+     * @param extractedText    extractedText object that should be annotated
+     * @param internalServices the services to determine if the NLP service is requested
+     */
+    private void doNLPTask(ExtractedText extractedText, List<InternalServices> internalServices) {
+        boolean doNLP = false;
+
+        // Add all NLP steps to the pipeline
+        for (InternalServices internalService : internalServices) {
+
+            if (internalService.name().startsWith("NLP_")) {
+                if (mInternalNLP == null) {
+                    mInternalNLP = new InternalNLP();
+                }
+
+                try {
+                    mInternalNLP.addAnnotator(internalService);
+                    doNLP = true;
+                } catch (NotImplementedException e) {
+                    Log.e(CLASS_TAG, "Something went wrong when building the NLP pipeline", e);
+                }
+            }
+        }
+
+        if (doNLP) {
+            mInternalNLP.annotate(extractedText);
+            Log.d(CLASS_TAG, "Service completed: " + "NLP ANNOTATION");
+        }
+        mInternalNLP = null;
     }
 
 }

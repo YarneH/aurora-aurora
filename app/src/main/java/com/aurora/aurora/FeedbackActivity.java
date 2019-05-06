@@ -14,17 +14,35 @@ import java.io.DataOutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
+/**
+ * <p>
+ * Activity responsible for handling the feedback function.
+ * </p>
+ * <p>
+ * The user can write some feedback in this activity and send it.
+ * It will automatically be pushed to the Slack channel of this project.
+ * This requires internet connection.
+ * </p>
+ */
 public class FeedbackActivity extends AppCompatActivity {
+    /**
+     * HTTP response code for a successful communication.
+     */
     private static final int OK_RESPONSE_CODE = 200;
-    private static final String FEEDBACK_MESSAGE_BASE = "*:fire::fire:New feedback:fire::fire:* \\n";
+    /**
+     * Message prefixed to the actual feedback that arrives in the Slack.
+     */
+    private static final String FEEDBACK_MESSAGE_BASE = "*:fire::fire:New feedback:fire::fire:* \n";
+
+    /**
+     * @hide
+     */
     private static final String FEEDBACK_WEBHOOK_URL =
             "https://hooks.slack.com/services/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";
     private EditText mEditTextFeedback = null;
 
     /**
-     * Runs on startup of the activity, in this case on startup of the app
-     *
-     * @param savedInstanceState
+     * {@inheritDoc}
      */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,16 +52,14 @@ public class FeedbackActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         mEditTextFeedback = findViewById(R.id.et_feedback);
-        mEditTextFeedback.setHint("Enter your feedback here");
+        mEditTextFeedback.setHint(getString(R.string.enter_feedback));
     }
-
-    // This will start a SendFeedbackTask and notice the user whether it succeeded or not
 
     /**
      * When the user clicks on the 'Send'-button,
      * this will start a SendFeedbackTask and notice the user whether it succeeded or not
      *
-     * @param view
+     * @param view a reference to the view
      */
     public void onFeedbackClick(View view) {
         boolean success = false;
@@ -59,19 +75,19 @@ public class FeedbackActivity extends AppCompatActivity {
             }
 
             if (success) {
-                Snackbar.make(view, "Feedback sent, thank you!", Snackbar.LENGTH_SHORT).show();
+                Snackbar.make(view, R.string.feedback_sent, Snackbar.LENGTH_SHORT).show();
                 mEditTextFeedback.setText("");
             } else {
-                Snackbar.make(view, "Something went wrong. Please try again.", Snackbar.LENGTH_SHORT).show();
+                Snackbar.make(view, R.string.feedback_wrong, Snackbar.LENGTH_SHORT).show();
             }
         } else {
-            Snackbar.make(view, "Please enter your feedback first.", Snackbar.LENGTH_SHORT).show();
+            Snackbar.make(view, R.string.feedback_empty, Snackbar.LENGTH_SHORT).show();
         }
 
     }
 
     /**
-     * A task which will run asynchronously and send the feedback to our Slack channel
+     * A task which will run asynchronously and send the feedback to the Slack channel
      */
     static class SendFeedbackTask extends AsyncTask<String, Void, Boolean> {
 

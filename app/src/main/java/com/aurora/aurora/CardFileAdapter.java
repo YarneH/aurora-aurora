@@ -1,7 +1,6 @@
 package com.aurora.aurora;
 
 import android.content.Context;
-import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
@@ -12,21 +11,33 @@ import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 
-import com.aurora.auroralib.Constants;
 import com.aurora.kernel.Kernel;
 
-import java.io.InputStream;
 import java.util.Locale;
 
 /**
  * The adapter for the RecyclerView of the file-cards
  */
 public class CardFileAdapter extends RecyclerView.Adapter<CardFileAdapter.CardFileViewHolder> {
+    /**
+     * The option to have no selected card in the RecyclerView
+     */
     private static final int NO_DETAILS = -1;
     // TODO: Remove dummy amount
-    private static final int DUMMY_AMOUNT = 0;
+
+    /**
+     * A dummy amount for the amount of card that the RecyclerView manages
+     */
+    private static final int DUMMY_AMOUNT = 100;
+
+    /**
+     * The amount of cards that the RecyclerView manages
+     */
     private int mAmount = DUMMY_AMOUNT;
-    // value of the currently selected file (file card that is expanded)
+
+    /**
+     * The index of the currently selected file (file card that is expanded)
+     */
     private int mSelectedIndex = NO_DETAILS;
 
     /**
@@ -51,6 +62,7 @@ public class CardFileAdapter extends RecyclerView.Adapter<CardFileAdapter.CardFi
      *
      * @param viewGroup view that contains other views. Used to set layout (inflate) of card
      * @param i         not used, index of the card
+     *
      * @return the CardFileViewHolder
      */
     @NonNull
@@ -74,7 +86,7 @@ public class CardFileAdapter extends RecyclerView.Adapter<CardFileAdapter.CardFi
     }
 
     /**
-     * Retreive number of items in the list.
+     * Retrieve the number of items in the list.
      *
      * @return number of items in the list
      */
@@ -181,7 +193,6 @@ public class CardFileAdapter extends RecyclerView.Adapter<CardFileAdapter.CardFi
             // TODO this should make an event to open the cached file.
             // Plugin should probably still be able to open this, but Souschef probably not
             if (view.getId() == R.id.button_card_file) {
-                Intent intent = new Intent(Constants.PLUGIN_ACTION);
 
                 /* TODO Remove this test code
                 Eventually, here instead of opening a file, the cache will be called instead.
@@ -190,10 +201,9 @@ public class CardFileAdapter extends RecyclerView.Adapter<CardFileAdapter.CardFi
 
                 Note: this is basically mixed code as a result of a merge. This test code will be removed ASAP
                 */
-                String textFile = "DummyTextFile.docx";
-                InputStream docFile = mContext.getResources().openRawResource(R.raw.apple_crisp);
 
-                mKernel.getAuroraCommunicator().openFileWithPlugin(textFile,"docx" , docFile, intent, mContext);
+                mKernel.getAuroraCommunicator().openFileWithCache("dummyfilename", "docx",
+                        "com.aurora.basicplugin", mContext);
             }
         }
     }

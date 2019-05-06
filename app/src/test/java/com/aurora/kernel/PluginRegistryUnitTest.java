@@ -1,6 +1,7 @@
 package com.aurora.kernel;
 
 import com.aurora.plugin.Plugin;
+import com.aurora.util.MockContext;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -29,8 +30,10 @@ public class PluginRegistryUnitTest {
     private static final String NOT_IN_MAP_PLUGIN = "DummyPlugin3";
     private static final String DESCRIPTION_1 = "Dummydescription 1";
     private static final String DESCRIPTION_2 = "Dummydescription 2";
-    private static final String VERSION_1 = "0.1";
-    private static final String VERSION_2 = "0.1";
+    private static final int VERSION_NUMBER_1 = 1;
+    private static final int VERSION_NUMBER_2 = 1;
+    private static final String VERSION_CODE_1 = "0.1";
+    private static final String VERSION_CODE_2 = "0.1";
 
     private static Plugin plugin1;
     private static Plugin plugin2;
@@ -52,7 +55,7 @@ public class PluginRegistryUnitTest {
         }
 
         mRegistry = new
-                PluginRegistry(mProcessingCommunicator, mConfigRef);
+                PluginRegistry(mConfigRef, new MockContext());
 
         mPluginCommunicator = new
                 PluginCommunicator(mBus, mRegistry);
@@ -61,8 +64,10 @@ public class PluginRegistryUnitTest {
         mRegistry.removeAllPlugins();
 
         // Create dummy plugins
-        plugin1 = new DummyPlugin1(DUMMY_NAME_1, DUMMY_NAME_1, null, DESCRIPTION_1, VERSION_1);
-        plugin2 = new DummyPlugin2(DUMMY_NAME_2, DUMMY_NAME_2, null, DESCRIPTION_2, VERSION_2);
+        plugin1 = new Plugin(DUMMY_NAME_1, DUMMY_NAME_1, null,
+                DESCRIPTION_1, VERSION_NUMBER_1, VERSION_CODE_1);
+        plugin2 = new Plugin(DUMMY_NAME_2, DUMMY_NAME_2, null,
+                DESCRIPTION_2, VERSION_NUMBER_2, VERSION_CODE_2);
 
         // Add dummy plugins
         mRegistry.registerPlugin(DUMMY_NAME_1, plugin1);
@@ -73,7 +78,7 @@ public class PluginRegistryUnitTest {
     @Test
     public void PluginRegistry_loadPlugin_shouldReturnNull() {
         // Call load plugin method with a name that is not in the map
-        Plugin plugin = mRegistry.loadPlugin(NOT_IN_MAP_PLUGIN);
+        Plugin plugin = mRegistry.getPlugin(NOT_IN_MAP_PLUGIN);
 
         // Assert that environment is indeed null
         assertNull(plugin);
@@ -82,32 +87,11 @@ public class PluginRegistryUnitTest {
     @Test
     public void PluginRegistry_loadPlugin_shouldReturnDummyPlugins() {
         // Call load plugin method with names that are in the map
-        Plugin pluginLoaded1 = mRegistry.loadPlugin(DUMMY_NAME_1);
-        Plugin pluginLoaded2 = mRegistry.loadPlugin(DUMMY_NAME_2);
+        Plugin pluginLoaded1 = mRegistry.getPlugin(DUMMY_NAME_1);
+        Plugin pluginLoaded2 = mRegistry.getPlugin(DUMMY_NAME_2);
 
         // Assert that the environments are what expected
         assertEquals(plugin1, pluginLoaded1);
         assertEquals(plugin2, pluginLoaded2);
     }
-
-
-    /**
-     * Dummy plugin for testing purposes
-     */
-    private static class DummyPlugin1 extends Plugin {
-        public DummyPlugin1(String uniqueName, String name, File pluginLogo, String description, String version) {
-            super(uniqueName, name, pluginLogo, description, version);
-        }
-    }
-
-    /**
-     * Another dummy plugin for testing purposes
-     */
-    private static class DummyPlugin2 extends Plugin {
-
-        public DummyPlugin2(String uniqueName, String name, File pluginLogo, String description, String version) {
-            super(uniqueName, name, pluginLogo, description, version);
-        }
-    }
-
 }
