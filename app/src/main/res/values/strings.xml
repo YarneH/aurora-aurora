@@ -21,7 +21,7 @@
     <string name="button_open">Open</string>
 
     <!-- Card File strings -->
-    <string name="file_description">\'Description of the file\'</string>
+    <string name="file_location">\'Location of the file\'</string>
     <string name="file_last">Last opened on:</string>
     <string name="file_added_on">Added on:</string>
     <string name="file_more_details">Hold for more info...</string>

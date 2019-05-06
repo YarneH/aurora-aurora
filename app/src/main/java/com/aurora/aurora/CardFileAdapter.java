@@ -166,6 +166,12 @@ public class CardFileAdapter extends RecyclerView.Adapter<CardFileAdapter.CardFi
             boolean clickConsumed = false;
             // If the click happened on the card itself
             if (view.getId() == R.id.cv_file) {
+
+                // TODO: Remove this 'return' if card details should be enabled!
+                if (view.getId() != 0){
+                    return true;
+                }
+
                 // If the click happened on the card itself
                 if (mSelectedIndex == NO_DETAILS) {
                     /*
@@ -232,8 +238,10 @@ public class CardFileAdapter extends RecyclerView.Adapter<CardFileAdapter.CardFi
      */
     public static void collapse(final View v) {
         ConstraintLayout detailView = v.findViewById(R.id.cv_fl_detail);
-        TextView baseView = v.findViewById(R.id.tv_card_more_details);
+        // TODO: Uncomment if details of card should be used!
+        // TextView baseView = v.findViewById(R.id.tv_card_more_details);
         detailView.setVisibility(View.GONE);
-        baseView.setVisibility(View.VISIBLE);
+        // TODO: Uncomment if details of card should be used!
+        // baseView.setVisibility(View.VISIBLE);
     }
 }
