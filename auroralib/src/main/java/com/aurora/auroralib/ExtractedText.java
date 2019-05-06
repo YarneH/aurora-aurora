@@ -203,14 +203,14 @@ public class ExtractedText implements InternallyProcessedFile, Serializable {
     /**
      * Convenience method for getting all the images
      *
-     * @return List of {@link Image} objects
+     * @return List of {@link ExtractedImage} objects
      */
     @SuppressWarnings("unused")
-    public List<Image> getImages() {
-        List<Image> extractedImages = new ArrayList<>();
+    public List<ExtractedImage> getImages() {
+        List<ExtractedImage> extractedImages = new ArrayList<>();
 
         for (Section section: this.getSections()) {
-            extractedImages.addAll(section.getImageObjects());
+            extractedImages.addAll(section.getExtractedImages());
         }
 
         return extractedImages;

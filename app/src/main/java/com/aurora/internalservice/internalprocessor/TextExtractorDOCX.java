@@ -4,8 +4,8 @@ import android.support.annotation.NonNull;
 import android.util.Base64;
 import android.util.Log;
 
+import com.aurora.auroralib.ExtractedImage;
 import com.aurora.auroralib.ExtractedText;
-import com.aurora.auroralib.Image;
 import com.aurora.auroralib.Section;
 
 import org.apache.poi.xwpf.usermodel.IBodyElement;
@@ -125,17 +125,17 @@ public class TextExtractorDOCX implements TextExtractor {
     // multiple methods without making it harder to understand.
     @java.lang.SuppressWarnings({"squid:MethodCyclomaticComplexity","squid:S3776"})
     private void addRun(@NonNull String run, int paragraphLevel, int runSize,
-                        @NonNull List<Image> images) {
+                        @NonNull List<ExtractedImage> extractedImages) {
         String formatted = run.trim();
 
         // First text line is always a title for simplicity
         if(mExtractedText.getTitle() == null && !formatted.isEmpty()) {
             mExtractedText.setTitle(formatted);
 
-            // The title section contains images, add them to their own section.
-            if(!images.isEmpty()) {
+            // The title section contains extractedImages, add them to their own section.
+            if(!extractedImages.isEmpty()) {
                 Section imageSection = new Section();
-                imageSection.setImageObjects(images);
+                imageSection.setExtractedImages(extractedImages);
                 mExtractedText.addSection(imageSection);
             }
 
@@ -157,7 +157,7 @@ public class TextExtractorDOCX implements TextExtractor {
             // Create a new Section
             mSectionInProgress = new Section();
             mSectionInProgress.setTitle(formatted);
-            mSectionInProgress.setImageObjects(images);
+            mSectionInProgress.setExtractedImages(extractedImages);
 
             // If the default headers of word are used, we can extract a paragraph level, non
             // header sections will get the last seen paragraph level.
@@ -175,13 +175,13 @@ public class TextExtractorDOCX implements TextExtractor {
         } else {
             // The section is not a title
 
-            // If its empty, flush the previous section (if it has body or images)
+            // If its empty, flush the previous section (if it has body or extractedImages)
             if(formatted.isEmpty() && mSectionInProgress != null &&
-                    (mSectionInProgress.getBody()!=null || !mSectionInProgress.getImageObjects().isEmpty())) {
-                mSectionInProgress.addImageObjects(images);
+                    (mSectionInProgress.getBody()!=null || !mSectionInProgress.getExtractedImages().isEmpty())) {
+                mSectionInProgress.addExtractedImages(extractedImages);
                 mExtractedText.addSection(mSectionInProgress);
                 mSectionInProgress = null;
-            } else if (!formatted.isEmpty() || !images.isEmpty()) {
+            } else if (!formatted.isEmpty() || !extractedImages.isEmpty()) {
                 // It is not empty
 
                 if (mSectionInProgress == null) {
@@ -190,7 +190,7 @@ public class TextExtractorDOCX implements TextExtractor {
                     mSectionInProgress.setLevel(mLastSeenParagraphLevel);
                 }
 
-                mSectionInProgress.addImageObjects(images);
+                mSectionInProgress.addExtractedImages(extractedImages);
                 mSectionInProgress.concatBody(formatted + "\n");
 
                 mPreviousRunSize = runSize;
@@ -220,8 +220,8 @@ public class TextExtractorDOCX implements TextExtractor {
          the same parameters */
         XWPFRun runInProgress = null;
 
-        /* List of images that has yet to be added */
-        List<Image> images = new ArrayList<>();
+        /* List of extractedImages that has yet to be added */
+        List<ExtractedImage> extractedImages = new ArrayList<>();
 
         if(paragraph.getRuns().isEmpty()) {
               addRun(paragraph.getText(), getLevel(paragraph), -1, new ArrayList<>());
@@ -231,14 +231,14 @@ public class TextExtractorDOCX implements TextExtractor {
         for (IRunElement run : paragraph.getRuns()) {
             // Normal flow
             if (run instanceof XWPFRun) {
-                // Extract the images from the run and add them to the list of yet to process images
+                // Extract the extractedImages from the run and add them to the list of yet to process extractedImages
                 List<XWPFPicture> piclist = ((XWPFRun) run).getEmbeddedPictures();
                 for (XWPFPicture image: piclist) {
                     if (extractImages) {
-                        Image imageObject =
-                                new Image(Base64.encodeToString(image.getPictureData().getData(),
+                        ExtractedImage imageObject =
+                                new ExtractedImage(Base64.encodeToString(image.getPictureData().getData(),
                                         Base64.DEFAULT));
-                        images.add(imageObject);
+                        extractedImages.add(imageObject);
                     }
                 }
 
@@ -257,9 +257,9 @@ public class TextExtractorDOCX implements TextExtractor {
 
                         // Add the section and reset the state variables
                         addRun(textInProgress.toString(), getLevel(paragraph)
-                                , runInProgress.getFontSize(), images);
+                                , runInProgress.getFontSize(), extractedImages);
 
-                        images = new ArrayList<>();
+                        extractedImages = new ArrayList<>();
                         textInProgress = null;
                         runInProgress = null;
                     } else if(textInProgress != null) {
@@ -281,12 +281,12 @@ public class TextExtractorDOCX implements TextExtractor {
                 addRun(run.toString(), getLevel(paragraph), -1, new ArrayList<>());
             }
         }
-        // Flush the last run and any images that are not yet pushed.
+        // Flush the last run and any extractedImages that are not yet pushed.
         if(runInProgress != null) {
             addRun(textInProgress.toString(), getLevel(paragraph)
-                    , runInProgress.getFontSize(), images);
-        } else if(!images.isEmpty()) {
-            addRun("",getLevel(paragraph), -1, images);
+                    , runInProgress.getFontSize(), extractedImages);
+        } else if(!extractedImages.isEmpty()) {
+            addRun("",getLevel(paragraph), -1, extractedImages);
         }
     }
 

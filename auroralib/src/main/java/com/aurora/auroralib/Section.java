@@ -1,5 +1,7 @@
 package com.aurora.auroralib;
 
+import android.support.annotation.NonNull;
+
 import com.google.gson.annotations.JsonAdapter;
 
 import java.util.ArrayList;
@@ -44,9 +46,9 @@ public class Section {
     private transient Annotation mBodyAnnotation;
 
     /**
-     * The images in a section, as an {@link Image} object
+     * The images in a section, as an {@link ExtractedImage} object
      */
-    private List<Image> mImages = new ArrayList<>();
+    private List<ExtractedImage> mExtractedImages = new ArrayList<>();
     /**
      * The level of the section, default level is 0
      */
@@ -141,7 +143,7 @@ public class Section {
     }
 
     /**
-     * The old method for getting images, instead use {@link #getImageObjects()}
+     * The old method for getting images, instead use {@link #getExtractedImages()}
      *
      * @return the list of base64 encode images
      * @deprecated
@@ -150,71 +152,84 @@ public class Section {
     public List<String> getImages() {
         List<String> base64Images = new ArrayList<>();
 
-        for (Image image: mImages) {
-            base64Images.add(image.getBase64EncodedImage());
+        for (ExtractedImage extractedImage : mExtractedImages) {
+            base64Images.add(extractedImage.getBase64EncodedImage());
         }
         return base64Images;
     }
 
     /**
-     * Get the {@link Image} objects of this Section. Will return an empty
+     * Get the {@link ExtractedImage} objects of this Section. Will return an empty
      * list when no images are present.
      *
      * @return the list of images
      */
     @SuppressWarnings("unused")
-    public List<Image> getImageObjects() {
-        if (mImages != null) {
-            return  mImages;
+    public @NonNull
+    List<ExtractedImage> getExtractedImages() {
+        if (mExtractedImages != null) {
+            return mExtractedImages;
         } else {
             return new ArrayList<>();
         }
     }
 
     /**
-     * The old method of setting images, instead use {@link #setImageObjects(List)}
+     * The old method of setting images, instead use {@link #setExtractedImages(List)}
      *
      * @param images List of base64 encode images
      * @deprecated
      */
     @Deprecated
     public void setImages(List<String> images) {
-        mImages = new ArrayList<>();
+        mExtractedImages = new ArrayList<>();
         addImages(images);
     }
 
     /**
-     * Set the list of {@link Image} objects
+     * Set the list of {@link ExtractedImage} objects
      *
-     * @param images the List of {@link Image} objects
+     * @param extractedImages the List of {@link ExtractedImage} objects
      */
-    public void setImageObjects(List<Image> images) {
-        this.mImages = images;
+    public void setExtractedImages(List<ExtractedImage> extractedImages) {
+        this.mExtractedImages = extractedImages;
     }
 
     /**
-     * The old method of adding images, instead use {@link #addImageObjects(List)}
+     * The old method of adding images, instead use {@link #addExtractedImages(List)}
      *
      * @param images List of base64 encoded images
      * @deprecated
      */
     @Deprecated
     public void addImages(Iterable<String> images) {
-        for (String image: images) {
-            mImages.add(new Image(image));
+        for (String image : images) {
+            mExtractedImages.add(new ExtractedImage(image));
         }
     }
 
     /**
-     * Add the list of {@link Image} objects to the existing list
+     * Adds a single {@link ExtractedImage} to this section
      *
-     * @param images the List of {@link Image} objects
+     * @param extractedImage the ExtractedImage to add
      */
-    public void addImageObjects(List<Image> images) {
-        if (mImages == null) {
-            this.mImages = images;
+    public void addExtractedImage(ExtractedImage extractedImage) {
+        if (mExtractedImages == null) {
+            this.mExtractedImages = new ArrayList<>();
+        }
+        this.mExtractedImages.add(extractedImage);
+    }
+
+    /**
+     * Add the list of {@link ExtractedImage} objects to the existing list
+     *
+     * @param extractedImages the List of {@link ExtractedImage} objects
+     */
+    public void addExtractedImages(List<ExtractedImage> extractedImages) {
+        if (mExtractedImages == null) {
+            this.mExtractedImages = extractedImages;
         } else {
-            this.mImages.addAll(images);
+            this.mExtractedImages.addAll(extractedImages);
         }
     }
 

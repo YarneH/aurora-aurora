@@ -9,7 +9,7 @@ import android.util.Base64;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 
-public class Image {
+public class ExtractedImage {
 
     private String mBase64EncodedImage;
 
@@ -20,7 +20,7 @@ public class Image {
      *
      * @param base64EncodedImage the base64 encode String
      */
-    public Image(@NonNull String base64EncodedImage) {
+    public ExtractedImage(@NonNull final String base64EncodedImage) {
         mBase64EncodedImage = base64EncodedImage;
     }
 
@@ -29,41 +29,43 @@ public class Image {
      * @param base64EncodedImage the base64 encode String
      * @param caption           the caption String
      */
-    public Image(@NonNull String base64EncodedImage, @Nullable String caption) {
+    public ExtractedImage(@NonNull final String base64EncodedImage,
+                          @Nullable final String caption) {
         mBase64EncodedImage = base64EncodedImage;
         mCaption = caption;
     }
 
     /**
-     * Get the raw base64 encode image
+     * Returns the raw base64 encoded image
      *
      * @return the base64 encoded image
      */
-    public String getBase64EncodedImage() {
+    public @NonNull String getBase64EncodedImage() {
         return mBase64EncodedImage;
     }
 
     /**
-     * Get the decoded image as Bitmap
+     * Returns the decoded image as Bitmap
      *
      * @return the Bitmap of the image
      */
     @SuppressWarnings("unused")
-    public Bitmap getImage() {
+    public @NonNull Bitmap getBitmap() {
         InputStream stream = new ByteArrayInputStream(Base64.decode(mBase64EncodedImage.getBytes()
                 , Base64.DEFAULT));
         return BitmapFactory.decodeStream(stream);
     }
 
-    public void setBase64EncodedImage(String base64EncodedImage) {
+    public void setBase64EncodedImage(@NonNull final String base64EncodedImage) {
         this.mBase64EncodedImage = base64EncodedImage;
     }
 
-    public String getCaption() {
+    @SuppressWarnings("unused")
+    public @Nullable String getCaption() {
         return mCaption;
     }
 
-    public void setCaption(String caption) {
+    public void setCaption(@Nullable final String caption) {
         this.mCaption = caption;
     }
 }
