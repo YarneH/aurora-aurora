@@ -26,7 +26,7 @@ public class TextExtractorTXT implements TextExtractor {
         String content = extractStringFromTXT(file, fileRef);
         String[] splitContent = new String[0];
         if (content != null) {
-            splitContent = content.split("\n\n");
+            splitContent = content.split("\\r?\\n\\r?\\n");
         }
         if (splitContent.length > 1) {
             extractedText.setTitle(splitContent[0]);
@@ -34,16 +34,7 @@ public class TextExtractorTXT implements TextExtractor {
                 extractedText.addSimpleSection(splitContent[i]);
             }
         } else if (splitContent.length == 1) {
-            // Maybe this text file is split with one newline
-            splitContent = splitContent[0].split("\n");
-            if (splitContent.length > 1) {
-                extractedText.setTitle(splitContent[0]);
-                for (int i = 1; i < splitContent.length; i++) {
-                    extractedText.addSimpleSection(splitContent[i]);
-                }
-            } else {
-                extractedText.addSimpleSection(splitContent[0]);
-            }
+            extractedText.addSimpleSection(splitContent[0]);
         }
         return extractedText;
     }
