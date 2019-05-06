@@ -1,11 +1,11 @@
 package com.aurora.internalservice.internalprocessor.pdfparsing;
 
 
+import com.aurora.auroralib.ExtractedImage;
 import com.aurora.auroralib.ExtractedText;
 import com.aurora.auroralib.Section;
 
 import java.util.ArrayList;
-import java.util.List;
 
 /**
  * This class will represent a PDF parsed by the {@link PDFContentExtractor}
@@ -71,9 +71,7 @@ public class ParsedPDF {
      */
     private void addElementToSection(PDFStructureElement pdfStructureElement, Section section) {
         if (pdfStructureElement.getType().equals(ImageFromPDF.TYPE)) {
-            List<String> images = new ArrayList<>();
-            images.add(pdfStructureElement.getContent());
-            section.addImages((images));
+            section.addExtractedImage(new ExtractedImage(pdfStructureElement.getContent()));
         } else {
             section.concatBody(pdfStructureElement.getContent() + "\n");
         }

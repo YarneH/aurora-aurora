@@ -1,5 +1,7 @@
 package com.aurora.auroralib;
 
+import android.support.annotation.NonNull;
+
 import com.google.gson.annotations.JsonAdapter;
 
 import java.util.ArrayList;
@@ -44,9 +46,9 @@ public class Section {
     private transient Annotation mBodyAnnotation;
 
     /**
-     * The images in a section, as a Base64 String
+     * The images in a section, as an {@link ExtractedImage} object
      */
-    private List<String> mImages;
+    private List<ExtractedImage> mExtractedImages = new ArrayList<>();
     /**
      * The level of the section, default level is 0
      */
@@ -66,19 +68,6 @@ public class Section {
      */
     public Section(String body) {
         this.mBody = body;
-    }
-
-    /**
-     * Constructor for creating a section with a title, content and images
-     *
-     * @param title  the title of the section
-     * @param body   the content of the section
-     * @param images the images in the section
-     */
-    public Section(String title, String body, List<String> images) {
-        this.mTitle = title;
-        this.mBody = body;
-        this.mImages = images;
     }
 
     @Override
@@ -105,10 +94,6 @@ public class Section {
         this.mTitle = title;
     }
 
-    CoreNLPProtos.Document getTitleAnnotationProto() {
-        return mTitleAnnotationProto;
-    }
-
     public void setTitleAnnotationProto(CoreNLPProtos.Document titleAnnotations) {
         this.mTitleAnnotationProto = titleAnnotations;
     }
@@ -123,10 +108,6 @@ public class Section {
         }
 
         return mTitleAnnotation;
-    }
-
-    void setTitleAnnotation(Annotation annotation) {
-        this.mTitleAnnotation = annotation;
     }
 
     public String getBody() {
@@ -145,10 +126,6 @@ public class Section {
         }
     }
 
-    CoreNLPProtos.Document getBodyAnnotationProto() {
-        return mBodyAnnotationProto;
-    }
-
     public void setBodyAnnotationProto(CoreNLPProtos.Document bodyAnnotationProto) {
         this.mBodyAnnotationProto = bodyAnnotationProto;
     }
@@ -165,27 +142,94 @@ public class Section {
         return mBodyAnnotation;
     }
 
-    void setBodyAnnotation(Annotation mBodyAnnotation) {
-        this.mBodyAnnotation = mBodyAnnotation;
+    /**
+     * The old method for getting images, instead use {@link #getExtractedImages()}
+     *
+     * @return the list of base64 encode images
+     * @deprecated
+     */
+    @Deprecated
+    public List<String> getImages() {
+        List<String> base64Images = new ArrayList<>();
+
+        for (ExtractedImage extractedImage : mExtractedImages) {
+            base64Images.add(extractedImage.getBase64EncodedImage());
+        }
+        return base64Images;
     }
 
-    public List<String> getImages() {
-        if (mImages != null) {
-            return this.mImages;
+    /**
+     * Get the {@link ExtractedImage} objects of this Section. Will return an empty
+     * list when no images are present.
+     *
+     * @return the list of images
+     */
+    @SuppressWarnings("unused")
+    public @NonNull
+    List<ExtractedImage> getExtractedImages() {
+        if (mExtractedImages != null) {
+            return mExtractedImages;
         } else {
             return new ArrayList<>();
         }
     }
 
+    /**
+     * The old method of setting images, instead use {@link #setExtractedImages(List)}
+     *
+     * @param images List of base64 encode images
+     * @deprecated
+     */
+    @Deprecated
     public void setImages(List<String> images) {
-        this.mImages = images;
+        mExtractedImages = new ArrayList<>();
+        addImages(images);
     }
 
-    public void addImages(List<String> images) {
-        if (mImages == null) {
-            this.mImages = images;
+    /**
+     * Set the list of {@link ExtractedImage} objects
+     *
+     * @param extractedImages the List of {@link ExtractedImage} objects
+     */
+    public void setExtractedImages(List<ExtractedImage> extractedImages) {
+        this.mExtractedImages = extractedImages;
+    }
+
+    /**
+     * The old method of adding images, instead use {@link #addExtractedImages(List)}
+     *
+     * @param images List of base64 encoded images
+     * @deprecated
+     */
+    @Deprecated
+    public void addImages(Iterable<String> images) {
+        for (String image : images) {
+            mExtractedImages.add(new ExtractedImage(image));
+        }
+    }
+
+    /**
+     * Adds a single {@link ExtractedImage} to this section
+     *
+     * @param extractedImage the ExtractedImage to add
+     */
+    public void addExtractedImage(ExtractedImage extractedImage) {
+        if (mExtractedImages == null) {
+            this.mExtractedImages = new ArrayList<>();
+        }
+        this.mExtractedImages.add(extractedImage);
+    }
+
+    /**
+     * Add the list of {@link ExtractedImage} objects to the existing list
+     *
+     * @param extractedImages the List of {@link ExtractedImage} objects
+     */
+    public void addExtractedImages(List<ExtractedImage> extractedImages) {
+        if (mExtractedImages == null) {
+            this.mExtractedImages = extractedImages;
         } else {
-            this.mImages.addAll(images);
+            this.mExtractedImages.addAll(extractedImages);
         }
     }
 
