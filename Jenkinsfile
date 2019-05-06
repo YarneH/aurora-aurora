@@ -30,8 +30,10 @@ pipeline {
                     // Compile and run the unit tests for the app and its dependencies
                     if (env.BRANCH_NAME == 'master' || env.BRANCH_NAME == 'dev') {
                         sh "./gradlew testReleaseUnitTest --tests '*UnitTest'"
+                        sh "./gradlew auroralib:testReleaseUnitTest --tests '*UnitTest'"
                     } else {
                         sh "./gradlew testDebugUnitTest --tests '*UnitTest'"
+                        sh "./gradlew auroralib:testDebugUnitTest --tests '*UnitTest'"
                     }
 
 
@@ -41,7 +43,7 @@ pipeline {
                     // Analyze coverage info
                     jacoco sourcePattern: '**/src/*/java', 
                         classPattern: '**/classes/com/aurora', 
-                        exclusionPattern: '**/*Test*.class,  **/aurora/*.class, **/src/test, **/src/androidTest'
+                        exclusionPattern: '**/*Test*.class,  **/aurora/*.class, **/util/*.class, **/*ICache*, **/R.class, **/R$*.class, **/BuildConfig, **/src/test/, **/src/androidTest/'
                 }
             }
 
@@ -95,8 +97,10 @@ pipeline {
                 script {
                     if (env.BRANCH_NAME == 'master' || env.BRANCH_NAME == 'dev') {
                         sh "./gradlew testReleaseUnitTest --tests '*LongTest'"
+                        sh "./gradlew auroralib:testReleaseUnitTest --tests '*LongTest'"
                     } else {
                         sh "./gradlew testDebugUnitTest --tests '*LongTest'"
+                        sh "./gradlew auroralib:testDebugUnitTest --tests '*LongTest'"
                     }
 
 
@@ -104,9 +108,9 @@ pipeline {
                     junit allowEmptyResults: true, testResults: '**/TEST-*.xml'
 
                     // Analyze coverage info
-                    jacoco sourcePattern: '**/src/main/java/com/aurora', 
+                     jacoco sourcePattern: '**/src/*/java', 
                         classPattern: '**/classes/com/aurora', 
-                        exclusionPattern: '**/*Test*.class,  **/souschef/*.class, **/R.class, **/R$*.class, **/BuildConfig'
+                        exclusionPattern: '**/*Test*.class,  **/aurora/*.class, **/util/*.class, **/ICache*, **/R.class, **/R$*.class, **/BuildConfig, **/src/test, **/src/androidTest'
                 }
             }
             post {
@@ -121,17 +125,19 @@ pipeline {
                 script {
                     if (env.BRANCH_NAME == 'master' || env.BRANCH_NAME == 'dev') {
                         sh "./gradlew testReleaseUnitTest --tests '*IntegTest'"
+                        sh "./gradlew auroralib:testReleaseUnitTest --tests '*IntegTest'"
                     } else {
                         sh "./gradlew testDebugUnitTest --tests '*IntegTest'"
+                        sh "./gradlew auroralib:testDebugUnitTest --tests '*IntegTest'"
                     }
 
                     // Analyse the test results and update the build result as appropriate
                     junit allowEmptyResults: true, testResults: '**/TEST-*.xml'
 
                     // Analyze coverage info
-                    jacoco sourcePattern: '**/src/main/java/com/aurora', 
+                    jacoco sourcePattern: '**/src/*/java', 
                         classPattern: '**/classes/com/aurora', 
-                        exclusionPattern: '**/*Test*.class,  **/souschef/*.class, **/R.class, **/R$*.class, **/BuildConfig'
+                        exclusionPattern: '**/*Test*.class,  **/aurora/*.class, **/util/*.class, **/ICache*, **/R.class, **/R$*.class, **/BuildConfig, **/src/test/, **/src/androidTest/'
                 }
             }
             post {

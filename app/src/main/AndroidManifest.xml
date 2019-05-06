@@ -40,6 +40,29 @@
             </intent-filter>
 
         </activity>
+
+
+        <service android:name="com.aurora.plugin.CacheService">
+            <intent-filter>
+                <action android:name="com.aurora.internalservice.internalcache.ICache" />
+            </intent-filter>
+        </service>
+        <service android:name="com.aurora.plugin.TranslationService">
+            <intent-filter>
+                <action android:name="com.aurora.internalservice.internaltranslation.ITranslate" />
+            </intent-filter>
+        </service>
+
+
+        <provider
+            android:name="android.support.v4.content.FileProvider"
+            android:authorities="com.aurora.aurora.provider"
+            android:grantUriPermissions="true"
+            android:exported="false">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/filepaths" />
+        </provider>
     </application>
 
     <uses-permission android:name="android.permission.INTERNET" />

@@ -1,8 +1,18 @@
 package com.aurora.auroralib;
 
+import android.content.Context;
+import android.net.Uri;
+import android.os.ParcelFileDescriptor;
+import android.support.annotation.NonNull;
+
 import com.google.gson.Gson;
 import com.google.gson.annotations.JsonAdapter;
 
+import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
@@ -17,22 +27,37 @@ import edu.stanford.nlp.pipeline.ProtobufAnnotationSerializer;
  * Class to represent extracted text from an internal processor
  */
 public class ExtractedText implements InternallyProcessedFile, Serializable {
-    /** The filename, often the path to the file */
+
+    /**
+     * The filename, often the path to the file
+     */
     private String mFilename;
-    /** The Date of the last edit*/
+    /**
+     * The Date of the last edit
+     */
     private Date mDateLastEdit;
 
-    /** The text of the title of the file */
+    /**
+     * The text of the title of the file
+     */
     private String mTitle;
-    /** The CoreNLP annotations of the title in Google's protobuf format */
+    /**
+     * The CoreNLP annotations of the title in Google's protobuf format
+     */
     @JsonAdapter(CoreNLPDocumentAdapter.class)
     private CoreNLPProtos.Document mTitleAnnotationProto;
-    /** The deserialized Annotation of the title */
+    /**
+     * The deserialized Annotation of the title
+     */
     private transient Annotation mTitleAnnotation;
 
-    /** A list of authors of the file */
+    /**
+     * A list of authors of the file
+     */
     private List<String> mAuthors;
-    /** A list of Sections of the file which represent the content */
+    /**
+     * A list of Sections of the file which represent the content
+     */
     private List<Section> mSections;
 
     /**
@@ -54,10 +79,15 @@ public class ExtractedText implements InternallyProcessedFile, Serializable {
      * @param sections     the sections in the file (only plain sections)
      */
     public ExtractedText(String filename, Date dateLastEdit, List<String> sections) {
-        this.mFilename = filename;
-        this.mDateLastEdit = dateLastEdit;
+        mFilename = filename;
+        mDateLastEdit = dateLastEdit;
+
+        mSections = new ArrayList<>();
+
+        // Do not use overridable method because this can lead to strange behaviour in subclasses
+        // wiki.sei.cmu.edu/confluence/display/java/MET05-J.+Ensure+that+constructors+do+not+call+overridable+methods
         for (String section : sections) {
-            addSimpleSection(section);
+            mSections.add(new Section(section));
         }
     }
 
@@ -70,7 +100,8 @@ public class ExtractedText implements InternallyProcessedFile, Serializable {
      * @param mAuthors      the authors of the file
      * @param mSections     the sections in the file
      */
-    public ExtractedText(String mFilename, Date mDateLastEdit, String mTitle, List<String> mAuthors, List<Section> mSections) {
+    public ExtractedText(String mFilename, Date mDateLastEdit, String mTitle, List<String> mAuthors,
+                         List<Section> mSections) {
         this(mFilename, mDateLastEdit);
         this.mTitle = mTitle;
         this.mAuthors = mAuthors;
@@ -80,19 +111,20 @@ public class ExtractedText implements InternallyProcessedFile, Serializable {
     /**
      * Get the sections of this ExtractedText. Will return an empty list when no Sections are
      * present
+     *
      * @return the list of sections
      */
     public List<Section> getSections() {
-        if(mSections != null) {
+        if (mSections != null) {
             return this.mSections;
         } else {
             return new ArrayList<>();
         }
-
     }
 
     /**
      * Adds the section to the list of sections for this extractedText
+     *
      * @param section the section to be added
      */
     public void addSection(Section section) {
@@ -145,6 +177,13 @@ public class ExtractedText implements InternallyProcessedFile, Serializable {
 
     @SuppressWarnings("unused")
     public Annotation getTitleAnnotation() {
+        // Recover the title CoreNLP annotations
+        if (mTitleAnnotationProto != null && mTitleAnnotation == null) {
+            ProtobufAnnotationSerializer annotationSerializer =
+                    new ProtobufAnnotationSerializer(true);
+                    mTitleAnnotation = annotationSerializer.fromProto(mTitleAnnotationProto);
+        }
+
         return mTitleAnnotation;
     }
 
@@ -161,6 +200,23 @@ public class ExtractedText implements InternallyProcessedFile, Serializable {
         this.mAuthors = authors;
     }
 
+    /**
+     * Convenience method for getting all the images
+     *
+     * @return List of {@link ExtractedImage} objects
+     */
+    @SuppressWarnings("unused")
+    public List<ExtractedImage> getImages() {
+        List<ExtractedImage> extractedImages = new ArrayList<>();
+
+        for (Section section: this.getSections()) {
+            extractedImages.addAll(section.getExtractedImages());
+        }
+
+        return extractedImages;
+    }
+
+    @Override
     public String toString() {
         StringBuilder res = new StringBuilder();
         if (mTitle != null) {
@@ -194,29 +250,39 @@ public class ExtractedText implements InternallyProcessedFile, Serializable {
     public static ExtractedText fromJson(String json) {
         Gson gson = new Gson();
 
-        ExtractedText extractedText = gson.fromJson(json, ExtractedText.class);
-        ProtobufAnnotationSerializer annotationSerializer =
-                new ProtobufAnnotationSerializer(true);
+        return gson.fromJson(json, ExtractedText.class);
+    }
 
-        // Recover the title CoreNLP annotations
-        if (extractedText.mTitleAnnotationProto != null) {
-            extractedText.mTitleAnnotation =
-                    annotationSerializer.fromProto(extractedText.mTitleAnnotationProto);
+    /**
+     * Method to convert the file accessed by the Uri to an ExtractedText object
+     *
+     * @param fileUri   The Uri to the temp file
+     * @param context   The conext
+     * @return  ExtractedText object
+     * @throws IOException          On IO trouble
+     * @throws NullPointerException When the file cannot be found.
+     */
+    @SuppressWarnings("unused")
+    public static ExtractedText getExtractedTextFromFile(@NonNull Uri fileUri, @NonNull Context context)
+            throws IOException {
+
+        // Open the file
+        ParcelFileDescriptor inputPFD = context.getContentResolver().openFileDescriptor(fileUri, "r");
+
+        if(inputPFD == null) {
+            throw new IllegalArgumentException("The file could not be opened");
         }
 
-        // Recover the Section CoreNLP annotations
-        for (Section section : extractedText.getSections()) {
-            if (section.getTitleAnnotationProto() != null) {
-                section.setTitleAnnotation(
-                        annotationSerializer.fromProto(section.getTitleAnnotationProto()));
-            }
-
-            if (section.getBodyAnnotationProto() != null) {
-                section.setBodyAnnotation(
-                        annotationSerializer.fromProto(section.getBodyAnnotationProto()));
+        // Read the file
+        StringBuilder total = new StringBuilder();
+        InputStream fileStream = new FileInputStream(inputPFD.getFileDescriptor());
+        try (BufferedReader r = new BufferedReader(new InputStreamReader(fileStream))) {
+            for (String line; (line = r.readLine()) != null; ) {
+                total.append(line).append('\n');
             }
         }
 
-        return extractedText;
+        // Convert the read file to an ExtractedText object
+        return ExtractedText.fromJson(total.toString());
     }
 }

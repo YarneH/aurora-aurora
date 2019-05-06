@@ -1,10 +1,11 @@
 package com.aurora.aurora;
 
-import android.content.ContentResolver;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.OpenableColumns;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -27,6 +28,7 @@ import android.widget.Toast;
 
 import com.aurora.auroralib.Constants;
 import com.aurora.kernel.AuroraCommunicator;
+import com.aurora.kernel.ContextNullException;
 import com.aurora.kernel.Kernel;
 import com.aurora.plugin.Plugin;
 import com.google.firebase.analytics.FirebaseAnalytics;
@@ -88,6 +90,7 @@ public class MainActivity extends AppCompatActivity
      */
     private FirebaseAnalytics mFirebaseAnalytics = null;
 
+
     /**
      * {@inheritDoc}
      */
@@ -97,8 +100,13 @@ public class MainActivity extends AppCompatActivity
         setContentView(R.layout.activity_main);
 
         /* Set up kernel */
-        mKernel = new Kernel(this.getApplicationContext());
-        mAuroraCommunicator = mKernel.getAuroraCommunicator();
+        try {
+            mKernel = Kernel.getInstance(this.getApplicationContext());
+            mAuroraCommunicator = mKernel.getAuroraCommunicator();
+        } catch (ContextNullException e) {
+            Log.e("MainActivity",
+                    "The kernel was not initialized with a valid android application context", e);
+        }
 
         /*
         Set up plugins
@@ -109,14 +117,6 @@ public class MainActivity extends AppCompatActivity
 
         /* Initialize FirebaseAnalytics */
         mFirebaseAnalytics = FirebaseAnalytics.getInstance(this);
-
-        /* Set system properties for DOCX */
-        System.setProperty("org.apache.poi.javax.xml.stream.XMLInputFactory",
-                "com.fasterxml.aalto.stax.InputFactoryImpl");
-        System.setProperty("org.apache.poi.javax.xml.stream.XMLOutputFactory",
-                "com.fasterxml.aalto.stax.OutputFactoryImpl");
-        System.setProperty("org.apache.poi.javax.xml.stream.XMLEventFactory",
-                "com.fasterxml.aalto.stax.EventFactoryImpl");
 
         /* Add toolbar when activity is created */
         Toolbar toolbar = findViewById(R.id.toolbar);
@@ -148,12 +148,47 @@ public class MainActivity extends AppCompatActivity
         CardFileAdapter adapter = new CardFileAdapter(mKernel, this);
         mRecyclerView.setAdapter(adapter);
 
+
         // If opening the file is done from a file explorer
         if (Intent.ACTION_VIEW.equals(getIntent().getAction())) {
             // This method is also called when a file is opened from the file chooser
             onActivityResult(REQUEST_FILE_GET, RESULT_OK, getIntent());
         }
+    }
 
+    /**
+     * Helper method that register the plugins with their info in the pluginregistry
+     * TODO: when the pluginmarket is implemented, remove this method
+     */
+    private void registerPlugins() {
+        final Plugin basicPlugin = new Plugin(
+                "com.aurora.basicplugin",
+                "Basic Plugin",
+                null,
+                "Basic plugin to open any file and display extracted text.",
+                4,
+                "v0.4");
+
+        final Plugin souschefPlugin = new Plugin(
+                "com.aurora.souschef",
+                "Souschef",
+                null,
+                "Plugin to open recipes and display them in an enhanced way.",
+                4,
+                "v0.4");
+
+        final Plugin paperViewerPlugin = new Plugin(
+                "com.aurora.paperviewer",
+                "Paperviewer",
+                null,
+                "Plugin to open papers and display them in an enhanced way.",
+                4,
+                "v0.4");
+
+        // Register plugins in the registry
+        mAuroraCommunicator.registerPlugin(basicPlugin);
+        mAuroraCommunicator.registerPlugin(souschefPlugin);
+        mAuroraCommunicator.registerPlugin(paperViewerPlugin);
     }
 
     /**
@@ -210,9 +245,11 @@ public class MainActivity extends AppCompatActivity
             try {
                 if (textFile != null) {
                     Log.i("URI", textFile.toString());
-                    ContentResolver cR = getApplicationContext().getContentResolver();
-                    String type = MimeTypeMap.getSingleton().getExtensionFromMimeType(cR.getType(textFile));
+                    String type = MimeTypeMap.getSingleton().getExtensionFromMimeType(
+                            getApplicationContext().getContentResolver().getType(textFile));
                     Log.i("MIME", type);
+                    String fileName = getFileName(textFile);
+                    Log.i("FILENAME", fileName);
 
                     /*
                      * Firebase Analytics
@@ -226,14 +263,24 @@ public class MainActivity extends AppCompatActivity
                     // Make inputstream reader for aurora communicator
                     InputStream read = getContentResolver().openInputStream(textFile);
 
+                    // TODO: create and call custom chooser here, and let it return the unique plugin name of the
+                    // plugin to open the file with (package name, e.g. "com.aurora.basicplugin")
+
+
                     // Create intent to open file with a certain plugin
                     Intent pluginAction = new Intent(Constants.PLUGIN_ACTION);
 
                     // Create chooser to let user choose the plugin
                     Intent chooser = Intent.createChooser(pluginAction, getString(R.string.select_plugin));
+                    mAuroraCommunicator.openFileWithPluginChooser(fileName, type,
+                            read, pluginAction, chooser, getApplicationContext());
+                    /*
+                    // For now hard coded constant
+                    String uniquePluginName = "com.aurora.basicplugin";
 
                     mAuroraCommunicator.openFileWithPlugin(textFile.toString(), type,
-                            read, pluginAction, chooser, getApplicationContext());
+                            read, uniquePluginName, getApplicationContext());
+                    */
 
                 } else {
                     showPopUpView("The selected file was null, please select another file!");
@@ -243,6 +290,36 @@ public class MainActivity extends AppCompatActivity
                 Log.e("FILE_NOT_FOUND", "The file could not be found", e);
             }
         }
+    }
+
+    /**
+     * Private helper method to extract the displayed filename from the Cursor combined with the
+     * Uri.
+     *
+     * <p>
+     * This method is needed because files from for example Google Drive get an automatically
+     * generated uri that does not contain the actual file name. This method allows to
+     * extract the filename displayed in the Android file picker.
+     * </p>
+     *
+     * @param uri the Uri to get the displayed filename from
+     * @return The displayed filename
+     */
+    private String getFileName(Uri uri) {
+
+        try (Cursor cursor = getContentResolver()
+                .query(uri, null, null, null, null, null)) {
+            // moveToFirst() returns false if the cursor has 0 rows.  Very handy for
+            // "if there's anything to look at, look at it" conditionals.
+            if (cursor != null && cursor.moveToFirst()) {
+
+                // Note it's called "Display Name".  This is
+                // provider-specific, and might not necessarily be the file name.
+                return cursor.getString(
+                        cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME));
+            }
+        }
+        return null;
     }
 
     /**
@@ -365,40 +442,6 @@ public class MainActivity extends AppCompatActivity
         return true;
     }
 
-    /**
-     * Helper method that register the plugins with their info in the pluginregistry
-     * TODO: when the pluginmarket is implemented, remove this method
-     */
-    private void registerPlugins() {
-        final Plugin basicPlugin = new Plugin(
-                "com.aurora.basicplugin",
-                "Basic Plugin",
-                null,
-                "Basic plugin to open any file and display extracted text.",
-                4,
-                "v0.4");
-
-        final Plugin souschefPlugin = new Plugin(
-                "com.aurora.souschef",
-                "Souschef",
-                null,
-                "Plugin to open recipes and display them in an enhanced way.",
-                4,
-                "v0.4");
-
-        final Plugin paperViewerPlugin = new Plugin(
-                "com.aurora.paperviewer",
-                "Paperviewer",
-                null,
-                "Plugin to open papers and display them in an enhanced way.",
-                4,
-                "v0.4");
-
-        // Register plugins in the registry
-        mAuroraCommunicator.registerPlugin(basicPlugin);
-        mAuroraCommunicator.registerPlugin(souschefPlugin);
-        mAuroraCommunicator.registerPlugin(paperViewerPlugin);
-    }
 
     private void showPopUpView(String message) {
         // Create a LayoutInflater which will create the view for the pop-up

@@ -55,7 +55,7 @@ public class PluginRegistryUnitTest {
         }
 
         mRegistry = new
-                PluginRegistry(mProcessingCommunicator, mConfigRef, new MockContext());
+                PluginRegistry(mConfigRef, new MockContext());
 
         mPluginCommunicator = new
                 PluginCommunicator(mBus, mRegistry);
