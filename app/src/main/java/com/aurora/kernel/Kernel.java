@@ -7,6 +7,7 @@ import android.util.Log;
 import com.android.volley.toolbox.Volley;
 import com.aurora.internalservice.internalcache.InternalCache;
 import com.aurora.internalservice.internalprocessor.InternalTextProcessor;
+import com.aurora.internalservice.internaltranslation.Translator;
 import com.aurora.plugin.Plugin;
 import com.google.gson.Gson;
 
@@ -121,13 +122,12 @@ public final class Kernel {
         InternalTextProcessor internalTextProcessing = new InternalTextProcessor();
 
         sPluginInternalServiceCommunicator = new PluginInternalServiceCommunicator(sBus,
-                internalTextProcessing, Volley.newRequestQueue(applicationContext));
+                internalTextProcessing, new Translator(Volley.newRequestQueue(applicationContext)));
 
 
         // Create cache
         InternalCache internalCache = new InternalCache(applicationContext);
         sAuroraInternalServiceCommunicator = new AuroraInternalServiceCommunicator(sBus, internalCache);
-
         return sKernel;
     }
 

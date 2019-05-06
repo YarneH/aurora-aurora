@@ -1,4 +1,4 @@
-package com.aurora.auroralib;
+package com.aurora.auroralib.cache;
 
 /**
  * Class of constants indicating results of the caching operation.

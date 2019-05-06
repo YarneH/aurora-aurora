@@ -1,8 +1,9 @@
 // ICache.aidl
 package com.aurora.internalservice.internalcache;
 
-// Declare any non-default types here with import statements
-
+/**
+ * AIDL interface for the cache operation
+ */
 interface ICache {
     /**
      * Caches a pluginObject in JSON format

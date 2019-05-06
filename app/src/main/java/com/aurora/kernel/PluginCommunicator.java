@@ -4,6 +4,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.support.annotation.NonNull;
+import android.os.Handler;
+import android.os.Looper;
+import android.support.annotation.Nullable;
 import android.support.v4.content.FileProvider;
 import android.util.Log;
 import android.widget.Toast;
@@ -59,6 +62,26 @@ public class PluginCommunicator extends Communicator {
      * An observable keeping track of incoming ListPluginsRequests
      */
     private final Observable<ListPluginsRequest> mListPluginsRequestObservable;
+
+    /**
+     * String that is logged on a writing error
+     */
+    private static final String ERROR_LOG = "Writing to temporary files went wrong";
+
+    /**
+     * Prefix used for Extracted-text temporary files
+     */
+    private static final String PROCESSED_PREFIX = "processed-";
+
+    /**
+     * Prefix used for Cached PluginObject temporary files
+     */
+    private static final String CACHED_PREFIX = "cached-";
+
+    /**
+     * File extension used as suffix
+     */
+    private static final String EXTENSION = ".aur";
 
 
     /**
@@ -121,32 +144,41 @@ public class PluginCommunicator extends Communicator {
         Intent launchIntent = context.getPackageManager().getLaunchIntentForPackage(uniquePluginName);
 
         if (launchIntent == null) {
-            Toast.makeText(context, context.getString(R.string.could_not_open_plugin), Toast.LENGTH_LONG).show();
+            showToastAndLog(context, context.getString(R.string.could_not_open_plugin), null);
             return;
         }
 
         launchIntent.setAction(Constants.PLUGIN_ACTION);
 
+        // Convert the extracted text to JSON
         String extractedTextInJSON = extractedText.toJSON();
-        launchIntent.putExtra(Constants.PLUGIN_INPUT_EXTRACTED_TEXT, extractedTextInJSON);
-
         Log.d("JSON", extractedTextInJSON);
 
-        //TODO copy File mechanism from openFileWithPluginChooser
+        // Start by clearing the old transfer files
+        removeFilesThatStartWithFromDir(context.getCacheDir(), PROCESSED_PREFIX);
 
-        boolean pluginOpens = launchIntent.resolveActivity(context.getPackageManager()) != null;
+        Uri uri;
+
+        try {
+            uri = writeToTempFile(context, extractedTextInJSON, PROCESSED_PREFIX, EXTENSION);
+        } catch (IOException e) {
+            showToastAndLog(context, ERROR_LOG, e);
+            return;
+        }
+
+        setDataAndFlags(launchIntent, uri, Constants.PLUGIN_INPUT_TYPE_EXTRACTED_TEXT);
 
         // This is a bit of a hack, but it needs to be done because of trying to launch an
         // activity outside of and activity context
         // https://stackoverflow.com/questions/3918517/calling-startactivity-from-outside-of-an-activity-context
         launchIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 
-
+        // Check if at least one app exists that can execute the task
+        boolean pluginOpens = launchIntent.resolveActivity(context.getPackageManager()) != null;
         if (pluginOpens) {
             context.startActivity(launchIntent);
         } else {
-            Toast.makeText(context, context.getString(R.string.could_not_open_plugin),
-                    Toast.LENGTH_LONG).show();
+            showToastAndLog(context, context.getString(R.string.could_not_open_plugin), null);
         }
     }
 
@@ -157,100 +189,88 @@ public class PluginCommunicator extends Communicator {
      * Opens a file with a given plugin
      *
      * @param extractedText the extracted text of the file to open
-     *                      TODO: add tests for this method
      * @param pluginAction  the target intent of the chooser
      * @param chooser       the plugin that was selected by the user in the chooser menu
      * @param context       the android context
      */
+
     private void openFileWithPluginChooser(ExtractedText extractedText, Intent pluginAction,
                                            Intent chooser, Context context) {
-        String extractedTextInJSON = extractedText.toJSON();
-        pluginAction.putExtra(Constants.PLUGIN_INPUT_EXTRACTED_TEXT, extractedTextInJSON);
 
+        // Convert the extracted text to JSON
+        String extractedTextInJSON = extractedText.toJSON();
         Log.d("JSON", extractedTextInJSON);
 
-        // Start by clearing the full android cache directory of our app
-        clearCacheDir(context.getCacheDir());
+        // Start by clearing the old transfer files
+        removeFilesThatStartWithFromDir(context.getCacheDir(), PROCESSED_PREFIX);
 
-        // Write the processed file to the cache directory
-        File file = null;
+        Uri uri;
+
         try {
-            file = File.createTempFile("processed-", ".aur", context.getCacheDir());
+            uri = writeToTempFile(context, extractedTextInJSON, PROCESSED_PREFIX, EXTENSION);
         } catch (IOException e) {
-            Log.e(CLASS_TAG, "Writing to temporary files went wrong", e);
+            showToastAndLog(context, ERROR_LOG, e);
+            return;
         }
 
-        try (FileWriter fileWriter = new FileWriter(file)){
-            fileWriter.write(extractedTextInJSON);
-
-            // Get the URI of the file
-            Uri fileUri = FileProvider.getUriForFile(context, "com.aurora.aurora.provider",
-                    file);
-
-            // Make the file readable by the plugin, this permission last until the activity of
-            // the receiving app ends
-            pluginAction.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-            // Add the uri of the file as data
-            pluginAction.setData(fileUri);
-
-        } catch (IOException e) {
-            Log.e(CLASS_TAG, "Writing to temporary files went wrong", e);
-        }
-
-        // This field now gets used as a boolean to let the plugin know the kind of data will be
-        // read from the file.
-        pluginAction.putExtra(Constants.PLUGIN_INPUT_EXTRACTED_TEXT, "");
-
-
-        // Check if at least one app exists that can execute the task
-        boolean pluginOpens = pluginAction.resolveActivity(context.getPackageManager()) != null;
+        setDataAndFlags(pluginAction, uri, Constants.PLUGIN_INPUT_TYPE_EXTRACTED_TEXT);
 
         // This is a bit of a hack, but it needs to be done because of trying to launch an
         // activity outside of and activity context
         // https://stackoverflow.com/questions/3918517/calling-startactivity-from-outside-of-an-activity-context
         chooser.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 
-
+        // Check if at least one app exists that can execute the task
+        boolean pluginOpens = pluginAction.resolveActivity(context.getPackageManager()) != null;
         if (pluginOpens) {
             context.startActivity(chooser);
         } else {
-            // This toast crashes the app
-            Toast.makeText(context, context.getString(R.string.no_plugins_available),
-                    Toast.LENGTH_LONG).show();
+            showToastAndLog(context, context.getString(R.string.no_plugins_available), null);
         }
     }
 
     /**
      * Opens a cached file with a given plugin
      *
-     * @param jsonRepresentation the json representation of the plugin object to represent
+     * @param jsonRepresentation    the json representation of the plugin object to represent
+     * @param uniquePluginName      the unique name of the plugin
      * @param context            the android context
      */
     private void openCachedFileWithPlugin(@NonNull final String jsonRepresentation,
                                           @NonNull final String uniquePluginName, @NonNull final Context context) {
         // Create intent to open plugin
-        Log.d(getClass().getCanonicalName(), uniquePluginName);
         Intent launchIntent = context.getPackageManager().getLaunchIntentForPackage(uniquePluginName);
 
         // Check if plugin is found
 
         if (launchIntent == null) {
-            Toast.makeText(context, context.getString(R.string.could_not_open_plugin), Toast.LENGTH_LONG).show();
+            showToastAndLog(context, context.getString(R.string.could_not_open_plugin), null);
             return;
         }
 
         launchIntent.setAction(Constants.PLUGIN_ACTION);
-        launchIntent.putExtra(Constants.PLUGIN_INPUT_OBJECT, jsonRepresentation);
+
+        // Start by clearing the old transfer files
+        removeFilesThatStartWithFromDir(context.getCacheDir(), CACHED_PREFIX);
+
+        Uri uri;
+
+        try {
+            uri = writeToTempFile(context, jsonRepresentation, CACHED_PREFIX, EXTENSION);
+        } catch (IOException e) {
+            showToastAndLog(context, ERROR_LOG, e);
+            return;
+        }
+
+        setDataAndFlags(launchIntent, uri, Constants.PLUGIN_INPUT_TYPE_OBJECT);
 
         boolean cachedFileOpens = launchIntent.resolveActivity(context.getPackageManager()) != null;
-
         if (cachedFileOpens) {
             context.startActivity(launchIntent);
         } else {
-            Toast.makeText(context, context.getString(R.string.no_plugins_available), Toast.LENGTH_LONG).show();
+            showToastAndLog(context, context.getString(R.string.could_not_open_plugin), null);
         }
-
-    }
+}
 
     /**
      * Lists all available plugins. It actually fires a ListPluginsResponseEvent that should be
@@ -265,27 +285,98 @@ public class PluginCommunicator extends Communicator {
         mBus.post(response);
     }
 
+
     /**
-     * Private helper function to clear the cache directory
-     * @param dir the directory that needs to be cleared
-     * @return true if success, false otherwise
+     * Private non recursive helper function to clear a directory from files that start with prefix
+     *
+     * @param dir       the directory that needs files to be removed from
+     * @param prefix    the files that will be deleted start with this prefix
      */
     @SuppressWarnings("squid:S4042")
-    private static boolean clearCacheDir(File dir) {
+    // This warning is suppressed because it's not android compliant.
+    private static void removeFilesThatStartWithFromDir(File dir, String prefix) {
         if (dir != null && dir.isDirectory()) {
-            String[] children = dir.list();
-            for (String child: children) {
-                boolean success = clearCacheDir(new File(dir, child));
-                if (!success) {
-                    return false;
+            File[] files = dir.listFiles();
+
+            for (File file : files) {
+                if (file.getName().startsWith(prefix)) {
+                    boolean success = file.delete();
+                    if (!success) {
+                        Log.d(CLASS_TAG, "There was a problem removing old files from "
+                                + dir.getName());
+                        return;
+                    }
                 }
             }
         }
+    }
 
-        // The directory is now empty so delete it
-        if(dir != null) {
-            return dir.delete();
+    /**
+     * Private helper method that shows a toast on the main tread
+     *
+     * @param context   the application context
+     * @param message   the message that needs to be shown
+     */
+    private void showToast(Context context, String message) {
+        Handler handler = new Handler(Looper.getMainLooper());
+        handler.post(() -> Toast.makeText(context, message,
+                Toast.LENGTH_LONG).show());
+    }
+
+    /**
+     * Private helper method that shows a toast on the main tread and also logs the message
+     *
+     * @param context   the application context
+     * @param message   the message that needs to be shown
+     * @param e         the throwable error
+     */
+    private void showToastAndLog(Context context, String message, @Nullable Throwable e) {
+        showToast(context, message);
+        if(e != null) {
+            Log.e(CLASS_TAG, message, e);
+        } else {
+            Log.d(CLASS_TAG, message);
         }
-        return false;
+
+    }
+
+    /**
+     * Private helper function that writes content to a file with a name that starts with a
+     * prefix, ends with suffix, and a random number in between.
+     *
+     * @param context   the application context
+     * @param content   the content that will be written
+     * @param prefix    name of the file
+     * @param suffix    extension of the file
+     * @return Uri to the file on success
+     * @throws IOException on failure
+     */
+    private Uri writeToTempFile(Context context, String content, String prefix, String suffix) throws IOException {
+        // Write the processed file to the cache directory
+        File file = File.createTempFile(prefix, suffix, context.getCacheDir());
+
+        try (FileWriter fileWriter = new FileWriter(file)) {
+            fileWriter.write(content);
+        }
+
+        return FileProvider.getUriForFile(context, "com.aurora.aurora.provider", file);
+    }
+
+    /**
+     * Set all the data field and flags of the intent correctly for letting the receiver be able
+     * to open the file.
+     *
+     * @param intent    The intent where the fields need to be set
+     * @param uri       The Uri to the file
+     * @param dataType  The datatype of the file, should be a constant of {@link Constants}
+     */
+    private void setDataAndFlags(Intent intent, Uri uri, String dataType) {
+        // Make the file readable by the plugin, this permission last until the activity of
+        // the receiving app ends
+        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        // Add the uri of the file as data
+        intent.setData(uri);
+        // Specify the datatype
+        intent.putExtra(Constants.PLUGIN_INPUT_TYPE, dataType);
     }
 }
