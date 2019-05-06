@@ -36,6 +36,16 @@ public class ExtractedImage {
     }
 
     /**
+     * Copy constructor for a deep copy of an ExtractedImage
+     *
+     * @param extractedImage Image that needs copying
+     */
+    public ExtractedImage(final ExtractedImage extractedImage) {
+        mBase64EncodedImage = extractedImage.mBase64EncodedImage;
+        mCaption = extractedImage.mCaption;
+    }
+
+    /**
      * Returns the raw base64 encoded image
      *
      * @return the base64 encoded image

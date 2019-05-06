@@ -70,6 +70,33 @@ public class Section {
         this.mBody = body;
     }
 
+    /**
+     * Copy constructor for a deep copy of a Section
+     *
+     * @param section   the Section that needs a copy
+     */
+    @SuppressWarnings("unused")
+    public Section(final Section section) {
+        // Immutable fields
+        mBody = section.mBody;
+        mTitle = section.mTitle;
+        mLevel = section.mLevel;
+
+        // Deep copy of objects
+        ProtobufAnnotationSerializer annotationSerializer = new ProtobufAnnotationSerializer(true);
+        if(mBodyAnnotationProto != null) {
+            mBodyAnnotationProto = annotationSerializer.toProto(section.getBodyAnnotation());
+        }
+        if(mTitleAnnotationProto != null) {
+            mTitleAnnotationProto = annotationSerializer.toProto(section.getTitleAnnotation());
+        }
+
+        mExtractedImages = new ArrayList<>();
+        for (ExtractedImage image: section.mExtractedImages) {
+            mExtractedImages.add(new ExtractedImage(image));
+        }
+    }
+
     @Override
     public String toString() {
         String result;
