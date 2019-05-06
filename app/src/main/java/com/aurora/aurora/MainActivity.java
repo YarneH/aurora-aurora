@@ -8,7 +8,6 @@ import android.os.Bundle;
 import android.provider.OpenableColumns;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
-import android.support.design.widget.Snackbar;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -284,10 +283,10 @@ public class MainActivity extends AppCompatActivity
                     */
 
                 } else {
-                    Toast.makeText(this, "The selected file was null", Snackbar.LENGTH_LONG).show();
+                    showPopUpView("The selected file was null, please select another file!");
                 }
             } catch (FileNotFoundException e) {
-                Toast.makeText(this, "The file could not be found", Snackbar.LENGTH_LONG).show();
+                showPopUpView("The file could not be found, please select another file!");
                 Log.e("FILE_NOT_FOUND", "The file could not be found", e);
             }
         }
@@ -298,9 +297,9 @@ public class MainActivity extends AppCompatActivity
      * Uri.
      *
      * <p>
-     *     This method is needed because files from for example Google Drive get an automatically
-     *     generated uri that does not contain the actual file name. This method allows to
-     *     extract the filename displayed in the Android file picker.
+     * This method is needed because files from for example Google Drive get an automatically
+     * generated uri that does not contain the actual file name. This method allows to
+     * extract the filename displayed in the Android file picker.
      * </p>
      *
      * @param uri the Uri to get the displayed filename from
@@ -370,7 +369,7 @@ public class MainActivity extends AppCompatActivity
         if (id == R.id.action_search) {
             // Create a LayoutInflater which will create the view for the pop-up
             LayoutInflater li = LayoutInflater.from(this);
-            View promptView = li.inflate(R.layout.search_prompt, null);
+            View promptView = li.inflate(R.layout.search_prompt, mRecyclerView, false);
             final EditText userInput = promptView.findViewById(R.id.et_search_prompt);
 
             // Create a builder to build the actual alertdialog from the previous inflated view
@@ -442,5 +441,23 @@ public class MainActivity extends AppCompatActivity
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
-}
 
+
+    private void showPopUpView(String message) {
+        // Create a LayoutInflater which will create the view for the pop-up
+        LayoutInflater li = LayoutInflater.from(this);
+        View promptView = li.inflate(R.layout.popup_card, mRecyclerView, false);
+
+        // Set the message of the TextView
+        TextView messageText = promptView.findViewById(R.id.tv_message);
+        messageText.setText(message);
+
+        // Create a builder to build the actual alertdialog from the previous inflated view
+        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
+        alertDialogBuilder.setView(promptView);
+        alertDialogBuilder.setCancelable(false);
+
+        // Create and show the pop-up
+        alertDialogBuilder.create().show();
+    }
+}
