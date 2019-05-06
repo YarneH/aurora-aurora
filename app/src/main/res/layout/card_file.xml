@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?><!-- The main view for the ViewHolder of the RecyclerView -->
-<android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.v7.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/cv_file"
     android:layout_width="match_parent"
@@ -11,59 +12,54 @@
     app:cardElevation="@dimen/fc_elevation">
 
     <!-- This LinearLayout holds the whole content of the cardview -->
-    <FrameLayout
+    <android.support.constraint.ConstraintLayout
         android:id="@+id/cv_fl_base_card"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:padding="@dimen/fc_padding">
 
-        <!-- This LinearLayout holds and orders all TextView from one card -->
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:orientation="vertical"
-            android:padding="@dimen/fc_individual_padding">
-            <!-- File name -->
-            <!-- Gravity "start" in stead of "left".
+        <!-- File name -->
+        <!-- Gravity "start" in stead of "left".
             Users might use right to left text flow. -->
-            <TextView
-                android:id="@+id/tv_card_title"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_gravity="start"
-                android:textSize="@dimen/fc_large_text"
-                android:textStyle="bold" />
-            <!-- Details about file -->
-            <TextView
-                android:id="@+id/tv_card_detail"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_gravity="start"
-                android:text="@string/file_details"
-                android:textSize="@dimen/fc_small_text"
-                android:textStyle="italic" />
-        </LinearLayout>
+        <TextView
+            android:id="@+id/tv_card_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="start"
+            android:textSize="@dimen/fc_large_text"
+            android:textStyle="bold"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"/>
 
-        <!-- The 'Open' button -->
-        <Button
-            android:id="@+id/button_card_file"
+        <!-- Description of the file -->
+        <TextView
+            android:id="@+id/tv_card_location"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="start"
+            android:text="@string/file_location"
+            android:textSize="@dimen/fc_small_text"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/tv_card_title"/>
+
+        <!-- Details of the file -->
+        <!-- TODO: Remove invisibility is details should be used! -->
+        <TextView
+            android:id="@+id/tv_card_more_details"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="end"
-            android:layout_margin="@dimen/fc_open_button_margin"
-            android:background="@drawable/rounded_button"
-            android:elevation="@dimen/fc_elevation"
-            android:text="@string/button_open"
-            android:textAllCaps="false"
-            android:textColor="#FFFFFF"
-            android:textSize="18sp" />
+            android:text="@string/file_more_details"
+            app:layout_constraintBottom_toBottomOf="@+id/cv_fl_base_card"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/tv_card_location"
+            android:visibility="gone"/>
 
-    </FrameLayout>
-    <!-- Include file detail content -->
-    <include
-        layout="@layout/card_file_detail"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" />
-
-
+        <!-- Include file detail content -->
+        <include
+            layout="@layout/card_file_detail"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:layout_constraintBottom_toBottomOf="@id/cv_fl_base_card"
+            app:layout_constraintTop_toBottomOf="@+id/tv_card_location"/>
+    </android.support.constraint.ConstraintLayout>
 </android.support.v7.widget.CardView>

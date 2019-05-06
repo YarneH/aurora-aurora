@@ -1,5 +1,6 @@
 package com.aurora.aurora;
 
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
@@ -56,6 +57,7 @@ public class MainActivity extends AppCompatActivity
      */
     private static final int REQUEST_FILE_GET = 1;
 
+
     /**
      * Toast that holds the dummy text after a file is searched for.
      * This will disappear after file-search is implemented.
@@ -74,6 +76,7 @@ public class MainActivity extends AppCompatActivity
      * It contains all recently opened files.
      */
     private RecyclerView mRecyclerView = null;
+    private Context mContext = this;
 
     /**
      * An instance of the {@link Kernel}.
