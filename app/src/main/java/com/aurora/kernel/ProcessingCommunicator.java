@@ -39,7 +39,7 @@ public class ProcessingCommunicator extends Communicator {
      *
      * @param mBus a reference to the unique bus instance that all communicators should use to communicate events
      */
-    public ProcessingCommunicator(Bus mBus) {
+    public ProcessingCommunicator(@NonNull final Bus mBus) {
         super(mBus);
 
         // Subscribe to observable
@@ -55,7 +55,8 @@ public class ProcessingCommunicator extends Communicator {
      * @param uniquePluginName the name of the plugin that the file was processed with
      * @return a status code indicating if the cache operation was successful (0) or not (-1)
      */
-    public int cacheFile(@NonNull String fileRef, @NonNull String pluginObject, @NonNull String uniquePluginName) {
+    public int cacheFile(@NonNull final String fileRef, @NonNull final String pluginObject,
+                         @NonNull final String uniquePluginName) {
         // response contains boolean, which is converted to a status code which is then synchronously returned
         AtomicBoolean isSet = new AtomicBoolean(false);
         AtomicInteger returnCode = new AtomicInteger(CacheResults.CACHE_FAIL);

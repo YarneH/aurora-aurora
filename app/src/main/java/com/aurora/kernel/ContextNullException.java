@@ -5,7 +5,7 @@ package com.aurora.kernel;
  */
 public class ContextNullException extends Exception {
 
-    public ContextNullException(String message) {
+    public ContextNullException(final String message) {
         super(message);
     }
 

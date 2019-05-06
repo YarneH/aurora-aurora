@@ -1,8 +1,8 @@
 package com.aurora.kernel;
 
+import android.support.annotation.NonNull;
 import android.util.Log;
 
-import com.android.volley.RequestQueue;
 import com.aurora.auroralib.ExtractedText;
 import com.aurora.internalservice.internalnlp.InternalNLP;
 import com.aurora.internalservice.internalprocessor.FileTypeNotSupportedException;
@@ -64,8 +64,8 @@ public class PluginInternalServiceCommunicator extends Communicator {
      * @param processor a reference to the InternalTextProcessor
      * @param translator a reference to the internal translator
      */
-    public PluginInternalServiceCommunicator(Bus mBus, InternalTextProcessor processor,
-                                             Translator translator) {
+    public PluginInternalServiceCommunicator(@NonNull final Bus mBus, @NonNull final InternalTextProcessor processor,
+                                             @NonNull final Translator translator) {
         super(mBus);
         mInternalTextProcessor = processor;
         mTranslator = translator;
@@ -97,8 +97,9 @@ public class PluginInternalServiceCommunicator extends Communicator {
      * @param file             the file input stream
      * @param internalServices the set of internal services that should be run on the file
      */
-    private void processFileWithInternalProcessor(String fileRef, String type, InputStream file,
-                                                  List<InternalServices> internalServices) {
+    private void processFileWithInternalProcessor(@NonNull final String fileRef, @NonNull String type,
+                                                  final InputStream file,
+                                                  @NonNull final List<InternalServices> internalServices) {
 
         // STEP ONE
         ExtractedText extractedText = doTextAndImageExtractionTasks(internalServices, file,
