@@ -21,11 +21,25 @@ import java.util.Locale;
  * The adapter for the RecyclerView of the file-cards
  */
 public class CardFileAdapter extends RecyclerView.Adapter<CardFileAdapter.CardFileViewHolder> {
+    /**
+     * The option to have no selected card in the RecyclerView
+     */
     private static final int NO_DETAILS = -1;
     // TODO: Remove dummy amount
+
+    /**
+     * A dummy amount for the amount of card that the RecyclerView manages
+     */
     private static final int DUMMY_AMOUNT = 100;
+
+    /**
+     * The amount of cards that the RecyclerView manages
+     */
     private int mAmount = DUMMY_AMOUNT;
-    // value of the currently selected file (file card that is expanded)
+
+    /**
+     * The index of the currently selected file (file card that is expanded)
+     */
     private int mSelectedIndex = NO_DETAILS;
 
     /**
@@ -73,7 +87,7 @@ public class CardFileAdapter extends RecyclerView.Adapter<CardFileAdapter.CardFi
     }
 
     /**
-     * Retreive number of items in the list.
+     * Retrieve the number of items in the list.
      *
      * @return number of items in the list
      */
@@ -140,25 +154,24 @@ public class CardFileAdapter extends RecyclerView.Adapter<CardFileAdapter.CardFi
         // TODO: onClick for the open button, onClick for the open with different plugin button, delete button
         @Override
         public void onClick(View view) {
+
             // TODO add the case that view.getId() is R.id.button_card_file
             // TODO update this preliminary code for opening a plugin.
             // TODO this should make an event to open the cached file.
             // Plugin should probably still be able to open this, but Souschef probably not
-            if (view.getId() == R.id.cv_file) {
-                Intent intent = new Intent(Constants.PLUGIN_ACTION);
 
-                /* TODO Remove this test code
-                Eventually, here instead of opening a file, the cache will be called instead.
-                This is just a demonstration that it works.
-                TODO remove the 'mContext' variable from this class. It is used solely for demonstration purposes!
+            /* TODO Remove this test code
+            Eventually, here instead of opening a file, the cache will be called instead.
+            This is just a demonstration that it works.
+            TODO remove the 'mContext' variable from this class. It is used solely for demonstration purposes!
 
-                Note: this is basically mixed code as a result of a merge. This test code will be removed ASAP
-                */
-                String textFile = "DummyTextFile.docx";
-                InputStream docFile = mContext.getResources().openRawResource(R.raw.apple_crisp);
+            Note: this is basically mixed code as a result of a merge. This test code will be removed ASAP
+            */
 
-                mKernel.getAuroraCommunicator().openFileWithPlugin(textFile, "docx", docFile, intent, mContext);
-            }
+            mKernel.getAuroraCommunicator().openFileWithCache("dummyfilename", "docx",
+                    "com.aurora.basicplugin", mContext);
+
+
         }
 
         @Override
@@ -168,7 +181,7 @@ public class CardFileAdapter extends RecyclerView.Adapter<CardFileAdapter.CardFi
             if (view.getId() == R.id.cv_file) {
 
                 // TODO: Remove this 'return' if card details should be enabled!
-                if (view.getId() != 0){
+                if (view.getId() != 0) {
                     return true;
                 }
 
@@ -207,6 +220,7 @@ public class CardFileAdapter extends RecyclerView.Adapter<CardFileAdapter.CardFi
                     expand(view);
                     clickConsumed = true;
                 }
+                // if the click happened on the open button
             }
             return clickConsumed;
         }

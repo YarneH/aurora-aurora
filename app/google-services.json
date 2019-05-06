@@ -1,0 +1,35 @@
+{
+  "project_info": {
+    "project_number": "862197502447",
+    "firebase_url": "https://aurora-25c28.firebaseio.com",
+    "project_id": "aurora-25c28",
+    "storage_bucket": "aurora-25c28.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:862197502447:android:54202143c5eb41de",
+        "android_client_info": {
+          "package_name": "com.aurora.aurora"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBT0I7M_hZlTmpD1hqC8beY1ILzpWGSU4s"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "862197502447-t2p1ijtq692sailupu2svspsp7c9vuln.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
