@@ -3,7 +3,6 @@ package com.aurora.kernel;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
-import com.android.volley.RequestQueue;
 import com.aurora.auroralib.ExtractedText;
 import com.aurora.internalservice.internalnlp.InternalNLP;
 import com.aurora.internalservice.internalprocessor.FileTypeNotSupportedException;
