@@ -2,13 +2,12 @@ package com.aurora.aurora;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
+import android.support.constraint.ConstraintLayout;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.FrameLayout;
 import android.widget.TextView;
 
 import com.aurora.kernel.Kernel;
@@ -28,7 +27,7 @@ public class CardFileAdapter extends RecyclerView.Adapter<CardFileAdapter.CardFi
     /**
      * A dummy amount for the amount of card that the RecyclerView manages
      */
-    private static final int DUMMY_AMOUNT = 100;
+    private static final int DUMMY_AMOUNT = 0;
 
     /**
      * The amount of cards that the RecyclerView manages
@@ -62,7 +61,6 @@ public class CardFileAdapter extends RecyclerView.Adapter<CardFileAdapter.CardFi
      *
      * @param viewGroup view that contains other views. Used to set layout (inflate) of card
      * @param i         not used, index of the card
-     *
      * @return the CardFileViewHolder
      */
     @NonNull
@@ -98,10 +96,10 @@ public class CardFileAdapter extends RecyclerView.Adapter<CardFileAdapter.CardFi
     /**
      * ViewHolder for the recyclerview. Holds the file cards.
      */
-    public class CardFileViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+    public class CardFileViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener,
+            View.OnLongClickListener {
         private TextView mTextView;
         private CardView mCardView;
-        private Button mButton;
         private int index;
 
         // TODO: add fields for the details about the file
@@ -116,10 +114,9 @@ public class CardFileAdapter extends RecyclerView.Adapter<CardFileAdapter.CardFi
             super(itemView);
             mCardView = itemView.findViewById(R.id.cv_file);
             mTextView = itemView.findViewById(R.id.tv_card_title);
-            mButton = itemView.findViewById(R.id.button_card_file);
             // The card itself is clickable (for details), but also the open button.
             mCardView.setOnClickListener(this);
-            mButton.setOnClickListener(this);
+            mCardView.setOnLongClickListener(this);
         }
 
         /**
@@ -154,14 +151,45 @@ public class CardFileAdapter extends RecyclerView.Adapter<CardFileAdapter.CardFi
         // TODO: onClick for the open button, onClick for the open with different plugin button, delete button
         @Override
         public void onClick(View view) {
+
+            // TODO add the case that view.getId() is R.id.button_card_file
+            // TODO update this preliminary code for opening a plugin.
+            // TODO this should make an event to open the cached file.
+            // Plugin should probably still be able to open this, but Souschef probably not
+
+            /* TODO Remove this test code
+            Eventually, here instead of opening a file, the cache will be called instead.
+            This is just a demonstration that it works.
+            TODO remove the 'mContext' variable from this class. It is used solely for demonstration purposes!
+
+            Note: this is basically mixed code as a result of a merge. This test code will be removed ASAP
+            */
+
+            mKernel.getAuroraCommunicator().openFileWithCache("dummyfilename", "docx",
+                    "com.aurora.basicplugin", mContext);
+
+
+        }
+
+        @Override
+        public boolean onLongClick(View view) {
+            boolean clickConsumed = false;
             // If the click happened on the card itself
             if (view.getId() == R.id.cv_file) {
+
+                // TODO: Remove this 'return' if card details should be enabled!
+                if (view.getId() != 0) {
+                    return true;
+                }
+
+                // If the click happened on the card itself
                 if (mSelectedIndex == NO_DETAILS) {
                     /*
                     Case no card selected. Sets the selected card and expands the view.
                      */
                     mSelectedIndex = index;
                     expand(view);
+                    clickConsumed = true;
                 } else if (mSelectedIndex == index) {
                     /*
                     Case the clicked card is the expanded card.
@@ -169,6 +197,7 @@ public class CardFileAdapter extends RecyclerView.Adapter<CardFileAdapter.CardFi
                      */
                     mSelectedIndex = NO_DETAILS;
                     collapse(view);
+                    clickConsumed = true;
                 } else {
                     /*
                     Case where a card is selected but a different card is clicked.
@@ -178,6 +207,7 @@ public class CardFileAdapter extends RecyclerView.Adapter<CardFileAdapter.CardFi
                     Set the index to the selected card, and expand that card.
                      */
                     RecyclerView recyclerView = (RecyclerView) view.getParent();
+
                     CardFileViewHolder prev = (CardFileViewHolder) recyclerView.findViewHolderForLayoutPosition(
                             mSelectedIndex);
                     if (prev != null) {
@@ -185,28 +215,18 @@ public class CardFileAdapter extends RecyclerView.Adapter<CardFileAdapter.CardFi
                     }
                     mSelectedIndex = index;
                     expand(view);
+                    clickConsumed = true;
                 }
                 // if the click happened on the open button
             }
-            // TODO add the case that view.getId() is R.id.button_card_file
-            // TODO update this preliminary code for opening a plugin.
-            // TODO this should make an event to open the cached file.
-            // Plugin should probably still be able to open this, but Souschef probably not
-            if (view.getId() == R.id.button_card_file) {
-
-                /* TODO Remove this test code
-                Eventually, here instead of opening a file, the cache will be called instead.
-                This is just a demonstration that it works.
-                TODO remove the 'mContext' variable from this class. It is used solely for demonstration purposes!
-
-                Note: this is basically mixed code as a result of a merge. This test code will be removed ASAP
-                */
-
-                mKernel.getAuroraCommunicator().openFileWithCache("dummyfilename", "docx",
-                        "com.aurora.basicplugin", mContext);
-            }
+            return clickConsumed;
         }
     }
+
+//    TODO: Expanding card when another expanded card is
+//    in view results in the card growing upwards instead of down.
+//    Scrolling down before expanding "solves" this.
+//    Fix This bug :)
 
     /**
      * Expand the view to show details.
@@ -215,8 +235,8 @@ public class CardFileAdapter extends RecyclerView.Adapter<CardFileAdapter.CardFi
      * @param v view to expand
      */
     public static void expand(final View v) {
-        FrameLayout detailView = v.findViewById(R.id.cv_fl_detail);
-        FrameLayout baseView = v.findViewById(R.id.cv_fl_base_card);
+        ConstraintLayout detailView = v.findViewById(R.id.cv_fl_detail);
+        TextView baseView = v.findViewById(R.id.tv_card_more_details);
         detailView.setVisibility(View.VISIBLE);
         baseView.setVisibility(View.GONE);
     }
@@ -228,9 +248,11 @@ public class CardFileAdapter extends RecyclerView.Adapter<CardFileAdapter.CardFi
      * @param v view to collapse
      */
     public static void collapse(final View v) {
-        FrameLayout detailView = v.findViewById(R.id.cv_fl_detail);
-        FrameLayout baseView = v.findViewById(R.id.cv_fl_base_card);
+        ConstraintLayout detailView = v.findViewById(R.id.cv_fl_detail);
+        // TODO: Uncomment if details of card should be used!
+        // TextView baseView = v.findViewById(R.id.tv_card_more_details)
         detailView.setVisibility(View.GONE);
-        baseView.setVisibility(View.VISIBLE);
+        // TODO: Uncomment if details of card should be used!
+        // baseView.setVisibility(View.VISIBLE)
     }
 }
