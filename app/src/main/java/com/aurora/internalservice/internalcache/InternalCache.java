@@ -210,33 +210,15 @@ public class InternalCache implements InternalService {
         // Get the file ref to it without extension
         String cachedPath;
 
-        String fileName = getFileNameFromRef(fileRef);
 
-        if (fileName.contains(".")) {
-            cachedPath = fileName.substring(0, fileName.indexOf('.'));
+        if (fileRef.contains(".")) {
+            cachedPath = fileRef.substring(0, fileRef.indexOf('.'));
         } else {
-            cachedPath = fileName;
+            cachedPath = fileRef;
         }
 
         // Concatenate .aur extension
         return cachedPath + CACHE_EXTENSION;
-    }
-
-    /**
-     * Takes a file reference as a string and attempts to get the filename
-     *
-     * @param fileRef the file reference as a string
-     * @return the filename if it is found. If it is not found, the function will try to get the part after the last
-     * '/' character. If that doesn't work out, it will finally compute a hash of the fileRef and return that.
-     */
-    private static String getFileNameFromRef(@NonNull String fileRef) {
-        int lastSlash = fileRef.lastIndexOf('/');
-
-        if (lastSlash != -1 && lastSlash != fileRef.length() - 1) {
-            return fileRef.substring(lastSlash);
-        } else {
-            return fileRef;
-        }
     }
 
     /**
