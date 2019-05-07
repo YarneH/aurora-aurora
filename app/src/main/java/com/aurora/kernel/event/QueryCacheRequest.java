@@ -17,6 +17,7 @@ public class QueryCacheRequest implements Event {
 
     /**
      * A reference to the file to be queried (if there is a specific file. Null if cache is queried for all files
+     * (should be hash_displayName). Check the getFileName method from MainActivity.
      */
     private String mFileRef;
 
@@ -35,6 +36,7 @@ public class QueryCacheRequest implements Event {
 
     /**
      * Creates a new (empty) QueryCacheRequest to get a number of files in the cache
+     *
      * @param maxEntries the maxmimum number of entries that should be returned. If this is <= 0, it will return
      *                   all the files instead.
      */
@@ -46,7 +48,8 @@ public class QueryCacheRequest implements Event {
     /**
      * Creates a new QueryCacheRequest to get a specific file from the cache
      *
-     * @param fileRef          a reference to the file to be queried
+     * @param fileRef          a reference to the file to be queried (should be hash_displayName)
+     *                         Check the getFileName method from MainActivity.
      * @param uniquePluginName the name of the plugin that the cached file was processed with
      */
     public QueryCacheRequest(String fileRef, String uniquePluginName) {

@@ -28,7 +28,7 @@ public class InternalCacheUnitTest {
     @Test
     public void InternalCache_cacheFile_shouldWriteObjectToFile() {
         // Create arguments
-        String fileRef = "testFile.pdf";
+        String fileRef = "-123456_testFile.pdf";
         String title = "title";
         String text = "text";
         String pluginObject = new DummyPluginObject1(title, text).toJSON();
@@ -38,7 +38,7 @@ public class InternalCacheUnitTest {
         mInternalCache.cacheFile(fileRef, pluginObject, uniquePluginName);
 
         // Check that file has been written to the right location
-        File cachedFile = new File("testFile.aur");
+        File cachedFile = new File("-123456_testFile.aur");
 
         Assert.assertTrue(cachedFile.exists());
 
@@ -207,8 +207,8 @@ public class InternalCacheUnitTest {
         addCacheFiles();
 
         // Add multiple files by another plugin
-        String fileRef1 = "award-winning-text.pdf";
-        String fileRef2 = "bad-text.pdf";
+        String fileRef1 = "-123456_award-winning-text.pdf";
+        String fileRef2 = "-122455_bad-text.pdf";
         String title1 = "A Good Title";
         String title2 = "A Bad Title";
         String text1 = "This is a very good text. Nobel prize worthy, even!";

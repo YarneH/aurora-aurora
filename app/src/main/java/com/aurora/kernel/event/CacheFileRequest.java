@@ -2,11 +2,13 @@ package com.aurora.kernel.event;
 
 /**
  * A class that can be used to request that a certain file representation is cached
+ *
  * @see CacheFileResponse
  */
 public class CacheFileRequest implements Event {
     /**
-     * A reference to the file that needs to be cached
+     * A reference to the file that needs to be cached (should be hash_displayName)
+     * Check the getFileName method from MainActivity.
      */
     private String mFileRef;
 
@@ -23,7 +25,8 @@ public class CacheFileRequest implements Event {
     /**
      * Creates a new CacheFileRequest
      *
-     * @param fileRef          a reference to the original file that is to be cached
+     * @param fileRef          a reference to the original file that is to be cached (should be hash_displayName)
+     *                         Check the getFileName method from MainActivity.
      * @param pluginObject     a json representation containing the processed contents of the file
      * @param uniquePluginName the name of the plugin that the file was processed with
      */

@@ -293,7 +293,23 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
+    /**
+     * Gets a unique filename from a uri by taking the hash from the path and then appending the display name that
+     * should be used.
+     * @param uri the uri to get the unique filename for
+     * @return the unique filename
+     */
     private String getFileName(Uri uri) {
+
+        String result;
+
+        // Add hash to filename so we have a unique filename for different files with the same filename on different
+        // locations
+        if (uri.getPath() != null) {
+            result = Integer.toString(uri.getPath().hashCode(), 16) + "_";
+        } else {
+            return null;
+        }
 
         try (Cursor cursor = getContentResolver()
                 .query(uri, null, null, null, null, null)) {
@@ -303,8 +319,10 @@ public class MainActivity extends AppCompatActivity
 
                 // Note it's called "Display Name".  This is
                 // provider-specific, and might not necessarily be the file name.
-                return cursor.getString(
+                result += cursor.getString(
                         cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME));
+
+                return result;
             }
         }
         return null;

@@ -1,6 +1,7 @@
 package com.aurora.kernel;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
 
 import com.aurora.auroralib.PluginObject;
 import com.aurora.internalservice.internalcache.CachedFileInfo;
@@ -219,7 +220,7 @@ public class AuroraInternalServiceCommunicatorUnitTest {
         }
 
         @Override
-        public CachedFileInfo checkCacheForProcessedFile(String fileRef, String uniquePluginName) {
+        public CachedFileInfo checkCacheForProcessedFile(@NonNull String fileRef, @NonNull String uniquePluginName) {
             return dummyCachedFileInfo;
         }
 
