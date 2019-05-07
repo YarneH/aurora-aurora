@@ -23,6 +23,7 @@ public class InternalCacheUnitTest {
     @BeforeClass
     public static void initialize() {
         mInternalCache = new InternalCache(new MockContext());
+        mInternalCache.clear();
     }
 
     @Test
