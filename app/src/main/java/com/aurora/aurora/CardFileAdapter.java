@@ -27,7 +27,7 @@ public class CardFileAdapter extends RecyclerView.Adapter<CardFileAdapter.CardFi
     /**
      * A dummy amount for the amount of card that the RecyclerView manages
      */
-    private static final int DUMMY_AMOUNT = 100;
+    private static final int DUMMY_AMOUNT = 0;
 
     /**
      * The amount of cards that the RecyclerView manages
@@ -250,9 +250,9 @@ public class CardFileAdapter extends RecyclerView.Adapter<CardFileAdapter.CardFi
     public static void collapse(final View v) {
         ConstraintLayout detailView = v.findViewById(R.id.cv_fl_detail);
         // TODO: Uncomment if details of card should be used!
-        // TextView baseView = v.findViewById(R.id.tv_card_more_details);
+        // TextView baseView = v.findViewById(R.id.tv_card_more_details)
         detailView.setVisibility(View.GONE);
         // TODO: Uncomment if details of card should be used!
-        // baseView.setVisibility(View.VISIBLE);
+        // baseView.setVisibility(View.VISIBLE)
     }
 }

@@ -19,6 +19,7 @@
 
     <!-- Recycler View strings -->
     <string name="button_open">Open</string>
+    <string name="empty_recent">Press the button to open a file with Aurora!</string>
 
     <!-- Card File strings -->
     <string name="file_location">\'Location of the file\'</string>

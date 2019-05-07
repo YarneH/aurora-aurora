@@ -18,6 +18,11 @@
     <dimen name="fc_small_text">14sp</dimen>
     <dimen name="fc_open_button_margin">20dp</dimen>
     <dimen name="fc_padding">15dp</dimen>
+
+
+    <!-- Start screen -->
+    <!-- This is the same as a default FloatingActionButton -->
+    <dimen name="arrow_icon">56dp</dimen>
     
     <!-- Search prompt values -->
     <dimen name="sp_padding">10dp</dimen>

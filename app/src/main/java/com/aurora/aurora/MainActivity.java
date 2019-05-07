@@ -22,8 +22,12 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.LinearInterpolator;
+import android.view.animation.TranslateAnimation;
 import android.webkit.MimeTypeMap;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -61,6 +65,9 @@ public class MainActivity extends AppCompatActivity
      * Chosen to be 1.
      */
     private static final int REQUEST_FILE_GET = 1;
+    private static final int ANIMATION_DURATION = 500;
+    private static final float END_POINT_OF_ANIMATION = 0.2f;
+
 
 
     /**
@@ -156,6 +163,24 @@ public class MainActivity extends AppCompatActivity
         CardFileAdapter adapter = new CardFileAdapter(mKernel, this);
         mRecyclerView.setAdapter(adapter);
 
+
+        /* Show TextView when RecyclerView is empty */
+        if (adapter.getItemCount() == 0) {
+            findViewById(R.id.cl_empty_text).setVisibility(View.VISIBLE);
+            ImageView arrow = findViewById(R.id.img_arrow);
+
+            // Set the animation of the arrow in the startscreen
+            TranslateAnimation mAnimation = new TranslateAnimation(
+                    TranslateAnimation.ABSOLUTE, 0F,
+                    TranslateAnimation.ABSOLUTE, 0F,
+                    TranslateAnimation.RELATIVE_TO_PARENT, 0F,
+                    TranslateAnimation.RELATIVE_TO_PARENT, END_POINT_OF_ANIMATION);
+            mAnimation.setDuration(ANIMATION_DURATION);
+            mAnimation.setRepeatCount(-1);
+            mAnimation.setRepeatMode(Animation.REVERSE);
+            mAnimation.setInterpolator(new LinearInterpolator());
+            arrow.setAnimation(mAnimation);
+        }
 
         // If opening the file is done from a file explorer
         if (Intent.ACTION_VIEW.equals(getIntent().getAction())) {
@@ -412,7 +437,6 @@ public class MainActivity extends AppCompatActivity
             // Create and show the pop-up
             alertDialogBuilder.create().show();
         }
-
         return super.onOptionsItemSelected(item);
     }
 
@@ -454,10 +478,12 @@ public class MainActivity extends AppCompatActivity
             mTextViewMain.setText(text);
         }
         if (home) {
-            mRecyclerView.setVisibility(View.VISIBLE);
+            //mRecyclerView.setVisibility(View.VISIBLE);
+            findViewById(R.id.cl_recycler_content).setVisibility(View.VISIBLE);
             mTextViewMain.setVisibility(View.INVISIBLE);
         } else {
-            mRecyclerView.setVisibility(View.INVISIBLE);
+            //mRecyclerView.setVisibility(View.INVISIBLE);
+            findViewById(R.id.cl_recycler_content).setVisibility(View.INVISIBLE);
             mTextViewMain.setVisibility(View.VISIBLE);
         }
 
