@@ -10,29 +10,35 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.aurora.internalservice.internalcache.CachedFileInfo;
 import com.aurora.kernel.Kernel;
 
-import java.util.Locale;
+import java.text.SimpleDateFormat;
+import java.util.List;
 
 /**
  * The adapter for the RecyclerView of the file-cards
  */
 public class CardFileAdapter extends RecyclerView.Adapter<CardFileAdapter.CardFileViewHolder> {
     /**
+     * The format of a date used in the cards
+     */
+    private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("E, dd MMM yyyy");
+
+    /**
      * The option to have no selected card in the RecyclerView
      */
     private static final int NO_DETAILS = -1;
-    // TODO: Remove dummy amount
-
-    /**
-     * A dummy amount for the amount of card that the RecyclerView manages
-     */
-    private static final int DUMMY_AMOUNT = 0;
 
     /**
      * The amount of cards that the RecyclerView manages
      */
-    private int mAmount = DUMMY_AMOUNT;
+    private int mAmount = 0;
+
+    /**
+     * The data of the cached files
+     */
+    private List<CachedFileInfo> mCachedFileInfoList = null;
 
     /**
      * The index of the currently selected file (file card that is expanded)
@@ -49,11 +55,22 @@ public class CardFileAdapter extends RecyclerView.Adapter<CardFileAdapter.CardFi
      */
     private Context mContext;
 
-    public CardFileAdapter(Kernel kernel, Context context) {
+    public CardFileAdapter(Kernel kernel, Context context, List<CachedFileInfo> cachedFileInfoList) {
         // TODO: This could take an argument as input (which contains the recent files)
         // TODO: remove context variable if it is not needed by the test example anymore!
         mKernel = kernel;
         mContext = context;
+        updateData(cachedFileInfoList);
+    }
+
+    public void updateData(List<CachedFileInfo> cachedFileInfoList) {
+        if (cachedFileInfoList == null) {
+            mAmount = 0;
+        } else {
+            mCachedFileInfoList = cachedFileInfoList;
+            mAmount = mCachedFileInfoList.size();
+        }
+        notifyDataSetChanged();
     }
 
     /**
@@ -98,9 +115,15 @@ public class CardFileAdapter extends RecyclerView.Adapter<CardFileAdapter.CardFi
      */
     public class CardFileViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener,
             View.OnLongClickListener {
-        private TextView mTextView;
+        /* UI related objects */
+        private TextView mTitleTextView;
+        private TextView mLastOpenedTextView;
         private CardView mCardView;
+
+        /* Data related objects */
         private int index;
+        private CachedFileInfo mCachedFileInfo;
+
 
         // TODO: add fields for the details about the file
 
@@ -113,7 +136,8 @@ public class CardFileAdapter extends RecyclerView.Adapter<CardFileAdapter.CardFi
         public CardFileViewHolder(View itemView) {
             super(itemView);
             mCardView = itemView.findViewById(R.id.cv_file);
-            mTextView = itemView.findViewById(R.id.tv_card_title);
+            mTitleTextView = itemView.findViewById(R.id.tv_card_title);
+            mLastOpenedTextView = itemView.findViewById(R.id.tv_card_last_opened);
             // The card itself is clickable (for details), but also the open button.
             mCardView.setOnClickListener(this);
             mCardView.setOnLongClickListener(this);
@@ -128,8 +152,16 @@ public class CardFileAdapter extends RecyclerView.Adapter<CardFileAdapter.CardFi
          */
         public void bind(int i) {
             index = i;
+            mCachedFileInfo = mCachedFileInfoList.get(index);
+            String lastOpenedBase = mLastOpenedTextView.getResources().getString(R.string.file_last);
+
             // Set name of the correct file to the reused container.
-            mTextView.setText(String.format(Locale.getDefault(), "File %d", i));
+            mTitleTextView.setText(mCachedFileInfo.getFileDisplayName());
+            StringBuilder bld  = new StringBuilder(lastOpenedBase)
+                    .append(" ")
+                    .append(DATE_FORMAT.format(mCachedFileInfo.getLastOpened()));
+
+            mLastOpenedTextView.setText(bld.toString());
 
             /*
             If the card is the selected card, expand it (as it was when it was scrolled away
@@ -165,9 +197,11 @@ public class CardFileAdapter extends RecyclerView.Adapter<CardFileAdapter.CardFi
             Note: this is basically mixed code as a result of a merge. This test code will be removed ASAP
             */
 
-            mKernel.getAuroraCommunicator().openFileWithCache("dummyfilename", "docx",
-                    "com.aurora.basicplugin", mContext);
+            String displayName = mCachedFileInfo.getFileDisplayName();
+            String fileType = displayName.substring(displayName.lastIndexOf("."));
 
+            mKernel.getAuroraCommunicator().openFileWithCache(mCachedFileInfo.getFileRef(), fileType,
+                    mCachedFileInfo.getUniquePluginName(), mContext);
 
         }
 

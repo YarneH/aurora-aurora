@@ -289,8 +289,8 @@ public class InternalCache implements InternalService {
             cachedFiles.addAll(entry.getValue());
         }
 
-        // Sort list on date with most recent value first
-        Collections.sort(cachedFiles, (a, b) -> a.getLastOpened().compareTo(b.getLastOpened()));
+        // Sort list on date with most recent (which is the largest) value first
+        Collections.sort(cachedFiles, (a, b) -> b.getLastOpened().compareTo(a.getLastOpened()));
 
         if (amount <= 0) {
             amount = cachedFiles.size();

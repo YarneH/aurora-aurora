@@ -32,14 +32,19 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.aurora.auroralib.Constants;
+import com.aurora.internalservice.internalcache.CachedFileInfo;
 import com.aurora.kernel.AuroraCommunicator;
 import com.aurora.kernel.ContextNullException;
 import com.aurora.kernel.Kernel;
 import com.aurora.plugin.Plugin;
 import com.google.firebase.analytics.FirebaseAnalytics;
+import io.reactivex.Observer;
+import io.reactivex.disposables.Disposable;
 
 import java.io.FileNotFoundException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * The main activity of the application, started when the app is opened.
@@ -69,7 +74,6 @@ public class MainActivity extends AppCompatActivity
     private static final float END_POINT_OF_ANIMATION = 0.2f;
 
 
-
     /**
      * Toast that holds the dummy text after a file is searched for.
      * This will disappear after file-search is implemented.
@@ -88,6 +92,7 @@ public class MainActivity extends AppCompatActivity
      * It contains all recently opened files.
      */
     private RecyclerView mRecyclerView = null;
+
     private Context mContext = this;
 
     /**
@@ -104,6 +109,11 @@ public class MainActivity extends AppCompatActivity
      * Firebase analytics
      */
     private FirebaseAnalytics mFirebaseAnalytics = null;
+
+    /**
+     * The list of cached files, which will be shown in the RecyclerView
+     */
+    private List<CachedFileInfo> mCachedFileInfoList = null;
 
 
     /**
@@ -129,6 +139,14 @@ public class MainActivity extends AppCompatActivity
          */
         registerPlugins();
 
+        /* Setup RecyclerView */
+        mRecyclerView = findViewById(R.id.rv_files);
+        mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+        CardFileAdapter adapter = new CardFileAdapter(mKernel, this, mCachedFileInfoList);
+        mRecyclerView.setAdapter(adapter);
+
+        /* Get list of cached files */
+        refreshCachedFileInfoList();
 
         /* Initialize FirebaseAnalytics */
         mFirebaseAnalytics = FirebaseAnalytics.getInstance(this);
@@ -157,12 +175,6 @@ public class MainActivity extends AppCompatActivity
         /* Setup Main TextView */
         mTextViewMain = findViewById(R.id.tv_main);
 
-        /* Setup RecyclerView */
-        mRecyclerView = findViewById(R.id.rv_files);
-        mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
-        CardFileAdapter adapter = new CardFileAdapter(mKernel, this);
-        mRecyclerView.setAdapter(adapter);
-
 
         /* Show TextView when RecyclerView is empty */
         if (adapter.getItemCount() == 0) {
@@ -186,6 +198,54 @@ public class MainActivity extends AppCompatActivity
         if (Intent.ACTION_VIEW.equals(getIntent().getAction())) {
             // This method is also called when a file is opened from the file chooser
             onActivityResult(REQUEST_FILE_GET, RESULT_OK, getIntent());
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected void onResume() {
+        super.onResume();
+        refreshCachedFileInfoList();
+    }
+
+    /**
+     * Refresh the list of info of the cached files
+     */
+    private void refreshCachedFileInfoList() {
+        /* Get list of cached files */
+        if (mKernel != null) {
+            mKernel.getAuroraCommunicator().getListOfCachedFiles(0, new Observer<List<CachedFileInfo>>() {
+                private Disposable mDisposable;
+
+                @Override
+                public void onSubscribe(Disposable d) {
+                    mDisposable = d;
+                }
+
+                @Override
+                public void onNext(List<CachedFileInfo> cachedFileInfos) {
+                    Log.d("Cache", "" + cachedFileInfos.size());
+                    mCachedFileInfoList = cachedFileInfos;
+                    ((CardFileAdapter)mRecyclerView.getAdapter()).updateData(mCachedFileInfoList);
+                    if (cachedFileInfos.size() == 0) {
+                        findViewById(R.id.cl_empty_text).setVisibility(View.VISIBLE);
+                    } else{
+                        findViewById(R.id.cl_empty_text).setVisibility(View.GONE);
+                    }
+                }
+
+                @Override
+                public void onError(Throwable e) {
+
+                }
+
+                @Override
+                public void onComplete() {
+                    mDisposable.dispose();
+                }
+            });
         }
     }
 
