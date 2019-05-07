@@ -1,7 +1,6 @@
 package com.aurora.aurora;
 
 import android.content.Context;
-import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.constraint.ConstraintLayout;
 import android.support.v7.widget.CardView;
@@ -11,10 +10,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.aurora.auroralib.Constants;
 import com.aurora.kernel.Kernel;
 
-import java.io.InputStream;
 import java.util.Locale;
 
 /**
