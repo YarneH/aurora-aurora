@@ -23,12 +23,13 @@ public class InternalCacheUnitTest {
     @BeforeClass
     public static void initialize() {
         mInternalCache = new InternalCache(new MockContext());
+        mInternalCache.clear();
     }
 
     @Test
     public void InternalCache_cacheFile_shouldWriteObjectToFile() {
         // Create arguments
-        String fileRef = "testFile.pdf";
+        String fileRef = "-123456_testFile.pdf";
         String title = "title";
         String text = "text";
         String pluginObject = new DummyPluginObject1(title, text).toJSON();
@@ -38,7 +39,7 @@ public class InternalCacheUnitTest {
         mInternalCache.cacheFile(fileRef, pluginObject, uniquePluginName);
 
         // Check that file has been written to the right location
-        File cachedFile = new File("testFile.aur");
+        File cachedFile = new File("-123456_testFile.aur");
 
         Assert.assertTrue(cachedFile.exists());
 
@@ -61,7 +62,7 @@ public class InternalCacheUnitTest {
     @Test
     public void InternalCache_cacheFile_shouldReturnTrueOnSuccess() {
         // Create arguments
-        String fileRef = "testFile.pdf";
+        String fileRef = "-123456_testFile.pdf";
         String title = "title";
         String text = "text";
         String pluginObject = new DummyPluginObject1(title, text).toJSON();
@@ -77,7 +78,7 @@ public class InternalCacheUnitTest {
     public void InternalCache_cacheFile_shouldReturnFalseOnFailure() {
         // Create arguments
         // Invalid filename works on windows. Linux should also have a problem with the slashes
-        String invalidFileRef = "te///st??File!.pdf";
+        String invalidFileRef = "-1234_te///st??File!.pdf";
         String title = "title";
         String text = "text";
         String pluginObject = new DummyPluginObject1(title, text).toJSON();
@@ -92,7 +93,7 @@ public class InternalCacheUnitTest {
     @Test
     public void InternalCache_checkCacheForProcessedFile_shouldReturnProcessedFileName() {
         // First cache an element
-        String fileRef = "testFile.pdf";
+        String fileRef = "-123456_testFile.pdf";
         String title = "title";
         String text = "text";
         String pluginObject = new DummyPluginObject1(title, text).toJSON();
@@ -146,7 +147,7 @@ public class InternalCacheUnitTest {
         addCacheFiles();
 
         // Add one yourself
-        String fileRef = "award-winning-text.pdf";
+        String fileRef = "-1234567_award-winning-text.pdf";
         String title = "A Good Title";
         String text = "This is a very good text. Nobel prize worthy, even!";
         String pluginName = "DummyPlugin";
@@ -172,7 +173,7 @@ public class InternalCacheUnitTest {
         addCacheFiles();
 
         // Add one yourself
-        String fileRef = "award-winning-text.pdf";
+        String fileRef = "-123456_award-winning-text.pdf";
         String title = "A Good Title";
         String text = "This is a very good text. Nobel prize worthy, even!";
         String pluginName = "DummyPlugin";
@@ -192,7 +193,7 @@ public class InternalCacheUnitTest {
         addCacheFiles();
 
         // Add one yourself
-        String fileRef = "award-winning-text.pdf";
+        String fileRef = "-123456_award-winning-text.pdf";
         String pluginName = "DummyPlugin";
 
         // Now we want to remove this one file
@@ -207,8 +208,8 @@ public class InternalCacheUnitTest {
         addCacheFiles();
 
         // Add multiple files by another plugin
-        String fileRef1 = "award-winning-text.pdf";
-        String fileRef2 = "bad-text.pdf";
+        String fileRef1 = "-123456_award-winning-text.pdf";
+        String fileRef2 = "-122455_bad-text.pdf";
         String title1 = "A Good Title";
         String title2 = "A Bad Title";
         String text1 = "This is a very good text. Nobel prize worthy, even!";
@@ -265,7 +266,7 @@ public class InternalCacheUnitTest {
      * Helper method that adds 5 files to the cache of different types
      */
     private static void addCacheFiles() {
-        String[] filerefs1 = {"fileref1.pdf", "fileref2.docx", "fileref3.pdf"};
+        String[] filerefs1 = {"-123_fileref1.pdf", "-456_fileref2.docx", "-789_fileref3.pdf"};
         String[] titles1 = {"Title1", "Title2", "Title3"};
         String[] texts1 = {"Text1", "Text2", "Text3"};
         String pluginName1 = "DummyPlugin1";
@@ -278,7 +279,7 @@ public class InternalCacheUnitTest {
             mInternalCache.cacheFile(filerefs1[i], object1, pluginName1);
         }
 
-        String[] filerefs2 = {"fileref4.docx", "fileref5.txt"};
+        String[] filerefs2 = {"-123_fileref4.docx", "-456_fileref5.txt"};
         String[] titles2 = {"Title4", "Title5"};
         int[] numbers = {2, 3};
         String[] names = {"Name4", "Name 5"};

@@ -52,6 +52,11 @@ public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
     /**
+     * Constant for radix of Integer.toString()
+     */
+    private static final int HEX_RADIX = 16;
+
+    /**
      * The request-code used to start the file-chooser intent.
      * Chosen to be 1.
      */
@@ -305,10 +310,24 @@ public class MainActivity extends AppCompatActivity
      * extract the filename displayed in the Android file picker.
      * </p>
      *
+     * <p>
+     * To ensure uniqueness, a hash of the uri path will be prepended before the filename.
+     * </p>
+     *
      * @param uri the Uri to get the displayed filename from
      * @return The displayed filename
      */
     private String getFileName(Uri uri) {
+
+        String result;
+
+        // Add hash to filename so we have a unique filename for different files with the same filename on different
+        // locations
+        if (uri.getPath() != null) {
+            result = Integer.toString(uri.getPath().hashCode(), HEX_RADIX) + "_";
+        } else {
+            return null;
+        }
 
         try (Cursor cursor = getContentResolver()
                 .query(uri, null, null, null, null, null)) {
@@ -318,8 +337,10 @@ public class MainActivity extends AppCompatActivity
 
                 // Note it's called "Display Name".  This is
                 // provider-specific, and might not necessarily be the file name.
-                return cursor.getString(
+                result += cursor.getString(
                         cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME));
+
+                return result;
             }
         }
         return null;

@@ -142,7 +142,8 @@ public class AuroraInternalServiceCommunicator extends Communicator {
     /**
      * Private handle method that queries cache for specific file processed with a certain plugin
      *
-     * @param fileRef          a reference to the file to check if it was already cached
+     * @param fileRef          a reference to the file to check if it was already cached (should be hash_displayName)
+     *                         Check the getFileName method from MainActivity.
      * @param uniquePluginName the plugin that the file should be processed with
      */
     private void queryCache(@NonNull final String fileRef, @NonNull final String uniquePluginName) {
@@ -163,7 +164,8 @@ public class AuroraInternalServiceCommunicator extends Communicator {
     /**
      * Private handle method that retrieves a specific file processed with a certain plugin
      *
-     * @param fileRef          a reference to the file to retrieve
+     * @param fileRef          a reference to the file to retrieve (should be hash_displayName)
+     *                         Check the getFileName method from MainActivity.
      * @param uniquePluginName the plugin that the file was processed with
      */
     private void retrieveFileFromCache(@NonNull final String fileRef, @NonNull final String uniquePluginName) {
@@ -186,7 +188,8 @@ public class AuroraInternalServiceCommunicator extends Communicator {
     /**
      * Private handle method that removes a specific file from the cache
      *
-     * @param fileRef          a reference to the file to remove
+     * @param fileRef          a reference to the file to remove (should be hash_displayName)
+     *                         Check the getFileName method from MainActivity.
      * @param uniquePluginName the name of the plugin that the file was processed with
      */
     private void removeFileFromCache(@NonNull final String fileRef, @NonNull final String uniquePluginName) {

@@ -145,6 +145,9 @@ public class ExtractedText implements InternallyProcessedFile, Serializable {
         addSection(section);
     }
 
+    /**
+     * @return the (unique) filename given by aurora
+     */
     @SuppressWarnings("unused")
     public String getFilename() {
         return mFilename;
@@ -154,6 +157,19 @@ public class ExtractedText implements InternallyProcessedFile, Serializable {
         this.mFilename = mFilename;
     }
 
+    /**
+     * @return the display name that should be used in the plugins to display the name of the files.
+     */
+    public String getFileDisplayName() {
+        if (mFilename.contains("_")) {
+            return mFilename.substring(mFilename.indexOf('_') + 1);
+        }
+        return mFilename;
+    }
+
+    /**
+     * @return the date on which the file was last edited
+     */
     @SuppressWarnings("unused")
     public Date getDateLastEdit() {
         return mDateLastEdit;
@@ -163,6 +179,9 @@ public class ExtractedText implements InternallyProcessedFile, Serializable {
         this.mDateLastEdit = mDateLastEdit;
     }
 
+    /**
+     * @return the title of the text
+     */
     public String getTitle() {
         return mTitle;
     }
@@ -181,7 +200,7 @@ public class ExtractedText implements InternallyProcessedFile, Serializable {
         if (mTitleAnnotationProto != null && mTitleAnnotation == null) {
             ProtobufAnnotationSerializer annotationSerializer =
                     new ProtobufAnnotationSerializer(true);
-                    mTitleAnnotation = annotationSerializer.fromProto(mTitleAnnotationProto);
+            mTitleAnnotation = annotationSerializer.fromProto(mTitleAnnotationProto);
         }
 
         return mTitleAnnotation;
@@ -190,7 +209,7 @@ public class ExtractedText implements InternallyProcessedFile, Serializable {
     @SuppressWarnings("unused")
     public List<String> getAuthors() {
         if (mAuthors != null) {
-            return  mAuthors;
+            return mAuthors;
         } else {
             return new ArrayList<>();
         }
@@ -209,7 +228,7 @@ public class ExtractedText implements InternallyProcessedFile, Serializable {
     public List<ExtractedImage> getImages() {
         List<ExtractedImage> extractedImages = new ArrayList<>();
 
-        for (Section section: this.getSections()) {
+        for (Section section : this.getSections()) {
             extractedImages.addAll(section.getExtractedImages());
         }
 
@@ -256,9 +275,9 @@ public class ExtractedText implements InternallyProcessedFile, Serializable {
     /**
      * Method to convert the file accessed by the Uri to an ExtractedText object
      *
-     * @param fileUri   The Uri to the temp file
-     * @param context   The conext
-     * @return  ExtractedText object
+     * @param fileUri The Uri to the temp file
+     * @param context The conext
+     * @return ExtractedText object
      * @throws IOException          On IO trouble
      * @throws NullPointerException When the file cannot be found.
      */
@@ -269,7 +288,7 @@ public class ExtractedText implements InternallyProcessedFile, Serializable {
         // Open the file
         ParcelFileDescriptor inputPFD = context.getContentResolver().openFileDescriptor(fileUri, "r");
 
-        if(inputPFD == null) {
+        if (inputPFD == null) {
             throw new IllegalArgumentException("The file could not be opened");
         }
 
