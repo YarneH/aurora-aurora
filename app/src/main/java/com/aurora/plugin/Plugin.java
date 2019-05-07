@@ -1,8 +1,8 @@
 package com.aurora.plugin;
 
+import android.graphics.Bitmap;
 import android.support.annotation.NonNull;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -33,7 +33,7 @@ public class Plugin {
     /**
      * A logo for the plugin
      */
-    private File mPluginLogo;
+    private Bitmap mPluginLogo;
 
     /**
      * A description of what the plugin is used for
@@ -66,7 +66,7 @@ public class Plugin {
      * @param versionCode      the version code for the plugin
      * @param internalServices the internal services needed by the plugin
      */
-    public Plugin(@NonNull String uniqueName, @NonNull String name, File pluginLogo, @NonNull String description,
+    public Plugin(@NonNull String uniqueName, @NonNull String name, Bitmap pluginLogo, @NonNull String description,
                   int versionNumber, @NonNull String versionCode,
                   @NonNull List<InternalServices> internalServices) {
         mUniqueName = uniqueName;
@@ -88,7 +88,7 @@ public class Plugin {
      * @param versionNumber the version number for the plugin
      * @param versionCode   the version code for the plugin
      */
-    public Plugin(String uniqueName, String name, File pluginLogo, String description,
+    public Plugin(String uniqueName, String name, Bitmap pluginLogo, String description,
                   int versionNumber, String versionCode) {
         this(uniqueName, name, pluginLogo, description, versionNumber, versionCode, DEFAULT_INTERNAL_SERVICES);
     }
@@ -110,7 +110,7 @@ public class Plugin {
     /**
      * @return the plugin logo, or null if no logo
      */
-    public File getPluginLogo() {
+    public Bitmap getPluginLogo() {
         return mPluginLogo;
     }
 

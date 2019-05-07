@@ -209,6 +209,7 @@ public class AuroraCommunicator extends Communicator {
 
         queryCacheResponseObservable
                 .map(QueryCacheResponse::getResults)
+                .take(1)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(observer);
 
@@ -229,6 +230,7 @@ public class AuroraCommunicator extends Communicator {
 
         mListPluginsResponse
                 .map(ListPluginsResponse::getPlugins)
+                .take(1)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(observer);
 
