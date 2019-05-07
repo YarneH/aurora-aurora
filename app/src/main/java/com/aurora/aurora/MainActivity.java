@@ -319,7 +319,8 @@ public class MainActivity extends AppCompatActivity
         // Add hash to filename so we have a unique filename for different files with the same filename on different
         // locations
         if (uri.getPath() != null) {
-            result = Integer.toString(uri.getPath().hashCode(), 16) + "_";
+            int radixHex = 16;
+            result = Integer.toString(uri.getPath().hashCode(), radixHex) + "_";
         } else {
             return null;
         }
