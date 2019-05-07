@@ -213,7 +213,7 @@ public class InternalCache implements InternalService {
         String fileName = getFileNameFromRef(fileRef);
 
         if (fileName.contains(".")) {
-            cachedPath = fileName.substring(0, fileRef.indexOf('.'));
+            cachedPath = fileName.substring(0, fileName.indexOf('.'));
         } else {
             cachedPath = fileName;
         }
