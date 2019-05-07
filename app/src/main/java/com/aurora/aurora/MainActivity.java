@@ -52,6 +52,11 @@ public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
     /**
+     * Constant for radix of Integer.toString()
+     */
+    private static final int HEX_RADIX = 16;
+
+    /**
      * The request-code used to start the file-chooser intent.
      * Chosen to be 1.
      */
@@ -319,8 +324,7 @@ public class MainActivity extends AppCompatActivity
         // Add hash to filename so we have a unique filename for different files with the same filename on different
         // locations
         if (uri.getPath() != null) {
-            int radixHex = 16;
-            result = Integer.toString(uri.getPath().hashCode(), radixHex) + "_";
+            result = Integer.toString(uri.getPath().hashCode(), HEX_RADIX) + "_";
         } else {
             return null;
         }
