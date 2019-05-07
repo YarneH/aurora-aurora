@@ -29,11 +29,11 @@ pipeline {
                 script {
                     // Compile and run the unit tests for the app and its dependencies
                     if (env.BRANCH_NAME == 'master' || env.BRANCH_NAME == 'dev') {
-                        sh "./gradlew testReleaseUnitTest --tests '*UnitTest' --scan --stacktrace"
-                        sh "./gradlew auroralib:testReleaseUnitTest --tests '*UnitTest' --scan --stacktrace"
+                        sh "./gradlew testReleaseUnitTest --tests '*UnitTest' --scan --stacktrace --debug --info"
+                        sh "./gradlew auroralib:testReleaseUnitTest --tests '*UnitTest' --scan --stacktrace --debug --info"
                     } else {
-                        sh "./gradlew testDebugUnitTest --tests '*UnitTest' --scan --stacktrace"
-                        sh "./gradlew auroralib:testDebugUnitTest --tests '*UnitTest' --scan --stacktrace"
+                        sh "./gradlew testDebugUnitTest --tests '*UnitTest' --scan --stacktrace --debug --info"
+                        sh "./gradlew auroralib:testDebugUnitTest --tests '*UnitTest' --scan --stacktrace --debug --info"
                     }
 
 
