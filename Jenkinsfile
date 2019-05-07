@@ -161,6 +161,20 @@ pipeline {
                 -classpath ${WORKSPACE}/app/build/intermediates/javac/release/compileReleaseJavaWithJavac/classes \
                 -bootclasspath /opt/android-sdk-linux/platforms/android-28/android.jar
                 """
+
+                // Auroralib docs for internal developers
+                sh """
+                javadoc -d /var/www/javadoc/aurora/auroralib/${env.BRANCH_NAME} -sourcepath ${WORKSPACE}/auroralib/src/main/java -subpackages com -private \
+                -classpath ${WORKSPACE}/auroralib/build/intermediates/javac/release/compileReleaseJavaWithJavac/classes \
+                -bootclasspath /opt/android-sdk-linux/platforms/android-28/android.jar
+                """
+
+                // Auroralib docs for external developers
+                sh """
+                javadoc -d /var/www/javadoc/auroralib/${env.BRANCH_NAME} -sourcepath ${WORKSPACE}/auroralib/src/main/java -subpackages com \
+                -classpath ${WORKSPACE}/auroralib/build/intermediates/javac/release/compileReleaseJavaWithJavac/classes \
+                -bootclasspath /opt/android-sdk-linux/platforms/android-28/android.jar
+                """
             }
             post {
                 failure {
