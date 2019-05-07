@@ -43,7 +43,6 @@ import io.reactivex.disposables.Disposable;
 
 import java.io.FileNotFoundException;
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -226,10 +225,9 @@ public class MainActivity extends AppCompatActivity
 
                 @Override
                 public void onNext(List<CachedFileInfo> cachedFileInfos) {
-                    Log.d("Cache", "" + cachedFileInfos.size());
                     mCachedFileInfoList = cachedFileInfos;
                     ((CardFileAdapter)mRecyclerView.getAdapter()).updateData(mCachedFileInfoList);
-                    if (cachedFileInfos.size() == 0) {
+                    if (cachedFileInfos.isEmpty()) {
                         findViewById(R.id.cl_empty_text).setVisibility(View.VISIBLE);
                     } else{
                         findViewById(R.id.cl_empty_text).setVisibility(View.GONE);
@@ -238,7 +236,7 @@ public class MainActivity extends AppCompatActivity
 
                 @Override
                 public void onError(Throwable e) {
-
+                    Log.e("MainActivity", "Error while trying to get the list of cached files", e);
                 }
 
                 @Override

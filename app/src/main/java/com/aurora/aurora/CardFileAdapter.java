@@ -20,15 +20,16 @@ import java.util.List;
  * The adapter for the RecyclerView of the file-cards
  */
 public class CardFileAdapter extends RecyclerView.Adapter<CardFileAdapter.CardFileViewHolder> {
-    /**
-     * The format of a date used in the cards
-     */
-    private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("E, dd MMM yyyy");
 
     /**
      * The option to have no selected card in the RecyclerView
      */
     private static final int NO_DETAILS = -1;
+
+    /**
+     * The format of a date used in the cards
+     */
+    private SimpleDateFormat mDateFormat = new SimpleDateFormat("E, dd MMM yyyy");
 
     /**
      * The amount of cards that the RecyclerView manages
@@ -60,7 +61,13 @@ public class CardFileAdapter extends RecyclerView.Adapter<CardFileAdapter.CardFi
         // TODO: remove context variable if it is not needed by the test example anymore!
         mKernel = kernel;
         mContext = context;
-        updateData(cachedFileInfoList);
+        if (cachedFileInfoList == null) {
+            mAmount = 0;
+        } else {
+            mCachedFileInfoList = cachedFileInfoList;
+            mAmount = mCachedFileInfoList.size();
+        }
+        notifyDataSetChanged();
     }
 
     public void updateData(List<CachedFileInfo> cachedFileInfoList) {
@@ -159,7 +166,7 @@ public class CardFileAdapter extends RecyclerView.Adapter<CardFileAdapter.CardFi
             mTitleTextView.setText(mCachedFileInfo.getFileDisplayName());
             StringBuilder bld  = new StringBuilder(lastOpenedBase)
                     .append(" ")
-                    .append(DATE_FORMAT.format(mCachedFileInfo.getLastOpened()));
+                    .append(mDateFormat.format(mCachedFileInfo.getLastOpened()));
 
             mLastOpenedTextView.setText(bld.toString());
 
@@ -198,7 +205,7 @@ public class CardFileAdapter extends RecyclerView.Adapter<CardFileAdapter.CardFi
             */
 
             String displayName = mCachedFileInfo.getFileDisplayName();
-            String fileType = displayName.substring(displayName.lastIndexOf("."));
+            String fileType = displayName.substring(displayName.lastIndexOf('.'));
 
             mKernel.getAuroraCommunicator().openFileWithCache(mCachedFileInfo.getFileRef(), fileType,
                     mCachedFileInfo.getUniquePluginName(), mContext);
