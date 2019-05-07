@@ -165,8 +165,8 @@ public class CardFileAdapter extends RecyclerView.Adapter<CardFileAdapter.CardFi
             Note: this is basically mixed code as a result of a merge. This test code will be removed ASAP
             */
 
-            mKernel.getAuroraCommunicator().openFileWithCache("dummyfilename", "docx",
-                    "com.aurora.basicplugin", mContext);
+            mKernel.getAuroraCommunicator().openFileWithCache("4f352a7b_beefAndRiceCasserole.txt", "txt",
+                    "com.aurora.basicplugin", mContext.getApplicationContext());
 
 
         }
