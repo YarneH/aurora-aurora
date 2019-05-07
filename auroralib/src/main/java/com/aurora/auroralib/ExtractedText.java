@@ -120,7 +120,6 @@ public class ExtractedText implements InternallyProcessedFile, Serializable {
         } else {
             return new ArrayList<>();
         }
-
     }
 
     /**
@@ -201,6 +200,23 @@ public class ExtractedText implements InternallyProcessedFile, Serializable {
         this.mAuthors = authors;
     }
 
+    /**
+     * Convenience method for getting all the images
+     *
+     * @return List of {@link ExtractedImage} objects
+     */
+    @SuppressWarnings("unused")
+    public List<ExtractedImage> getImages() {
+        List<ExtractedImage> extractedImages = new ArrayList<>();
+
+        for (Section section: this.getSections()) {
+            extractedImages.addAll(section.getExtractedImages());
+        }
+
+        return extractedImages;
+    }
+
+    @Override
     public String toString() {
         StringBuilder res = new StringBuilder();
         if (mTitle != null) {

@@ -32,7 +32,7 @@ public class PluginCommunicatorUnitTest {
         mBus = new Bus(Schedulers.trampoline());
 
         mProcessingCommunicator = new ProcessingCommunicator(mBus);
-        mPluginRegistry = new PluginRegistry(mProcessingCommunicator, PLUGINS_CFG, new MockContext());
+        mPluginRegistry = new PluginRegistry(PLUGINS_CFG, new MockContext());
         mPluginCommunicator = new PluginCommunicator(mBus, mPluginRegistry);
     }
 
