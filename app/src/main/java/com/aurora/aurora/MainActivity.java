@@ -74,7 +74,7 @@ public class MainActivity extends AppCompatActivity
     /**
      * Constant for the position of the pointing arrow animation
      */
-    private static final float END_POINT_OF_ANIMATION = 0.2f;
+    private static final float END_POINT_OF_ANIMATION = 0.2F;
 
     /**
      * Toast that holds the dummy text after a file is searched for.

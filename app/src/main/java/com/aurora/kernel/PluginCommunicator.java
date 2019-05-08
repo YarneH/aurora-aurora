@@ -193,6 +193,7 @@ class PluginCommunicator extends Communicator {
      * @param pluginAction  the target intent of the chooser
      * @param chooser       the plugin that was selected by the user in the chooser menu
      * @param context       the android context
+     * @deprecated
      */
     //TODO delete if custom picker works
     @Deprecated
