@@ -12,6 +12,9 @@ import com.aurora.internalservice.internaltranslation.ITranslate;
 
 import java.util.List;
 
+/**
+ * This class handles the communication with Aurora regarding the translation service
+ */
 public class TranslationServiceCaller extends ServiceCaller {
     /**
      * Tag used for log messages
@@ -62,12 +65,14 @@ public class TranslationServiceCaller extends ServiceCaller {
 
 
     /**
-     * Will start a new thread to cache the file
+     * Will start a new thread to translate the sentences from a source language to a destination
+     * language
      *
      * @param sentences             the list of strings to be translated
      * @param sourceLanguage        the language of the input sentences in ISO code
      * @param destinationLanguage   the desired language of the translations in ISO format
-     * @return status code of the cache operation from Cache Service in Aurora Internal Services
+     * @return status code of the translation operation from Translation Service in Aurora Internal
+     * Services
      */
     private List<String> translate(@NonNull List<String> sentences, String sourceLanguage,
                                    @NonNull String destinationLanguage ) {
@@ -115,7 +120,8 @@ public class TranslationServiceCaller extends ServiceCaller {
     }
 
     /**
-     * A private thread class that will cache the file in another thread to avoid blocking of the main thread
+     * A private thread class that will translate the senteces in another thread to avoid blocking
+     * of the main thread
      */
     private class TranslateThread extends Thread {
         private List<String> mTranslatedSentences = null;

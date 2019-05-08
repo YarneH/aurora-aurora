@@ -24,7 +24,7 @@ import io.reactivex.Observable;
 /**
  * Communicator that communicates with internal services offered to plugin processors
  */
-public class PluginInternalServiceCommunicator extends Communicator {
+class PluginInternalServiceCommunicator extends Communicator {
 
     /**
      * Tag for logging purposes
@@ -64,8 +64,9 @@ public class PluginInternalServiceCommunicator extends Communicator {
      * @param processor a reference to the InternalTextProcessor
      * @param translator a reference to the internal translator
      */
-    public PluginInternalServiceCommunicator(@NonNull final Bus mBus, @NonNull final InternalTextProcessor processor,
-                                             @NonNull final Translator translator) {
+    PluginInternalServiceCommunicator(@NonNull final Bus mBus,
+                                      @NonNull final InternalTextProcessor processor,
+                                      @NonNull final Translator translator) {
         super(mBus);
         mInternalTextProcessor = processor;
         mTranslator = translator;
@@ -107,7 +108,7 @@ public class PluginInternalServiceCommunicator extends Communicator {
 
         // If extractedText is null for some reason: return default extracted text
         if (extractedText == null) {
-            extractedText = new ExtractedText("", null);
+            mBus.post(new InternalProcessorResponse(new ExtractedText("", null)));
         }
 
         // STEP TWO
@@ -190,5 +191,4 @@ public class PluginInternalServiceCommunicator extends Communicator {
         }
         mInternalNLP = null;
     }
-
 }

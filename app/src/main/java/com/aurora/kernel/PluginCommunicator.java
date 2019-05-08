@@ -34,7 +34,7 @@ import io.reactivex.Observable;
 /**
  * Communicator that communicates with Plugin environments
  */
-public class PluginCommunicator extends Communicator {
+class PluginCommunicator extends Communicator {
     /**
      * Tag for logging purposes
      */
@@ -94,7 +94,7 @@ public class PluginCommunicator extends Communicator {
      *                       communicate events
      * @param pluginRegistry a reference to the plugin registry
      */
-    public PluginCommunicator(@NonNull Bus bus, @NonNull PluginRegistry pluginRegistry) {
+    PluginCommunicator(@NonNull Bus bus, @NonNull PluginRegistry pluginRegistry) {
         super(bus);
 
         this.mPluginRegistry = pluginRegistry;
@@ -163,7 +163,7 @@ public class PluginCommunicator extends Communicator {
         Uri uri;
 
         try {
-            uri = writeToTempFile(context, extractedTextInJSON, PROCESSED_PREFIX, EXTENSION);
+            uri = writeToTempFile(context, extractedTextInJSON, PROCESSED_PREFIX);
         } catch (IOException e) {
             showToastAndLog(context, ERROR_LOG, e);
             return;
@@ -186,8 +186,6 @@ public class PluginCommunicator extends Communicator {
     }
 
 
-    //TODO delete if custom picker works
-
     /**
      * Opens a file with a given plugin
      *
@@ -196,7 +194,8 @@ public class PluginCommunicator extends Communicator {
      * @param chooser       the plugin that was selected by the user in the chooser menu
      * @param context       the android context
      */
-
+    //TODO delete if custom picker works
+    @Deprecated
     private void openFileWithPluginChooser(ExtractedText extractedText, Intent pluginAction,
                                            Intent chooser, Context context) {
 
@@ -210,7 +209,7 @@ public class PluginCommunicator extends Communicator {
         Uri uri;
 
         try {
-            uri = writeToTempFile(context, extractedTextInJSON, PROCESSED_PREFIX, EXTENSION);
+            uri = writeToTempFile(context, extractedTextInJSON, PROCESSED_PREFIX);
         } catch (IOException e) {
             showToastAndLog(context, ERROR_LOG, e);
             return;
@@ -269,7 +268,7 @@ public class PluginCommunicator extends Communicator {
             Uri uri;
 
             try {
-                uri = writeToTempFile(context, jsonRepresentation, CACHED_PREFIX, EXTENSION);
+                uri = writeToTempFile(context, jsonRepresentation, CACHED_PREFIX);
             } catch (IOException e) {
                 showToastAndLog(context, ERROR_LOG, e);
                 return;
@@ -361,13 +360,12 @@ public class PluginCommunicator extends Communicator {
      * @param context the application context
      * @param content the content that will be written
      * @param prefix  name of the file
-     * @param suffix  extension of the file
      * @return Uri to the file on success
      * @throws IOException on failure
      */
-    private Uri writeToTempFile(Context context, String content, String prefix, String suffix) throws IOException {
+    private Uri writeToTempFile(Context context, String content, String prefix) throws IOException {
         // Write the processed file to the cache directory
-        File file = File.createTempFile(prefix, suffix, context.getCacheDir());
+        File file = File.createTempFile(prefix, PluginCommunicator.EXTENSION, context.getCacheDir());
 
         try (FileWriter fileWriter = new FileWriter(file)) {
             fileWriter.write(content);

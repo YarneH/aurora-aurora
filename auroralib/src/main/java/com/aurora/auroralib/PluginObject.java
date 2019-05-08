@@ -19,8 +19,10 @@ import java.io.Serializable;
 public abstract class PluginObject implements Serializable {
 
     /**
-     * The name of the file that contained the text that is now displayed in the PluginObject
+     * The name of the file that contained the text that is now displayed in the PluginObject,
+     * this also contains the prepended hash
      */
+    @SuppressWarnings("WeakerAccess")
     protected String mFileName;
 
     /**
@@ -31,6 +33,7 @@ public abstract class PluginObject implements Serializable {
     /**
      * Gson object for turning PluginObject to Json string
      */
+    @SuppressWarnings("WeakerAccess")
     protected static Gson sGson = new Gson();
 
     public PluginObject(String fileName, String uniquePluginName) {
@@ -38,16 +41,12 @@ public abstract class PluginObject implements Serializable {
         mUniquePluginName = uniquePluginName;
     }
 
-    public String getFileName() {
+    public final String getFileName() {
         return mFileName;
     }
 
     public String getUniquePluginName() {
         return mUniquePluginName;
-    }
-
-    public void setFileName(String fileName) {
-        mFileName = fileName;
     }
 
     public void setUniquePluginName(String uniquePluginName) {

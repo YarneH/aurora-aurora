@@ -3,6 +3,9 @@ package com.aurora.auroralib.translation;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+/**
+ * Class of constants indicating results of the translation operation.
+ */
 public class TranslationResult implements Parcelable {
 
     /**
@@ -30,7 +33,7 @@ public class TranslationResult implements Parcelable {
     protected TranslationResult(Parcel in) {
 
         mErrorCode = in.readInt();
-        mTranslatedSentences  = in.createStringArray();
+        mTranslatedSentences = in.createStringArray();
 
     }
 

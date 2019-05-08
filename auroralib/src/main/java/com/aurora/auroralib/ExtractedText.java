@@ -29,9 +29,10 @@ import edu.stanford.nlp.pipeline.ProtobufAnnotationSerializer;
 public class ExtractedText implements InternallyProcessedFile, Serializable {
 
     /**
-     * The filename, often the path to the file
+     * The filename, which is made unique with a prepended hash
      */
     private String mFilename;
+
     /**
      * The Date of the last edit
      */
@@ -41,11 +42,13 @@ public class ExtractedText implements InternallyProcessedFile, Serializable {
      * The text of the title of the file
      */
     private String mTitle;
+
     /**
      * The CoreNLP annotations of the title in Google's protobuf format
      */
     @JsonAdapter(CoreNLPDocumentAdapter.class)
     private CoreNLPProtos.Document mTitleAnnotationProto;
+
     /**
      * The deserialized Annotation of the title
      */
@@ -55,6 +58,7 @@ public class ExtractedText implements InternallyProcessedFile, Serializable {
      * A list of authors of the file
      */
     private List<String> mAuthors;
+
     /**
      * A list of Sections of the file which represent the content
      */
@@ -85,7 +89,8 @@ public class ExtractedText implements InternallyProcessedFile, Serializable {
         mSections = new ArrayList<>();
 
         // Do not use overridable method because this can lead to strange behaviour in subclasses
-        // wiki.sei.cmu.edu/confluence/display/java/MET05-J.+Ensure+that+constructors+do+not+call+overridable+methods
+        // wiki.sei.cmu.edu/confluence/display/java/MET05-J
+        // .+Ensure+that+constructors+do+not+call+overridable+methods
         for (String section : sections) {
             mSections.add(new Section(section));
         }
@@ -282,11 +287,13 @@ public class ExtractedText implements InternallyProcessedFile, Serializable {
      * @throws NullPointerException When the file cannot be found.
      */
     @SuppressWarnings("unused")
-    public static ExtractedText getExtractedTextFromFile(@NonNull Uri fileUri, @NonNull Context context)
+    public static ExtractedText getExtractedTextFromFile(@NonNull Uri fileUri,
+                                                         @NonNull Context context)
             throws IOException {
 
         // Open the file
-        ParcelFileDescriptor inputPFD = context.getContentResolver().openFileDescriptor(fileUri, "r");
+        ParcelFileDescriptor inputPFD = context.getContentResolver().openFileDescriptor(fileUri,
+                "r");
 
         if (inputPFD == null) {
             throw new IllegalArgumentException("The file could not be opened");

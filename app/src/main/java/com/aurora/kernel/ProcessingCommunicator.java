@@ -23,7 +23,11 @@ import io.reactivex.Observable;
  * Communicator that communicates with Plugin processors
  */
 public class ProcessingCommunicator extends Communicator {
-    private static final String LOG_TAG = "ProcessingCommunicator";
+
+    /**
+     * Tag for logging purposes
+     */
+    private static final String LOG_TAG = ProcessingCommunicator.class.getSimpleName();
 
     /**
      * Observable for a Cache operation response
@@ -39,7 +43,7 @@ public class ProcessingCommunicator extends Communicator {
      *
      * @param mBus a reference to the unique bus instance that all communicators should use to communicate events
      */
-    public ProcessingCommunicator(@NonNull final Bus mBus) {
+    ProcessingCommunicator(@NonNull final Bus mBus) {
         super(mBus);
 
         // Subscribe to observable
