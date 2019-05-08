@@ -76,8 +76,7 @@ public class MainActivity extends AppCompatActivity
      */
     private static final int REQUEST_FILE_GET = 1;
     private static final int ANIMATION_DURATION = 500;
-    private static final float END_POINT_OF_ANIMATION = 0.2f;
-
+    private static final float END_POINT_OF_ANIMATION = 0.2F;
 
 
     /**
@@ -212,12 +211,12 @@ public class MainActivity extends AppCompatActivity
                 4,
                 "v0.4",
                 new ArrayList<>(Arrays.asList(
-                                InternalServices.TEXT_EXTRACTION,
-                                InternalServices.IMAGE_EXTRACTION,
-                                InternalServices.NLP_TOKENIZE,
-                                InternalServices.NLP_SSPLIT,
-                                InternalServices.NLP_POS
-                        )));
+                        InternalServices.TEXT_EXTRACTION,
+                        InternalServices.IMAGE_EXTRACTION,
+                        InternalServices.NLP_TOKENIZE,
+                        InternalServices.NLP_SSPLIT,
+                        InternalServices.NLP_POS
+                )));
 
         final Plugin souschefPlugin = new Plugin(
                 "com.aurora.souschef",
@@ -341,13 +340,14 @@ public class MainActivity extends AppCompatActivity
 
                     // Look for plugins that can answer the pluginAction
                     PackageManager manager = getPackageManager();
-                    List<ResolveInfo> infos = manager.queryIntentActivities(pluginAction, PackageManager.MATCH_DEFAULT_ONLY);
+                    List<ResolveInfo> infos = manager.queryIntentActivities(pluginAction,
+                            PackageManager.MATCH_DEFAULT_ONLY);
 
-                    if (infos.size() > 0){
+                    if (!infos.isEmpty()) {
                         // TODO List<Plugin> plugins = new ArrayList<>();
                         List<String> packageNames = new ArrayList<>();
                         //List<Integer> iconResources = new ArrayList<>();
-                        for(ResolveInfo info : infos){
+                        for (ResolveInfo info : infos) {
                             Log.d("FOUND_PLUGINS", info.activityInfo.packageName + " - " + info.getIconResource());
 
                             //TODO update to a list of plugins
@@ -389,13 +389,14 @@ public class MainActivity extends AppCompatActivity
     }
 
 
-    private void showSimpleAdapterAlertDialog(List<String> packageNames, String fileName, String type, InputStream readFile) {
+    private void showSimpleAdapterAlertDialog(List<String> packageNames, String fileName, String type,
+                                              InputStream readFile) {
         // Each image in array will be displayed at each item beginning.
         //private int[] imageIdArr = {R.drawable.if_candy_cane, R.drawable.if_present, R.drawable.if_snowman};
 
         // Image and text item data's key.
-        String CUSTOM_ADAPTER_IMAGE = "image";
-        String CUSTOM_ADAPTER_TEXT = "text";
+        // final String CUSTOM_ADAPTER_IMAGE = "image";
+        final String CUSTOM_ADAPTER_TEXT = "text";
 
         AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
         // Set title value.
@@ -403,12 +404,11 @@ public class MainActivity extends AppCompatActivity
 
         // Create SimpleAdapter list data.
 
-        List<Map<String, Object>> dialogItemList = new ArrayList<Map<String, Object>>();
+        List<Map<String, Object>> dialogItemList = new ArrayList<>();
         int listItemLen = packageNames.size();
-        for(int i=0;i<listItemLen;i++)
-        {
+        for (int i = 0; i < listItemLen; i++) {
             Log.d("DIALOG_ITEM", packageNames.get(i));
-            Map<String, Object> itemMap = new HashMap<String, Object>();
+            Map<String, Object> itemMap = new HashMap<>();
             //itemMap.put(CUSTOM_ADAPTER_IMAGE, iconResources.get(i));
             itemMap.put(CUSTOM_ADAPTER_TEXT, packageNames.get(i));
 
@@ -420,29 +420,24 @@ public class MainActivity extends AppCompatActivity
                 R.layout.plugin_alert_dialog_adapter_row,
                 new String[]{CUSTOM_ADAPTER_TEXT},
                 new int[]{R.id.alertDialogItemTextView});
-                //new String[]{CUSTOM_ADAPTER_IMAGE, CUSTOM_ADAPTER_TEXT},
-                //new int[]{R.id.alertDialogItemImageView,R.id.alertDialogItemTextView});
+        //new String[]{CUSTOM_ADAPTER_IMAGE, CUSTOM_ADAPTER_TEXT},
+        //new int[]{R.id.alertDialogItemImageView,R.id.alertDialogItemTextView});
 
         // Set the data adapter.
-        builder.setAdapter(simpleAdapter, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int itemIndex) {
-                if (dialogItemList.get(itemIndex).get(CUSTOM_ADAPTER_TEXT) != null) {
-                    String selectedPluginName = dialogItemList.get(itemIndex).get(CUSTOM_ADAPTER_TEXT).
-                            toString();
-                    Log.d("PLUGIN_SELECTED", selectedPluginName);
-                    mAuroraCommunicator.openFileWithPlugin(fileName, type, readFile, selectedPluginName,
-                            getApplicationContext());
-                }
+        builder.setAdapter(simpleAdapter, (dialogInterface, itemIndex) -> {
+            if (dialogItemList.get(itemIndex).get(CUSTOM_ADAPTER_TEXT) != null) {
+                String selectedPluginName = dialogItemList.get(itemIndex).get(CUSTOM_ADAPTER_TEXT).
+                        toString();
+                Log.d("PLUGIN_SELECTED", selectedPluginName);
+                mAuroraCommunicator.openFileWithPlugin(fileName, type, readFile, selectedPluginName,
+                        getApplicationContext());
             }
-
         });
 
         builder.setCancelable(true);
         builder.create();
         builder.show();
     }
-
 
 
     /**
