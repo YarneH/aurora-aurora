@@ -8,7 +8,7 @@ import java.util.Objects;
 /**
  * Class that contains basic information of a cached file.
  */
-public class CachedFileInfo implements Cloneable {
+public class CachedFileInfo {
     /**
      * The file reference to the original file
      */
