@@ -41,6 +41,11 @@ public final class Translator implements InternalService {
      * Beginning tag and key for in the url to send to the API
      */
     private static final String KEY = "&key=" + BuildConfig.TRANSLATION_API;
+
+    /**
+     * Let the api know that we want text and not html readable text (e.g apostrophe is ' and not &#39; )
+     */
+    private static final String FORMAT = "&format=text";
     /**
      * A lock for parallel programming
      */
@@ -128,7 +133,7 @@ public final class Translator implements InternalService {
                 bld.append(QUERY);
             }
             // add the converted sentence so that escape characters are correct
-            bld.append(java.net.URLEncoder.encode(sentence, "ISO-8859-1"));
+            bld.append(java.net.URLEncoder.encode(sentence, "UTF-8"));
         }
         // append the target
         bld.append(TARGET).append(targetLanguage);
@@ -136,6 +141,8 @@ public final class Translator implements InternalService {
         bld.append(SOURCE).append(sourceLanguage);
         // append the key
         bld.append(KEY);
+        // append the formatting
+        bld.append(FORMAT);
 
         return bld.toString();
     }
