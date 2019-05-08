@@ -70,6 +70,7 @@ public class AuroraCommunicator extends Communicator {
      *                           the own chooser.
      * @param applicationContext the android context
      */
+    // TODO change String uniqueuPluginName to Plugin plugin
     public void openFileWithPlugin(String fileRef, String fileType, InputStream file,
                                    String uniquePluginName, Context applicationContext) {
 

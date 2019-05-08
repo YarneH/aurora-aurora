@@ -3,6 +3,8 @@ package com.aurora.aurora;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
@@ -28,6 +30,7 @@ import android.view.animation.TranslateAnimation;
 import android.webkit.MimeTypeMap;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.SimpleAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -38,8 +41,13 @@ import com.aurora.kernel.Kernel;
 import com.aurora.plugin.Plugin;
 import com.google.firebase.analytics.FirebaseAnalytics;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * The main activity of the application, started when the app is opened.
@@ -303,17 +311,53 @@ public class MainActivity extends AppCompatActivity
                     // Create intent to open file with a certain plugin
                     Intent pluginAction = new Intent(Constants.PLUGIN_ACTION);
 
-                    // Create chooser to let user choose the plugin
+                    /*
                     Intent chooser = Intent.createChooser(pluginAction, getString(R.string.select_plugin));
                     mAuroraCommunicator.openFileWithPluginChooser(fileName, type,
                             read, pluginAction, chooser, getApplicationContext());
-                    /*
-                    // For now hard coded constant
-                    String uniquePluginName = "com.aurora.basicplugin";
+                            */
+                    pluginAction.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    pluginAction.setType("*/*");
 
-                    mAuroraCommunicator.openFileWithPlugin(textFile.toString(), type,
-                            read, uniquePluginName, getApplicationContext());
-                    */
+
+                    // Look for plugins that can answer the pluginAction
+                    PackageManager manager = getPackageManager();
+                    List<ResolveInfo> infos = manager.queryIntentActivities(pluginAction, PackageManager.MATCH_DEFAULT_ONLY);
+
+                    if (infos.size() > 0){
+                        // TODO List<Plugin> plugins = new ArrayList<>();
+                        List<String> packageNames = new ArrayList<>();
+                        //List<Integer> iconResources = new ArrayList<>();
+                        for(ResolveInfo info : infos){
+                            Log.d("FOUND_PLUGINS", info.activityInfo.packageName + " - " + info.getIconResource());
+
+                            //TODO update to a list of plugins
+                            packageNames.add(info.activityInfo.packageName);
+
+                            // TODO Robbe:
+                            //  Here I want to fill the array plugins with the Plugin
+                            //  object corresponding to each packagename. If there is no entry in the
+                            //  PluginRegistry I want to add a PluginObject with as name also the substring
+                            //  after the last dot of the packageName. This would be for plugins in development
+                            //  that are found on a device. In this case all preprocessing steps will be executed
+
+                            //  I could also get the list of plugins that are in the registry and then
+                            //  verify this with the resolveInfos that I receive (removing entries that
+                            //  weren't reseolved and adding entries that are resolved but not in pluginRegistry
+                            //  (developing plugins)
+
+
+                            //iconResources.add(info.getIconResource());
+                        }
+
+                        // Show the dialog for selecting a plugin
+                        showSimpleAdapterAlertDialog(packageNames, fileName, type, read);
+
+                    } else {
+                        Log.d("FOUND_PLUGINS", "NO PLUGINS FOUND");
+                        showPopUpView("No plugins were found");
+                    }
+
 
                 } else {
                     showPopUpView("The selected file was null, please select another file!");
@@ -324,6 +368,63 @@ public class MainActivity extends AppCompatActivity
             }
         }
     }
+
+
+    private void showSimpleAdapterAlertDialog(List<String> packageNames, String fileName, String type, InputStream readFile) {
+        // Each image in array will be displayed at each item beginning.
+        //private int[] imageIdArr = {R.drawable.if_candy_cane, R.drawable.if_present, R.drawable.if_snowman};
+
+        // Image and text item data's key.
+        String CUSTOM_ADAPTER_IMAGE = "image";
+        String CUSTOM_ADAPTER_TEXT = "text";
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+        // Set title value.
+        builder.setTitle("Select a plugin");
+
+        // Create SimpleAdapter list data.
+
+        List<Map<String, Object>> dialogItemList = new ArrayList<Map<String, Object>>();
+        int listItemLen = packageNames.size();
+        for(int i=0;i<listItemLen;i++)
+        {
+            Log.d("DIALOG_ITEM", packageNames.get(i));
+            Map<String, Object> itemMap = new HashMap<String, Object>();
+            //itemMap.put(CUSTOM_ADAPTER_IMAGE, iconResources.get(i));
+            itemMap.put(CUSTOM_ADAPTER_TEXT, packageNames.get(i));
+
+            dialogItemList.add(itemMap);
+        }
+
+        // Create SimpleAdapter object.
+        SimpleAdapter simpleAdapter = new SimpleAdapter(MainActivity.this, dialogItemList,
+                R.layout.plugin_alert_dialog_adapter_row,
+                new String[]{CUSTOM_ADAPTER_TEXT},
+                new int[]{R.id.alertDialogItemTextView});
+                //new String[]{CUSTOM_ADAPTER_IMAGE, CUSTOM_ADAPTER_TEXT},
+                //new int[]{R.id.alertDialogItemImageView,R.id.alertDialogItemTextView});
+
+        // Set the data adapter.
+        builder.setAdapter(simpleAdapter, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int itemIndex) {
+                if (dialogItemList.get(itemIndex).get(CUSTOM_ADAPTER_TEXT) != null) {
+                    String selectedPluginName = dialogItemList.get(itemIndex).get(CUSTOM_ADAPTER_TEXT).
+                            toString();
+                    Log.d("PLUGIN_SELECTED", selectedPluginName);
+                    mAuroraCommunicator.openFileWithPlugin(fileName, type, readFile, selectedPluginName,
+                            getApplicationContext());
+                }
+            }
+
+        });
+
+        builder.setCancelable(true);
+        builder.create();
+        builder.show();
+    }
+
+
 
     /**
      * Private helper method to extract the displayed filename from the Cursor combined with the

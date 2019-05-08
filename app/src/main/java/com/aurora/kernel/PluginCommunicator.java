@@ -142,7 +142,7 @@ public class PluginCommunicator extends Communicator {
     private void openFileWithPlugin(ExtractedText extractedText, String uniquePluginName, Context context) {
         // Create intent to open plugin
         Intent launchIntent = context.getPackageManager().getLaunchIntentForPackage(uniquePluginName);
-
+        
         if (launchIntent == null) {
             showToastAndLog(context, context.getString(R.string.could_not_open_plugin), null);
             return;
@@ -166,12 +166,8 @@ public class PluginCommunicator extends Communicator {
             return;
         }
 
+        // Update the intent with some final flags, extras and data
         setDataAndFlags(launchIntent, uri, Constants.PLUGIN_INPUT_TYPE_EXTRACTED_TEXT);
-
-        // This is a bit of a hack, but it needs to be done because of trying to launch an
-        // activity outside of and activity context
-        // https://stackoverflow.com/questions/3918517/calling-startactivity-from-outside-of-an-activity-context
-        launchIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 
         // Check if at least one app exists that can execute the task
         boolean pluginOpens = launchIntent.resolveActivity(context.getPackageManager()) != null;
@@ -180,6 +176,7 @@ public class PluginCommunicator extends Communicator {
         } else {
             showToastAndLog(context, context.getString(R.string.could_not_open_plugin), null);
         }
+
     }
 
 
@@ -213,7 +210,12 @@ public class PluginCommunicator extends Communicator {
             return;
         }
 
+
+
         setDataAndFlags(pluginAction, uri, Constants.PLUGIN_INPUT_TYPE_EXTRACTED_TEXT);
+
+
+
 
         // This is a bit of a hack, but it needs to be done because of trying to launch an
         // activity outside of and activity context
