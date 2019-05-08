@@ -190,8 +190,6 @@ public class AuroraCommunicator extends Communicator {
                                 Log.e(CLASS_TAG, "Something went wrong while retrieving a file from the cache!", e)
                 );
 
-
-        // Send request to retrieve file from cache TODO change this (DummyPlugin)!
         RetrieveFileFromCacheRequest request = new RetrieveFileFromCacheRequest(fileRef, uniquePluginName);
         mBus.post(request);
     }
