@@ -10,6 +10,7 @@ package com.aurora.internalservice.internalprocessor.pdfparsing;
  */
 
 import android.util.Log;
+
 import com.itextpdf.text.pdf.PdfArray;
 import com.itextpdf.text.pdf.PdfDictionary;
 import com.itextpdf.text.pdf.PdfName;
@@ -24,6 +25,8 @@ import com.itextpdf.text.pdf.parser.SimpleTextExtractionStrategy;
 import com.itextpdf.text.pdf.parser.TextExtractionStrategy;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 /**
@@ -33,11 +36,24 @@ public class PDFContentExtractor {
 
     private ParsedPDF mParsedPDF;
 
-    // Subtract 48 from a char to get the number in int
+    /**
+     * Subtract 48 from a char to get the number in int
+     */
     private static final int CHAR_TO_INT = 48;
+    /**
+     * These are the main tags the extractor can use
+     */
+    private static final String MAIN_SUPPORTED_TAGS = "(H[0-9]+|P|Figure)";
+
+    /**
+     * convert tags to supported tags if possible
+     */
+    private static Map<String,String> TAG_CONVERTER;
 
     public PDFContentExtractor() {
         mParsedPDF = new ParsedPDF();
+        TAG_CONVERTER = new HashMap<>();
+        TAG_CONVERTER.put("Text body", "P");
     }
 
     /**
@@ -49,8 +65,10 @@ public class PDFContentExtractor {
     public void extractContent(PdfReader reader, ParsedPDF parsedPDF)
             throws IOException {
         this.mParsedPDF = parsedPDF;
-        // get the StructTreeRoot from the root object
+        // TODO: Error if not possible
+        Log.d("TAGGED", Boolean.toString(reader.isTagged()));
         PdfDictionary catalog = reader.getCatalog();
+        // get the StructTreeRoot from the root object
         PdfDictionary struct = catalog.getAsDict(PdfName.STRUCTTREEROOT);
         if (struct == null) {
             Log.e("PDF text extraction", "Could not receive struct");
@@ -111,7 +129,8 @@ public class PDFContentExtractor {
         PdfName s = k.getAsName(PdfName.S);
         if (s != null) {
             tag = PdfName.decodeName(s.toString());
-            if (!Pattern.matches("(H[0-9]+|P|Figure)", tag)) {
+            tag = convertTagToSupported(tag);
+            if (!Pattern.matches(MAIN_SUPPORTED_TAGS, tag)) {
                 tag = tagParent;
             }
             PdfDictionary dict = k.getAsDict(PdfName.PG);
@@ -130,6 +149,18 @@ public class PDFContentExtractor {
             }
         }
         inspectChild(k.getDirectObject(PdfName.K), tag);
+    }
+
+    /**
+     * Converts a tag extracted from a PDF  to a {@link #MAIN_SUPPORTED_TAGS}
+     * @param tag the extracted tag
+     * @return the possibly accepted tag
+     */
+    private String convertTagToSupported(String tag) {
+        if (TAG_CONVERTER.containsKey(tag)){
+            tag = TAG_CONVERTER.get(tag);
+        }
+        return tag;
     }
 
     protected String xmlName(PdfName name) {
@@ -184,7 +215,7 @@ public class PDFContentExtractor {
             PdfDictionary mcr = (PdfDictionary) object;
             parsed = parseTag(mcr.getDirectObject(PdfName.MCID), mcr
                     .getAsDict(PdfName.PG), image);
-        } else{
+        } else {
             parsed = "";
         }
         return parsed;
