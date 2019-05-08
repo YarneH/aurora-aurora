@@ -24,6 +24,7 @@ import android.view.MenuItem;
 
 import com.aurora.aurora.R;
 import com.aurora.market.data.database.MarketPlugin;
+import edu.stanford.nlp.ling.tokensregex.Env;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -31,6 +32,8 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * An activity representing a single MarketPlugin detail screen. This
@@ -40,7 +43,6 @@ import java.net.URLConnection;
  */
 public class MarketPluginDetailActivity extends AppCompatActivity {
     private MarketPlugin mMarketPlugin = null;
-    private BroadcastReceiver mBroadcastReceiver = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,14 +50,6 @@ public class MarketPluginDetailActivity extends AppCompatActivity {
         setContentView(R.layout.activity_marketplugin_detail);
         Toolbar toolbar = (Toolbar) findViewById(R.id.detail_toolbar);
         setSupportActionBar(toolbar);
-
-        mBroadcastReceiver = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                // Empty because stub
-            }
-        };
-        registerReceiver(mBroadcastReceiver, new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
 
         Activity activity = this;
         // Setup the FAB for downloading the Plugin
@@ -147,20 +141,23 @@ public class MarketPluginDetailActivity extends AppCompatActivity {
 
                 long downloadID = downloadManager.enqueue(request);
 
-                mBroadcastReceiver = new BroadcastReceiver() {
+                BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
                     @Override
                     public void onReceive(Context context, Intent intent) {
-                        long id = intent.getIntExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1);
+                        // TODO: Fix this, look into PackageInstaller
+                        long id = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1);
                         if (id == downloadID) {
-                            // TODO: This code is not accessed
-                            Log.d("test","test");
                             Intent installIntent = new Intent(Intent.ACTION_VIEW);
-                            installIntent.setDataAndType(Uri.fromFile(new File(Environment.DIRECTORY_DOWNLOADS + "plugin.apk")), "application/vnd.android.package-archive");
+                            String path = Environment.getDataDirectory() + File.pathSeparator + Environment.DIRECTORY_DOWNLOADS + File.separator + "souschef.apk";
+                            File test = new File(Environment.getExternalStorageDirectory() + "/download/" + "souschef.apk");
+                            //installIntent.setDataAndType(Uri.fromFile(new File(Environment.DIRECTORY_DOWNLOADS + "/souschef.apk")), "application/vnd.android.package-archive");
+                            intent.setDataAndType(Uri.fromFile(new File(Environment.getExternalStorageDirectory() + "/download/" + "paperviewer.apk")), downloadManager.getMimeTypeForDownloadedFile(id));
                             installIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                             startActivity(installIntent);
                         }
                     }
                 };
+                registerReceiver(broadcastReceiver, new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
 
                 //Intent intent = new Intent(Intent.ACTION_VIEW);
                 //intent.setDataAndType(Uri.fromFile(new File(Environment.getExternalStorageDirectory() + "/download/" + "app.apk")), "application/vnd.android.package-archive");
