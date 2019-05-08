@@ -1,7 +1,10 @@
 package com.aurora.kernel;
 
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
+import android.content.pm.ResolveInfo;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.os.Handler;
@@ -232,45 +235,56 @@ public class PluginCommunicator extends Communicator {
     /**
      * Opens a cached file with a given plugin
      *
-     * @param jsonRepresentation    the json representation of the plugin object to represent
-     * @param uniquePluginName      the unique name of the plugin
+     * @param jsonRepresentation the json representation of the plugin object to represent
+     * @param uniquePluginName   the unique name of the plugin
      * @param context            the android context
      */
     private void openCachedFileWithPlugin(@NonNull final String jsonRepresentation,
                                           @NonNull final String uniquePluginName, @NonNull final Context context) {
-        // Create intent to open plugin
-        Intent launchIntent = context.getPackageManager().getLaunchIntentForPackage(uniquePluginName);
 
-        // Check if plugin is found
+        Intent pluginAction = new Intent(Constants.PLUGIN_ACTION);
+        pluginAction.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        pluginAction.setType("*/*");
+        List<ResolveInfo> possiblePlugins = context.getPackageManager().queryIntentActivities(pluginAction, 0);
 
-        if (launchIntent == null) {
-            showToastAndLog(context, context.getString(R.string.could_not_open_plugin), null);
-            return;
+        // Loop over the plugins to see if the wanted plugin is in there
+        ActivityInfo activityInfo = null;
+        for (ResolveInfo pluginInfo : possiblePlugins) {
+            if (uniquePluginName.equals(pluginInfo.activityInfo.applicationInfo.packageName)) {
+                // If the wanted plugin is found, change activityInfo and break
+                activityInfo = pluginInfo.activityInfo;
+                break;
+            }
         }
 
-        launchIntent.setAction(Constants.PLUGIN_ACTION);
+        if (activityInfo != null) {
+            Intent launchIntent = new Intent(pluginAction);
 
-        // Start by clearing the old transfer files
-        removeFilesThatStartWithFromDir(context.getCacheDir(), CACHED_PREFIX);
+            ComponentName cn = new ComponentName(activityInfo.applicationInfo.packageName, activityInfo.name);
+            launchIntent.setComponent(cn);
 
-        Uri uri;
+            // Start by clearing the old transfer files
+            removeFilesThatStartWithFromDir(context.getCacheDir(), CACHED_PREFIX);
 
-        try {
-            uri = writeToTempFile(context, jsonRepresentation, CACHED_PREFIX, EXTENSION);
-        } catch (IOException e) {
-            showToastAndLog(context, ERROR_LOG, e);
-            return;
+            Uri uri;
+
+            try {
+                uri = writeToTempFile(context, jsonRepresentation, CACHED_PREFIX, EXTENSION);
+            } catch (IOException e) {
+                showToastAndLog(context, ERROR_LOG, e);
+                return;
+            }
+
+            setDataAndFlags(launchIntent, uri, Constants.PLUGIN_INPUT_TYPE_OBJECT);
+
+            boolean cachedFileOpens = launchIntent.resolveActivity(context.getPackageManager()) != null;
+            if (cachedFileOpens) {
+                context.startActivity(launchIntent);
+                return;
+            }
         }
-
-        setDataAndFlags(launchIntent, uri, Constants.PLUGIN_INPUT_TYPE_OBJECT);
-
-        boolean cachedFileOpens = launchIntent.resolveActivity(context.getPackageManager()) != null;
-        if (cachedFileOpens) {
-            context.startActivity(launchIntent);
-        } else {
-            showToastAndLog(context, context.getString(R.string.could_not_open_plugin), null);
-        }
-}
+        showToastAndLog(context, context.getString(R.string.could_not_open_plugin), null);
+    }
 
     /**
      * Lists all available plugins. It actually fires a ListPluginsResponseEvent that should be
@@ -289,8 +303,8 @@ public class PluginCommunicator extends Communicator {
     /**
      * Private non recursive helper function to clear a directory from files that start with prefix
      *
-     * @param dir       the directory that needs files to be removed from
-     * @param prefix    the files that will be deleted start with this prefix
+     * @param dir    the directory that needs files to be removed from
+     * @param prefix the files that will be deleted start with this prefix
      */
     @SuppressWarnings("squid:S4042")
     // This warning is suppressed because it's not android compliant.
@@ -314,8 +328,8 @@ public class PluginCommunicator extends Communicator {
     /**
      * Private helper method that shows a toast on the main tread
      *
-     * @param context   the application context
-     * @param message   the message that needs to be shown
+     * @param context the application context
+     * @param message the message that needs to be shown
      */
     private void showToast(Context context, String message) {
         Handler handler = new Handler(Looper.getMainLooper());
@@ -326,13 +340,13 @@ public class PluginCommunicator extends Communicator {
     /**
      * Private helper method that shows a toast on the main tread and also logs the message
      *
-     * @param context   the application context
-     * @param message   the message that needs to be shown
-     * @param e         the throwable error
+     * @param context the application context
+     * @param message the message that needs to be shown
+     * @param e       the throwable error
      */
     private void showToastAndLog(Context context, String message, @Nullable Throwable e) {
         showToast(context, message);
-        if(e != null) {
+        if (e != null) {
             Log.e(CLASS_TAG, message, e);
         } else {
             Log.d(CLASS_TAG, message);
@@ -344,10 +358,10 @@ public class PluginCommunicator extends Communicator {
      * Private helper function that writes content to a file with a name that starts with a
      * prefix, ends with suffix, and a random number in between.
      *
-     * @param context   the application context
-     * @param content   the content that will be written
-     * @param prefix    name of the file
-     * @param suffix    extension of the file
+     * @param context the application context
+     * @param content the content that will be written
+     * @param prefix  name of the file
+     * @param suffix  extension of the file
      * @return Uri to the file on success
      * @throws IOException on failure
      */
@@ -366,9 +380,9 @@ public class PluginCommunicator extends Communicator {
      * Set all the data field and flags of the intent correctly for letting the receiver be able
      * to open the file.
      *
-     * @param intent    The intent where the fields need to be set
-     * @param uri       The Uri to the file
-     * @param dataType  The datatype of the file, should be a constant of {@link Constants}
+     * @param intent   The intent where the fields need to be set
+     * @param uri      The Uri to the file
+     * @param dataType The datatype of the file, should be a constant of {@link Constants}
      */
     private void setDataAndFlags(Intent intent, Uri uri, String dataType) {
         // Make the file readable by the plugin, this permission last until the activity of
