@@ -197,6 +197,31 @@ public class InternalCache implements InternalService {
     }
 
     /**
+     * Updates the data of an already cached file in the registry to now, if it is present. Does nothing otherwise
+     *
+     * @param fileRef          a reference to the original file that was processed
+     * @param uniquePluginName the unique name of the plugin that the file was processed with
+     */
+    public void updateCachedFileDate(@NonNull final String fileRef, @NonNull final String uniquePluginName) {
+        // Check if the file is in the cache
+        CachedFileInfo fileInfo = checkCacheForProcessedFile(fileRef, uniquePluginName);
+
+        if (fileInfo != null) {
+            // Update date
+            fileInfo.setLastOpened(new Date());
+
+            // Write back to cache registry
+            // requireNonNull just to stop warning, should never be null in reality
+            int fileIndex = Objects.requireNonNull(mCachedFiles.get(uniquePluginName)).indexOf(fileInfo);
+            if (fileIndex >= 0) {
+                // This should always be the case since the checkCacheForProcessedFile returned the file
+                // Update the entry
+                Objects.requireNonNull(mCachedFiles.get(uniquePluginName)).set(fileIndex, fileInfo);
+            }
+        }
+    }
+
+    /**
      * Gets the path of the cached file given the fileRef
      *
      * @param fileRef a reference to a file
@@ -231,9 +256,7 @@ public class InternalCache implements InternalService {
 
             writer.write(pluginObjectJson);
         } catch (IOException e) {
-
             Log.e(CLASS_TAG, "Something went wrong while writing a cache file!", e);
-
             return false;
         }
         return true;
@@ -257,8 +280,11 @@ public class InternalCache implements InternalService {
         if ((cachedFilesByPlugin = mCachedFiles.get(uniquePluginName)) != null
                 && cachedFilesByPlugin.contains(lookupFile)) {
             // Return the file info if it is present in the cache (with up to date 'date' field)
-
-            return cachedFilesByPlugin.get(cachedFilesByPlugin.indexOf(lookupFile));
+            try {
+                return (CachedFileInfo) cachedFilesByPlugin.get(cachedFilesByPlugin.indexOf(lookupFile)).clone();
+            } catch (CloneNotSupportedException e) {
+                Log.e(CLASS_TAG, "Something went wrong in retrieving the info from the cache", e);
+            }
         }
 
         // Return null if the parameters are invalid or if the file is not present
@@ -286,7 +312,16 @@ public class InternalCache implements InternalService {
 
         // Add all values to the list
         for (Map.Entry<String, List<CachedFileInfo>> entry : mCachedFiles.entrySet()) {
-            cachedFiles.addAll(entry.getValue());
+            List<CachedFileInfo> infoList = entry.getValue();
+
+            // Add clone of info
+            for (CachedFileInfo info : infoList) {
+                try {
+                    cachedFiles.add((CachedFileInfo) info.clone());
+                } catch (CloneNotSupportedException e) {
+                    Log.e(CLASS_TAG, "Something went wrong retrieving the info from the cache", e);
+                }
+            }
         }
 
         // Sort list on date with most recent (which is the largest) value first

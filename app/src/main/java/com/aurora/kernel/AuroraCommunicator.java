@@ -21,6 +21,7 @@ import com.aurora.kernel.event.QueryCacheRequest;
 import com.aurora.kernel.event.QueryCacheResponse;
 import com.aurora.kernel.event.RetrieveFileFromCacheRequest;
 import com.aurora.kernel.event.RetrieveFileFromCacheResponse;
+import com.aurora.kernel.event.UpdateCachedFileDateRequest;
 import com.aurora.plugin.InternalServices;
 import com.aurora.plugin.Plugin;
 
@@ -183,8 +184,9 @@ public class AuroraCommunicator extends Communicator {
                                 // TODO: change this such that it processes the original file
 
                             } else {
-                                sendOpenCachedFileRequest(processedFile.getJsonRepresentation(),
-                                        processedFile.getUniquePluginName(), context);
+                                sendOpenCachedFileRequest(processedFile.getFileRef(),
+                                        processedFile.getJsonRepresentation(), processedFile.getUniquePluginName(),
+                                        context);
                             }
                         }, (Throwable e) ->
                                 Log.e(CLASS_TAG, "Something went wrong while retrieving a file from the cache!", e)
@@ -283,18 +285,22 @@ public class AuroraCommunicator extends Communicator {
     }
 
     /**
-     * Private handle method to send request to plugin communicator to open an already cached file with plugin
+     * Private handle method to send request to plugin communicator to open an already cached file with plugin.
+     * It will also update the dateLastOpened of the cached file in the cache
      *
      * @param jsonRepresentation the representation of the object to represent
      * @param uniquePluginName   the name of the plugin that the file was processed with
      * @param context            the android context
      */
-    private void sendOpenCachedFileRequest(final String jsonRepresentation, final String uniquePluginName,
-                                           final Context context) {
+    private void sendOpenCachedFileRequest(final String fileRef, final String jsonRepresentation,
+                                           final String uniquePluginName, final Context context) {
         // Create request and post it on bus
-
         OpenCachedFileWithPluginRequest openCachedFileWithPluginRequest =
                 new OpenCachedFileWithPluginRequest(jsonRepresentation, uniquePluginName, context);
         mBus.post(openCachedFileWithPluginRequest);
+
+        // Also create request to update date of the file in the cache
+        UpdateCachedFileDateRequest updateDateRequest = new UpdateCachedFileDateRequest(fileRef, uniquePluginName);
+        mBus.post(updateDateRequest);
     }
 }

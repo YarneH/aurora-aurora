@@ -6,7 +6,7 @@ import java.util.Objects;
 /**
  * Class that contains basic information of a cached file.
  */
-public class CachedFileInfo {
+public class CachedFileInfo implements Cloneable {
     /**
      * The file reference to the original file
      */
@@ -112,5 +112,13 @@ public class CachedFileInfo {
     @Override
     public int hashCode() {
         return Objects.hash(mFileRef, mUniquePluginName);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    @Override
+    protected Object clone() throws CloneNotSupportedException {
+        return new CachedFileInfo(mFileRef, mUniquePluginName, mLastOpened);
     }
 }
