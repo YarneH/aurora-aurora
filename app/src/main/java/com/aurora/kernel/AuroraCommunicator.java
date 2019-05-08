@@ -288,6 +288,7 @@ public class AuroraCommunicator extends Communicator {
      * Private handle method to send request to plugin communicator to open an already cached file with plugin.
      * It will also update the dateLastOpened of the cached file in the cache
      *
+     * @param fileRef            a reference to the originally processed file
      * @param jsonRepresentation the representation of the object to represent
      * @param uniquePluginName   the name of the plugin that the file was processed with
      * @param context            the android context
