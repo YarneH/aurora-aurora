@@ -424,7 +424,7 @@ public class MainActivity extends AppCompatActivity
         //new int[]{R.id.alertDialogItemImageView,R.id.alertDialogItemTextView});
 
         // Set the data adapter.
-        builder.setAdapter(simpleAdapter, (dialogInterface, itemIndex) -> {
+        builder.setAdapter(simpleAdapter, (DialogInterface dialogInterface, int itemIndex) -> {
             if (dialogItemList.get(itemIndex).get(CUSTOM_ADAPTER_TEXT) != null) {
                 String selectedPluginName = dialogItemList.get(itemIndex).get(CUSTOM_ADAPTER_TEXT).
                         toString();
