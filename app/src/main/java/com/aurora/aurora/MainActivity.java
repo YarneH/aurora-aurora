@@ -38,6 +38,7 @@ import com.aurora.auroralib.Constants;
 import com.aurora.kernel.AuroraCommunicator;
 import com.aurora.kernel.ContextNullException;
 import com.aurora.kernel.Kernel;
+import com.aurora.plugin.InternalServices;
 import com.aurora.plugin.Plugin;
 import com.google.firebase.analytics.FirebaseAnalytics;
 
@@ -45,6 +46,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -208,7 +210,14 @@ public class MainActivity extends AppCompatActivity
                 null,
                 "Basic plugin to open any file and display extracted text.",
                 4,
-                "v0.4");
+                "v0.4",
+                new ArrayList<>(Arrays.asList(
+                                InternalServices.TEXT_EXTRACTION,
+                                InternalServices.IMAGE_EXTRACTION,
+                                InternalServices.NLP_TOKENIZE,
+                                InternalServices.NLP_SSPLIT,
+                                InternalServices.NLP_POS
+                        )));
 
         final Plugin souschefPlugin = new Plugin(
                 "com.aurora.souschef",
@@ -216,7 +225,13 @@ public class MainActivity extends AppCompatActivity
                 null,
                 "Plugin to open recipes and display them in an enhanced way.",
                 4,
-                "v0.4");
+                "v0.4",
+                new ArrayList<>(Arrays.asList(
+                        InternalServices.TEXT_EXTRACTION,
+                        InternalServices.NLP_TOKENIZE,
+                        InternalServices.NLP_SSPLIT,
+                        InternalServices.NLP_POS
+                )));
 
         final Plugin paperViewerPlugin = new Plugin(
                 "com.aurora.paperviewer",
@@ -224,7 +239,11 @@ public class MainActivity extends AppCompatActivity
                 null,
                 "Plugin to open papers and display them in an enhanced way.",
                 4,
-                "v0.4");
+                "v0.4",
+                new ArrayList<>(Arrays.asList(
+                        InternalServices.TEXT_EXTRACTION,
+                        InternalServices.IMAGE_EXTRACTION
+                )));
 
         // Register plugins in the registry
         mAuroraCommunicator.registerPlugin(basicPlugin);
