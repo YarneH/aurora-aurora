@@ -214,8 +214,8 @@ public class MainActivity extends AppCompatActivity
      */
     private void refreshCachedFileInfoList() {
         /* Get list of cached files */
-        if (mKernel != null) {
-            mKernel.getAuroraCommunicator().getListOfCachedFiles(0, new Observer<List<CachedFileInfo>>() {
+        if (mAuroraCommunicator != null) {
+            mAuroraCommunicator.getListOfCachedFiles(0, new Observer<List<CachedFileInfo>>() {
                 private Disposable mDisposable;
 
                 @Override

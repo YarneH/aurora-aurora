@@ -29,7 +29,7 @@ public class CardFileAdapter extends RecyclerView.Adapter<CardFileAdapter.CardFi
     /**
      * The format of a date used in the cards
      */
-    private SimpleDateFormat mDateFormat = new SimpleDateFormat("E, dd MMM yyyy");
+    private final SimpleDateFormat mDateFormat = new SimpleDateFormat("E, dd MMM yyyy");
 
     /**
      * The amount of cards that the RecyclerView manages
@@ -56,27 +56,23 @@ public class CardFileAdapter extends RecyclerView.Adapter<CardFileAdapter.CardFi
      */
     private Context mContext;
 
-    public CardFileAdapter(Kernel kernel, Context context, List<CachedFileInfo> cachedFileInfoList) {
+    public CardFileAdapter(Kernel kernel, Context context, @NonNull List<CachedFileInfo> cachedFileInfoList) {
         // TODO: This could take an argument as input (which contains the recent files)
         // TODO: remove context variable if it is not needed by the test example anymore!
         mKernel = kernel;
         mContext = context;
-        if (cachedFileInfoList == null) {
-            mAmount = 0;
-        } else {
-            mCachedFileInfoList = cachedFileInfoList;
-            mAmount = mCachedFileInfoList.size();
-        }
-        notifyDataSetChanged();
+        mCachedFileInfoList = cachedFileInfoList;
+        mAmount = mCachedFileInfoList.size();
     }
 
-    public void updateData(List<CachedFileInfo> cachedFileInfoList) {
-        if (cachedFileInfoList == null) {
-            mAmount = 0;
-        } else {
-            mCachedFileInfoList = cachedFileInfoList;
-            mAmount = mCachedFileInfoList.size();
-        }
+    /**
+     * Replaces the old list of info about the cached files with a new one
+     *
+     * @param cachedFileInfoList The new list which will replace the old one
+     */
+    public void updateData(@NonNull List<CachedFileInfo> cachedFileInfoList) {
+        mCachedFileInfoList = cachedFileInfoList;
+        mAmount = mCachedFileInfoList.size();
         notifyDataSetChanged();
     }
 
@@ -131,9 +127,6 @@ public class CardFileAdapter extends RecyclerView.Adapter<CardFileAdapter.CardFi
         private int index;
         private CachedFileInfo mCachedFileInfo;
 
-
-        // TODO: add fields for the details about the file
-
         /**
          * Constructor for the ViewHolder.
          * Sets the fields for the contents of the card.
@@ -164,7 +157,7 @@ public class CardFileAdapter extends RecyclerView.Adapter<CardFileAdapter.CardFi
 
             // Set name of the correct file to the reused container.
             mTitleTextView.setText(mCachedFileInfo.getFileDisplayName());
-            StringBuilder bld  = new StringBuilder(lastOpenedBase)
+            StringBuilder bld = new StringBuilder(lastOpenedBase)
                     .append(" ")
                     .append(mDateFormat.format(mCachedFileInfo.getLastOpened()));
 
@@ -190,7 +183,7 @@ public class CardFileAdapter extends RecyclerView.Adapter<CardFileAdapter.CardFi
         @Override
         public void onClick(View view) {
             // TODO remove the 'mContext' variable from this class. It is used solely for demonstration purposes!
-            if (view.getId() == mCardView.getId()){
+            if (view.getId() == mCardView.getId()) {
                 String displayName = mCachedFileInfo.getFileDisplayName();
                 String fileType = displayName.substring(displayName.lastIndexOf('.'));
 
