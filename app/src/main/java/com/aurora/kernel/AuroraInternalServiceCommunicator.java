@@ -117,7 +117,8 @@ public class AuroraInternalServiceCommunicator extends Communicator {
         mUpdateCachedFileDateRequestObservable = mBus.register(UpdateCachedFileDateRequest.class);
 
         // Call appropriate method when request comes in
-        mUpdateCachedFileDateRequestObservable.subscribe(request -> updateDate(request.getFileRef(), request.getUniquePluginName()));
+        mUpdateCachedFileDateRequestObservable.subscribe(request -> updateDate(request.getFileRef(),
+                request.getUniquePluginName()));
     }
 
     /**

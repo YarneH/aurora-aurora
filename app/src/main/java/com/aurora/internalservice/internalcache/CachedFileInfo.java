@@ -1,5 +1,7 @@
 package com.aurora.internalservice.internalcache;
 
+import android.support.annotation.NonNull;
+
 import java.util.Date;
 import java.util.Objects;
 
@@ -44,6 +46,14 @@ public class CachedFileInfo implements Cloneable {
      */
     public CachedFileInfo(String fileRef, String uniquePluginName) {
         this(fileRef, uniquePluginName, null);
+    }
+
+    /**
+     * Creates a new CachedFileInfo instance that is a copy of the existing instance given as argument
+     * @param cachedFileInfo an existing instance of CachedFileInfo
+     */
+    public CachedFileInfo(@NonNull final CachedFileInfo cachedFileInfo) {
+        this(cachedFileInfo.mFileRef, cachedFileInfo.mUniquePluginName, cachedFileInfo.mLastOpened);
     }
 
     /**
@@ -112,13 +122,5 @@ public class CachedFileInfo implements Cloneable {
     @Override
     public int hashCode() {
         return Objects.hash(mFileRef, mUniquePluginName);
-    }
-
-    /**
-     * @inheritDoc
-     */
-    @Override
-    protected Object clone() throws CloneNotSupportedException {
-        return new CachedFileInfo(mFileRef, mUniquePluginName, mLastOpened);
     }
 }

@@ -280,11 +280,7 @@ public class InternalCache implements InternalService {
         if ((cachedFilesByPlugin = mCachedFiles.get(uniquePluginName)) != null
                 && cachedFilesByPlugin.contains(lookupFile)) {
             // Return the file info if it is present in the cache (with up to date 'date' field)
-            try {
-                return (CachedFileInfo) cachedFilesByPlugin.get(cachedFilesByPlugin.indexOf(lookupFile)).clone();
-            } catch (CloneNotSupportedException e) {
-                Log.e(CLASS_TAG, "Something went wrong in retrieving the info from the cache", e);
-            }
+            return new CachedFileInfo(cachedFilesByPlugin.get(cachedFilesByPlugin.indexOf(lookupFile)));
         }
 
         // Return null if the parameters are invalid or if the file is not present
@@ -316,11 +312,7 @@ public class InternalCache implements InternalService {
 
             // Add clone of info
             for (CachedFileInfo info : infoList) {
-                try {
-                    cachedFiles.add((CachedFileInfo) info.clone());
-                } catch (CloneNotSupportedException e) {
-                    Log.e(CLASS_TAG, "Something went wrong retrieving the info from the cache", e);
-                }
+                cachedFiles.add(new CachedFileInfo(info));
             }
         }
 
