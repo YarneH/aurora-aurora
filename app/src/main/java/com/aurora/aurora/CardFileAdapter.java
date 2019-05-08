@@ -183,33 +183,20 @@ public class CardFileAdapter extends RecyclerView.Adapter<CardFileAdapter.CardFi
         }
 
         /**
-         * Defines what happens on click of the card. This can be a button or the card itself.
+         * Defines what happens on click of the card. This can only be the card itself
          *
          * @param view the view that received the click
          */
-        // TODO: onClick for the open button, onClick for the open with different plugin button, delete button
         @Override
         public void onClick(View view) {
+            // TODO remove the 'mContext' variable from this class. It is used solely for demonstration purposes!
+            if (view.getId() == mCardView.getId()){
+                String displayName = mCachedFileInfo.getFileDisplayName();
+                String fileType = displayName.substring(displayName.lastIndexOf('.'));
 
-            // TODO add the case that view.getId() is R.id.button_card_file
-            // TODO update this preliminary code for opening a plugin.
-            // TODO this should make an event to open the cached file.
-            // Plugin should probably still be able to open this, but Souschef probably not
-
-            /* TODO Remove this test code
-            Eventually, here instead of opening a file, the cache will be called instead.
-            This is just a demonstration that it works.
-            TODO remove the 'mContext' variable from this class. It is used solely for demonstration purposes!
-
-            Note: this is basically mixed code as a result of a merge. This test code will be removed ASAP
-            */
-
-            String displayName = mCachedFileInfo.getFileDisplayName();
-            String fileType = displayName.substring(displayName.lastIndexOf('.'));
-
-            mKernel.getAuroraCommunicator().openFileWithCache(mCachedFileInfo.getFileRef(), fileType,
-                    mCachedFileInfo.getUniquePluginName(), mContext);
-
+                mKernel.getAuroraCommunicator().openFileWithCache(mCachedFileInfo.getFileRef(), fileType,
+                        mCachedFileInfo.getUniquePluginName(), mContext);
+            }
         }
 
         @Override
