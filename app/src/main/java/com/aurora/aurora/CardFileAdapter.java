@@ -51,16 +51,10 @@ public class CardFileAdapter extends RecyclerView.Adapter<CardFileAdapter.CardFi
      */
     private Kernel mKernel;
 
-    /**
-     * context for testing purposes
-     */
-    private Context mContext;
-
     public CardFileAdapter(Kernel kernel, Context context, @NonNull List<CachedFileInfo> cachedFileInfoList) {
         // TODO: This could take an argument as input (which contains the recent files)
         // TODO: remove context variable if it is not needed by the test example anymore!
         mKernel = kernel;
-        mContext = context;
         mCachedFileInfoList = cachedFileInfoList;
         mAmount = mCachedFileInfoList.size();
     }
@@ -182,13 +176,12 @@ public class CardFileAdapter extends RecyclerView.Adapter<CardFileAdapter.CardFi
          */
         @Override
         public void onClick(View view) {
-            // TODO remove the 'mContext' variable from this class. It is used solely for demonstration purposes!
             if (view.getId() == mCardView.getId()) {
                 String displayName = mCachedFileInfo.getFileDisplayName();
                 String fileType = displayName.substring(displayName.lastIndexOf('.'));
 
                 mKernel.getAuroraCommunicator().openFileWithCache(mCachedFileInfo.getFileRef(), fileType,
-                        mCachedFileInfo.getUniquePluginName(), mContext);
+                        mCachedFileInfo.getUniquePluginName());
             }
         }
 
