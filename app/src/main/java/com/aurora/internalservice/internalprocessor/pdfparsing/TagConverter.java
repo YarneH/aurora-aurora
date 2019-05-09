@@ -6,7 +6,7 @@ import java.util.Map;
 /**
  * Convert tags extracted from a Tagged PDF to tags supported by the {@link PDFContentExtractor}
  */
-public class TagConverter {
+public final class TagConverter {
 
     /**
      * These are the main tags the extractor can use
@@ -18,8 +18,8 @@ public class TagConverter {
      */
     private static Map<String, String> tagConverterMap = TagConverter.fillTagConverter();
 
-    public TagConverter(){
-
+    private TagConverter(){
+        // Empty because utility class
     }
     /**
      * Converts a tag extracted from a PDF  to a {@link #MAIN_SUPPORTED_TAGS}
