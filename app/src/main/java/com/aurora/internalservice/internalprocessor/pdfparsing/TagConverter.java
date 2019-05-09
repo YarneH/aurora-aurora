@@ -18,7 +18,7 @@ public class TagConverter {
      */
     private static Map<String, String> tagConverterMap = TagConverter.fillTagConverter();
 
-    private TagConverter(){
+    public TagConverter(){
 
     }
     /**
