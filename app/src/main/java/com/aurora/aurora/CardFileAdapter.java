@@ -14,6 +14,7 @@ import com.aurora.internalservice.internalcache.CachedFileInfo;
 import com.aurora.kernel.Kernel;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -39,7 +40,7 @@ public class CardFileAdapter extends RecyclerView.Adapter<CardFileAdapter.CardFi
     /**
      * The data of the cached files
      */
-    private List<CachedFileInfo> mCachedFileInfoList = null;
+    private List<CachedFileInfo> mCachedFileInfoList = new ArrayList<>();
 
     /**
      * The index of the currently selected file (file card that is expanded)
@@ -177,10 +178,7 @@ public class CardFileAdapter extends RecyclerView.Adapter<CardFileAdapter.CardFi
         @Override
         public void onClick(View view) {
             if (view.getId() == mCardView.getId()) {
-                String displayName = mCachedFileInfo.getFileDisplayName();
-                String fileType = displayName.substring(displayName.lastIndexOf('.'));
-
-                mKernel.getAuroraCommunicator().openFileWithCache(mCachedFileInfo.getFileRef(), fileType,
+                mKernel.getAuroraCommunicator().openFileWithCache(mCachedFileInfo.getFileRef(),
                         mCachedFileInfo.getUniquePluginName());
             }
         }

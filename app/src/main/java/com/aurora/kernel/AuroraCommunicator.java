@@ -184,10 +184,9 @@ public class AuroraCommunicator extends Communicator {
      * Method to open an already cached file with the plugin
      *
      * @param fileRef          a reference to the file to open
-     * @param fileType         the file type of the file to open
      * @param uniquePluginName the name of the plugin that the file was processed with
      */
-    public void openFileWithCache(String fileRef, String fileType, String uniquePluginName) {
+    public void openFileWithCache(String fileRef, String uniquePluginName) {
         // Create observable to listen to
         Observable<RetrieveFileFromCacheResponse> retrieveFileFromCacheResponse =
                 mBus.register(RetrieveFileFromCacheResponse.class);
