@@ -14,24 +14,32 @@ import java.util.logging.Logger;
  * A Class representing a Plugin which can be downloaded from the PluginMarket
  */
 public class MarketPlugin implements Serializable {
-    //private static final long serialVersionUID = 1;
-    // TODO: Change mLogo to Image!!
-    private String mLogo;
+    /**
+     * A Bitmap representing a base64 encoded image of the plugin
+     */
+    private Bitmap mLogo;
+    /**
+     * The name of the plugin
+     */
     private String mPluginName;
+    /**
+     * The description of the plugin
+     */
     private String mDescription;
+    /**
+     * The link the plugin can be downloaded from
+     */
     private URL mDownloadLink;
 
 
     /**
      * Dummy constructor for testing UI
-     * @param logo
-     * @param name
-     * @param description
-     * @param url
+     * @param logo          a base64 encoded String representation of the image
+     * @param name          a string representing the name of the plugin
+     * @param description   a string representing the description of the plugin
+     * @param url           a string representing the link the plugin can be downloaded from
      */
     public MarketPlugin(String logo, String name, String description, String url){
-        // TODO: Get image!
-        this.mLogo = logo;
         this.mPluginName = name;
         this.mDescription = description;
         try {
@@ -39,13 +47,13 @@ public class MarketPlugin implements Serializable {
         } catch (MalformedURLException e) {
             Logger.getLogger(this.getClass().getSimpleName()).log(Level.SEVERE, null, e);
         }
+
+        byte[] decodedString = Base64.decode(logo, Base64.DEFAULT);
+        this.mLogo = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
     }
 
     public Bitmap getLogo() {
-
-        byte[] decodedString = Base64.decode(mLogo, Base64.DEFAULT);
-        Bitmap decodedByte = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
-        return decodedByte;
+        return mLogo;
     }
 
     public String getDescription() {

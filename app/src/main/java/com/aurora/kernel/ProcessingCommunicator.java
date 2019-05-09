@@ -5,7 +5,6 @@ import android.util.Log;
 
 import com.aurora.auroralib.cache.CacheResults;
 import com.aurora.auroralib.translation.TranslationErrorCodes;
-import com.aurora.auroralib.translation.TranslationResult;
 import com.aurora.kernel.event.CacheFileRequest;
 import com.aurora.kernel.event.CacheFileResponse;
 import com.aurora.kernel.event.TranslationRequest;

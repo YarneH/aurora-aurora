@@ -41,11 +41,11 @@ public class MarketPluginDetailActivity extends AppCompatActivity {
     /**
      * The request code used for requesting the writing and reading external storage permission
      */
-    private final static int WRITE_AND_READ_REQUEST_CODE = 9999;
+    private static final int WRITE_AND_READ_REQUEST_CODE = 9999;
     /**
      * The request code used for installing a plugin
      */
-    private final static int INSTALL_PLUGIN_REQUEST_CODE = 1234;
+    private static final int INSTALL_PLUGIN_REQUEST_CODE = 1234;
     /**
      * The MarketPlugin which is represented by the current DetailActivity
      */
@@ -76,7 +76,12 @@ public class MarketPluginDetailActivity extends AppCompatActivity {
 
                 // Ask the permissions if needed, otherwise download the MarketPlugin
                 if (!readPermission || !writePermission) {
-                    ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE}, WRITE_AND_READ_REQUEST_CODE);
+                    ActivityCompat.requestPermissions(
+                            activity,
+                            new String[]{
+                                    Manifest.permission.READ_EXTERNAL_STORAGE,
+                                    Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                            WRITE_AND_READ_REQUEST_CODE);
                 } else {
                     new DownloadAndInstallPluginTask().execute(mMarketPlugin.getDownloadLink());
                 }
@@ -112,13 +117,14 @@ public class MarketPluginDetailActivity extends AppCompatActivity {
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        if (requestCode == WRITE_AND_READ_REQUEST_CODE) {
-            // Check if the write and read request are granted
-            if (grantResults.length > 1 && grantResults[0] == PackageManager.PERMISSION_GRANTED && grantResults[1] == PackageManager.PERMISSION_GRANTED) {
-                // Download the plugin
-                new DownloadAndInstallPluginTask().execute(mMarketPlugin.getDownloadLink());
-            }
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
+                                           @NonNull int[] grantResults) {
+        if (requestCode == WRITE_AND_READ_REQUEST_CODE
+                && grantResults.length > 1
+                && grantResults[0] == PackageManager.PERMISSION_GRANTED
+                && grantResults[1] == PackageManager.PERMISSION_GRANTED) {
+            // Download the plugin
+            new DownloadAndInstallPluginTask().execute(mMarketPlugin.getDownloadLink());
         }
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
@@ -148,11 +154,6 @@ public class MarketPluginDetailActivity extends AppCompatActivity {
     private class DownloadAndInstallPluginTask extends AsyncTask<URL, Void, Void> {
 
         @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-        }
-
-        @Override
         protected Void doInBackground(URL... urls) {
             try {
                 // Create request for android download manager
@@ -169,8 +170,9 @@ public class MarketPluginDetailActivity extends AppCompatActivity {
                 request.allowScanningByMediaScanner();
                 request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE);
 
-                // Set the local destination for download file to a path within the application's external files directory
-                request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, mMarketPlugin.getPluginName() + ".apk");
+                // Set the destination for download file to a path within the application's external files directory
+                request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS,
+                        mMarketPlugin.getPluginName() + ".apk");
                 request.setMimeType("application/vnd.android.package-archive");
 
                 // Save the downloadID for later
@@ -184,14 +186,12 @@ public class MarketPluginDetailActivity extends AppCompatActivity {
                             Intent installIntent = new Intent(Intent.ACTION_INSTALL_PACKAGE);
 
                             // Build up the path to the downloaded plugin
-                            StringBuilder pathBuilder = new StringBuilder(Environment.getExternalStorageDirectory().toString())
-                                    .append(File.pathSeparator)
-                                    .append(Environment.DIRECTORY_DOWNLOADS)
-                                    .append(File.separator)
-                                    .append(mMarketPlugin.getPluginName())
-                                    .append(".apk");
-
-                            String path = pathBuilder.toString();
+                            String path = String.valueOf(Environment.getExternalStorageDirectory()) +
+                                    File.pathSeparator +
+                                    Environment.DIRECTORY_DOWNLOADS +
+                                    File.separator +
+                                    mMarketPlugin.getPluginName() +
+                                    ".apk";
 
                             // Get the URI of the downloaded apk and prepare intent
                             Uri apkURI = FileProvider.getUriForFile(context,
@@ -210,11 +210,6 @@ public class MarketPluginDetailActivity extends AppCompatActivity {
                 Log.e("Download", "exception", e);
             }
             return null;
-        }
-
-        @Override
-        protected void onPostExecute(Void aVoid) {
-            super.onPostExecute(aVoid);
         }
     }
 
