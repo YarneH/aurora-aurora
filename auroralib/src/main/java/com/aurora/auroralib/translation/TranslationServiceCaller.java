@@ -10,6 +10,7 @@ import android.util.Log;
 import com.aurora.auroralib.ServiceCaller;
 import com.aurora.internalservice.internaltranslation.ITranslate;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class TranslationServiceCaller extends ServiceCaller {
@@ -118,9 +119,26 @@ public class TranslationServiceCaller extends ServiceCaller {
      * A private thread class that will cache the file in another thread to avoid blocking of the main thread
      */
     private class TranslateThread extends Thread {
-        private List<String> mTranslatedSentences = null;
+        private static final int MAX_REQUEST_SIZE = 200;
+
+        /**
+         * Translated sentences
+         */
+        private List<String> mTranslatedSentences = new ArrayList<>();
+
+        /**
+         * Sentences to be translated
+         */
         private List<String> mSentences;
+
+        /**
+         * Language of original sentences
+         */
         private String mSourceLanguage;
+
+        /**
+         * Language to translate to
+         */
         private String mDestinationLanguage;
 
         protected TranslateThread(List<String> sentences, String sourceLanguage,
@@ -139,19 +157,17 @@ public class TranslationServiceCaller extends ServiceCaller {
          */
         @Override
         public void run() {
-            Log.d(LOG_TAG, "translation called");
+            Log.i(LOG_TAG, "translation called");
             try {
 
                 if (mTranslateBinding == null) {
                     synchronized (mMonitor) {
-                        Log.d(LOG_TAG, "Entering sync block" + mTranslatedSentences);
-
-                        mTranslatedSentences = translate();
+                        Log.v(LOG_TAG, "Entering sync block" + mTranslatedSentences);
+                        mTranslatedSentences = translateAfterConnected();
                     }
                 } else {
-                    mTranslatedSentences = mTranslateBinding.translate(mSentences, mSourceLanguage,
-                            mDestinationLanguage);
-                    Log.d(LOG_TAG, "" + mTranslatedSentences);
+                    // Translate big requests in different parts:
+                    mTranslatedSentences = executeTranslateRequest(mSentences);
                 }
 
 
@@ -161,7 +177,14 @@ public class TranslationServiceCaller extends ServiceCaller {
             }
         }
 
-        private List<String> translate() throws RemoteException {
+
+        /**
+         * Helper method that waits until the translation service is connected if necessary
+         *
+         * @return                  The list of translated sentences
+         * @throws RemoteException
+         */
+        private List<String> translateAfterConnected() throws RemoteException {
             synchronized (mMonitor) {
                 try {
                     while (!mServiceConnected) {
@@ -174,11 +197,67 @@ public class TranslationServiceCaller extends ServiceCaller {
                     // https://www.ibm.com/developerworks/java/library/j-jtp05236/index.html?ca=drs-#2.1
                     Thread.currentThread().interrupt();
                 }
-                List<String> translatedSentences = mTranslateBinding.translate(mSentences,
-                        mSourceLanguage, mDestinationLanguage);
-                Log.d(LOG_TAG, "" + translatedSentences);
-                return translatedSentences;
+                // Translate big requests in different parts:
+                return executeTranslateRequest(mSentences);
             }
         }
+
+
+        /**
+         * Helper method that executes the full translate request, consisting of splitting the
+         * request and then executing the smaller requests and concatenating their results
+         *
+         * @param allSentences      The list of all sentences to be translated
+         * @return                  The list of all translated sentences
+         * @throws RemoteException
+         */
+        private List<String> executeTranslateRequest(List<String> allSentences) throws RemoteException {
+            List<String> translatedSentences = new ArrayList<>();
+
+            List<List<String>> smallerRequestList = createSmallerRequests(mSentences);
+            for (List<String> requestSentences : smallerRequestList){
+                Log.d(LOG_TAG, "Small request: " + requestSentences);
+                translatedSentences.addAll(mTranslateBinding.translate(requestSentences,
+                        mSourceLanguage, mDestinationLanguage));
+            }
+
+
+            //List<String> translatedSentences = mTranslateBinding.translate(mSentences,
+            //        mSourceLanguage, mDestinationLanguage);
+            Log.d(LOG_TAG, "" + translatedSentences);
+            return translatedSentences;
+        }
+
+        /**
+         * Helper method to split a big translate request
+         *
+         * @param allSentences  List of all sentences to be translated
+         * @return              List of smaller lists of sentences, with total character length
+         *                      around MAX_REQUEST_SIZE
+         */
+        private List<List<String>> createSmallerRequests(List<String> allSentences){
+            List<List<String>> smallerRequestList = new ArrayList<>();
+
+            int currentRequestSize = 0;
+            List<String> currentRequestList = new ArrayList<>();
+            for (String sentence : allSentences){
+                currentRequestSize += sentence.length();
+                Log.d("CURRENT_REQUEST_SIZE", "" + currentRequestSize);
+                currentRequestList.add(sentence);
+
+                if (currentRequestSize > MAX_REQUEST_SIZE){
+                    Log.d("TOO_BIG_REQUEST_SIZE", "" + currentRequestSize);
+                    Log.d("CURRENT_REQUEST", "" + currentRequestList);
+                    smallerRequestList.add(currentRequestList);
+                    currentRequestList = new ArrayList<>();
+                    currentRequestSize = 0;
+                }
+            }
+            if (!currentRequestList.isEmpty()){
+                smallerRequestList.add(currentRequestList);
+            }
+            return smallerRequestList;
+        }
+
     }
 }
