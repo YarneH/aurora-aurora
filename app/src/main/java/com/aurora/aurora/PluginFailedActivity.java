@@ -15,7 +15,7 @@ public class PluginFailedActivity extends AppCompatActivity {
     /**
      * reference to the text view indicating the reason why the plugin failed
      */
-    private TextView mTextViewReason;
+    private TextView mTextViewReason = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
