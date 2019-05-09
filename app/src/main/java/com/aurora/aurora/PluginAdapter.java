@@ -16,7 +16,7 @@ import java.util.List;
 
 public class PluginAdapter extends ArrayAdapter<Plugin>{
 
-    // View lookup cache
+    // ViewHolder for the Adapter
     private static class ViewHolder {
         private TextView pluginName;
         private TextView pluginDescription;

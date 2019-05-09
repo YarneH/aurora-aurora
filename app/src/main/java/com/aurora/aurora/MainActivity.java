@@ -362,6 +362,14 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
+    /**
+     * Shows the custom chooser after requesting the list of registered plugins.
+     *
+     * @param packageNames  The packageNames of the plugins that where found using Intent querying
+     * @param fileName      The name of the file to be opened
+     * @param type          The MIME type of the file to be opened
+     * @param readFile      An InputStream to the read file
+     */
     private void getPluginsAndShowChooser(List<String> packageNames, String fileName, String type,
                                           InputStream readFile){
         if (mAuroraCommunicator != null) {
@@ -373,6 +381,15 @@ public class MainActivity extends AppCompatActivity
                     mDisposable = d;
                 }
 
+                /**
+                 * Shows the custom chooser after requesting the list of registered plugins. The
+                 * Plugins that are shown are the ones that have been found by querying the pluginAction
+                 * Intent (i.e. these are the plugins in packageNames). If a plugin in packageNames
+                 * is not found in the registry, it will still be selectable, but without info and
+                 * using the default Internal Services in its preprocessing.
+                 *
+                 * @param plugins list of Plugins that are in the registry
+                 */
                 @Override
                 public void onNext(List<Plugin> plugins) {
                     // Show the dialog for selecting a plugin
@@ -412,6 +429,13 @@ public class MainActivity extends AppCompatActivity
     }
 
 
+    /**
+     *
+     * @param plugins       The plugins to be offered in the chooser dialog
+     * @param fileName      The name of the file to be opened
+     * @param type          The MIME type of the file to be opened
+     * @param readFile      An InputStream to the read file
+     */
     private void showPluginAdapterAlertDialog(List<Plugin> plugins, String fileName, String type,
                                               InputStream readFile) {
 
