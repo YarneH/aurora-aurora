@@ -167,7 +167,7 @@ public class TranslationServiceCaller extends ServiceCaller {
                     }
                 } else {
                     // Translate big requests in different parts:
-                    mTranslatedSentences = executeTranslateRequest(mSentences);
+                    mTranslatedSentences = executeTranslateRequest();
                 }
 
 
@@ -198,7 +198,7 @@ public class TranslationServiceCaller extends ServiceCaller {
                     Thread.currentThread().interrupt();
                 }
                 // Translate big requests in different parts:
-                return executeTranslateRequest(mSentences);
+                return executeTranslateRequest();
             }
         }
 
@@ -207,11 +207,10 @@ public class TranslationServiceCaller extends ServiceCaller {
          * Helper method that executes the full translate request, consisting of splitting the
          * request and then executing the smaller requests and concatenating their results
          *
-         * @param allSentences      The list of all sentences to be translated
          * @return                  The list of all translated sentences
          * @throws RemoteException
          */
-        private List<String> executeTranslateRequest(List<String> allSentences) throws RemoteException {
+        private List<String> executeTranslateRequest() throws RemoteException {
             List<String> translatedSentences = new ArrayList<>();
 
             List<List<String>> smallerRequestList = createSmallerRequests(mSentences);
@@ -220,10 +219,7 @@ public class TranslationServiceCaller extends ServiceCaller {
                 translatedSentences.addAll(mTranslateBinding.translate(requestSentences,
                         mSourceLanguage, mDestinationLanguage));
             }
-
-
-            //List<String> translatedSentences = mTranslateBinding.translate(mSentences,
-            //        mSourceLanguage, mDestinationLanguage);
+            
             Log.d(LOG_TAG, "" + translatedSentences);
             return translatedSentences;
         }
