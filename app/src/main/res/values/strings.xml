@@ -53,5 +53,7 @@
     <!-- Service Permission -->
     <string name="service_permission_label">Aurora Services</string>
     <string name="service_permission_description">Allows the app to make use of Aurora services</string>
+    <string name="plugin_processing_failed">The plugin\'s processing failed.</string>
+    <string name="plugin_failed_label">plugin failed</string>
 
 </resources>
