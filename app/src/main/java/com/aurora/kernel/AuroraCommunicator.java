@@ -76,7 +76,8 @@ public class AuroraCommunicator extends Communicator {
         // Call right method when event comes in
         mDocumentNotSupportedEventObservable
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(event -> showDocumentNotSupportedMessage(event.getReason()));
+                .subscribe(event -> showDocumentNotSupportedMessage(event.getReason()),
+                        error -> Log.e(CLASS_TAG, "Something went wrong showing the message", error));
     }
 
     /**
