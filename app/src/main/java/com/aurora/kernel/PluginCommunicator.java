@@ -20,7 +20,6 @@ import com.aurora.auroralib.ExtractedText;
 import com.aurora.kernel.event.ListPluginsRequest;
 import com.aurora.kernel.event.ListPluginsResponse;
 import com.aurora.kernel.event.OpenCachedFileWithPluginRequest;
-import com.aurora.kernel.event.OpenFileWithPluginChooserRequest;
 import com.aurora.kernel.event.OpenFileWithPluginRequest;
 import com.aurora.plugin.Plugin;
 
@@ -49,12 +48,6 @@ public class PluginCommunicator extends Communicator {
      * An observable keeping track of incoming OpenFileWithPluginRequests
      */
     private final Observable<OpenFileWithPluginRequest> mOpenFileWithPluginRequestObservable;
-
-    //TODO delete when custom picker is finished
-    /**
-     * An observable keeping track of incoming OpenFileWithPluginChooserRequests
-     */
-    private final Observable<OpenFileWithPluginChooserRequest> mOpenFileWithPluginChooserRequestObservable;
 
     /**
      * An observable keeping track of incoming OpenCachedFileWithPluginRequests
@@ -105,16 +98,6 @@ public class PluginCommunicator extends Communicator {
         // When a request comes in, call appropriate function
         mOpenFileWithPluginRequestObservable.subscribe((OpenFileWithPluginRequest request) ->
                 openFileWithPlugin(request.getExtractedText(), request.getUniquePluginName(), request.getContext())
-        );
-
-        // TODO: delete following two statements if custom plugin chooser is finished
-        // Register for requests to open file with plugin chooser
-        mOpenFileWithPluginChooserRequestObservable = mBus.register(OpenFileWithPluginChooserRequest.class);
-
-        // When a request comes in, call appropriate function
-        mOpenFileWithPluginChooserRequestObservable.subscribe((OpenFileWithPluginChooserRequest request) ->
-                openFileWithPluginChooser(request.getExtractedText(), request.getPluginAction(),
-                        request.getChooser(), request.getContext())
         );
 
         // Register for requests to open a cached file with plugin
@@ -182,57 +165,6 @@ public class PluginCommunicator extends Communicator {
 
     }
 
-
-    //TODO delete if custom picker works
-
-    /**
-     * Opens a file with a given plugin
-     *
-     * @param extractedText the extracted text of the file to open
-     * @param pluginAction  the target intent of the chooser
-     * @param chooser       the plugin that was selected by the user in the chooser menu
-     * @param context       the android context
-     */
-
-    private void openFileWithPluginChooser(ExtractedText extractedText, Intent pluginAction,
-                                           Intent chooser, Context context) {
-
-        // Convert the extracted text to JSON
-        String extractedTextInJSON = extractedText.toJSON();
-        Log.d("JSON", extractedTextInJSON);
-
-        // Start by clearing the old transfer files
-        removeFilesThatStartWithFromDir(context.getCacheDir(), PROCESSED_PREFIX);
-
-        Uri uri;
-
-        try {
-            uri = writeToTempFile(context, extractedTextInJSON, PROCESSED_PREFIX, EXTENSION);
-        } catch (IOException e) {
-            showToastAndLog(context, ERROR_LOG, e);
-            return;
-        }
-
-
-
-        setDataAndFlags(pluginAction, uri, Constants.PLUGIN_INPUT_TYPE_EXTRACTED_TEXT);
-
-
-
-
-        // This is a bit of a hack, but it needs to be done because of trying to launch an
-        // activity outside of and activity context
-        // https://stackoverflow.com/questions/3918517/calling-startactivity-from-outside-of-an-activity-context
-        chooser.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-
-        // Check if at least one app exists that can execute the task
-        boolean pluginOpens = pluginAction.resolveActivity(context.getPackageManager()) != null;
-        if (pluginOpens) {
-            context.startActivity(chooser);
-        } else {
-            showToastAndLog(context, context.getString(R.string.no_plugins_available), null);
-        }
-    }
 
     /**
      * Opens a cached file with a given plugin
