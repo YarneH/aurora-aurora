@@ -1,6 +1,8 @@
 package com.aurora.aurora;
 
 import android.content.Context;
+import android.content.pm.PackageManager;
+import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,7 +15,9 @@ import com.aurora.plugin.Plugin;
 
 import java.util.List;
 
-
+/**
+ * Adapter to represent Plugins with their name, description and icon in the pluginChooser
+ */
 public class PluginAdapter extends ArrayAdapter<Plugin>{
 
     // ViewHolder for the Adapter
@@ -69,11 +73,20 @@ public class PluginAdapter extends ArrayAdapter<Plugin>{
             viewHolder.pluginDescription.setText(plugin.getDescription());
             if (plugin.getPluginLogo() != null) {
                 viewHolder.pluginLogo.setImageBitmap(plugin.getPluginLogo());
+            } else{
+                // Get the icon via the package of the plugin
+                try {
+                    Drawable icon = getContext().getPackageManager().getApplicationIcon(plugin.getUniqueName());
+                    viewHolder.pluginLogo.setImageDrawable(icon);
+                } catch (PackageManager.NameNotFoundException e) {
+                    e.printStackTrace();
+                }
             }
         }
         // Return the completed view to render on screen
         return convertView;
     }
+
 }
 
 

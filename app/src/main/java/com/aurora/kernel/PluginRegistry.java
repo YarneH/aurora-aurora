@@ -89,7 +89,7 @@ class PluginRegistry {
                                   final boolean overwriteOldVersion) {
         // TODO: write back config file immediately
         if (!mPluginsMap.containsKey(pluginName) || (overwriteOldVersion &&
-                Objects.requireNonNull(mPluginsMap.get(pluginName)).getVersionNumber() < plugin.getVersionNumber())) {
+                Objects.requireNonNull(mPluginsMap.get(pluginName)).getVersionCode() < plugin.getVersionCode())) {
 
             // Add plugin to the map
             mPluginsMap.put(pluginName, plugin);

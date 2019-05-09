@@ -3,10 +3,13 @@ package com.aurora.aurora;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.provider.OpenableColumns;
 import android.support.design.widget.FloatingActionButton;
@@ -44,11 +47,7 @@ import com.google.firebase.analytics.FirebaseAnalytics;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-
-import io.reactivex.Observer;
-import io.reactivex.disposables.Disposable;
 
 /**
  * The main activity of the application, started when the app is opened.
@@ -63,6 +62,11 @@ import io.reactivex.disposables.Disposable;
  */
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
+    /**
+     * Tag for logging
+     */
+    private static final String LOG_TAG = MainActivity.class.getSimpleName();
+
 
     /**
      * Constant for radix of Integer.toString()
@@ -131,12 +135,6 @@ public class MainActivity extends AppCompatActivity
                     "The kernel was not initialized with a valid android application context", e);
         }
 
-        /*
-        Set up plugins
-        TODO: Now this is static, later the pluginmarket should register new plugins.
-         */
-        registerPlugins();
-
 
         /* Initialize FirebaseAnalytics */
         mFirebaseAnalytics = FirebaseAnalytics.getInstance(this);
@@ -197,57 +195,6 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    /**
-     * Helper method that register the plugins with their info in the pluginregistry
-     * TODO: when the pluginmarket is implemented, remove this method
-     */
-    private void registerPlugins() {
-        final Plugin basicPlugin = new Plugin(
-                "com.aurora.basicplugin",
-                "Basic Plugin",
-                null,
-                "Basic plugin to open any file and display extracted text.",
-                4,
-                "v0.4",
-                new ArrayList<>(Arrays.asList(
-                        InternalServices.TEXT_EXTRACTION,
-                        InternalServices.IMAGE_EXTRACTION,
-                        InternalServices.NLP_TOKENIZE,
-                        InternalServices.NLP_SSPLIT,
-                        InternalServices.NLP_POS
-                )));
-
-        final Plugin souschefPlugin = new Plugin(
-                "com.aurora.souschef",
-                "Souschef",
-                null,
-                "Plugin to open recipes and display them in an enhanced way.",
-                4,
-                "v0.4",
-                new ArrayList<>(Arrays.asList(
-                        InternalServices.TEXT_EXTRACTION,
-                        InternalServices.NLP_TOKENIZE,
-                        InternalServices.NLP_SSPLIT,
-                        InternalServices.NLP_POS
-                )));
-
-        final Plugin paperViewerPlugin = new Plugin(
-                "com.aurora.paperviewer",
-                "Paperviewer",
-                null,
-                "Plugin to open papers and display them in an enhanced way.",
-                4,
-                "v0.4",
-                new ArrayList<>(Arrays.asList(
-                        InternalServices.TEXT_EXTRACTION,
-                        InternalServices.IMAGE_EXTRACTION
-                )));
-
-        // Register plugins in the registry
-        mAuroraCommunicator.registerPlugin(basicPlugin);
-        mAuroraCommunicator.registerPlugin(souschefPlugin);
-        mAuroraCommunicator.registerPlugin(paperViewerPlugin);
-    }
 
     /**
      * Creates an intent to open the file manager.
@@ -340,14 +287,18 @@ public class MainActivity extends AppCompatActivity
                     if (!infos.isEmpty()) {
                         List<String> packageNames = new ArrayList<>();
                         for (ResolveInfo info : infos) {
-                            Log.d("FOUND_PLUGINS", info.activityInfo.packageName + " - " + info.getIconResource());
+                            Log.i(LOG_TAG,
+                                    "Found Plugin: " + info.activityInfo.packageName +
+                                            " - " + info.getIconResource());
                             packageNames.add(info.activityInfo.packageName);
                         }
-
-                        getPluginsAndShowChooser(packageNames, fileName, type, read);
+                        // Get a list of filled in Plugin objects
+                        List<Plugin> plugins = getPlugins(packageNames, getPackageManager());
+                        // Show the chooser
+                        showPluginAdapterAlertDialog(plugins, fileName, type, read);
 
                     } else {
-                        Log.d("FOUND_PLUGINS", "NO PLUGINS FOUND");
+                        Log.i(LOG_TAG, "NO PLUGINS FOUND");
                         showPopUpView("No plugins were found");
                     }
 
@@ -357,75 +308,60 @@ public class MainActivity extends AppCompatActivity
                 }
             } catch (FileNotFoundException e) {
                 showPopUpView("The file could not be found, please select another file!");
-                Log.e("FILE_NOT_FOUND", "The file could not be found", e);
+                Log.e(LOG_TAG, "The file could not be found", e);
             }
         }
     }
 
     /**
-     * Shows the custom chooser after requesting the list of registered plugins.
+     * Get all plugins on device and their info form their packageNames
      *
      * @param packageNames  The packageNames of the plugins that where found using Intent querying
-     * @param fileName      The name of the file to be opened
-     * @param type          The MIME type of the file to be opened
-     * @param readFile      An InputStream to the read file
+     * @param pm            A PackageManager to get all plugin information
+     * @return              The list of plugins that were resolved
      */
-    private void getPluginsAndShowChooser(List<String> packageNames, String fileName, String type,
-                                          InputStream readFile){
-        if (mAuroraCommunicator != null) {
-            mAuroraCommunicator.getListOfPlugins(new Observer<List<Plugin>>() {
-                private Disposable mDisposable;
+    private List<Plugin> getPlugins(List<String> packageNames, PackageManager pm){
+        List<Plugin> plugins = new ArrayList<>();
+        //PackageManager pm = mainActivity.getPackageManager();
 
-                @Override
-                public void onSubscribe(Disposable d) {
-                    mDisposable = d;
-                }
+        for(String packageName : packageNames){
+            // Get the ApplicationInfo and PackageInfo to get the attributes of the Plugin
+            ApplicationInfo ai = null;
+            PackageInfo pi = null;
+            try {
+                 ai = pm.getApplicationInfo(packageName, PackageManager.GET_META_DATA);
+                 pi = pm.getPackageInfo(packageName, 0);
+            } catch (final PackageManager.NameNotFoundException e) {
+                Log.e(LOG_TAG, "Package not found", e);
+            }
 
-                /**
-                 * Shows the custom chooser after requesting the list of registered plugins. The
-                 * Plugins that are shown are the ones that have been found by querying the pluginAction
-                 * Intent (i.e. these are the plugins in packageNames). If a plugin in packageNames
-                 * is not found in the registry, it will still be selectable, but without info and
-                 * using the default Internal Services in its preprocessing.
-                 *
-                 * @param plugins list of Plugins that are in the registry
-                 */
-                @Override
-                public void onNext(List<Plugin> plugins) {
-                    // Show the dialog for selecting a plugin
-                    List<Plugin> filteredListOfPlugins = new ArrayList<>();
-                    for(Plugin plugin : plugins){
-                        if (packageNames.contains(plugin.getUniqueName())){
-                            filteredListOfPlugins.add(plugin);
-                            packageNames.remove(plugin.getUniqueName());
-                        }
+            // Create the Plugin object
+            Plugin plugin;
+            if (ai != null && pi != null) {
+                // Get the requested Internal Services for preprocessing
+                List<InternalServices> internalServices = new ArrayList<>();
+                for (InternalServices internalService : InternalServices.values()){
+                    if (ai.metaData.getBoolean(internalService.name())){
+                        internalServices.add(internalService);
                     }
-                    for(String notRegisteredPackageName : packageNames){
-                        Plugin notRegisteredPlugin = new Plugin(notRegisteredPackageName,
-                                notRegisteredPackageName.substring(
-                                        notRegisteredPackageName.lastIndexOf('.') + 1),
-                                null,
-                                getString(R.string.plugin_not_in_registry),
-                                0,
-                                "");
-                        filteredListOfPlugins.add(notRegisteredPlugin);
-                    }
-
-                    showPluginAdapterAlertDialog(filteredListOfPlugins, fileName, type, readFile);
-
                 }
+                // Get the version code without deprecation:
+                int versionCode;
+                versionCode = Build.VERSION.SDK_INT < Build.VERSION_CODES.P ? pi.versionCode :
+                        (int) pi.getLongVersionCode();
 
-                @Override
-                public void onError(Throwable e) {
-                    Log.e(MainActivity.class.getSimpleName(), "Error while trying to get the list of plugins", e);
-                }
-
-                @Override
-                public void onComplete() {
-                    mDisposable.dispose();
-                }
-            });
+                // Create the plugin
+                plugin = new Plugin(packageName, (String) pm.getApplicationLabel(ai),
+                        null, (String) ai.loadDescription(pm), versionCode,
+                        pi.versionName, internalServices);
+            } else {
+                plugin = new Plugin(packageName, packageName.substring(
+                        packageName.lastIndexOf('.') + 1), null, null, 0, "");
+            }
+            plugins.add(plugin);
         }
+
+        return plugins;
     }
 
 
@@ -439,19 +375,19 @@ public class MainActivity extends AppCompatActivity
     private void showPluginAdapterAlertDialog(List<Plugin> plugins, String fileName, String type,
                                               InputStream readFile) {
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
         // Set title value.
         builder.setTitle(getString(R.string.select_plugin));
         // Set adapter and define the onClickListener
-        builder.setAdapter(new PluginAdapter(plugins, this), (DialogInterface dialogInterface, int itemIndex) -> {
+        builder.setAdapter(new PluginAdapter(plugins, this), (
+                DialogInterface dialogInterface, int itemIndex) -> {
                     if (plugins.get(itemIndex).getUniqueName() != null) {
                         Plugin selectedPlugin = plugins.get(itemIndex);
-                        Log.d("PLUGIN_SELECTED", selectedPlugin.getUniqueName());
+                        Log.i(LOG_TAG, "Selected Plugin: " + selectedPlugin.getUniqueName());
                         mAuroraCommunicator.openFileWithPlugin(fileName, type, readFile,
-                                selectedPlugin, getApplicationContext());
+                                selectedPlugin, this);
                     }
         });
-
 
         builder.setCancelable(true);
         builder.create();
@@ -644,4 +580,5 @@ public class MainActivity extends AppCompatActivity
         // Create and show the pop-up
         alertDialogBuilder.create().show();
     }
+
 }
