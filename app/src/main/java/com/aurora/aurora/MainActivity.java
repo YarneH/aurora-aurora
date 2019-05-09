@@ -79,7 +79,7 @@ public class MainActivity extends AppCompatActivity
      */
     private static final int REQUEST_FILE_GET = 1;
     private static final int ANIMATION_DURATION = 500;
-    private static final float END_POINT_OF_ANIMATION = 0.2f;
+    private static final float END_POINT_OF_ANIMATION = 0.2F;
 
 
 
@@ -294,7 +294,7 @@ public class MainActivity extends AppCompatActivity
                             packageNames.add(info.activityInfo.packageName);
                         }
                         // Get a list of filled in Plugin objects
-                        List<Plugin> plugins = getPlugins(packageNames, getPackageManager());
+                        List<Plugin> plugins = getPlugins(packageNames);
                         // Show the chooser
                         showPluginAdapterAlertDialog(plugins, fileName, type, read);
 
@@ -318,12 +318,11 @@ public class MainActivity extends AppCompatActivity
      * Get all plugins on device and their info form their packageNames
      *
      * @param packageNames  The packageNames of the plugins that where found using Intent querying
-     * @param pm            A PackageManager to get all plugin information
      * @return              The list of plugins that were resolved
      */
-    private List<Plugin> getPlugins(List<String> packageNames, PackageManager pm){
+    private List<Plugin> getPlugins(List<String> packageNames){
         List<Plugin> plugins = new ArrayList<>();
-        //PackageManager pm = mainActivity.getPackageManager();
+        PackageManager pm = getPackageManager();
 
         for(String packageName : packageNames){
             // Get the ApplicationInfo and PackageInfo to get the attributes of the Plugin
@@ -336,33 +335,50 @@ public class MainActivity extends AppCompatActivity
                 Log.e(LOG_TAG, "Package not found", e);
             }
 
-            // Create the Plugin object
-            Plugin plugin;
-            if (ai != null && pi != null) {
-                // Get the requested Internal Services for preprocessing
-                List<InternalServices> internalServices = new ArrayList<>();
-                for (InternalServices internalService : InternalServices.values()){
-                    if (ai.metaData.getBoolean(internalService.name())){
-                        internalServices.add(internalService);
-                    }
-                }
-                // Get the version code without deprecation:
-                int versionCode;
-                versionCode = Build.VERSION.SDK_INT < Build.VERSION_CODES.P ? pi.versionCode :
-                        (int) pi.getLongVersionCode();
-
-                // Create the plugin
-                plugin = new Plugin(packageName, (String) pm.getApplicationLabel(ai),
-                        null, (String) ai.loadDescription(pm), versionCode,
-                        pi.versionName, internalServices);
-            } else {
-                plugin = new Plugin(packageName, packageName.substring(
-                        packageName.lastIndexOf('.') + 1), null, null, 0, "");
-            }
-            plugins.add(plugin);
+            plugins.add(createPlugin(packageName, ai, pi, pm));
         }
 
         return plugins;
+    }
+
+    /**
+     * Create a Plugin object with info obtained from a packageName
+     *
+     * @param packageName name of the plugin's package
+     * @param ai          ApplicationInfo obtained for the package
+     * @param pi          PackageInfo obtained for the package
+     * @param pm          A packageManager to resolve some final info
+     * @return
+     */
+    private Plugin createPlugin(String packageName, ApplicationInfo ai, PackageInfo pi,
+                                PackageManager pm){
+        // Create the Plugin object
+        Plugin plugin;
+        if (ai != null && pi != null) {
+            // Get the requested Internal Services for preprocessing
+            List<InternalServices> internalServices = new ArrayList<>();
+            for (InternalServices internalService : InternalServices.values()){
+                if (ai.metaData.getBoolean(internalService.name())){
+                    internalServices.add(internalService);
+                }
+            }
+            // Get the version code without deprecation:
+            int versionCode;
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.P){
+                versionCode = pi.versionCode;
+            } else {
+                versionCode = (int) pi.getLongVersionCode();
+            }
+
+            // Create the plugin
+            plugin = new Plugin(packageName, (String) pm.getApplicationLabel(ai),
+                    null, (String) ai.loadDescription(pm), versionCode,
+                    pi.versionName, internalServices);
+        } else {
+            plugin = new Plugin(packageName, packageName.substring(
+                    packageName.lastIndexOf('.') + 1), null, null, 0, "");
+        }
+        return plugin;
     }
 
 
@@ -549,11 +565,9 @@ public class MainActivity extends AppCompatActivity
             mTextViewMain.setText(text);
         }
         if (home) {
-            //mRecyclerView.setVisibility(View.VISIBLE);
             findViewById(R.id.cl_recycler_content).setVisibility(View.VISIBLE);
             mTextViewMain.setVisibility(View.INVISIBLE);
         } else {
-            //mRecyclerView.setVisibility(View.INVISIBLE);
             findViewById(R.id.cl_recycler_content).setVisibility(View.INVISIBLE);
             mTextViewMain.setVisibility(View.VISIBLE);
         }

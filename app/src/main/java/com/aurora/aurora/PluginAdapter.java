@@ -21,7 +21,7 @@ import java.util.List;
 public class PluginAdapter extends ArrayAdapter<Plugin>{
 
     // ViewHolder for the Adapter
-    private static class ViewHolder {
+    private static final class ViewHolder {
         private TextView pluginName;
         private TextView pluginDescription;
         private ImageView pluginLogo;
@@ -49,8 +49,6 @@ public class PluginAdapter extends ArrayAdapter<Plugin>{
         Plugin plugin = getItem(position);
         // Check if an existing view is being reused, otherwise inflate the view
         ViewHolder viewHolder;
-
-        final View result;
 
         if (convertView == null) {
             viewHolder = new ViewHolder();
