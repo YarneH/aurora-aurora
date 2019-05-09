@@ -2,6 +2,7 @@ package com.aurora.internalservice.internalnlp;
 
 import com.aurora.auroralib.ExtractedText;
 import com.aurora.auroralib.Section;
+import com.aurora.internalservice.internalprocessor.DocumentNotSupportedException;
 import com.aurora.internalservice.internalprocessor.FileTypeNotSupportedException;
 import com.aurora.internalservice.internalprocessor.InternalTextProcessor;
 import com.aurora.plugin.InternalServices;
@@ -40,6 +41,8 @@ public class InternalNLPUnitTest {
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (FileTypeNotSupportedException e) {
+            e.printStackTrace();
+        } catch (DocumentNotSupportedException e) {
             e.printStackTrace();
         }
 

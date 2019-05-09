@@ -58,7 +58,7 @@ public class AuroraCommunicatorUnitTest {
         final String pluginsCfg = "plugin-config.json";
         sPluginRegistry = new DummyPluginRegistry(processingCommunicator, pluginsCfg, new MockContext());
 
-        sAuroraCommunicator = new AuroraCommunicator(sBus, sPluginRegistry);
+        sAuroraCommunicator = new AuroraCommunicator(sBus, sPluginRegistry, new MockContext());
 
         // Register dummy plugin in registry
         sAuroraCommunicator.registerPlugin(DUMMY_PLUGIN);
@@ -80,7 +80,7 @@ public class AuroraCommunicatorUnitTest {
         String fileType = "txt";
         InputStream file = new DummyInputStream();
         String pluginName = DUMMY_PLUGIN.getUniqueName();
-        sAuroraCommunicator.openFileWithPlugin(fileRef, fileType, file, pluginName, new MockContext());
+        sAuroraCommunicator.openFileWithPlugin(fileRef, fileType, file, pluginName);
 
         // Assert that arguments passed are as expected
         fileRefObserver.assertSubscribed();
@@ -105,7 +105,7 @@ public class AuroraCommunicatorUnitTest {
         String fileType = "txt";
         InputStream file = new DummyInputStream();
         sAuroraCommunicator.openFileWithPluginChooser(fileRef, fileType, file, new DummyIntent(),
-                new DummyIntent(), new MockContext());
+                new DummyIntent());
 
         // Assert that arguments passed are as expected
         fileRefObserver.assertSubscribed();
@@ -142,7 +142,7 @@ public class AuroraCommunicatorUnitTest {
         String fileType = "docx";
         InputStream file = new DummyInputStream();
         String pluginName = DUMMY_PLUGIN.getUniqueName();
-        sAuroraCommunicator.openFileWithPlugin(dummyFileRef, fileType, file, pluginName, new MockContext());
+        sAuroraCommunicator.openFileWithPlugin(dummyFileRef, fileType, file, pluginName);
 
         // Assure that the correct values are contained in request event
         extractedTextObserver.assertSubscribed();
@@ -188,7 +188,7 @@ public class AuroraCommunicatorUnitTest {
         InputStream file = new DummyInputStream();
         String pluginName = DUMMY_PLUGIN.getUniqueName();
         sAuroraCommunicator.openFileWithPluginChooser(dummyFileRef, fileType, file,
-                new DummyIntent(), new DummyIntent(), new MockContext());
+                new DummyIntent(), new DummyIntent());
 
         // Assure that the correct values are contained in request event
         extractedTextObserver.assertSubscribed();
@@ -234,7 +234,7 @@ public class AuroraCommunicatorUnitTest {
                 .subscribe(pluginNameTestObserver);
 
         // Call method under test
-        sAuroraCommunicator.openFileWithCache(fileRef, fileType, uniquePluginName, new MockContext());
+        sAuroraCommunicator.openFileWithCache(fileRef, fileType, uniquePluginName);
 
         // Assert values
         jsonTestObserver.assertSubscribed();
