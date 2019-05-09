@@ -61,8 +61,9 @@ public class AuroraCommunicator extends Communicator {
     /**
      * Creates an AuroraCommunicator. There should be only one AuroraCommunicator at a time
      *
-     * @param bus            A reference to the unique bus instance over which the communicators will communicate events
-     * @param pluginRegistry a reference to the plugin registry
+     * @param bus                A reference to the unique bus instance over which the communicators will communicate events
+     * @param pluginRegistry     a reference to the plugin registry
+     * @param applicationContext the android context
      */
     public AuroraCommunicator(@NonNull final Bus bus, @NonNull final PluginRegistry pluginRegistry,
                               @NonNull final Context applicationContext) {
@@ -84,11 +85,12 @@ public class AuroraCommunicator extends Communicator {
      * Open file with a given plugin. This method will first extract
      * the text from the given file reference,
      * then it will send a request to let the plugin make the representation.
-     *  @param fileRef            a reference to the file that needs to be opened
-     * @param fileType           the file type
-     * @param file               the input stream of the file
-     * @param uniquePluginName   the (unique) name of the plugin to open the file with. This should be obtained from
-*                           the own chooser.
+     *
+     * @param fileRef          a reference to the file that needs to be opened
+     * @param fileType         the file type
+     * @param file             the input stream of the file
+     * @param uniquePluginName the (unique) name of the plugin to open the file with. This should be obtained from
+     *                         the own chooser.
      */
     public void openFileWithPlugin(String fileRef, String fileType, InputStream file,
                                    String uniquePluginName) {
@@ -132,11 +134,12 @@ public class AuroraCommunicator extends Communicator {
      * Open file with a given plugin. This method will first extract
      * the text from the given file reference,
      * then it will send a request to let the plugin make the representation.
-     *  @param fileRef            a reference to the file that needs to be opened
-     * @param fileType           the file type
-     * @param file               the input stream of the file
-     * @param pluginAction       the target plugin that was selected by the user
-     * @param chooser            the chooser intent used for opening the plugin
+     *
+     * @param fileRef      a reference to the file that needs to be opened
+     * @param fileType     the file type
+     * @param file         the input stream of the file
+     * @param pluginAction the target plugin that was selected by the user
+     * @param chooser      the chooser intent used for opening the plugin
      */
     public void openFileWithPluginChooser(String fileRef, String fileType, InputStream file,
                                           Intent pluginAction, Intent chooser) {
@@ -177,7 +180,8 @@ public class AuroraCommunicator extends Communicator {
 
     /**
      * Method to open an already cached file with the plugin
-     *  @param fileRef          a reference to the file to open
+     *
+     * @param fileRef          a reference to the file to open
      * @param fileType         the file type of the file to open
      * @param uniquePluginName the name of the plugin that the file was processed with
      */
@@ -265,7 +269,8 @@ public class AuroraCommunicator extends Communicator {
 
     /**
      * Private handle method to send request to plugin communicator to open file with plugin
-     *  @param extractedText    the extracted text of the file that was internally processed
+     *
+     * @param extractedText    the extracted text of the file that was internally processed
      * @param uniquePluginName the (unique) name of the plugin to open the file with
      */
     private void sendOpenFileRequest(final ExtractedText extractedText, final String uniquePluginName) {
@@ -280,7 +285,8 @@ public class AuroraCommunicator extends Communicator {
 
     /**
      * Private handle method to send request to plugin communicator to open file with plugin
-     *  @param extractedText the extracted text of the file that was internally processed
+     *
+     * @param extractedText the extracted text of the file that was internally processed
      * @param pluginAction  the target intent of the chooser
      * @param chooser       the plugin that the user selected
      */
@@ -295,7 +301,8 @@ public class AuroraCommunicator extends Communicator {
 
     /**
      * Private handle method to send request to plugin communicator to open an already cached file with plugin
-     *  @param jsonRepresentation the representation of the object to represent
+     *
+     * @param jsonRepresentation the representation of the object to represent
      * @param uniquePluginName   the name of the plugin that the file was processed with
      */
     private void sendOpenCachedFileRequest(final String jsonRepresentation, final String uniquePluginName) {
