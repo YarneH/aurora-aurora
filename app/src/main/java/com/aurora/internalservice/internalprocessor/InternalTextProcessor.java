@@ -7,6 +7,7 @@ import com.aurora.internalservice.InternalService;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -29,11 +30,17 @@ public class InternalTextProcessor implements InternalService {
      */
     public ExtractedText processFile(InputStream file, String fileRef, String type,
                                      boolean extractImages)
-            throws FileTypeNotSupportedException, DocumentNotSupportedException {
+            throws FileTypeNotSupportedException {
         ExtractedText extractedText;
         TextExtractor extractor = fileFormatExtractorMap.get(type);
         if (extractor != null) {
-            extractedText = extractor.extract(file, fileRef, extractImages);
+            //TODO: Robbe catch this in PluginInternalServiceComunicator plz
+            extractedText = new ExtractedText("",new Date());
+            try {
+                extractedText = extractor.extract(file, fileRef, extractImages);
+            } catch (DocumentNotSupportedException e) {
+                e.printStackTrace();
+            }
             try {
                 Objects.requireNonNull(file).close();
             } catch (IOException e) {
