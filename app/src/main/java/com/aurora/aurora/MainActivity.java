@@ -306,7 +306,7 @@ public class MainActivity extends AppCompatActivity
                     // Create chooser to let user choose the plugin
                     Intent chooser = Intent.createChooser(pluginAction, getString(R.string.select_plugin));
                     mAuroraCommunicator.openFileWithPluginChooser(fileName, type,
-                            read, pluginAction, chooser, getApplicationContext());
+                            read, pluginAction, chooser);
                     /*
                     // For now hard coded constant
                     String uniquePluginName = "com.aurora.basicplugin";
