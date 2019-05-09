@@ -305,7 +305,6 @@ public class AuroraCommunicator extends Communicator {
      * Private handle method to send request to plugin communicator to open an already cached file with plugin.
      * It will also update the dateLastOpened of the cached file in the cache
      *
-     * @param fileRef            a reference to the originally processed file
      * @param jsonRepresentation the representation of the object to represent
      * @param uniquePluginName   the name of the plugin that the file was processed with
      */
@@ -314,10 +313,6 @@ public class AuroraCommunicator extends Communicator {
         OpenCachedFileWithPluginRequest openCachedFileWithPluginRequest =
                 new OpenCachedFileWithPluginRequest(jsonRepresentation, uniquePluginName, mContext);
         mBus.post(openCachedFileWithPluginRequest);
-
-        // Also create request to update date of the file in the cache
-        UpdateCachedFileDateRequest updateDateRequest = new UpdateCachedFileDateRequest(fileRef, uniquePluginName);
-        mBus.post(updateDateRequest);
     }
 
     /**
