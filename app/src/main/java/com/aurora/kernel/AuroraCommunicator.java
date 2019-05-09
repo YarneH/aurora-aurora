@@ -61,7 +61,8 @@ public class AuroraCommunicator extends Communicator {
     /**
      * Creates an AuroraCommunicator. There should be only one AuroraCommunicator at a time
      *
-     * @param bus                A reference to the unique bus instance over which the communicators will communicate events
+     * @param bus                A reference to the unique bus instance over which
+     *                           the communicators will communicate events
      * @param pluginRegistry     a reference to the plugin registry
      * @param applicationContext the android context
      */
