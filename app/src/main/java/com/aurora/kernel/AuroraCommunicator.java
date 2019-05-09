@@ -106,6 +106,7 @@ public class AuroraCommunicator extends Communicator {
                                         "Something went wrong when receiving the internally processed file.", e)
                 );
 
+
         InternalProcessorRequest internalProcessorRequest =
                 new InternalProcessorRequest(fileRef, fileType, file, plugin.getInternalServices());
 
@@ -120,10 +121,9 @@ public class AuroraCommunicator extends Communicator {
      * Method to open an already cached file with the plugin
      *
      * @param fileRef          a reference to the file to open
-     * @param fileType         the file type of the file to open
      * @param uniquePluginName the name of the plugin that the file was processed with
      */
-    public void openFileWithCache(String fileRef, String fileType, String uniquePluginName) {
+    public void openFileWithCache(String fileRef, String uniquePluginName) {
         // Create observable to listen to
         Observable<RetrieveFileFromCacheResponse> retrieveFileFromCacheResponse =
                 mBus.register(RetrieveFileFromCacheResponse.class);
@@ -221,14 +221,14 @@ public class AuroraCommunicator extends Communicator {
 
 
     /**
-     * Private handle method to send request to plugin communicator to open an already cached file with plugin
+     * Private handle method to send request to plugin communicator to open an already cached file with plugin.
+     * It will also update the dateLastOpened of the cached file in the cache
      *
      * @param jsonRepresentation the representation of the object to represent
      * @param uniquePluginName   the name of the plugin that the file was processed with
      */
     private void sendOpenCachedFileRequest(final String jsonRepresentation, final String uniquePluginName) {
         // Create request and post it on bus
-
         OpenCachedFileWithPluginRequest openCachedFileWithPluginRequest =
                 new OpenCachedFileWithPluginRequest(jsonRepresentation, uniquePluginName, mContext);
         mBus.post(openCachedFileWithPluginRequest);

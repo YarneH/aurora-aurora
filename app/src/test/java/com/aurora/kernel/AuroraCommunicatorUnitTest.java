@@ -163,7 +163,7 @@ public class AuroraCommunicatorUnitTest {
                 .subscribe(pluginNameTestObserver);
 
         // Call method under test
-        sAuroraCommunicator.openFileWithCache(fileRef, fileType, uniquePluginName);
+        sAuroraCommunicator.openFileWithCache(fileRef, uniquePluginName);
 
         // Assert values
         jsonTestObserver.assertSubscribed();

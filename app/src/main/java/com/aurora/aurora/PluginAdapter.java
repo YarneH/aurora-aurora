@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,6 +20,7 @@ import java.util.List;
  * Adapter to represent Plugins with their name, description and icon in the pluginChooser
  */
 public class PluginAdapter extends ArrayAdapter<Plugin>{
+    private static final String LOG_TAG = PluginAdapter.class.getSimpleName();
 
     // ViewHolder for the Adapter
     private static final class ViewHolder {
@@ -74,9 +76,12 @@ public class PluginAdapter extends ArrayAdapter<Plugin>{
             } else{
                 // Get the icon via the package of the plugin
                 try {
-                    Drawable icon = getContext().getPackageManager().getApplicationIcon(plugin.getUniqueName());
+                    Drawable icon = getContext().getPackageManager().getApplicationIcon(
+                            plugin.getUniqueName());
                     viewHolder.pluginLogo.setImageDrawable(icon);
                 } catch (PackageManager.NameNotFoundException e) {
+                    Log.e(LOG_TAG, "Package not found when getting icon for packageName: " +
+                            plugin.getUniqueName(), e);
                     e.printStackTrace();
                 }
             }

@@ -256,6 +256,27 @@ public class InternalCacheUnitTest {
         Assert.assertTrue(successful);
     }
 
+    @Test
+    public void InternalCache_updateCachedFileDate_shouldUpdateDateOfCachedFileInfo() {
+        // Add file to cache
+        String fileRef1 = "-123_dummyFileRef.docx";
+        String object1 = new DummyPluginObject1("Title", "Text").toJSON();
+        String pluginName = "com.aurora.dummyplugin";
+        mInternalCache.cacheFile(fileRef1, object1, pluginName);
+
+        // Get file from cache
+        CachedFileInfo originalFileInfo = mInternalCache.checkCacheForProcessedFile(fileRef1, pluginName);
+
+        // Update date
+        mInternalCache.updateCachedFileDate(fileRef1, pluginName);
+
+        // Get file from cache
+        CachedFileInfo updatedFile = mInternalCache.checkCacheForProcessedFile(fileRef1, pluginName);
+
+        // Compare file dates
+        Assert.assertTrue(originalFileInfo.getLastOpened().before(updatedFile.getLastOpened()));
+    }
+
     // After every test, reset the cache
     @After
     public void resetCache() {

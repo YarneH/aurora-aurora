@@ -41,12 +41,12 @@ public class Plugin {
     private String mDescription;
 
     /**
-     * A version number for the plugin.
+     * A version code for the plugin.
      */
     private int mVersionCode;
 
     /**
-     * A version code for the plugin, For example "v1.0" or "v2.2.3"
+     * The version name for the plugin, For example "v1.0" or "v2.2.3"
      */
     private String mVersionName;
 

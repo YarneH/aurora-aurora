@@ -33,11 +33,11 @@
 
         <!-- Description of the file -->
         <TextView
-            android:id="@+id/tv_card_location"
+            android:id="@+id/tv_card_last_opened"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="start"
-            android:text="@string/file_location"
+            android:text="@string/file_last"
             android:textSize="@dimen/fc_small_text"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/tv_card_title"/>

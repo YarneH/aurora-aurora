@@ -37,12 +37,15 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.aurora.auroralib.Constants;
+import com.aurora.internalservice.internalcache.CachedFileInfo;
 import com.aurora.kernel.AuroraCommunicator;
 import com.aurora.kernel.ContextNullException;
 import com.aurora.kernel.Kernel;
 import com.aurora.plugin.InternalServices;
 import com.aurora.plugin.Plugin;
 import com.google.firebase.analytics.FirebaseAnalytics;
+import io.reactivex.Observer;
+import io.reactivex.disposables.Disposable;
 
 import java.io.FileNotFoundException;
 import java.io.InputStream;
@@ -79,8 +82,7 @@ public class MainActivity extends AppCompatActivity
      */
     private static final int REQUEST_FILE_GET = 1;
     private static final int ANIMATION_DURATION = 500;
-    private static final float END_POINT_OF_ANIMATION = 0.2F;
-
+    private static final float END_POINT_OF_ANIMATION = 0.2f;
 
 
     /**
@@ -101,6 +103,7 @@ public class MainActivity extends AppCompatActivity
      * It contains all recently opened files.
      */
     private RecyclerView mRecyclerView = null;
+
     private Context mContext = this;
 
     /**
@@ -117,6 +120,11 @@ public class MainActivity extends AppCompatActivity
      * Firebase analytics
      */
     private FirebaseAnalytics mFirebaseAnalytics = null;
+
+    /**
+     * The list of cached files, which will be shown in the RecyclerView
+     */
+    private List<CachedFileInfo> mCachedFileInfoList = new ArrayList<>();
 
 
     /**
@@ -136,6 +144,15 @@ public class MainActivity extends AppCompatActivity
                     "The kernel was not initialized with a valid android application context", e);
         }
 
+
+        /* Setup RecyclerView */
+        mRecyclerView = findViewById(R.id.rv_files);
+        mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+        CardFileAdapter adapter = new CardFileAdapter(mKernel, this, mCachedFileInfoList);
+        mRecyclerView.setAdapter(adapter);
+
+        /* Get list of cached files */
+        refreshCachedFileInfoList();
 
         /* Initialize FirebaseAnalytics */
         mFirebaseAnalytics = FirebaseAnalytics.getInstance(this);
@@ -164,12 +181,6 @@ public class MainActivity extends AppCompatActivity
         /* Setup Main TextView */
         mTextViewMain = findViewById(R.id.tv_main);
 
-        /* Setup RecyclerView */
-        mRecyclerView = findViewById(R.id.rv_files);
-        mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
-        CardFileAdapter adapter = new CardFileAdapter(mKernel, this);
-        mRecyclerView.setAdapter(adapter);
-
 
         /* Show TextView when RecyclerView is empty */
         if (adapter.getItemCount() == 0) {
@@ -193,6 +204,53 @@ public class MainActivity extends AppCompatActivity
         if (Intent.ACTION_VIEW.equals(getIntent().getAction())) {
             // This method is also called when a file is opened from the file chooser
             onActivityResult(REQUEST_FILE_GET, RESULT_OK, getIntent());
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected void onResume() {
+        super.onResume();
+        refreshCachedFileInfoList();
+    }
+
+    /**
+     * Refresh the list of info of the cached files
+     */
+    private void refreshCachedFileInfoList() {
+        /* Get list of cached files */
+        if (mAuroraCommunicator != null) {
+            mAuroraCommunicator.getListOfCachedFiles(0, new Observer<List<CachedFileInfo>>() {
+                private Disposable mDisposable;
+
+                @Override
+                public void onSubscribe(Disposable d) {
+                    mDisposable = d;
+                }
+
+                @Override
+                public void onNext(List<CachedFileInfo> cachedFileInfos) {
+                    mCachedFileInfoList = cachedFileInfos;
+                    ((CardFileAdapter)mRecyclerView.getAdapter()).updateData(mCachedFileInfoList);
+                    if (cachedFileInfos.isEmpty()) {
+                        findViewById(R.id.cl_empty_text).setVisibility(View.VISIBLE);
+                    } else{
+                        findViewById(R.id.cl_empty_text).setVisibility(View.GONE);
+                    }
+                }
+
+                @Override
+                public void onError(Throwable e) {
+                    Log.e("MainActivity", "Error while trying to get the list of cached files", e);
+                }
+
+                @Override
+                public void onComplete() {
+                    mDisposable.dispose();
+                }
+            });
         }
     }
 
@@ -309,7 +367,7 @@ public class MainActivity extends AppCompatActivity
                 }
             } catch (FileNotFoundException e) {
                 showPopUpView("The file could not be found, please select another file!");
-                Log.e(LOG_TAG, "The file could not be found", e);
+                Log.e("FILE_NOT_FOUND", "The file could not be found", e);
             }
         }
     }
@@ -322,20 +380,21 @@ public class MainActivity extends AppCompatActivity
      */
     private List<Plugin> getPlugins(List<String> packageNames){
         List<Plugin> plugins = new ArrayList<>();
-        PackageManager pm = getPackageManager();
+        PackageManager packageManager = getPackageManager();
 
         for(String packageName : packageNames){
             // Get the ApplicationInfo and PackageInfo to get the attributes of the Plugin
-            ApplicationInfo ai = null;
-            PackageInfo pi = null;
+            ApplicationInfo applicationInfo = null;
+            PackageInfo packageInfo = null;
             try {
-                 ai = pm.getApplicationInfo(packageName, PackageManager.GET_META_DATA);
-                 pi = pm.getPackageInfo(packageName, 0);
+                 applicationInfo = packageManager.getApplicationInfo(packageName,
+                         PackageManager.GET_META_DATA);
+                 packageInfo = packageManager.getPackageInfo(packageName, 0);
             } catch (final PackageManager.NameNotFoundException e) {
                 Log.e(LOG_TAG, "Package not found", e);
             }
 
-            plugins.add(createPlugin(packageName, ai, pi, pm));
+            plugins.add(createPlugin(packageName, applicationInfo, packageInfo, packageManager));
         }
 
         return plugins;
@@ -345,35 +404,35 @@ public class MainActivity extends AppCompatActivity
      * Create a Plugin object with info obtained from a packageName
      *
      * @param packageName name of the plugin's package
-     * @param ai          ApplicationInfo obtained for the package
-     * @param pi          PackageInfo obtained for the package
-     * @param pm          A packageManager to resolve some final info
+     * @param applicationInfo          ApplicationInfo obtained for the package
+     * @param packageInfo          PackageInfo obtained for the package
+     * @param packageManager          A packageManager to resolve some final info
      * @return
      */
-    private Plugin createPlugin(String packageName, ApplicationInfo ai, PackageInfo pi,
-                                PackageManager pm){
+    private Plugin createPlugin(String packageName, ApplicationInfo applicationInfo,
+                                PackageInfo packageInfo, PackageManager packageManager){
         // Create the Plugin object
         Plugin plugin;
-        if (ai != null && pi != null) {
+        if (applicationInfo != null && packageInfo != null) {
             // Get the requested Internal Services for preprocessing
             List<InternalServices> internalServices = new ArrayList<>();
             for (InternalServices internalService : InternalServices.values()){
-                if (ai.metaData.getBoolean(internalService.name())){
+                if (applicationInfo.metaData.getBoolean(internalService.name())){
                     internalServices.add(internalService);
                 }
             }
             // Get the version code without deprecation:
             int versionCode;
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.P){
-                versionCode = pi.versionCode;
+                versionCode = packageInfo.versionCode;
             } else {
-                versionCode = (int) pi.getLongVersionCode();
+                versionCode = (int) packageInfo.getLongVersionCode();
             }
 
             // Create the plugin
-            plugin = new Plugin(packageName, (String) pm.getApplicationLabel(ai),
-                    null, (String) ai.loadDescription(pm), versionCode,
-                    pi.versionName, internalServices);
+            plugin = new Plugin(packageName, (String) packageManager.getApplicationLabel(
+                    applicationInfo), null, (String) applicationInfo.loadDescription(
+                            packageManager), versionCode, packageInfo.versionName, internalServices);
         } else {
             plugin = new Plugin(packageName, packageName.substring(
                     packageName.lastIndexOf('.') + 1), null, null, 0, "");
@@ -565,9 +624,11 @@ public class MainActivity extends AppCompatActivity
             mTextViewMain.setText(text);
         }
         if (home) {
+            //mRecyclerView.setVisibility(View.VISIBLE);
             findViewById(R.id.cl_recycler_content).setVisibility(View.VISIBLE);
             mTextViewMain.setVisibility(View.INVISIBLE);
         } else {
+            //mRecyclerView.setVisibility(View.INVISIBLE);
             findViewById(R.id.cl_recycler_content).setVisibility(View.INVISIBLE);
             mTextViewMain.setVisibility(View.VISIBLE);
         }
