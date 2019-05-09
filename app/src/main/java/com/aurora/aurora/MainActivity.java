@@ -367,7 +367,7 @@ public class MainActivity extends AppCompatActivity
                 }
             } catch (FileNotFoundException e) {
                 showPopUpView("The file could not be found, please select another file!");
-                Log.e("FILE_NOT_FOUND", "The file could not be found", e);
+                Log.e(LOG_TAG, "The file could not be found", e);
             }
         }
     }
