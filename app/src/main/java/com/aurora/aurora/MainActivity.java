@@ -43,6 +43,7 @@ import io.reactivex.disposables.Disposable;
 
 import java.io.FileNotFoundException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -112,7 +113,7 @@ public class MainActivity extends AppCompatActivity
     /**
      * The list of cached files, which will be shown in the RecyclerView
      */
-    private List<CachedFileInfo> mCachedFileInfoList = null;
+    private List<CachedFileInfo> mCachedFileInfoList = new ArrayList<>();
 
 
     /**
