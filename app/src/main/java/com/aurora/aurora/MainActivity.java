@@ -63,7 +63,7 @@ import java.util.List;
  * Implements {@code NavigationView.OnNavigationItemSelectedListener} to listen to events
  * on the NavigationView.
  */
-//NOSONAR
+@SuppressWarnings("squid:S1200")
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
     /**
