@@ -82,7 +82,6 @@ public class PluginAdapter extends ArrayAdapter<Plugin>{
                 } catch (PackageManager.NameNotFoundException e) {
                     Log.e(LOG_TAG, "Package not found when getting icon for packageName: " +
                             plugin.getUniqueName(), e);
-                    e.printStackTrace();
                 }
             }
         }
