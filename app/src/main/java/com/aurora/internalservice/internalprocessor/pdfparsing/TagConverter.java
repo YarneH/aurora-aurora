@@ -33,6 +33,11 @@ public final class TagConverter {
         return tag;
     }
 
+
+    /**
+     * Fills the {@link #tagConverterMap} with entries
+     * @return the translation to supported elements
+     */
     private static Map<String,String> fillTagConverter(){
         Map<String, String> tagConverterMap = new HashMap<>();
         tagConverterMap.put("Text body", "P");

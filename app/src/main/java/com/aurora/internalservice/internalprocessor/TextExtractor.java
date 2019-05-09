@@ -14,6 +14,7 @@ public interface TextExtractor {
      * @param fileRef       a reference to where the file can be found
      * @param extractImages True if images need to be extracted, False otherwise
      * @return the extracted text, split in parts
+     * @throws DocumentNotSupportedException when it is not possible to extract from the document
      */
     ExtractedText extract(InputStream file, String fileRef, boolean extractImages) throws DocumentNotSupportedException;
 }

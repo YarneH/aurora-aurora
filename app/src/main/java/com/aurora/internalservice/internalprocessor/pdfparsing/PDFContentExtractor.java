@@ -49,6 +49,8 @@ public class PDFContentExtractor {
      *
      * @param reader the PdfReader that has access to the PDF file
      * @since 5.0.5
+     * @throws DocumentNotSupportedException when the pdf is not tagged
+     * @throws IOException when there is a fault reading the document
      */
     public void extractContent(PdfReader reader, ParsedPDF parsedPDF)
             throws IOException, DocumentNotSupportedException {
@@ -72,7 +74,7 @@ public class PDFContentExtractor {
      *
      * @param k         the child to inspect
      * @param tagParent the tag of the parent
-     * @throws IOException
+     * @throws IOException when it is not possible to read this object
      */
     private void inspectChild(PdfObject k, String tagParent) throws IOException {
         if (k == null) {
@@ -91,6 +93,7 @@ public class PDFContentExtractor {
      *
      * @param k         the child array to inspect
      * @param tagParent the tag of the parent
+     * @throws IOException when it is not possible to read this object
      */
     private void inspectChildArray(PdfArray k, String tagParent) throws IOException {
         if (k == null) {
@@ -107,6 +110,7 @@ public class PDFContentExtractor {
      *
      * @param k         the child dictionary to inspect
      * @param tagParent the tag of the parent
+     * @throws IOException when it is not possible to read this object
      */
     private void inspectChildDictionary(PdfDictionary k, String tagParent) throws IOException {
         if (k == null) {

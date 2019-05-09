@@ -27,6 +27,9 @@ public class InternalTextProcessor implements InternalService {
      * @param type          the mimetype of the file
      * @param extractImages True if images also need to be extracted, false otherwise
      * @return The extracted content from the file
+     * @throws DocumentNotSupportedException is thrown when the extraction of the document is not
+     * supported. This is the case when the document contains elements which are not supported
+     * by the {@link TextExtractor}
      */
     public ExtractedText processFile(InputStream file, String fileRef, String type,
                                      boolean extractImages)
