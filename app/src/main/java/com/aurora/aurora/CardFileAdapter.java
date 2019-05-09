@@ -178,10 +178,7 @@ public class CardFileAdapter extends RecyclerView.Adapter<CardFileAdapter.CardFi
         @Override
         public void onClick(View view) {
             if (view.getId() == mCardView.getId()) {
-                String displayName = mCachedFileInfo.getFileDisplayName();
-                String fileType = displayName.substring(displayName.lastIndexOf('.'));
-
-                mKernel.getAuroraCommunicator().openFileWithCache(mCachedFileInfo.getFileRef(), fileType,
+                mKernel.getAuroraCommunicator().openFileWithCache(mCachedFileInfo.getFileRef(),
                         mCachedFileInfo.getUniquePluginName());
             }
         }
