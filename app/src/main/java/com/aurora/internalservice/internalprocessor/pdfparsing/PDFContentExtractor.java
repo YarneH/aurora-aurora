@@ -48,6 +48,8 @@ public class PDFContentExtractor {
      * Parses a string with structured content.
      *
      * @param reader the PdfReader that has access to the PDF file
+     * @throws DocumentNotSupportedException if the document cannot be processed
+     * @throws IOException                   in case the reading of the file goes wrong
      * @since 5.0.5
      */
     public void extractContent(PdfReader reader, ParsedPDF parsedPDF)
