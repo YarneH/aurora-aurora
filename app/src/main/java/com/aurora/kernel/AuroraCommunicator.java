@@ -66,13 +66,11 @@ public class AuroraCommunicator extends Communicator {
      * @param fileRef            a reference to the file that needs to be opened
      * @param fileType           the file type
      * @param file               the input stream of the file
-     * @param uniquePluginName   the (unique) name of the plugin to open the file with. This should be obtained from
-     *                           the own chooser.
+     * @param plugin             the plugin to open the file with.
      * @param applicationContext the android context
      */
-    // TODO change String uniqueuPluginName to Plugin plugin
     public void openFileWithPlugin(String fileRef, String fileType, InputStream file,
-                                   String uniquePluginName, Context applicationContext) {
+                                   Plugin plugin, Context applicationContext) {
 
         // Register observable
         Observable<InternalProcessorResponse> internalProcessorResponseObservable =
@@ -84,22 +82,14 @@ public class AuroraCommunicator extends Communicator {
                 .map(InternalProcessorResponse::getExtractedText)
                 .take(1)
                 .subscribe((ExtractedText extractedText) ->
-                                sendOpenFileRequest(extractedText, uniquePluginName, applicationContext)
+                                sendOpenFileRequest(extractedText, plugin.getUniqueName(), applicationContext)
                         , (Throwable e) ->
                                 Log.e(CLASS_TAG,
                                         "Something went wrong when receiving the internally processed file.", e)
                 );
 
 
-        // TODO: this is bypass code. As soon as plugins are registered in the registry, this should be removed
-        List<InternalServices> internalServices =
-                new ArrayList<>(Arrays.asList(
-                        InternalServices.TEXT_EXTRACTION,
-                        InternalServices.IMAGE_EXTRACTION,
-                        InternalServices.NLP_TOKENIZE,
-                        InternalServices.NLP_SSPLIT,
-                        InternalServices.NLP_POS
-                ));
+        List<InternalServices> internalServices = plugin.getInternalServices();
         InternalProcessorRequest internalProcessorRequest =
                 new InternalProcessorRequest(fileRef, fileType, file, internalServices);
 
