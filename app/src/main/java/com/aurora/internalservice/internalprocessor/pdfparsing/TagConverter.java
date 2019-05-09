@@ -16,23 +16,26 @@ public class TagConverter {
     /**
      * Mapping of extracted tags to supported tags
      */
-    private static Map<String, String> tagConverter = TagConverter.fillTagConverter();
+    private static Map<String, String> tagConverterMap = TagConverter.fillTagConverter();
 
+    private TagConverter(){
+
+    }
     /**
      * Converts a tag extracted from a PDF  to a {@link #MAIN_SUPPORTED_TAGS}
      * @param tag the extracted tag
      * @return the possibly accepted tag
      */
     public static String convertTag(String tag){
-        if (tagConverter.containsKey(tag)){
-            tag = tagConverter.get(tag);
+        if (tagConverterMap.containsKey(tag)){
+            tag = tagConverterMap.get(tag);
         }
         return tag;
     }
 
     private static Map<String,String> fillTagConverter(){
-        Map<String, String> tagConverter = new HashMap<>();
-        tagConverter.put("Text body", "P");
-        return tagConverter;
+        Map<String, String> tagConverterMap = new HashMap<>();
+        tagConverterMap.put("Text body", "P");
+        return tagConverterMap;
     }
 }

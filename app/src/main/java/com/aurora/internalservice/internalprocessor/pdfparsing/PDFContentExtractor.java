@@ -26,8 +26,6 @@ import com.itextpdf.text.pdf.parser.SimpleTextExtractionStrategy;
 import com.itextpdf.text.pdf.parser.TextExtractionStrategy;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.regex.Pattern;
 
 /**
