@@ -1,6 +1,8 @@
 package com.aurora.aurora;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,9 +19,9 @@ public class PluginAdapter extends ArrayAdapter<Plugin>{
 
     // View lookup cache
     private static class ViewHolder {
-        TextView pluginName;
-        TextView pluginDescription;
-        ImageView pluginLogo;
+        private TextView pluginName;
+        private TextView pluginDescription;
+        private ImageView pluginLogo;
     }
 
     public PluginAdapter(List<Plugin> plugins, Context context) {
@@ -27,36 +29,46 @@ public class PluginAdapter extends ArrayAdapter<Plugin>{
     }
 
 
+    /**
+     * Overriden method from ArrayAdapter.
+     *
+     * @param position      Position of the item in the adapter
+     * @param convertView   View that corresponds to the item
+     * @param parent        parent Viewgroup
+     * @return the inflated and updated convertView
+     */
     @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
+    @NonNull
+    public View getView(int position, View convertView, @NonNull ViewGroup parent) {
         // Get the data item for this position
         Plugin plugin = getItem(position);
         // Check if an existing view is being reused, otherwise inflate the view
-        ViewHolder viewHolder; // view lookup cache stored in tag
+        ViewHolder viewHolder; 
 
         final View result;
 
         if (convertView == null) {
-
             viewHolder = new ViewHolder();
             LayoutInflater inflater = LayoutInflater.from(getContext());
-            convertView = inflater.inflate(R.layout.plugin_alert_dialog_adapter_row, parent, false);
-            viewHolder.pluginName = (TextView) convertView.findViewById(R.id.pluginChooserDialogItemNameTextView);
-            viewHolder.pluginDescription = (TextView) convertView.findViewById(R.id.pluginChooserDialogItemDescriptionTextView);
-            viewHolder.pluginLogo = (ImageView) convertView.findViewById(R.id.pluginChooserDialogItemLogoItemImageView);
-
-            result=convertView;
-
+            convertView = inflater.inflate(
+                    R.layout.plugin_alert_dialog_adapter_row, parent, false);
+            viewHolder.pluginName = (TextView) convertView.findViewById(
+                    R.id.pluginChooserDialogItemNameTextView);
+            viewHolder.pluginDescription = (TextView) convertView.findViewById(
+                    R.id.pluginChooserDialogItemDescriptionTextView);
+            viewHolder.pluginLogo = (ImageView) convertView.findViewById(
+                    R.id.pluginChooserDialogItemLogoItemImageView);
             convertView.setTag(viewHolder);
         } else {
             viewHolder = (ViewHolder) convertView.getTag();
-            result=convertView;
         }
 
-        viewHolder.pluginName.setText(plugin.getName());
-        viewHolder.pluginDescription.setText(plugin.getDescription());
-        if (plugin.getPluginLogo() != null) {
-            viewHolder.pluginLogo.setImageBitmap(plugin.getPluginLogo());
+        if (plugin != null) {
+            viewHolder.pluginName.setText(plugin.getName());
+            viewHolder.pluginDescription.setText(plugin.getDescription());
+            if (plugin.getPluginLogo() != null) {
+                viewHolder.pluginLogo.setImageBitmap(plugin.getPluginLogo());
+            }
         }
         // Return the completed view to render on screen
         return convertView;

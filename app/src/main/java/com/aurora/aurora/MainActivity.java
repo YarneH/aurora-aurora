@@ -425,7 +425,8 @@ public class MainActivity extends AppCompatActivity
                         Log.d("PLUGIN_SELECTED", selectedPlugin.getUniqueName());
                         mAuroraCommunicator.openFileWithPlugin(fileName, type, readFile,
                                 selectedPlugin, getApplicationContext());
-                    }});
+                    }
+        });
 
 
         builder.setCancelable(true);
