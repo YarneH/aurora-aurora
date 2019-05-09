@@ -166,7 +166,7 @@ public class CardFileAdapter extends RecyclerView.Adapter<CardFileAdapter.CardFi
             */
 
             mKernel.getAuroraCommunicator().openFileWithCache("4f352a7b_beefAndRiceCasserole.txt", "txt",
-                    "com.aurora.souschef", mContext.getApplicationContext());
+                    "com.aurora.souschef");
 
 
         }

@@ -57,7 +57,7 @@ public class AuroraCommunicatorUnitTest {
         final String pluginsCfg = "plugin-config.json";
         sPluginRegistry = new DummyPluginRegistry(processingCommunicator, pluginsCfg, new MockContext());
 
-        sAuroraCommunicator = new AuroraCommunicator(sBus, sPluginRegistry);
+        sAuroraCommunicator = new AuroraCommunicator(sBus, sPluginRegistry, new MockContext());
 
         // Register dummy plugin in registry
         sAuroraCommunicator.registerPlugin(DUMMY_PLUGIN);
@@ -78,13 +78,14 @@ public class AuroraCommunicatorUnitTest {
         String fileRef = "Dummy/file/ref";
         String fileType = "txt";
         InputStream file = new DummyInputStream();
-        sAuroraCommunicator.openFileWithPlugin(fileRef, fileType, file, DUMMY_PLUGIN, new MockContext());
+        sAuroraCommunicator.openFileWithPlugin(fileRef, fileType, file, DUMMY_PLUGIN);
 
         // Assert that arguments passed are as expected
         fileRefObserver.assertSubscribed();
         fileRefObserver.assertValue(fileRef);
         fileRefObserver.dispose();
     }
+
 
     @Test
     public void AuroraCommunicator_openFileWithPlugin_shouldSendOpenFileWithPluginRequestAfterExtractingText() {
@@ -115,7 +116,7 @@ public class AuroraCommunicatorUnitTest {
         String fileType = "docx";
         InputStream file = new DummyInputStream();
         String pluginName = DUMMY_PLUGIN.getUniqueName();
-        sAuroraCommunicator.openFileWithPlugin(dummyFileRef, fileType, file, DUMMY_PLUGIN, new MockContext());
+        sAuroraCommunicator.openFileWithPlugin(dummyFileRef, fileType, file, DUMMY_PLUGIN);
 
         // Assure that the correct values are contained in request event
         extractedTextObserver.assertSubscribed();
@@ -162,7 +163,7 @@ public class AuroraCommunicatorUnitTest {
                 .subscribe(pluginNameTestObserver);
 
         // Call method under test
-        sAuroraCommunicator.openFileWithCache(fileRef, fileType, uniquePluginName, new MockContext());
+        sAuroraCommunicator.openFileWithCache(fileRef, fileType, uniquePluginName);
 
         // Assert values
         jsonTestObserver.assertSubscribed();
