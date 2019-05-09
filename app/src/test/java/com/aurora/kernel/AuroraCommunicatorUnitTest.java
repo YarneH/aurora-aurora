@@ -79,8 +79,7 @@ public class AuroraCommunicatorUnitTest {
         String fileRef = "Dummy/file/ref";
         String fileType = "txt";
         InputStream file = new DummyInputStream();
-        String pluginName = DUMMY_PLUGIN.getUniqueName();
-        sAuroraCommunicator.openFileWithPlugin(fileRef, fileType, file, pluginName, new MockContext());
+        sAuroraCommunicator.openFileWithPlugin(fileRef, fileType, file, DUMMY_PLUGIN, new MockContext());
 
         // Assert that arguments passed are as expected
         fileRefObserver.assertSubscribed();
@@ -142,7 +141,7 @@ public class AuroraCommunicatorUnitTest {
         String fileType = "docx";
         InputStream file = new DummyInputStream();
         String pluginName = DUMMY_PLUGIN.getUniqueName();
-        sAuroraCommunicator.openFileWithPlugin(dummyFileRef, fileType, file, pluginName, new MockContext());
+        sAuroraCommunicator.openFileWithPlugin(dummyFileRef, fileType, file, DUMMY_PLUGIN, new MockContext());
 
         // Assure that the correct values are contained in request event
         extractedTextObserver.assertSubscribed();
