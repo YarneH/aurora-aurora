@@ -22,6 +22,7 @@ import com.aurora.kernel.event.QueryCacheRequest;
 import com.aurora.kernel.event.QueryCacheResponse;
 import com.aurora.kernel.event.RetrieveFileFromCacheRequest;
 import com.aurora.kernel.event.RetrieveFileFromCacheResponse;
+import com.aurora.kernel.event.UpdateCachedFileDateRequest;
 import com.aurora.plugin.InternalServices;
 import com.aurora.plugin.Plugin;
 
@@ -301,14 +302,14 @@ public class AuroraCommunicator extends Communicator {
     }
 
     /**
-     * Private handle method to send request to plugin communicator to open an already cached file with plugin
+     * Private handle method to send request to plugin communicator to open an already cached file with plugin.
+     * It will also update the dateLastOpened of the cached file in the cache
      *
      * @param jsonRepresentation the representation of the object to represent
      * @param uniquePluginName   the name of the plugin that the file was processed with
      */
     private void sendOpenCachedFileRequest(final String jsonRepresentation, final String uniquePluginName) {
         // Create request and post it on bus
-
         OpenCachedFileWithPluginRequest openCachedFileWithPluginRequest =
                 new OpenCachedFileWithPluginRequest(jsonRepresentation, uniquePluginName, mContext);
         mBus.post(openCachedFileWithPluginRequest);

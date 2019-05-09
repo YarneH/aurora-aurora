@@ -10,29 +10,36 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.aurora.internalservice.internalcache.CachedFileInfo;
 import com.aurora.kernel.Kernel;
 
-import java.util.Locale;
+import java.text.SimpleDateFormat;
+import java.util.List;
 
 /**
  * The adapter for the RecyclerView of the file-cards
  */
 public class CardFileAdapter extends RecyclerView.Adapter<CardFileAdapter.CardFileViewHolder> {
+
     /**
      * The option to have no selected card in the RecyclerView
      */
     private static final int NO_DETAILS = -1;
-    // TODO: Remove dummy amount
 
     /**
-     * A dummy amount for the amount of card that the RecyclerView manages
+     * The format of a date used in the cards
      */
-    private static final int DUMMY_AMOUNT = 0;
+    private final SimpleDateFormat mDateFormat = new SimpleDateFormat("E, dd MMM yyyy");
 
     /**
      * The amount of cards that the RecyclerView manages
      */
-    private int mAmount = DUMMY_AMOUNT;
+    private int mAmount = 0;
+
+    /**
+     * The data of the cached files
+     */
+    private List<CachedFileInfo> mCachedFileInfoList = null;
 
     /**
      * The index of the currently selected file (file card that is expanded)
@@ -44,16 +51,23 @@ public class CardFileAdapter extends RecyclerView.Adapter<CardFileAdapter.CardFi
      */
     private Kernel mKernel;
 
-    /**
-     * context for testing purposes
-     */
-    private Context mContext;
-
-    public CardFileAdapter(Kernel kernel, Context context) {
+    public CardFileAdapter(Kernel kernel, Context context, @NonNull List<CachedFileInfo> cachedFileInfoList) {
         // TODO: This could take an argument as input (which contains the recent files)
         // TODO: remove context variable if it is not needed by the test example anymore!
         mKernel = kernel;
-        mContext = context;
+        mCachedFileInfoList = cachedFileInfoList;
+        mAmount = mCachedFileInfoList.size();
+    }
+
+    /**
+     * Replaces the old list of info about the cached files with a new one
+     *
+     * @param cachedFileInfoList The new list which will replace the old one
+     */
+    public void updateData(@NonNull List<CachedFileInfo> cachedFileInfoList) {
+        mCachedFileInfoList = cachedFileInfoList;
+        mAmount = mCachedFileInfoList.size();
+        notifyDataSetChanged();
     }
 
     /**
@@ -98,11 +112,14 @@ public class CardFileAdapter extends RecyclerView.Adapter<CardFileAdapter.CardFi
      */
     public class CardFileViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener,
             View.OnLongClickListener {
-        private TextView mTextView;
+        /* UI related objects */
+        private TextView mTitleTextView;
+        private TextView mLastOpenedTextView;
         private CardView mCardView;
-        private int index;
 
-        // TODO: add fields for the details about the file
+        /* Data related objects */
+        private int index;
+        private CachedFileInfo mCachedFileInfo;
 
         /**
          * Constructor for the ViewHolder.
@@ -113,7 +130,8 @@ public class CardFileAdapter extends RecyclerView.Adapter<CardFileAdapter.CardFi
         public CardFileViewHolder(View itemView) {
             super(itemView);
             mCardView = itemView.findViewById(R.id.cv_file);
-            mTextView = itemView.findViewById(R.id.tv_card_title);
+            mTitleTextView = itemView.findViewById(R.id.tv_card_title);
+            mLastOpenedTextView = itemView.findViewById(R.id.tv_card_last_opened);
             // The card itself is clickable (for details), but also the open button.
             mCardView.setOnClickListener(this);
             mCardView.setOnLongClickListener(this);
@@ -128,8 +146,16 @@ public class CardFileAdapter extends RecyclerView.Adapter<CardFileAdapter.CardFi
          */
         public void bind(int i) {
             index = i;
+            mCachedFileInfo = mCachedFileInfoList.get(index);
+            String lastOpenedBase = mLastOpenedTextView.getResources().getString(R.string.file_last);
+
             // Set name of the correct file to the reused container.
-            mTextView.setText(String.format(Locale.getDefault(), "File %d", i));
+            mTitleTextView.setText(mCachedFileInfo.getFileDisplayName());
+            StringBuilder bld = new StringBuilder(lastOpenedBase)
+                    .append(" ")
+                    .append(mDateFormat.format(mCachedFileInfo.getLastOpened()));
+
+            mLastOpenedTextView.setText(bld.toString());
 
             /*
             If the card is the selected card, expand it (as it was when it was scrolled away
@@ -144,31 +170,19 @@ public class CardFileAdapter extends RecyclerView.Adapter<CardFileAdapter.CardFi
         }
 
         /**
-         * Defines what happens on click of the card. This can be a button or the card itself.
+         * Defines what happens on click of the card. This can only be the card itself
          *
          * @param view the view that received the click
          */
-        // TODO: onClick for the open button, onClick for the open with different plugin button, delete button
         @Override
         public void onClick(View view) {
+            if (view.getId() == mCardView.getId()) {
+                String displayName = mCachedFileInfo.getFileDisplayName();
+                String fileType = displayName.substring(displayName.lastIndexOf('.'));
 
-            // TODO add the case that view.getId() is R.id.button_card_file
-            // TODO update this preliminary code for opening a plugin.
-            // TODO this should make an event to open the cached file.
-            // Plugin should probably still be able to open this, but Souschef probably not
-
-            /* TODO Remove this test code
-            Eventually, here instead of opening a file, the cache will be called instead.
-            This is just a demonstration that it works.
-            TODO remove the 'mContext' variable from this class. It is used solely for demonstration purposes!
-
-            Note: this is basically mixed code as a result of a merge. This test code will be removed ASAP
-            */
-
-            mKernel.getAuroraCommunicator().openFileWithCache("4f352a7b_beefAndRiceCasserole.txt", "txt",
-                    "com.aurora.souschef");
-
-
+                mKernel.getAuroraCommunicator().openFileWithCache(mCachedFileInfo.getFileRef(), fileType,
+                        mCachedFileInfo.getUniquePluginName());
+            }
         }
 
         @Override
