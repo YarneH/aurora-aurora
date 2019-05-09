@@ -3,8 +3,13 @@ package com.aurora.aurora;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.provider.OpenableColumns;
 import android.support.design.widget.FloatingActionButton;
@@ -36,6 +41,7 @@ import com.aurora.internalservice.internalcache.CachedFileInfo;
 import com.aurora.kernel.AuroraCommunicator;
 import com.aurora.kernel.ContextNullException;
 import com.aurora.kernel.Kernel;
+import com.aurora.plugin.InternalServices;
 import com.aurora.plugin.Plugin;
 import com.google.firebase.analytics.FirebaseAnalytics;
 import io.reactivex.Observer;
@@ -57,8 +63,14 @@ import java.util.List;
  * Implements {@code NavigationView.OnNavigationItemSelectedListener} to listen to events
  * on the NavigationView.
  */
+@SuppressWarnings("squid:S1200")
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
+    /**
+     * Tag for logging
+     */
+    private static final String LOG_TAG = MainActivity.class.getSimpleName();
+
 
     /**
      * Constant for radix of Integer.toString()
@@ -133,11 +145,6 @@ public class MainActivity extends AppCompatActivity
                     "The kernel was not initialized with a valid android application context", e);
         }
 
-        /*
-        Set up plugins
-        TODO: Now this is static, later the pluginmarket should register new plugins.
-         */
-        registerPlugins();
 
         /* Setup RecyclerView */
         mRecyclerView = findViewById(R.id.rv_files);
@@ -248,40 +255,6 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    /**
-     * Helper method that register the plugins with their info in the pluginregistry
-     * TODO: when the pluginmarket is implemented, remove this method
-     */
-    private void registerPlugins() {
-        final Plugin basicPlugin = new Plugin(
-                "com.aurora.basicplugin",
-                "Basic Plugin",
-                null,
-                "Basic plugin to open any file and display extracted text.",
-                4,
-                "v0.4");
-
-        final Plugin souschefPlugin = new Plugin(
-                "com.aurora.souschef",
-                "Souschef",
-                null,
-                "Plugin to open recipes and display them in an enhanced way.",
-                4,
-                "v0.4");
-
-        final Plugin paperViewerPlugin = new Plugin(
-                "com.aurora.paperviewer",
-                "Paperviewer",
-                null,
-                "Plugin to open papers and display them in an enhanced way.",
-                4,
-                "v0.4");
-
-        // Register plugins in the registry
-        mAuroraCommunicator.registerPlugin(basicPlugin);
-        mAuroraCommunicator.registerPlugin(souschefPlugin);
-        mAuroraCommunicator.registerPlugin(paperViewerPlugin);
-    }
 
     /**
      * Creates an intent to open the file manager.
@@ -362,27 +335,142 @@ public class MainActivity extends AppCompatActivity
                     // Create intent to open file with a certain plugin
                     Intent pluginAction = new Intent(Constants.PLUGIN_ACTION);
 
-                    // Create chooser to let user choose the plugin
-                    Intent chooser = Intent.createChooser(pluginAction, getString(R.string.select_plugin));
-                    mAuroraCommunicator.openFileWithPluginChooser(fileName, type,
-                            read, pluginAction, chooser);
-                    /*
-                    // For now hard coded constant
-                    String uniquePluginName = "com.aurora.basicplugin";
+                    pluginAction.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    pluginAction.setType("*/*");
 
-                    mAuroraCommunicator.openFileWithPlugin(textFile.toString(), type,
-                            read, uniquePluginName, getApplicationContext());
-                    */
+
+                    // Look for plugins that can answer the pluginAction
+                    PackageManager manager = getPackageManager();
+                    List<ResolveInfo> infos = manager.queryIntentActivities(pluginAction,
+                            PackageManager.MATCH_DEFAULT_ONLY);
+
+                    if (!infos.isEmpty()) {
+                        List<String> packageNames = new ArrayList<>();
+                        for (ResolveInfo info : infos) {
+                            Log.i(LOG_TAG,
+                                    "Found Plugin: " + info.activityInfo.packageName +
+                                            " - " + info.getIconResource());
+                            packageNames.add(info.activityInfo.packageName);
+                        }
+                        // Get a list of filled in Plugin objects
+                        List<Plugin> plugins = getPlugins(packageNames);
+                        // Show the chooser
+                        showPluginAdapterAlertDialog(plugins, fileName, type, read);
+
+                    } else {
+                        Log.i(LOG_TAG, "NO PLUGINS FOUND");
+                        showPopUpView("No plugins were found");
+                    }
+
 
                 } else {
                     showPopUpView("The selected file was null, please select another file!");
                 }
             } catch (FileNotFoundException e) {
                 showPopUpView("The file could not be found, please select another file!");
-                Log.e("FILE_NOT_FOUND", "The file could not be found", e);
+                Log.e(LOG_TAG, "The file could not be found", e);
             }
         }
     }
+
+    /**
+     * Get all plugins on device and their info form their packageNames
+     *
+     * @param packageNames  The packageNames of the plugins that where found using Intent querying
+     * @return              The list of plugins that were resolved
+     */
+    private List<Plugin> getPlugins(List<String> packageNames){
+        List<Plugin> plugins = new ArrayList<>();
+        PackageManager packageManager = getPackageManager();
+
+        for(String packageName : packageNames){
+            // Get the ApplicationInfo and PackageInfo to get the attributes of the Plugin
+            ApplicationInfo applicationInfo = null;
+            PackageInfo packageInfo = null;
+            try {
+                 applicationInfo = packageManager.getApplicationInfo(packageName,
+                         PackageManager.GET_META_DATA);
+                 packageInfo = packageManager.getPackageInfo(packageName, 0);
+            } catch (final PackageManager.NameNotFoundException e) {
+                Log.e(LOG_TAG, "Package not found", e);
+            }
+
+            plugins.add(createPlugin(packageName, applicationInfo, packageInfo, packageManager));
+        }
+
+        return plugins;
+    }
+
+    /**
+     * Create a Plugin object with info obtained from a packageName
+     *
+     * @param packageName name of the plugin's package
+     * @param applicationInfo          ApplicationInfo obtained for the package
+     * @param packageInfo          PackageInfo obtained for the package
+     * @param packageManager          A packageManager to resolve some final info
+     * @return
+     */
+    private Plugin createPlugin(String packageName, ApplicationInfo applicationInfo,
+                                PackageInfo packageInfo, PackageManager packageManager){
+        // Create the Plugin object
+        Plugin plugin;
+        if (applicationInfo != null && packageInfo != null) {
+            // Get the requested Internal Services for preprocessing
+            List<InternalServices> internalServices = new ArrayList<>();
+            for (InternalServices internalService : InternalServices.values()){
+                if (applicationInfo.metaData.getBoolean(internalService.name())){
+                    internalServices.add(internalService);
+                }
+            }
+            // Get the version code without deprecation:
+            int versionCode;
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.P){
+                versionCode = packageInfo.versionCode;
+            } else {
+                versionCode = (int) packageInfo.getLongVersionCode();
+            }
+
+            // Create the plugin
+            plugin = new Plugin(packageName, (String) packageManager.getApplicationLabel(
+                    applicationInfo), null, (String) applicationInfo.loadDescription(
+                            packageManager), versionCode, packageInfo.versionName, internalServices);
+        } else {
+            plugin = new Plugin(packageName, packageName.substring(
+                    packageName.lastIndexOf('.') + 1), null, null, 0, "");
+        }
+        return plugin;
+    }
+
+
+    /**
+     *
+     * @param plugins       The plugins to be offered in the chooser dialog
+     * @param fileName      The name of the file to be opened
+     * @param type          The MIME type of the file to be opened
+     * @param readFile      An InputStream to the read file
+     */
+    private void showPluginAdapterAlertDialog(List<Plugin> plugins, String fileName, String type,
+                                              InputStream readFile) {
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        // Set title value.
+        builder.setTitle(getString(R.string.select_plugin));
+        // Set adapter and define the onClickListener
+        builder.setAdapter(new PluginAdapter(plugins, this), (
+                DialogInterface dialogInterface, int itemIndex) -> {
+                    if (plugins.get(itemIndex).getUniqueName() != null) {
+                        Plugin selectedPlugin = plugins.get(itemIndex);
+                        Log.i(LOG_TAG, "Selected Plugin: " + selectedPlugin.getUniqueName());
+                        mAuroraCommunicator.openFileWithPlugin(fileName, type, readFile,
+                                selectedPlugin);
+                    }
+        });
+
+        builder.setCancelable(true);
+        builder.create();
+        builder.show();
+    }
+
 
     /**
      * Private helper method to extract the displayed filename from the Cursor combined with the

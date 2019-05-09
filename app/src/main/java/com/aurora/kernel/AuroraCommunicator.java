@@ -1,7 +1,6 @@
 package com.aurora.kernel;
 
 import android.content.Context;
-import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.util.Log;
 import android.widget.Toast;
@@ -16,19 +15,14 @@ import com.aurora.kernel.event.InternalProcessorResponse;
 import com.aurora.kernel.event.ListPluginsRequest;
 import com.aurora.kernel.event.ListPluginsResponse;
 import com.aurora.kernel.event.OpenCachedFileWithPluginRequest;
-import com.aurora.kernel.event.OpenFileWithPluginChooserRequest;
 import com.aurora.kernel.event.OpenFileWithPluginRequest;
 import com.aurora.kernel.event.QueryCacheRequest;
 import com.aurora.kernel.event.QueryCacheResponse;
 import com.aurora.kernel.event.RetrieveFileFromCacheRequest;
 import com.aurora.kernel.event.RetrieveFileFromCacheResponse;
-import com.aurora.kernel.event.UpdateCachedFileDateRequest;
-import com.aurora.plugin.InternalServices;
 import com.aurora.plugin.Plugin;
 
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import io.reactivex.Observable;
@@ -88,14 +82,13 @@ public class AuroraCommunicator extends Communicator {
      * the text from the given file reference,
      * then it will send a request to let the plugin make the representation.
      *
-     * @param fileRef          a reference to the file that needs to be opened
-     * @param fileType         the file type
-     * @param file             the input stream of the file
-     * @param uniquePluginName the (unique) name of the plugin to open the file with. This should be obtained from
-     *                         the own chooser.
+     * @param fileRef            a reference to the file that needs to be opened
+     * @param fileType           the file type
+     * @param file               the input stream of the file
+     * @param plugin             the plugin to open the file with.
      */
     public void openFileWithPlugin(String fileRef, String fileType, InputStream file,
-                                   String uniquePluginName) {
+                                   Plugin plugin) {
 
         // Register observable
         Observable<InternalProcessorResponse> internalProcessorResponseObservable =
@@ -107,77 +100,21 @@ public class AuroraCommunicator extends Communicator {
                 .map(InternalProcessorResponse::getExtractedText)
                 .take(1)
                 .subscribe((ExtractedText extractedText) ->
-                                sendOpenFileRequest(extractedText, uniquePluginName)
+                                sendOpenFileRequest(extractedText, plugin.getUniqueName())
                         , (Throwable e) ->
                                 Log.e(CLASS_TAG,
                                         "Something went wrong when receiving the internally processed file.", e)
                 );
 
 
-        // TODO: this is bypass code. As soon as plugins are registered in the registry, this should be removed
-        List<InternalServices> internalServices =
-                new ArrayList<>(Arrays.asList(
-                        InternalServices.TEXT_EXTRACTION,
-                        InternalServices.IMAGE_EXTRACTION,
-                        InternalServices.NLP_TOKENIZE,
-                        InternalServices.NLP_SSPLIT,
-                        InternalServices.NLP_POS
-                ));
         InternalProcessorRequest internalProcessorRequest =
-                new InternalProcessorRequest(fileRef, fileType, file, internalServices);
+                new InternalProcessorRequest(fileRef, fileType, file, plugin.getInternalServices());
 
         // Post request on the bus
         mBus.post(internalProcessorRequest);
     }
 
-    //TODO: delete once custom pluginPicker is finished
 
-    /**
-     * Open file with a given plugin. This method will first extract
-     * the text from the given file reference,
-     * then it will send a request to let the plugin make the representation.
-     *
-     * @param fileRef      a reference to the file that needs to be opened
-     * @param fileType     the file type
-     * @param file         the input stream of the file
-     * @param pluginAction the target plugin that was selected by the user
-     * @param chooser      the chooser intent used for opening the plugin
-     */
-    public void openFileWithPluginChooser(String fileRef, String fileType, InputStream file,
-                                          Intent pluginAction, Intent chooser) {
-
-        // Register observable
-        Observable<InternalProcessorResponse> internalProcessorResponseObservable =
-                mBus.register(InternalProcessorResponse.class);
-
-        // Subscribe to observable
-        // The subscribe will only be triggered after the file was processed internally
-        internalProcessorResponseObservable
-                .map(InternalProcessorResponse::getExtractedText)
-                .take(1)
-                .subscribe((ExtractedText extractedText) ->
-                                sendOpenFileChooserRequest(extractedText, pluginAction, chooser)
-                        , (Throwable e) ->
-                                Log.e(CLASS_TAG,
-                                        "Something went wrong when receiving the internally processed file.", e)
-                );
-
-
-        // TODO: this is bypass code. As soon as plugins are registered in the registry, this should be removed
-        List<InternalServices> internalServices =
-                new ArrayList<>(Arrays.asList(
-                        InternalServices.TEXT_EXTRACTION,
-                        InternalServices.IMAGE_EXTRACTION,
-                        InternalServices.NLP_TOKENIZE,
-                        InternalServices.NLP_SSPLIT,
-                        InternalServices.NLP_POS
-                ));
-        InternalProcessorRequest internalProcessorRequest =
-                new InternalProcessorRequest(fileRef, fileType, file, internalServices);
-
-        // Post request on the bus
-        mBus.post(internalProcessorRequest);
-    }
 
 
     /**
@@ -282,23 +219,6 @@ public class AuroraCommunicator extends Communicator {
         mBus.post(openFileWithPluginRequest);
     }
 
-    //TODO delete when there is a custom picker
-
-    /**
-     * Private handle method to send request to plugin communicator to open file with plugin
-     *
-     * @param extractedText the extracted text of the file that was internally processed
-     * @param pluginAction  the target intent of the chooser
-     * @param chooser       the plugin that the user selected
-     */
-    private void sendOpenFileChooserRequest(final ExtractedText extractedText, final Intent pluginAction,
-                                            final Intent chooser) {
-
-        // Create request and post it on bus
-        OpenFileWithPluginChooserRequest openFileWithPluginChooserRequest =
-                new OpenFileWithPluginChooserRequest(extractedText, pluginAction, chooser, mContext);
-        mBus.post(openFileWithPluginChooserRequest);
-    }
 
     /**
      * Private handle method to send request to plugin communicator to open an already cached file with plugin.
