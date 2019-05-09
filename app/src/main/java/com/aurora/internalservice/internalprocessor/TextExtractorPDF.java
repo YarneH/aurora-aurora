@@ -18,7 +18,7 @@ public class TextExtractorPDF implements TextExtractor {
      * @return the extracted text from the file on fileRef
      */
     @Override
-    public ExtractedText extract(InputStream file, String fileRef, boolean extractImages){
+    public ExtractedText extract(InputStream file, String fileRef, boolean extractImages) throws DocumentNotSupportedException {
         PDFContentExtractor reader = new PDFContentExtractor();
         PdfReader pdfreader;
         ParsedPDF parsedPDF = new ParsedPDF();

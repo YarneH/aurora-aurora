@@ -11,6 +11,7 @@ package com.aurora.internalservice.internalprocessor.pdfparsing;
 
 import android.util.Log;
 
+import com.aurora.internalservice.internalprocessor.DocumentNotSupportedException;
 import com.itextpdf.text.pdf.PdfArray;
 import com.itextpdf.text.pdf.PdfDictionary;
 import com.itextpdf.text.pdf.PdfName;
@@ -52,15 +53,14 @@ public class PDFContentExtractor {
      * @since 5.0.5
      */
     public void extractContent(PdfReader reader, ParsedPDF parsedPDF)
-            throws IOException {
+            throws IOException, DocumentNotSupportedException {
         this.mParsedPDF = parsedPDF;
-        // TODO: Error if not possible
-        Log.d("TAGGED", Boolean.toString(reader.isTagged()));
         PdfDictionary catalog = reader.getCatalog();
         // get the StructTreeRoot from the root object
         PdfDictionary struct = catalog.getAsDict(PdfName.STRUCTTREEROOT);
-        if (struct == null) {
-            Log.e("PDF text extraction", "Could not receive struct");
+        if (struct == null || !reader.isTagged()) {
+            throw new DocumentNotSupportedException("The opened PDF document is not supported " +
+                    "because it is not tagged");
         } else {
             // Inspect the child or children of the StructTreeRoot
             inspectChild(struct.getDirectObject(PdfName.K), "");

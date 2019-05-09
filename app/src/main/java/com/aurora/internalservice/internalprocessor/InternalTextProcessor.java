@@ -29,7 +29,7 @@ public class InternalTextProcessor implements InternalService {
      */
     public ExtractedText processFile(InputStream file, String fileRef, String type,
                                      boolean extractImages)
-            throws FileTypeNotSupportedException {
+            throws FileTypeNotSupportedException, DocumentNotSupportedException {
         ExtractedText extractedText;
         TextExtractor extractor = fileFormatExtractorMap.get(type);
         if (extractor != null) {
@@ -41,7 +41,8 @@ public class InternalTextProcessor implements InternalService {
             }
         } else {
             Log.d("InternalTextProcessor", "File type not supported");
-            throw new FileTypeNotSupportedException("");
+            throw new FileTypeNotSupportedException("You have opened a file with type: " + type +
+                    "\n This type is not supported.");
         }
         return extractedText;
     }
