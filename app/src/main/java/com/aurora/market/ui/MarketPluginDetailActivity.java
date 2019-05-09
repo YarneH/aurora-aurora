@@ -12,9 +12,12 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.FileProvider;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
@@ -24,16 +27,9 @@ import android.view.MenuItem;
 
 import com.aurora.aurora.R;
 import com.aurora.market.data.database.MarketPlugin;
-import edu.stanford.nlp.ling.tokensregex.Env;
 
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.InputStream;
-import java.net.HttpURLConnection;
 import java.net.URL;
-import java.net.URLConnection;
-import java.util.Arrays;
-import java.util.List;
 
 /**
  * An activity representing a single MarketPlugin detail screen. This
@@ -42,6 +38,17 @@ import java.util.List;
  * in a {@link MarketPluginListActivity}.
  */
 public class MarketPluginDetailActivity extends AppCompatActivity {
+    /**
+     * The request code used for requesting the writing and reading external storage permission
+     */
+    private final static int WRITE_AND_READ_REQUEST_CODE = 9999;
+    /**
+     * The request code used for installing a plugin
+     */
+    private final static int INSTALL_PLUGIN_REQUEST_CODE = 1234;
+    /**
+     * The MarketPlugin which is represented by the current DetailActivity
+     */
     private MarketPlugin mMarketPlugin = null;
 
     @Override
@@ -52,6 +59,7 @@ public class MarketPluginDetailActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
 
         Activity activity = this;
+
         // Setup the FAB for downloading the Plugin
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab_download_plugin);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -59,15 +67,19 @@ public class MarketPluginDetailActivity extends AppCompatActivity {
             public void onClick(View view) {
                 Snackbar.make(view, "This will download the plugin", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
-                int test = 9999;
 
-                Boolean readPermission = ActivityCompat.checkSelfPermission(activity, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED;
-                Boolean writePermission = ActivityCompat.checkSelfPermission(activity, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED;
+                // Check if the permissions for reading and writing are acquired
+                Boolean readPermission = ActivityCompat.checkSelfPermission(
+                        activity, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED;
+                Boolean writePermission = ActivityCompat.checkSelfPermission(
+                        activity, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED;
 
+                // Ask the permissions if needed, otherwise download the MarketPlugin
                 if (!readPermission || !writePermission) {
-                    ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE}, test);
+                    ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE}, WRITE_AND_READ_REQUEST_CODE);
+                } else {
+                    new DownloadAndInstallPluginTask().execute(mMarketPlugin.getDownloadLink());
                 }
-                new DownloadPluginTask().execute(mMarketPlugin.getDownloadLink());
             }
         });
 
@@ -95,7 +107,20 @@ public class MarketPluginDetailActivity extends AppCompatActivity {
                     .commit();
         }
 
+        // Save the MarketPlugin
         mMarketPlugin = (MarketPlugin) getIntent().getSerializableExtra(MarketPluginDetailFragment.ARG_MARKET_PLUGIN);
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        if (requestCode == WRITE_AND_READ_REQUEST_CODE) {
+            // Check if the write and read request are granted
+            if (grantResults.length > 1 && grantResults[0] == PackageManager.PERMISSION_GRANTED && grantResults[1] == PackageManager.PERMISSION_GRANTED) {
+                // Download the plugin
+                new DownloadAndInstallPluginTask().execute(mMarketPlugin.getDownloadLink());
+            }
+        }
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
 
     @Override
@@ -109,10 +134,19 @@ public class MarketPluginDetailActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        if (requestCode == INSTALL_PLUGIN_REQUEST_CODE) {
+            // TODO: Delete downloaded apk!
+        }
+        super.onActivityResult(requestCode, resultCode, data);
+    }
 
-    private class DownloadPluginTask extends AsyncTask<URL, Void, Void> {
+    /**
+     * A AsyncTask that will download an install a plugin from the market
+     */
+    private class DownloadAndInstallPluginTask extends AsyncTask<URL, Void, Void> {
 
-        // TODO: show loading screen
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
@@ -129,51 +163,57 @@ public class MarketPluginDetailActivity extends AppCompatActivity {
                         DownloadManager.Request.NETWORK_MOBILE);
 
                 // Set title and description
-                request.setTitle("souschef.apk");
-                request.setDescription("Downloading the new plugin!");
+                request.setTitle(mMarketPlugin.getPluginName() + ".apk");
+                request.setDescription(getResources().getString(R.string.download_plugin));
 
                 request.allowScanningByMediaScanner();
                 request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE);
 
                 // Set the local destination for download file to a path within the application's external files directory
-                request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, "souschef.apk");
+                request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, mMarketPlugin.getPluginName() + ".apk");
                 request.setMimeType("application/vnd.android.package-archive");
 
+                // Save the downloadID for later
                 long downloadID = downloadManager.enqueue(request);
 
                 BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
                     @Override
                     public void onReceive(Context context, Intent intent) {
-                        // TODO: Fix this, look into PackageInstaller
                         long id = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1);
                         if (id == downloadID) {
-                            Intent installIntent = new Intent(Intent.ACTION_VIEW);
-                            String path = Environment.getDataDirectory() + File.pathSeparator + Environment.DIRECTORY_DOWNLOADS + File.separator + "souschef.apk";
-                            File test = new File(Environment.getExternalStorageDirectory() + "/download/" + "souschef.apk");
-                            //installIntent.setDataAndType(Uri.fromFile(new File(Environment.DIRECTORY_DOWNLOADS + "/souschef.apk")), "application/vnd.android.package-archive");
-                            intent.setDataAndType(Uri.fromFile(new File(Environment.getExternalStorageDirectory() + "/download/" + "paperviewer.apk")), downloadManager.getMimeTypeForDownloadedFile(id));
+                            Intent installIntent = new Intent(Intent.ACTION_INSTALL_PACKAGE);
+
+                            // Build up the path to the downloaded plugin
+                            StringBuilder pathBuilder = new StringBuilder(Environment.getExternalStorageDirectory().toString())
+                                    .append(File.pathSeparator)
+                                    .append(Environment.DIRECTORY_DOWNLOADS)
+                                    .append(File.separator)
+                                    .append(mMarketPlugin.getPluginName())
+                                    .append(".apk");
+
+                            String path = pathBuilder.toString();
+
+                            // Get the URI of the downloaded apk and prepare intent
+                            Uri apkURI = FileProvider.getUriForFile(context,
+                                    context.getApplicationContext().getPackageName() + ".provider",
+                                    new File(path));
+                            installIntent.setDataAndType(apkURI, "application/vnd.android.package-archive");
                             installIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                            startActivity(installIntent);
+                            installIntent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                            startActivityForResult(installIntent, INSTALL_PLUGIN_REQUEST_CODE);
+                            unregisterReceiver(this);
                         }
                     }
                 };
                 registerReceiver(broadcastReceiver, new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
-
-                //Intent intent = new Intent(Intent.ACTION_VIEW);
-                //intent.setDataAndType(Uri.fromFile(new File(Environment.getExternalStorageDirectory() + "/download/" + "app.apk")), "application/vnd.android.package-archive");
-                //intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                //startActivity(intent);
             } catch (Exception e) {
                 Log.e("Download", "exception", e);
             }
-
             return null;
         }
 
-        // TODO: delete file and stop loading screen
         @Override
         protected void onPostExecute(Void aVoid) {
-            Log.d("Download", "finished");
             super.onPostExecute(aVoid);
         }
     }
