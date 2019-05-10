@@ -3,6 +3,7 @@ package com.aurora.auroralib;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.util.Base64;
+import android.util.Log;
 
 import com.google.gson.TypeAdapter;
 import com.google.gson.stream.JsonReader;
@@ -22,6 +23,9 @@ import java.util.List;
  */
 @SuppressWarnings("unused")
 public class BitmapListAdapter extends TypeAdapter {
+
+    private static final String LOG_TAG = BitmapListAdapter.class.getSimpleName();
+
     /**
      * Writes one JSON value (an array, object, string, number, boolean or null)
      * for {@code value}.
@@ -31,21 +35,29 @@ public class BitmapListAdapter extends TypeAdapter {
      */
     @Override
     public void write(JsonWriter out, Object value) throws IOException {
-        List<Bitmap> bitmapList = (ArrayList) value;
+        if(!(value instanceof List)) {
+            Log.e(LOG_TAG, "Using BitmapListAdapter on an Object that is not a List");
+        } else if( !((List) value).isEmpty() && !(((List) value).get(0) instanceof Bitmap)) {
+            Log.e(LOG_TAG, "Using BitmapListAdapter on a List that does not contain Bitmaps");
+        } else {
+            List<Bitmap> bitmapList = (ArrayList<Bitmap>) value;
 
-        // Starts a jsonArray
-        out.beginArray();
+            // Starts a jsonArray
+            out.beginArray();
 
-        // For each bitmap in the list, add it base64 encoded to the array
-        for (Bitmap bitmap: bitmapList) {
-            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-            bitmap.compress(Bitmap.CompressFormat.PNG, 100, byteArrayOutputStream);
-            byte[] byteArray = byteArrayOutputStream.toByteArray();
-            out.value(Base64.encodeToString(byteArray, Base64.DEFAULT));
+            // For each bitmap in the list, add it base64 encoded to the array
+            for (Bitmap bitmap: bitmapList) {
+                ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+                bitmap.compress(Bitmap.CompressFormat.PNG, 100, byteArrayOutputStream);
+                byte[] byteArray = byteArrayOutputStream.toByteArray();
+                out.value(Base64.encodeToString(byteArray, Base64.DEFAULT));
+            }
+
+            //Ends the jsonArray
+            out.endArray();
         }
 
-        //Ends the jsonArray
-        out.endArray();
+
     }
 
     /**
