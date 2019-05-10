@@ -11,6 +11,7 @@ import com.aurora.auroralib.ServiceCaller;
 import com.aurora.internalservice.internaltranslation.ITranslate;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class TranslationServiceCaller extends ServiceCaller {
@@ -119,12 +120,19 @@ public class TranslationServiceCaller extends ServiceCaller {
      * A private thread class that will cache the file in another thread to avoid blocking of the main thread
      */
     private class TranslateThread extends Thread {
+        /**
+         * Loose bound on the maximum request size: As soon as the translation request includes more
+         * than this number of characters, it will be sent as a separate request. (The longest request
+         * possible includes 2 * MAX_REQUEST_SIZE characters. This happens when a sentence of
+         * length MAX_REQUEST_SIZE is added and the currentRequestSize in
+         * {@link TranslateThread#createSmallerRequests(List)} also is MAX_REQUEST_SIZE.)
+         */
         private static final int MAX_REQUEST_SIZE = 1000;
 
         /**
          * Translated sentences
          */
-        private List<String> mTranslatedSentences = new ArrayList<>();
+        private List<String> mTranslatedSentences = null;
 
         /**
          * Sentences to be translated
@@ -179,10 +187,12 @@ public class TranslationServiceCaller extends ServiceCaller {
 
 
         /**
-         * Helper method that waits until the translation service is connected if necessary
+         * Helper method that waits until the translation service is connected if necessary.
+         * This is needed in run() in case {@link TranslateThread#mTranslateBinding} == null.
          *
          * @return                  The list of translated sentences
-         * @throws RemoteException
+         * @throws RemoteException  Happens when a RemoteException occurs in
+         *                          {@link TranslateThread#executeTranslateRequest()}
          */
         private List<String> translateAfterConnected() throws RemoteException {
             synchronized (mMonitor) {
@@ -208,45 +218,80 @@ public class TranslationServiceCaller extends ServiceCaller {
          * request and then executing the smaller requests and concatenating their results
          *
          * @return                  The list of all translated sentences
-         * @throws RemoteException
+         * @throws RemoteException  Happens when a RemoteException occurs in
+         *                          {@link TranslationServiceCaller#translate(List, String, String)}
          */
         private List<String> executeTranslateRequest() throws RemoteException {
-            List<String> translatedSentences = new ArrayList<>();
+            List<String> translatedSentences = null;
 
-            List<List<String>> smallerRequestList = createSmallerRequests(mSentences);
-            for (List<String> requestSentences : smallerRequestList){
-                Log.d(LOG_TAG, "Small request: " + requestSentences);
-                translatedSentences.addAll(mTranslateBinding.translate(requestSentences,
-                        mSourceLanguage, mDestinationLanguage));
+            List<List<String>> smallerRequestList = null;
+            try {
+                smallerRequestList = createSmallerRequests(mSentences);
+                translatedSentences = new ArrayList<>();
+                for (List<String> requestSentences : smallerRequestList){
+                    if (!smallerRequestList.isEmpty()) {
+                        Log.d(LOG_TAG, "Small request: " + requestSentences);
+                        translatedSentences.addAll(mTranslateBinding.translate(requestSentences,
+                                mSourceLanguage, mDestinationLanguage));
+                    }
+                }
+
+            } catch (TranslationSentenceTooLongException e) {
+                Log.e(LOG_TAG, e.getMessage());
             }
-
-            Log.d(LOG_TAG, "" + translatedSentences);
             return translatedSentences;
+
         }
+
 
         /**
          * Helper method to split a big translate request
          *
-         * @param allSentences  List of all sentences to be translated
-         * @return              List of smaller lists of sentences, with total character length
-         *                      around MAX_REQUEST_SIZE
+         * @param allSentences                          List of all sentences to be translated
+         * @return                                      List of smaller lists of sentences, with
+         *                                              total character length
+         *                                              around MAX_REQUEST_SIZE
+         * @throws TranslationSentenceTooLongException  Occurs when a provided sentence is longer
+         *                                              than MAX_REQUEST_SIZE and cannot be split
+         *                                              into smaller sentences
          */
-        private List<List<String>> createSmallerRequests(List<String> allSentences){
+        private List<List<String>> createSmallerRequests(List<String> allSentences)
+                throws TranslationSentenceTooLongException{
             List<List<String>> smallerRequestList = new ArrayList<>();
 
+            // This is calculated as the total number of characters of the sentences in this request
             int currentRequestSize = 0;
+
             List<String> currentRequestList = new ArrayList<>();
             for (String sentence : allSentences){
-                currentRequestSize += sentence.length();
-                Log.d("CURRENT_REQUEST_SIZE", "" + currentRequestSize);
-                currentRequestList.add(sentence);
 
-                if (currentRequestSize > MAX_REQUEST_SIZE){
-                    Log.d("TOO_BIG_REQUEST_SIZE", "" + currentRequestSize);
-                    Log.d("CURRENT_REQUEST", "" + currentRequestList);
-                    smallerRequestList.add(currentRequestList);
-                    currentRequestList = new ArrayList<>();
-                    currentRequestSize = 0;
+                //Very long sentence
+                if (sentence.length() > MAX_REQUEST_SIZE){
+                    // Split on dots, but keep dots in resulting strings
+                    String[] splitSentences = sentence.split("(?<=\\.)");
+                    if (splitSentences.length > 1){
+                        //Add the currentRequestList if it is not empty to the smallerRequestList
+                        if (!currentRequestList.isEmpty()) {
+                            smallerRequestList.add(currentRequestList);
+                            currentRequestList = new ArrayList<>();
+                            currentRequestSize = 0;
+                        }
+                        // Recursive call taking the split sentences as an argument
+                        Log.d(LOG_TAG, "Using recursive call for creating smaller translation " +
+                                "requests due to a long sentence.");
+                        smallerRequestList.addAll(createSmallerRequests(Arrays.asList(splitSentences)));
+                    } else {
+                        throw new TranslationSentenceTooLongException(sentence);
+                    }
+                } else {
+                    // Regular case of adding sentences.
+                    currentRequestSize += sentence.length();
+                    currentRequestList.add(sentence);
+                    if (currentRequestSize > MAX_REQUEST_SIZE) {
+                        smallerRequestList.add(currentRequestList);
+                        currentRequestList = new ArrayList<>();
+                        currentRequestSize = 0;
+                    }
                 }
             }
             if (!currentRequestList.isEmpty()){
