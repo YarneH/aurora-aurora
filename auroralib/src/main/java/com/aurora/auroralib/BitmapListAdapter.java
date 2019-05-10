@@ -1,4 +1,4 @@
-package com.aurora.auroralib.translation;
+package com.aurora.auroralib;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -21,7 +21,7 @@ import java.util.List;
  *
  */
 @SuppressWarnings("unused")
-public class BitMapListAdapter extends TypeAdapter {
+public class BitmapListAdapter extends TypeAdapter {
     /**
      * Writes one JSON value (an array, object, string, number, boolean or null)
      * for {@code value}.
