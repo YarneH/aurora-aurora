@@ -5,8 +5,8 @@ package com.aurora.auroralib.translation;
  * request
  */
 public class TranslationSentenceTooLongException extends Exception {
-    private static final String sMsg = "Translation sentence too long: ";
-    private String mSentence;
+    private static final String MSG = "Translation sentence too long: ";
+    private final String mSentence;
 
     public TranslationSentenceTooLongException(String sentence){
         this.mSentence = sentence;
@@ -15,7 +15,7 @@ public class TranslationSentenceTooLongException extends Exception {
 
     @Override
     public String getMessage(){
-        return sMsg + mSentence;
+        return MSG + mSentence;
     }
 
 }

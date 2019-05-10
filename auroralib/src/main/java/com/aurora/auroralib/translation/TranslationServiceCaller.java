@@ -267,15 +267,15 @@ public class TranslationServiceCaller extends ServiceCaller {
 
                 //Very long sentence
                 if (sentence.length() > MAX_REQUEST_SIZE){
+                    //Add the currentRequestList if it is not empty to the smallerRequestList
+                    if (!currentRequestList.isEmpty()) {
+                        smallerRequestList.add(currentRequestList);
+                        currentRequestList = new ArrayList<>();
+                        currentRequestSize = 0;
+                    }
                     // Split on dots, but keep dots in resulting strings
                     String[] splitSentences = sentence.split("(?<=\\.)");
                     if (splitSentences.length > 1){
-                        //Add the currentRequestList if it is not empty to the smallerRequestList
-                        if (!currentRequestList.isEmpty()) {
-                            smallerRequestList.add(currentRequestList);
-                            currentRequestList = new ArrayList<>();
-                            currentRequestSize = 0;
-                        }
                         // Recursive call taking the split sentences as an argument
                         Log.d(LOG_TAG, "Using recursive call for creating smaller translation " +
                                 "requests due to a long sentence.");
@@ -294,11 +294,11 @@ public class TranslationServiceCaller extends ServiceCaller {
                     }
                 }
             }
+            // Add the final currentRequestList
             if (!currentRequestList.isEmpty()){
                 smallerRequestList.add(currentRequestList);
             }
             return smallerRequestList;
         }
-
     }
 }
