@@ -83,7 +83,7 @@ public class MainActivity extends AppCompatActivity
      */
     private static final int REQUEST_FILE_GET = 1;
     private static final int ANIMATION_DURATION = 500;
-    private static final float END_POINT_OF_ANIMATION = 0.2f;
+    private static final float END_POINT_OF_ANIMATION = 0.2F;
 
 
     /**
