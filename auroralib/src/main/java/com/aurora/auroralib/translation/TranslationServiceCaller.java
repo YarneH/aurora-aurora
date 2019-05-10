@@ -119,7 +119,7 @@ public class TranslationServiceCaller extends ServiceCaller {
      * A private thread class that will cache the file in another thread to avoid blocking of the main thread
      */
     private class TranslateThread extends Thread {
-        private static final int MAX_REQUEST_SIZE = 200;
+        private static final int MAX_REQUEST_SIZE = 1000;
 
         /**
          * Translated sentences
@@ -219,7 +219,7 @@ public class TranslationServiceCaller extends ServiceCaller {
                 translatedSentences.addAll(mTranslateBinding.translate(requestSentences,
                         mSourceLanguage, mDestinationLanguage));
             }
-            
+
             Log.d(LOG_TAG, "" + translatedSentences);
             return translatedSentences;
         }
