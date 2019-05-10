@@ -24,7 +24,15 @@ import java.util.List;
 @SuppressWarnings("unused")
 public class BitmapListAdapter extends TypeAdapter {
 
+    /**
+     * Tag for logging
+     */
     private static final String LOG_TAG = BitmapListAdapter.class.getSimpleName();
+
+    /**
+     * Bitmap to byteArray compression quality
+     */
+    private static final int COMPRESSION_QUALITY = 100;
 
     /**
      * Writes one JSON value (an array, object, string, number, boolean or null)
