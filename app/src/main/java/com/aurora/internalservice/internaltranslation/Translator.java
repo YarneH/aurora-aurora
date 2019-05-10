@@ -65,6 +65,9 @@ public class Translator implements InternalService {
      */
     private TranslationResponse mInternalResponse;
 
+    /**
+     * The tag of this class for logging purposes
+     */
     private final String LOG_TAG = Translator.class.getSimpleName();
 
     public Translator(RequestQueue requestQueue) {
