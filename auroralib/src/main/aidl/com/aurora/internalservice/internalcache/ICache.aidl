@@ -9,5 +9,7 @@ interface ICache {
      * Caches a pluginObject in JSON format
      * returns a statuscode
      */
-    int cache(String fileName, String pluginObject, String uniquePluginName);
+    int cache(String fileName, String pluginObject, String uniquePluginName, in Intent intent);
+
+    Intent getWritePermissionIntent();
 }

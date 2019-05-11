@@ -2,13 +2,20 @@ package com.aurora.auroralib.cache;
 
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.IBinder;
+import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
 import com.aurora.auroralib.ServiceCaller;
 import com.aurora.internalservice.internalcache.ICache;
+
+import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
 
 public class CacheServiceCaller extends ServiceCaller {
     /**
@@ -69,7 +76,8 @@ public class CacheServiceCaller extends ServiceCaller {
      * @return status code of the cache operation from Cache Service in Aurora Internal Services
      */
     private int cache(@NonNull String fileName, @NonNull String uniquePluginName, @NonNull String pluginObjectJSON) {
-        CacheThread cacheThread = new CacheThread(fileName, uniquePluginName, pluginObjectJSON);
+        CacheThread cacheThread = new CacheThread(mAppContext, fileName, uniquePluginName,
+                pluginObjectJSON);
         cacheThread.start();
         try {
             cacheThread.join();
@@ -114,12 +122,17 @@ public class CacheServiceCaller extends ServiceCaller {
      * A private thread class that will cache the file in another thread to avoid blocking of the main thread
      */
     private class CacheThread extends Thread {
+
+        private Context mContext;
+
         private int mCacheResult = CacheResults.NOT_REACHED;
         private String mFileName;
         private String mUniquePluginName;
         private String mPluginObjectJSON;
 
-        protected CacheThread(String fileName, String uniquePluginName, String pluginObjectJSON) {
+        protected CacheThread(final Context context, String fileName, String uniquePluginName,
+                              String pluginObjectJSON) {
+            mContext = context;
             mFileName = fileName;
             mUniquePluginName = uniquePluginName;
             mPluginObjectJSON = pluginObjectJSON;
@@ -144,7 +157,28 @@ public class CacheServiceCaller extends ServiceCaller {
                         mCacheResult = cache();
                     }
                 } else {
-                    mCacheResult = mCacheBinding.cache(mFileName, mPluginObjectJSON, mUniquePluginName);
+
+                    Intent intent = mCacheBinding.getWritePermissionIntent();
+
+                    Uri uri = intent.getData();
+
+                    // Open the file
+                    ParcelFileDescriptor outputPFD =
+                            mContext.getContentResolver().openFileDescriptor(uri, "w");
+
+                    if(outputPFD == null) {
+                        throw new IllegalArgumentException("The file could not be opened");
+                    }
+
+                    try (FileWriter fileWriter = new FileWriter(outputPFD.getFileDescriptor())) {
+
+                        fileWriter.write(mPluginObjectJSON);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+
+                    mCacheResult = mCacheBinding.cache(mFileName, "", mUniquePluginName, intent);
+
                     Log.d(LOG_TAG, "" + mCacheResult);
                 }
 
@@ -152,6 +186,8 @@ public class CacheServiceCaller extends ServiceCaller {
             } catch (RemoteException e) {
                 Log.e(getClass().getSimpleName(), "Exception requesting cache", e);
                 mCacheResult = CacheResults.REMOTE_FAIL;
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
             }
         }
 
@@ -168,7 +204,8 @@ public class CacheServiceCaller extends ServiceCaller {
                     // https://www.ibm.com/developerworks/java/library/j-jtp05236/index.html?ca=drs-#2.1
                     Thread.currentThread().interrupt();
                 }
-                int cacheResult = mCacheBinding.cache(mFileName, mUniquePluginName, mPluginObjectJSON);
+                int cacheResult = 0; //mCacheBinding.cache(mFileName, mUniquePluginName,
+                        //mPluginObjectJSON);
                 Log.d(LOG_TAG, "" + cacheResult);
                 return cacheResult;
             }
