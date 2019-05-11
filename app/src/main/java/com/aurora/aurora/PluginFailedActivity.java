@@ -22,6 +22,12 @@ public class PluginFailedActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_plugin_failed);
 
+        // Set up home icon in left upper corner
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setHomeButtonEnabled(true);
+
+        getSupportActionBar().setTitle("Something went wrong...");
+
         Intent intentThatStartedActivity = getIntent();
 
         // Get the extra

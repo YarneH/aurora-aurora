@@ -13,6 +13,9 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity android:name=".PluginFailedActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".MainActivity" />
             <intent-filter>
                 <action android:name="com.aurora.auroralib.AURORA_PLUGIN_FAILED" />
                 <category android:name="android.intent.category.DEFAULT" />

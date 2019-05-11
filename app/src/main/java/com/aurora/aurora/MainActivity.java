@@ -69,7 +69,6 @@ public class MainActivity extends AppCompatActivity
     private static final float END_POINT_OF_ANIMATION = 0.2f;
 
 
-
     /**
      * Toast that holds the dummy text after a file is searched for.
      * This will disappear after file-search is implemented.
@@ -302,7 +301,6 @@ public class MainActivity extends AppCompatActivity
 
                     // Create intent to open file with a certain plugin
                     Intent pluginAction = new Intent(Constants.PLUGIN_ACTION);
-
                     // Create chooser to let user choose the plugin
                     Intent chooser = Intent.createChooser(pluginAction, getString(R.string.select_plugin));
                     mAuroraCommunicator.openFileWithPluginChooser(fileName, type,

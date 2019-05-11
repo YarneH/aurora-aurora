@@ -26,4 +26,7 @@
     
     <!-- Search prompt values -->
     <dimen name="sp_padding">10dp</dimen>
+
+    <!-- Failed plugin -->
+    <dimen name="text_failed_plugin">20sp</dimen>
 </resources>
