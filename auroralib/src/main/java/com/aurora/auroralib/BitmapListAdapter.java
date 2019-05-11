@@ -56,7 +56,7 @@ public class BitmapListAdapter extends TypeAdapter {
             // For each bitmap in the list, add it base64 encoded to the array
             for (Bitmap bitmap: bitmapList) {
                 ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-                bitmap.compress(Bitmap.CompressFormat.PNG, 100, byteArrayOutputStream);
+                bitmap.compress(Bitmap.CompressFormat.PNG, COMPRESSION_QUALITY, byteArrayOutputStream);
                 byte[] byteArray = byteArrayOutputStream.toByteArray();
                 out.value(Base64.encodeToString(byteArray, Base64.DEFAULT));
             }

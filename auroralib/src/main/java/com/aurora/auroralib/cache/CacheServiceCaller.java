@@ -40,8 +40,8 @@ public class CacheServiceCaller extends ServiceCaller {
      * @param pluginObjectJSON the json representation of the processed text
      * @return a status code indicating whether or not the operation was successful
      */
-    public int cacheOperation(@NonNull String fileName, @NonNull String uniquePluginName,
-                              @NonNull String pluginObjectJSON) {
+    int cacheOperation(@NonNull String fileName, @NonNull String uniquePluginName,
+                       @NonNull String pluginObjectJSON) {
         synchronized (mMonitor) {
             int result = CacheResults.NOT_REACHED;
             bindService(ICache.class, LOG_TAG);
@@ -93,7 +93,7 @@ public class CacheServiceCaller extends ServiceCaller {
     /**
      * This function will be called by the android system
      *
-     * @param className
+     * @param className Name of the class
      * @param binder    Finishes the binding process
      */
     @Override
@@ -124,11 +124,6 @@ public class CacheServiceCaller extends ServiceCaller {
     private class CacheThread extends Thread {
 
         /**
-         * Tag for logging
-         */
-        private final String CLASS_TAG = CacheThread.class.getSimpleName();
-
-        /**
          * Application context, required for writing to internal storage
          */
         private Context mContext;
@@ -138,15 +133,15 @@ public class CacheServiceCaller extends ServiceCaller {
         private String mUniquePluginName;
         private String mPluginObjectJSON;
 
-        protected CacheThread(final Context context, String fileName, String uniquePluginName,
-                              String pluginObjectJSON) {
+        CacheThread(final Context context, String fileName, String uniquePluginName,
+                    String pluginObjectJSON) {
             mContext = context;
             mFileName = fileName;
             mUniquePluginName = uniquePluginName;
             mPluginObjectJSON = pluginObjectJSON;
         }
 
-        protected int getCacheResult() {
+        int getCacheResult() {
             return mCacheResult;
         }
 
@@ -173,10 +168,10 @@ public class CacheServiceCaller extends ServiceCaller {
                 }
 
             } catch (RemoteException e) {
-                Log.e(CLASS_TAG, "Exception requesting cache", e);
+                Log.e(LOG_TAG, "Exception requesting cache", e);
                 mCacheResult = CacheResults.REMOTE_FAIL;
             } catch (IOException e) {
-                Log.e(CLASS_TAG, "Exception writing to internal storage", e);
+                Log.e(LOG_TAG, "Exception writing to internal storage", e);
                 mCacheResult = CacheResults.CACHE_FAIL;
             }
         }
