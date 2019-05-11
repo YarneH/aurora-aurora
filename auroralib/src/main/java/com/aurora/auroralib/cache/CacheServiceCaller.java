@@ -2,7 +2,6 @@ package com.aurora.auroralib.cache;
 
 import android.content.ComponentName;
 import android.content.Context;
-import android.content.Intent;
 import android.net.Uri;
 import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
@@ -13,7 +12,6 @@ import android.util.Log;
 import com.aurora.auroralib.ServiceCaller;
 import com.aurora.internalservice.internalcache.ICache;
 
-import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 
@@ -75,7 +73,8 @@ public class CacheServiceCaller extends ServiceCaller {
      * @param pluginObjectJSON the JSON string of the object that needs to be cached
      * @return status code of the cache operation from Cache Service in Aurora Internal Services
      */
-    private int cache(@NonNull String fileName, @NonNull String uniquePluginName, @NonNull String pluginObjectJSON) {
+    private int cache(@NonNull String fileName, @NonNull String uniquePluginName,
+                      @NonNull String pluginObjectJSON) {
         CacheThread cacheThread = new CacheThread(mAppContext, fileName, uniquePluginName,
                 pluginObjectJSON);
         cacheThread.start();
@@ -119,10 +118,19 @@ public class CacheServiceCaller extends ServiceCaller {
     }
 
     /**
-     * A private thread class that will cache the file in another thread to avoid blocking of the main thread
+     * A private thread class that will cache the file in another thread to avoid blocking of the
+     * main thread
      */
     private class CacheThread extends Thread {
 
+        /**
+         * Tag for logging
+         */
+        private final String CLASS_TAG = CacheThread.class.getSimpleName();
+
+        /**
+         * Application context, required for writing to internal storage
+         */
         private Context mContext;
 
         private int mCacheResult = CacheResults.NOT_REACHED;
@@ -150,6 +158,7 @@ public class CacheServiceCaller extends ServiceCaller {
             Log.d(LOG_TAG, "cache called");
             try {
 
+                // I don't think the if ever happens
                 if (mCacheBinding == null) {
                     synchronized (mMonitor) {
                         Log.d(LOG_TAG, "Entering sync block" + mCacheResult);
@@ -157,58 +166,68 @@ public class CacheServiceCaller extends ServiceCaller {
                         mCacheResult = cache();
                     }
                 } else {
-
-                    Intent intent = mCacheBinding.getWritePermissionIntent();
-
-                    Uri uri = intent.getData();
-
-                    // Open the file
-                    ParcelFileDescriptor outputPFD =
-                            mContext.getContentResolver().openFileDescriptor(uri, "w");
-
-                    if(outputPFD == null) {
-                        throw new IllegalArgumentException("The file could not be opened");
-                    }
-
-                    try (FileWriter fileWriter = new FileWriter(outputPFD.getFileDescriptor())) {
-
-                        fileWriter.write(mPluginObjectJSON);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-
-                    mCacheResult = mCacheBinding.cache(mFileName, "", mUniquePluginName, intent);
+                    mCacheResult = mCacheBinding.cache(mFileName, mUniquePluginName,
+                            writeToAurora());
 
                     Log.d(LOG_TAG, "" + mCacheResult);
                 }
 
-
             } catch (RemoteException e) {
-                Log.e(getClass().getSimpleName(), "Exception requesting cache", e);
+                Log.e(CLASS_TAG, "Exception requesting cache", e);
                 mCacheResult = CacheResults.REMOTE_FAIL;
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
+            } catch (IOException e) {
+                Log.e(CLASS_TAG, "Exception writing to internal storage", e);
+                mCacheResult = CacheResults.CACHE_FAIL;
             }
         }
 
-        private int cache() throws RemoteException {
+        private int cache() throws RemoteException, IOException {
             synchronized (mMonitor) {
                 try {
                     while (!mServiceConnected) {
                         mMonitor.wait();
                     }
                 } catch (InterruptedException e) {
-                    Log.e(getClass().getSimpleName(), "Exception requesting cache", e);
+                    Log.e(LOG_TAG, "Exception requesting cache", e);
 
                     // Restore the interrupted state:
-                    // https://www.ibm.com/developerworks/java/library/j-jtp05236/index.html?ca=drs-#2.1
+                    // https://www.ibm.com/developerworks/java/library/j-jtp05236/index
+                    // .html?ca=drs-#2.1
                     Thread.currentThread().interrupt();
                 }
-                int cacheResult = 0; //mCacheBinding.cache(mFileName, mUniquePluginName,
-                        //mPluginObjectJSON);
+                int cacheResult = mCacheBinding.cache(mFileName, mUniquePluginName,
+                        writeToAurora());
+
                 Log.d(LOG_TAG, "" + cacheResult);
                 return cacheResult;
             }
+        }
+
+        /**
+         * Writes the content that needs to cached to a file in the internal storage of Aurora on
+         * a Uri received by Aurora. This Uri is returned.
+         *
+         * @return the Uri where the cache file is written to
+         * @throws RemoteException on not receiving a Uri from Aurora
+         * @throws IOException     on writing the file to internal storage
+         */
+        private Uri writeToAurora() throws RemoteException, IOException {
+            // Get a Uri to a file in internal storage of Aurora.
+            Uri uri = mCacheBinding.getWritePermissionUri( mContext.getPackageName());
+
+            // Open the file
+            ParcelFileDescriptor outputPFD = mContext.getContentResolver().openFileDescriptor(uri
+                    , "w");
+
+            if (outputPFD == null) {
+                throw new IllegalArgumentException("The file could not be opened");
+            }
+
+            try (FileWriter fileWriter = new FileWriter(outputPFD.getFileDescriptor())) {
+                fileWriter.write(mPluginObjectJSON);
+            }
+
+            return uri;
         }
     }
 
