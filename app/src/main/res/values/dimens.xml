@@ -25,6 +25,7 @@
     <dimen name="text_margin">16dp</dimen>
 
     <!-- Plugin Market values -->
+    <dimen name="market_text_input">18sp</dimen>
     <dimen name="market_plugin_logo">100sp</dimen>
     <dimen name="market_plugin_name">25sp</dimen>
 </resources>

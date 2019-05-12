@@ -15,9 +15,9 @@ import java.util.logging.Logger;
  */
 public class MarketPlugin implements Serializable {
     /**
-     * A Bitmap representing a base64 encoded image of the plugin
+     * A byte array representing the logo of the plugin
      */
-    private Bitmap mLogo;
+    private byte[] mLogo;
     /**
      * The name of the plugin
      */
@@ -26,6 +26,14 @@ public class MarketPlugin implements Serializable {
      * The description of the plugin
      */
     private String mDescription;
+    /**
+     * The creator of the plugin
+     */
+    private String mCreator;
+    /**
+     * The version of the plugin
+     */
+    private String mVersion;
     /**
      * The link the plugin can be downloaded from
      */
@@ -39,7 +47,7 @@ public class MarketPlugin implements Serializable {
      * @param description   a string representing the description of the plugin
      * @param url           a string representing the link the plugin can be downloaded from
      */
-    public MarketPlugin(String logo, String name, String description, String url){
+    public MarketPlugin(byte[] logo, String name, String description, String creator, String version, String url){
         this.mPluginName = name;
         this.mDescription = description;
         try {
@@ -47,13 +55,17 @@ public class MarketPlugin implements Serializable {
         } catch (MalformedURLException e) {
             Logger.getLogger(this.getClass().getSimpleName()).log(Level.SEVERE, null, e);
         }
-
-        byte[] decodedString = Base64.decode(logo, Base64.DEFAULT);
-        this.mLogo = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
+        this.mLogo = logo;
+        this.mVersion = version;
+        this.mCreator = creator;
     }
 
     public Bitmap getLogo() {
-        return mLogo;
+        if (mLogo != null) {
+            return BitmapFactory.decodeByteArray(mLogo, 0, mLogo.length);
+        } else {
+            return null;
+        }
     }
 
     public String getDescription() {
@@ -66,5 +78,14 @@ public class MarketPlugin implements Serializable {
 
     public URL getDownloadLink() {
         return mDownloadLink;
+    }
+
+
+    public String getCreator() {
+        return mCreator;
+    }
+
+    public String getVersion() {
+        return mVersion;
     }
 }

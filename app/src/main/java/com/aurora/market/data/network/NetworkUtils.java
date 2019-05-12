@@ -1,5 +1,9 @@
 package com.aurora.market.data.network;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.util.Log;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
@@ -17,7 +21,7 @@ final class NetworkUtils {
      * The URL to the list of MarketPlugins
      */
     private static final String PLUGINLIST_URL =
-            "http://pluginmarket.aurora-files.ml/plugins";
+            "http://pluginmarket.aurora-files.ml/plugin";
 
 
     private NetworkUtils() {
@@ -56,6 +60,26 @@ final class NetworkUtils {
                 response = scanner.next();
             }
             return response;
+        } finally {
+            urlConnection.disconnect();
+        }
+    }
+
+    /**
+     * This method returns the entire result from the HTTP response.
+     *
+     * @param url The URL to fetch the HTTP response from.
+     * @return The contents of the HTTP response, null if no response
+     * @throws IOException Related to network and stream reading
+     */
+    static Bitmap getBitmapFromHttpUrl(URL url) throws  IOException {
+        HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
+        try (
+                InputStream in = urlConnection.getInputStream()
+        ){
+            Bitmap testBitmap = BitmapFactory.decodeStream(in);
+            Log.d("image", "Bitmap: " + testBitmap);
+            return testBitmap;
         } finally {
             urlConnection.disconnect();
         }

@@ -1,12 +1,15 @@
 package com.aurora.market.ui;
 
 import android.app.Activity;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.aurora.aurora.R;
@@ -66,8 +69,19 @@ public class MarketPluginDetailFragment extends Fragment {
 
         // Show the dummy content as text in a TextView.
         if (mMarketPlugin != null) {
-            ((TextView) rootView.findViewById(R.id.marketplugin_detail)).setText(mMarketPlugin.getDescription());
+            ((TextView) rootView.findViewById(R.id.tv_description_input)).setText(mMarketPlugin.getDescription());
+            ((TextView) rootView.findViewById(R.id.tv_creator_input)).setText(mMarketPlugin.getCreator());
+            ((TextView) rootView.findViewById(R.id.tv_version_input)).setText(mMarketPlugin.getVersion());
+
+
+            Bitmap imgBitmap = mMarketPlugin.getLogo();
+            Log.d("image", "" + imgBitmap);
+            if (imgBitmap != null) {
+                ((ImageView)rootView.findViewById(R.id.iv_icon)).setImageBitmap(imgBitmap);
+            }
         }
+
+
 
         return rootView;
     }

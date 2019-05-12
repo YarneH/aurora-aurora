@@ -149,11 +149,14 @@ public class MarketPluginListActivity extends AppCompatActivity {
             holder.itemView.setTag(mMarketPlugins.get(position));
             holder.itemView.setOnClickListener(mOnClickListener);
             Bitmap imgBitmap = mMarketPlugins.get(position).getLogo();
-            int logoDimen = (int) holder.mContentView.getResources().getDimension(R.dimen.market_plugin_logo);
-            Bitmap tempBitmap = Bitmap.createScaledBitmap(imgBitmap, logoDimen,
-                   logoDimen, true);
+            Log.d("image", "" + imgBitmap);
+            if (imgBitmap != null) {
+                int logoDimen = (int) holder.mContentView.getResources().getDimension(R.dimen.market_plugin_logo);
+                Bitmap tempBitmap = Bitmap.createScaledBitmap(imgBitmap, logoDimen,
+                        logoDimen, true);
 
-            holder.mImageView.setImageBitmap(tempBitmap);
+                holder.mImageView.setImageBitmap(tempBitmap);
+            }
         }
 
         @Override
@@ -166,6 +169,7 @@ public class MarketPluginListActivity extends AppCompatActivity {
 
         /**
          * Set the List of MarketPlugins. This is used to update the data of the adapter
+         *
          * @param items
          */
         public void setMarketPlugins(List<MarketPlugin> items) {
