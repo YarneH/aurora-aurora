@@ -2,13 +2,18 @@ package com.aurora.auroralib.cache;
 
 import android.content.ComponentName;
 import android.content.Context;
+import android.net.Uri;
 import android.os.IBinder;
+import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
 import com.aurora.auroralib.ServiceCaller;
 import com.aurora.internalservice.internalcache.ICache;
+
+import java.io.FileWriter;
+import java.io.IOException;
 
 public class CacheServiceCaller extends ServiceCaller {
     /**
@@ -69,7 +74,8 @@ public class CacheServiceCaller extends ServiceCaller {
      */
     private int cache(@NonNull String fileName, @NonNull String uniquePluginName,
                       @NonNull String pluginObjectJSON) {
-        CacheThread cacheThread = new CacheThread(fileName, uniquePluginName, pluginObjectJSON);
+        CacheThread cacheThread = new CacheThread(mAppContext, fileName, uniquePluginName,
+                pluginObjectJSON);
         cacheThread.start();
         try {
             cacheThread.join();
@@ -115,12 +121,20 @@ public class CacheServiceCaller extends ServiceCaller {
      * main thread
      */
     private class CacheThread extends Thread {
+
+        /**
+         * Application context, required for writing to internal storage
+         */
+        private Context mContext;
+
         private int mCacheResult = CacheResults.NOT_REACHED;
         private String mFileName;
         private String mUniquePluginName;
         private String mPluginObjectJSON;
 
-        CacheThread(String fileName, String uniquePluginName, String pluginObjectJSON) {
+        CacheThread(final Context context, String fileName, String uniquePluginName,
+                    String pluginObjectJSON) {
+            mContext = context;
             mFileName = fileName;
             mUniquePluginName = uniquePluginName;
             mPluginObjectJSON = pluginObjectJSON;
@@ -138,6 +152,7 @@ public class CacheServiceCaller extends ServiceCaller {
             Log.i(LOG_TAG, "cache called");
             try {
 
+                // I don't think the if ever happens
                 if (mCacheBinding == null) {
                     synchronized (mMonitor) {
                         Log.v(LOG_TAG, "Entering sync block" + mCacheResult);
@@ -145,31 +160,29 @@ public class CacheServiceCaller extends ServiceCaller {
                         mCacheResult = cache();
                     }
                 } else {
-                    mCacheResult = mCacheBinding.cache(mFileName, mPluginObjectJSON,
-                            mUniquePluginName);
+                    mCacheResult = mCacheBinding.cache(mFileName, mUniquePluginName,
+                            writeToAurora());
+
                     Log.v(LOG_TAG, "" + mCacheResult);
                 }
 
             } catch (RemoteException e) {
-                Log.e(getClass().getSimpleName(), "Exception requesting cache", e);
+                Log.e(LOG_TAG, "Exception requesting cache", e);
                 mCacheResult = CacheResults.REMOTE_FAIL;
+            } catch (IOException e) {
+                Log.e(LOG_TAG, "Exception writing to internal storage", e);
+                mCacheResult = CacheResults.CACHE_FAIL;
             }
         }
 
-        /**
-         * Caches by calling {@link ICache#cache(String, String, String)}.
-         *
-         * @return The resulting int from {@link CacheResults}
-         * @throws RemoteException On trouble with the connection with Aurora
-         */
-        private int cache() throws RemoteException {
+        private int cache() throws RemoteException, IOException {
             synchronized (mMonitor) {
                 try {
                     while (!mServiceConnected) {
                         mMonitor.wait();
                     }
                 } catch (InterruptedException e) {
-                    Log.e(getClass().getSimpleName(), "Exception requesting cache", e);
+                    Log.e(LOG_TAG, "Exception requesting cache", e);
 
                     // Restore the interrupted state:
                     // https://www.ibm.com/developerworks/java/library/j-jtp05236/index
@@ -177,10 +190,38 @@ public class CacheServiceCaller extends ServiceCaller {
                     Thread.currentThread().interrupt();
                 }
                 int cacheResult = mCacheBinding.cache(mFileName, mUniquePluginName,
-                        mPluginObjectJSON);
-                Log.v(LOG_TAG, "" + cacheResult);
+                        writeToAurora());
+
+                Log.d(LOG_TAG, "" + cacheResult);
                 return cacheResult;
             }
+        }
+
+        /**
+         * Writes the content that needs to cached to a file in the internal storage of Aurora on
+         * a Uri received by Aurora. This Uri is returned.
+         *
+         * @return the Uri where the cache file is written to
+         * @throws RemoteException on not receiving a Uri from Aurora
+         * @throws IOException     on writing the file to internal storage
+         */
+        private Uri writeToAurora() throws RemoteException, IOException {
+            // Get a Uri to a file in internal storage of Aurora.
+            Uri uri = mCacheBinding.getWritePermissionUri( mContext.getPackageName());
+
+            // Open the file
+            ParcelFileDescriptor outputPFD = mContext.getContentResolver().openFileDescriptor(uri
+                    , "w");
+
+            if (outputPFD == null) {
+                throw new IllegalArgumentException("The file could not be opened");
+            }
+
+            try (FileWriter fileWriter = new FileWriter(outputPFD.getFileDescriptor())) {
+                fileWriter.write(mPluginObjectJSON);
+            }
+
+            return uri;
         }
     }
 

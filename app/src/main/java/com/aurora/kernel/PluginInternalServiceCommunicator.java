@@ -5,9 +5,11 @@ import android.util.Log;
 
 import com.aurora.auroralib.ExtractedText;
 import com.aurora.internalservice.internalnlp.InternalNLP;
+import com.aurora.internalservice.internalprocessor.DocumentNotSupportedException;
 import com.aurora.internalservice.internalprocessor.FileTypeNotSupportedException;
 import com.aurora.internalservice.internalprocessor.InternalTextProcessor;
 import com.aurora.internalservice.internaltranslation.Translator;
+import com.aurora.kernel.event.DocumentNotSupportedEvent;
 import com.aurora.kernel.event.InternalProcessorRequest;
 import com.aurora.kernel.event.InternalProcessorResponse;
 import com.aurora.kernel.event.TranslationRequest;
@@ -151,6 +153,14 @@ class PluginInternalServiceCommunicator extends Communicator {
 
             } catch (FileTypeNotSupportedException e) {
                 Log.e(CLASS_TAG, "File type is not supported!", e);
+            } catch (DocumentNotSupportedException e) {
+                Log.e(CLASS_TAG, "Document is not supported", e);
+
+                // Create event to show error to user
+                DocumentNotSupportedEvent event = new DocumentNotSupportedEvent(e.getMessage());
+
+                // Post on bus
+                mBus.post(event);
             }
         }
         return extractedText;

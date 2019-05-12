@@ -88,7 +88,7 @@ class PluginRegistry {
     public boolean registerPlugin(@NonNull final String pluginName, @NonNull final Plugin plugin,
                                   final boolean overwriteOldVersion) {
         if (!mPluginsMap.containsKey(pluginName) || (overwriteOldVersion &&
-                Objects.requireNonNull(mPluginsMap.get(pluginName)).getVersionNumber() < plugin.getVersionNumber())) {
+                Objects.requireNonNull(mPluginsMap.get(pluginName)).getVersionCode() < plugin.getVersionCode())) {
 
             // Add plugin to the map
             mPluginsMap.put(pluginName, plugin);

@@ -7,6 +7,7 @@
     <string name="about_us">About Us</string>
     <string name="settings">Settings</string>
     <string name="help_feedback">Help &amp; Feedback</string>
+    <string name="plugin_market">Plugin Market</string>
     <string name="action_search">Search</string>
     <string name="search_prompt">Search for a file...</string>
 
@@ -30,6 +31,10 @@
     <string name="null_file">The selected file was null</string>
     <string name="file_not_found">The file could not be found</string>
 
+    <!-- Plugin Chooser strings -->
+    <string name="plugin_name">Plugin name</string>
+    <string name="plugin_description">Plugin description</string>
+
     <!-- Feedback Activity -->
     <string name="feedback_sent">Feedback sent, thank you!</string>
     <string name="feedback_wrong">Something went wrong. Please try again.</string>
@@ -40,18 +45,26 @@
     <string name="feedback_send">Send</string>
     <string name="feedback_edittext_hint">Enter your feedback here</string>
 
+    <!-- Plugin Market -->
+    <string name="download_plugin">Downloading the new plugin!</string>
+
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="select_plugin">Select a plugin</string>
     <string name="no_plugins_available">No plugins available</string>
+    <string name="creator">Creator</string>
+    <string name="description">Description</string>
+    <string name="version">Version</string>
 
     <!-- User warnings -->
     <string name="plugin_not_in_registry">The plugin was not found in the registry!</string>
+    <string name="cached_file_not_found">The cached file was not found</string>
+    <string name="title_marketplugin_list">Plugin Market</string>
+    <string name="title_marketplugin_detail">MarketPlugin Detail</string>
     <string name="cached_file_not_found_processing_file">The cached file was not found. Processing file.</string>
     <string name="could_not_open_plugin">The plugin could not be opened.</string>
 
     <!-- Service Permission -->
     <string name="service_permission_label">Aurora Services</string>
     <string name="service_permission_description">Allows the app to make use of Aurora services</string>
-
 </resources>

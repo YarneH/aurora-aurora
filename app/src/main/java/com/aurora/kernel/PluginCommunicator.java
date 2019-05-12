@@ -1,10 +1,7 @@
 package com.aurora.kernel;
 
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.ActivityInfo;
-import android.content.pm.ResolveInfo;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.os.Handler;
@@ -20,7 +17,6 @@ import com.aurora.auroralib.ExtractedText;
 import com.aurora.kernel.event.ListPluginsRequest;
 import com.aurora.kernel.event.ListPluginsResponse;
 import com.aurora.kernel.event.OpenCachedFileWithPluginRequest;
-import com.aurora.kernel.event.OpenFileWithPluginChooserRequest;
 import com.aurora.kernel.event.OpenFileWithPluginRequest;
 import com.aurora.plugin.Plugin;
 
@@ -34,7 +30,7 @@ import io.reactivex.Observable;
 /**
  * Communicator that communicates with Plugin environments
  */
-class PluginCommunicator extends Communicator {
+public class PluginCommunicator extends Communicator {
     /**
      * Tag for logging purposes
      */
@@ -49,12 +45,6 @@ class PluginCommunicator extends Communicator {
      * An observable keeping track of incoming OpenFileWithPluginRequests
      */
     private final Observable<OpenFileWithPluginRequest> mOpenFileWithPluginRequestObservable;
-
-    //TODO delete when custom picker is finished
-    /**
-     * An observable keeping track of incoming OpenFileWithPluginChooserRequests
-     */
-    private final Observable<OpenFileWithPluginChooserRequest> mOpenFileWithPluginChooserRequestObservable;
 
     /**
      * An observable keeping track of incoming OpenCachedFileWithPluginRequests
@@ -94,7 +84,7 @@ class PluginCommunicator extends Communicator {
      *                       communicate events
      * @param pluginRegistry a reference to the plugin registry
      */
-    PluginCommunicator(@NonNull Bus bus, @NonNull PluginRegistry pluginRegistry) {
+    public PluginCommunicator(@NonNull Bus bus, @NonNull PluginRegistry pluginRegistry) {
         super(bus);
 
         this.mPluginRegistry = pluginRegistry;
@@ -105,16 +95,6 @@ class PluginCommunicator extends Communicator {
         // When a request comes in, call appropriate function
         mOpenFileWithPluginRequestObservable.subscribe((OpenFileWithPluginRequest request) ->
                 openFileWithPlugin(request.getExtractedText(), request.getUniquePluginName(), request.getContext())
-        );
-
-        // TODO: delete following two statements if custom plugin chooser is finished
-        // Register for requests to open file with plugin chooser
-        mOpenFileWithPluginChooserRequestObservable = mBus.register(OpenFileWithPluginChooserRequest.class);
-
-        // When a request comes in, call appropriate function
-        mOpenFileWithPluginChooserRequestObservable.subscribe((OpenFileWithPluginChooserRequest request) ->
-                openFileWithPluginChooser(request.getExtractedText(), request.getPluginAction(),
-                        request.getChooser(), request.getContext())
         );
 
         // Register for requests to open a cached file with plugin
@@ -144,14 +124,10 @@ class PluginCommunicator extends Communicator {
      */
     private void openFileWithPlugin(ExtractedText extractedText, String uniquePluginName, Context context) {
         // Create intent to open plugin
-        Intent launchIntent = context.getPackageManager().getLaunchIntentForPackage(uniquePluginName);
-
-        if (launchIntent == null) {
-            showToastAndLogError(context, context.getString(R.string.could_not_open_plugin), null);
-            return;
-        }
-
+        Intent launchIntent = new Intent();
         launchIntent.setAction(Constants.PLUGIN_ACTION);
+        launchIntent.setPackage(uniquePluginName);
+        launchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 
         // Convert the extracted text to JSON
         String extractedTextInJSON = extractedText.toJSON();
@@ -169,12 +145,8 @@ class PluginCommunicator extends Communicator {
             return;
         }
 
+        // Update the intent with some final flags, extras and data
         setDataAndFlags(launchIntent, uri, Constants.PLUGIN_INPUT_TYPE_EXTRACTED_TEXT);
-
-        // This is a bit of a hack, but it needs to be done because of trying to launch an
-        // activity outside of and activity context
-        // https://stackoverflow.com/questions/3918517/calling-startactivity-from-outside-of-an-activity-context
-        launchIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 
         // Check if at least one app exists that can execute the task
         boolean pluginOpens = launchIntent.resolveActivity(context.getPackageManager()) != null;
@@ -187,52 +159,6 @@ class PluginCommunicator extends Communicator {
 
 
     /**
-     * Opens a file with a given plugin
-     *
-     * @param extractedText the extracted text of the file to open
-     * @param pluginAction  the target intent of the chooser
-     * @param chooser       the plugin that was selected by the user in the chooser menu
-     * @param context       the android context
-     * @deprecated
-     */
-    //TODO delete if custom picker works
-    @Deprecated
-    private void openFileWithPluginChooser(ExtractedText extractedText, Intent pluginAction,
-                                           Intent chooser, Context context) {
-
-        // Convert the extracted text to JSON
-        String extractedTextInJSON = extractedText.toJSON();
-        Log.v("JSON", extractedTextInJSON);
-
-        // Start by clearing the old transfer files
-        removeFilesThatStartWithFromDir(context.getCacheDir(), PROCESSED_PREFIX);
-
-        Uri uri;
-
-        try {
-            uri = writeToTempFile(context, extractedTextInJSON, PROCESSED_PREFIX);
-        } catch (IOException e) {
-            showToastAndLogError(context, ERROR_LOG, e);
-            return;
-        }
-
-        setDataAndFlags(pluginAction, uri, Constants.PLUGIN_INPUT_TYPE_EXTRACTED_TEXT);
-
-        // This is a bit of a hack, but it needs to be done because of trying to launch an
-        // activity outside of and activity context
-        // https://stackoverflow.com/questions/3918517/calling-startactivity-from-outside-of-an-activity-context
-        chooser.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-
-        // Check if at least one app exists that can execute the task
-        boolean pluginOpens = pluginAction.resolveActivity(context.getPackageManager()) != null;
-        if (pluginOpens) {
-            context.startActivity(chooser);
-        } else {
-            showToastAndLogError(context, context.getString(R.string.no_plugins_available), null);
-        }
-    }
-
-    /**
      * Opens a cached file with a given plugin
      *
      * @param jsonRepresentation the json representation of the plugin object to represent
@@ -241,49 +167,34 @@ class PluginCommunicator extends Communicator {
      */
     private void openCachedFileWithPlugin(@NonNull final String jsonRepresentation,
                                           @NonNull final String uniquePluginName, @NonNull final Context context) {
+        // Create intent to open plugin
+        Intent launchIntent = new Intent();
+        launchIntent.setAction(Constants.PLUGIN_ACTION);
+        launchIntent.setPackage(uniquePluginName);
+        launchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 
-        Intent pluginAction = new Intent(Constants.PLUGIN_ACTION);
-        pluginAction.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        pluginAction.setType("*/*");
-        List<ResolveInfo> possiblePlugins = context.getPackageManager().queryIntentActivities(pluginAction, 0);
 
-        // Loop over the plugins to see if the wanted plugin is in there
-        ActivityInfo activityInfo = null;
-        for (ResolveInfo pluginInfo : possiblePlugins) {
-            if (uniquePluginName.equals(pluginInfo.activityInfo.applicationInfo.packageName)) {
-                // If the wanted plugin is found, change activityInfo and break
-                activityInfo = pluginInfo.activityInfo;
-                break;
-            }
+        // Start by clearing the old transfer files
+        removeFilesThatStartWithFromDir(context.getCacheDir(), CACHED_PREFIX);
+
+        Uri uri;
+
+        try {
+            uri = writeToTempFile(context, jsonRepresentation, CACHED_PREFIX);
+        } catch (IOException e) {
+            showToastAndLogError(context, ERROR_LOG, e);
+            return;
         }
 
-        if (activityInfo != null) {
-            Intent launchIntent = new Intent(pluginAction);
+        setDataAndFlags(launchIntent, uri, Constants.PLUGIN_INPUT_TYPE_OBJECT);
 
-            ComponentName cn = new ComponentName(activityInfo.applicationInfo.packageName, activityInfo.name);
-            launchIntent.setComponent(cn);
-
-            // Start by clearing the old transfer files
-            removeFilesThatStartWithFromDir(context.getCacheDir(), CACHED_PREFIX);
-
-            Uri uri;
-
-            try {
-                uri = writeToTempFile(context, jsonRepresentation, CACHED_PREFIX);
-            } catch (IOException e) {
-                showToastAndLogError(context, ERROR_LOG, e);
-                return;
-            }
-
-            setDataAndFlags(launchIntent, uri, Constants.PLUGIN_INPUT_TYPE_OBJECT);
-
-            boolean cachedFileOpens = launchIntent.resolveActivity(context.getPackageManager()) != null;
-            if (cachedFileOpens) {
-                context.startActivity(launchIntent);
-                return;
-            }
+        boolean cachedFileOpens = launchIntent.resolveActivity(context.getPackageManager()) != null;
+        if (cachedFileOpens) {
+            context.startActivity(launchIntent);
+        } else {
+            showToastAndLogError(context, context.getString(R.string.could_not_open_plugin), null);
         }
-        showToastAndLogError(context, context.getString(R.string.could_not_open_plugin), null);
+
     }
 
     /**

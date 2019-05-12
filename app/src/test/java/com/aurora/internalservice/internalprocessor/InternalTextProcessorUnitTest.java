@@ -20,7 +20,11 @@ public class InternalTextProcessorUnitTest {
     // Test if an exception is thrown when a wrong file type is passed
     @Test(expected = FileTypeNotSupportedException.class)
     public void processFile_shouldThrowErrorUnsupportedExtension() throws FileTypeNotSupportedException {
-        mInternalTextProcessor.processFile(null, null, "jpg", false);
+        try {
+            mInternalTextProcessor.processFile(null, null, "jpg", false);
+        } catch (DocumentNotSupportedException e) {
+            e.printStackTrace();
+        }
     }
 
     // Test if, when a 'txt'-file is passed, text is extracted
@@ -34,6 +38,8 @@ public class InternalTextProcessorUnitTest {
                     , "txt", false);
             assertNotNull("The extraction of the 'txt'-file has failed" , extractedText);
         } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (DocumentNotSupportedException e) {
             e.printStackTrace();
         }
     }
@@ -50,6 +56,8 @@ public class InternalTextProcessorUnitTest {
             assertNotNull("The extraction of the 'docx'-file has failed" , extractedText);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
+        } catch (DocumentNotSupportedException e) {
+            e.printStackTrace();
         }
     }
 
@@ -64,6 +72,8 @@ public class InternalTextProcessorUnitTest {
                     , "pdf", false);
             assertNotNull("The extraction of the 'pdf'-file has failed" , extractedText);
         } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (DocumentNotSupportedException e) {
             e.printStackTrace();
         }
     }
