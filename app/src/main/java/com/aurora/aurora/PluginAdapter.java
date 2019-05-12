@@ -31,6 +31,12 @@ public class PluginAdapter extends ArrayAdapter<Plugin>{
         private ViewHolder(){}
     }
 
+    /**
+     * Constructs a PluginAdapter
+     *
+     * @param plugins  The list of Plugins to be shown
+     * @param context  A Context object related to the activity the uses this adapter
+     */
     public PluginAdapter(List<Plugin> plugins, Context context) {
         super(context, R.layout.plugin_alert_dialog_adapter_row, plugins);
     }
@@ -88,10 +94,4 @@ public class PluginAdapter extends ArrayAdapter<Plugin>{
         // Return the completed view to render on screen
         return convertView;
     }
-
 }
-
-
-
-
-
