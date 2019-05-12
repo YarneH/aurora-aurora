@@ -1,6 +1,5 @@
 package com.aurora.aurora;
 
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
@@ -12,6 +11,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.OpenableColumns;
+import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -46,13 +46,14 @@ import com.aurora.market.ui.PluginMarketViewModel;
 import com.aurora.plugin.InternalServices;
 import com.aurora.plugin.Plugin;
 import com.google.firebase.analytics.FirebaseAnalytics;
-import io.reactivex.Observer;
-import io.reactivex.disposables.Disposable;
 
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+
+import io.reactivex.Observer;
+import io.reactivex.disposables.Disposable;
 
 /**
  * The main activity of the application, started when the app is opened.
@@ -84,9 +85,16 @@ public class MainActivity extends AppCompatActivity
      * Chosen to be 1.
      */
     private static final int REQUEST_FILE_GET = 1;
-    private static final int ANIMATION_DURATION = 500;
-    private static final float END_POINT_OF_ANIMATION = 0.2F;
 
+    /**
+     * Constant for the duration of the pointing arrow animation
+     */
+    private static final int ANIMATION_DURATION = 500;
+
+    /**
+     * Constant for the position of the pointing arrow animation
+     */
+    private static final float END_POINT_OF_ANIMATION = 0.2F;
 
     /**
      * Toast that holds the dummy text after a file is searched for.
@@ -106,8 +114,6 @@ public class MainActivity extends AppCompatActivity
      * It contains all recently opened files.
      */
     private RecyclerView mRecyclerView = null;
-
-    private Context mContext = this;
 
     /**
      * An instance of the {@link Kernel}.
@@ -264,28 +270,6 @@ public class MainActivity extends AppCompatActivity
 
     /**
      * Creates an intent to open the file manager.
-     * <p>
-     * Creates an intent to open the file manager.
-     * If more filetypes need to be opened, use a final String[].
-     * </p>
-     * <br>
-     * <p>
-     * For example: <br>
-     * final String[] ACCEPT_MIME_TYPES = {
-     * "application/pdf",
-     * "image/*"
-     * };
-     * </p>
-     * <br>
-     * <p>
-     * Intent intent = new Intent();
-     * <br>
-     * intent.setType("* / *");
-     * <br>
-     * intent.setAction(Intent.ACTION_GET_CONTENT);
-     * <br>
-     * intent.putExtra(Intent.EXTRA_MIME_TYPES,ACCEPT_MIME_TYPES);
-     * </p
      */
     protected void selectFile() {
         final String[] mimeTypes = {
@@ -424,7 +408,8 @@ public class MainActivity extends AppCompatActivity
             // Get the requested Internal Services for preprocessing
             List<InternalServices> internalServices = new ArrayList<>();
             for (InternalServices internalService : InternalServices.values()){
-                if (applicationInfo.metaData.getBoolean(internalService.name())){
+                if (applicationInfo.metaData != null &&
+                        applicationInfo.metaData.getBoolean(internalService.name())){
                     internalServices.add(internalService);
                 }
             }
@@ -570,8 +555,8 @@ public class MainActivity extends AppCompatActivity
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_search) {
             // Create a LayoutInflater which will create the view for the pop-up
-            LayoutInflater li = LayoutInflater.from(this);
-            View promptView = li.inflate(R.layout.search_prompt, mRecyclerView, false);
+            LayoutInflater inflater = LayoutInflater.from(this);
+            View promptView = inflater.inflate(R.layout.search_prompt, mRecyclerView, false);
             final EditText userInput = promptView.findViewById(R.id.et_search_prompt);
 
             // Create a builder to build the actual alertdialog from the previous inflated view
@@ -606,9 +591,8 @@ public class MainActivity extends AppCompatActivity
      * @param item Selected menu item.
      * @return whether or not successful.
      */
-    @SuppressWarnings("StatementWithEmptyBody")
     @Override
-    public boolean onNavigationItemSelected(MenuItem item) {
+    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
@@ -630,8 +614,8 @@ public class MainActivity extends AppCompatActivity
 
     private void showPopUpView(String message) {
         // Create a LayoutInflater which will create the view for the pop-up
-        LayoutInflater li = LayoutInflater.from(this);
-        View promptView = li.inflate(R.layout.popup_card, mRecyclerView, false);
+        LayoutInflater inflater = LayoutInflater.from(this);
+        View promptView = inflater.inflate(R.layout.popup_card, mRecyclerView, false);
 
         // Set the message of the TextView
         TextView messageText = promptView.findViewById(R.id.tv_message);

@@ -87,7 +87,6 @@ class PluginRegistry {
      */
     public boolean registerPlugin(@NonNull final String pluginName, @NonNull final Plugin plugin,
                                   final boolean overwriteOldVersion) {
-        // TODO: write back config file immediately
         if (!mPluginsMap.containsKey(pluginName) || (overwriteOldVersion &&
                 Objects.requireNonNull(mPluginsMap.get(pluginName)).getVersionCode() < plugin.getVersionCode())) {
 
@@ -150,7 +149,6 @@ class PluginRegistry {
             Plugin[] registeredPlugins = gson.fromJson(pluginsJson, Plugin[].class);
 
             for (Plugin p : registeredPlugins) {
-                // TODO: add appropriate pluginenvironment and processor to the plugin
                 // Add the plugin to the map
                 mPluginsMap.put(p.getUniqueName(), p);
             }

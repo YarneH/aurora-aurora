@@ -128,9 +128,9 @@ public class PluginCommunicator extends Communicator {
     private void openFileWithPlugin(ExtractedText extractedText, String uniquePluginName, Context context) {
         // Create intent to open plugin
         Intent launchIntent = context.getPackageManager().getLaunchIntentForPackage(uniquePluginName);
-        
+
         if (launchIntent == null) {
-            showToastAndLog(context, context.getString(R.string.could_not_open_plugin), null);
+            showToastAndLogError(context, context.getString(R.string.could_not_open_plugin), null);
             return;
         }
 
@@ -138,7 +138,7 @@ public class PluginCommunicator extends Communicator {
 
         // Convert the extracted text to JSON
         String extractedTextInJSON = extractedText.toJSON();
-        Log.d("JSON", extractedTextInJSON);
+        Log.v("JSON", extractedTextInJSON);
 
         // Start by clearing the old transfer files
         removeFilesThatStartWithFromDir(context.getCacheDir(), PROCESSED_PREFIX);
@@ -146,9 +146,9 @@ public class PluginCommunicator extends Communicator {
         Uri uri;
 
         try {
-            uri = writeToTempFile(context, extractedTextInJSON, PROCESSED_PREFIX, EXTENSION);
+            uri = writeToTempFile(context, extractedTextInJSON, PROCESSED_PREFIX);
         } catch (IOException e) {
-            showToastAndLog(context, ERROR_LOG, e);
+            showToastAndLogError(context, ERROR_LOG, e);
             return;
         }
 
@@ -160,9 +160,8 @@ public class PluginCommunicator extends Communicator {
         if (pluginOpens) {
             context.startActivity(launchIntent);
         } else {
-            showToastAndLog(context, context.getString(R.string.could_not_open_plugin), null);
+            showToastAndLogError(context, context.getString(R.string.could_not_open_plugin), null);
         }
-
     }
 
 
@@ -203,9 +202,9 @@ public class PluginCommunicator extends Communicator {
             Uri uri;
 
             try {
-                uri = writeToTempFile(context, jsonRepresentation, CACHED_PREFIX, EXTENSION);
+                uri = writeToTempFile(context, jsonRepresentation, CACHED_PREFIX);
             } catch (IOException e) {
-                showToastAndLog(context, ERROR_LOG, e);
+                showToastAndLogError(context, ERROR_LOG, e);
                 return;
             }
 
@@ -217,7 +216,7 @@ public class PluginCommunicator extends Communicator {
                 return;
             }
         }
-        showToastAndLog(context, context.getString(R.string.could_not_open_plugin), null);
+        showToastAndLogError(context, context.getString(R.string.could_not_open_plugin), null);
     }
 
     /**
@@ -250,7 +249,7 @@ public class PluginCommunicator extends Communicator {
                 if (file.getName().startsWith(prefix)) {
                     boolean success = file.delete();
                     if (!success) {
-                        Log.d(CLASS_TAG, "There was a problem removing old files from "
+                        Log.e(CLASS_TAG, "There was a problem removing old files from "
                                 + dir.getName());
                         return;
                     }
@@ -278,12 +277,12 @@ public class PluginCommunicator extends Communicator {
      * @param message the message that needs to be shown
      * @param e       the throwable error
      */
-    private void showToastAndLog(Context context, String message, @Nullable Throwable e) {
+    private void showToastAndLogError(Context context, String message, @Nullable Throwable e) {
         showToast(context, message);
         if (e != null) {
             Log.e(CLASS_TAG, message, e);
         } else {
-            Log.d(CLASS_TAG, message);
+            Log.e(CLASS_TAG, message);
         }
 
     }
@@ -295,13 +294,12 @@ public class PluginCommunicator extends Communicator {
      * @param context the application context
      * @param content the content that will be written
      * @param prefix  name of the file
-     * @param suffix  extension of the file
      * @return Uri to the file on success
      * @throws IOException on failure
      */
-    private Uri writeToTempFile(Context context, String content, String prefix, String suffix) throws IOException {
+    private Uri writeToTempFile(Context context, String content, String prefix) throws IOException {
         // Write the processed file to the cache directory
-        File file = File.createTempFile(prefix, suffix, context.getCacheDir());
+        File file = File.createTempFile(prefix, PluginCommunicator.EXTENSION, context.getCacheDir());
 
         try (FileWriter fileWriter = new FileWriter(file)) {
             fileWriter.write(content);

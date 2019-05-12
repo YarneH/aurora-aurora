@@ -1,5 +1,13 @@
 package com.aurora.auroralib.translation;
 
+/**
+ * Class that keeps constants for error codes of the translation service.
+ *
+ * <p>
+ * The reason that a class with constants instead of an enum is used, is because AIDL does not handle non-primitive
+ * types too well.
+ * </p>
+ */
 public final class TranslationErrorCodes {
     /**
      * Indicates that the translation operation succeeded

@@ -29,9 +29,10 @@ import edu.stanford.nlp.pipeline.ProtobufAnnotationSerializer;
 public class ExtractedText implements InternallyProcessedFile, Serializable {
 
     /**
-     * The filename, often the path to the file
+     * The filename, which is made unique with a prepended hash
      */
     private String mFilename;
+
     /**
      * The Date of the last edit
      */
@@ -41,11 +42,13 @@ public class ExtractedText implements InternallyProcessedFile, Serializable {
      * The text of the title of the file
      */
     private String mTitle;
+
     /**
      * The CoreNLP annotations of the title in Google's protobuf format
      */
     @JsonAdapter(CoreNLPDocumentAdapter.class)
     private CoreNLPProtos.Document mTitleAnnotationProto;
+
     /**
      * The deserialized Annotation of the title
      */
@@ -55,10 +58,19 @@ public class ExtractedText implements InternallyProcessedFile, Serializable {
      * A list of authors of the file
      */
     private List<String> mAuthors;
+
     /**
      * A list of Sections of the file which represent the content
      */
     private List<Section> mSections;
+
+    /**
+     * Default constructor for creating an empty extracted text
+     * @param filename      the name of the file
+     */
+    public ExtractedText(@NonNull final String filename) {
+        this.mFilename = filename;
+    }
 
     /**
      * This constructor will create an empty extracted text
@@ -66,7 +78,7 @@ public class ExtractedText implements InternallyProcessedFile, Serializable {
      * @param filename     the name of the file
      * @param dateLastEdit the moment the file was last edited
      */
-    public ExtractedText(String filename, Date dateLastEdit) {
+    public ExtractedText(@NonNull final String filename, @NonNull final Date dateLastEdit) {
         this.mFilename = filename;
         this.mDateLastEdit = dateLastEdit;
     }
@@ -78,14 +90,15 @@ public class ExtractedText implements InternallyProcessedFile, Serializable {
      * @param dateLastEdit the moment the file was last edited
      * @param sections     the sections in the file (only plain sections)
      */
-    public ExtractedText(String filename, Date dateLastEdit, List<String> sections) {
+    public ExtractedText(@NonNull final String filename, Date dateLastEdit, List<String> sections) {
         mFilename = filename;
         mDateLastEdit = dateLastEdit;
 
         mSections = new ArrayList<>();
 
         // Do not use overridable method because this can lead to strange behaviour in subclasses
-        // wiki.sei.cmu.edu/confluence/display/java/MET05-J.+Ensure+that+constructors+do+not+call+overridable+methods
+        // wiki.sei.cmu.edu/confluence/display/java/MET05-J
+        // .+Ensure+that+constructors+do+not+call+overridable+methods
         for (String section : sections) {
             mSections.add(new Section(section));
         }
@@ -100,7 +113,8 @@ public class ExtractedText implements InternallyProcessedFile, Serializable {
      * @param mAuthors      the authors of the file
      * @param mSections     the sections in the file
      */
-    public ExtractedText(String mFilename, Date mDateLastEdit, String mTitle, List<String> mAuthors,
+    public ExtractedText(@NonNull final String mFilename, Date mDateLastEdit, String mTitle,
+                         List<String> mAuthors,
                          List<Section> mSections) {
         this(mFilename, mDateLastEdit);
         this.mTitle = mTitle;
@@ -282,11 +296,13 @@ public class ExtractedText implements InternallyProcessedFile, Serializable {
      * @throws NullPointerException When the file cannot be found.
      */
     @SuppressWarnings("unused")
-    public static ExtractedText getExtractedTextFromFile(@NonNull Uri fileUri, @NonNull Context context)
+    public static ExtractedText getExtractedTextFromFile(@NonNull Uri fileUri,
+                                                         @NonNull Context context)
             throws IOException {
 
         // Open the file
-        ParcelFileDescriptor inputPFD = context.getContentResolver().openFileDescriptor(fileUri, "r");
+        ParcelFileDescriptor inputPFD = context.getContentResolver().openFileDescriptor(fileUri,
+                "r");
 
         if (inputPFD == null) {
             throw new IllegalArgumentException("The file could not be opened");
