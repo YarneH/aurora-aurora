@@ -41,6 +41,8 @@ import com.aurora.internalservice.internalcache.CachedFileInfo;
 import com.aurora.kernel.AuroraCommunicator;
 import com.aurora.kernel.ContextNullException;
 import com.aurora.kernel.Kernel;
+import com.aurora.market.ui.MarketPluginListActivity;
+import com.aurora.market.ui.PluginMarketViewModel;
 import com.aurora.plugin.InternalServices;
 import com.aurora.plugin.Plugin;
 import com.google.firebase.analytics.FirebaseAnalytics;
@@ -119,6 +121,11 @@ public class MainActivity extends AppCompatActivity
     private Kernel mKernel = null;
 
     /**
+     * The ViewModel of the PluginMarket, containing the downloadable plugins
+     */
+    private PluginMarketViewModel mPluginMarket = null;
+
+    /**
      * Delivers the communication between the environment and the Kernel.
      */
     private AuroraCommunicator mAuroraCommunicator = null;
@@ -151,7 +158,6 @@ public class MainActivity extends AppCompatActivity
                     "The kernel was not initialized with a valid android application context", e);
         }
 
-
         /* Setup RecyclerView */
         mRecyclerView = findViewById(R.id.rv_files);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -169,7 +175,7 @@ public class MainActivity extends AppCompatActivity
         setSupportActionBar(toolbar);
 
         /* The floating action button to add files */
-        FloatingActionButton fab = findViewById(R.id.fab);
+        FloatingActionButton fab = findViewById(R.id.fab_download_plugin);
         /* Implementation of adding files in onClick */
         fab.setOnClickListener(view -> selectFile());
 
@@ -590,23 +596,14 @@ public class MainActivity extends AppCompatActivity
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
-        boolean home = false;
-        if (id == R.id.nav_about_us) {
-            mTextViewMain.setText(R.string.about_us);
-        } else if (id == R.id.nav_help_feedback) {
+        if (id == R.id.nav_help_feedback) {
             Intent intent = new Intent(MainActivity.this, FeedbackActivity.class);
             startActivity(intent);
-        } else if (id == R.id.nav_home) {
-            home = true;
+        } else if (id == R.id.nav_plugin_market) {
+            Intent intent = new Intent(MainActivity.this, MarketPluginListActivity.class);
+            startActivity(intent);
         } else {
-            mTextViewMain.setText(R.string.settings);
-        }
-        if (home) {
-            findViewById(R.id.cl_recycler_content).setVisibility(View.VISIBLE);
-            mTextViewMain.setVisibility(View.INVISIBLE);
-        } else {
-            findViewById(R.id.cl_recycler_content).setVisibility(View.INVISIBLE);
-            mTextViewMain.setVisibility(View.VISIBLE);
+            // Home is selected, nothing to do here
         }
 
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
