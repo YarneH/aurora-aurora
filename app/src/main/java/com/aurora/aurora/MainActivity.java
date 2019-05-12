@@ -1,13 +1,14 @@
 package com.aurora.aurora;
 
-import android.content.ContentResolver;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.OpenableColumns;
+import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
-import android.support.design.widget.Snackbar;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -21,13 +22,18 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.LinearInterpolator;
+import android.view.animation.TranslateAnimation;
 import android.webkit.MimeTypeMap;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.aurora.auroralib.Constants;
 import com.aurora.kernel.AuroraCommunicator;
+import com.aurora.kernel.ContextNullException;
 import com.aurora.kernel.Kernel;
 import com.aurora.plugin.Plugin;
 import com.google.firebase.analytics.FirebaseAnalytics;
@@ -50,10 +56,25 @@ public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
     /**
+     * Constant for radix of Integer.toString()
+     */
+    private static final int HEX_RADIX = 16;
+
+    /**
      * The request-code used to start the file-chooser intent.
      * Chosen to be 1.
      */
     private static final int REQUEST_FILE_GET = 1;
+
+    /**
+     * Constant for the duration of the pointing arrow animation
+     */
+    private static final int ANIMATION_DURATION = 500;
+
+    /**
+     * Constant for the position of the pointing arrow animation
+     */
+    private static final float END_POINT_OF_ANIMATION = 0.2F;
 
     /**
      * Toast that holds the dummy text after a file is searched for.
@@ -89,6 +110,7 @@ public class MainActivity extends AppCompatActivity
      */
     private FirebaseAnalytics mFirebaseAnalytics = null;
 
+
     /**
      * {@inheritDoc}
      */
@@ -98,8 +120,13 @@ public class MainActivity extends AppCompatActivity
         setContentView(R.layout.activity_main);
 
         /* Set up kernel */
-        mKernel = new Kernel(this.getApplicationContext());
-        mAuroraCommunicator = mKernel.getAuroraCommunicator();
+        try {
+            mKernel = Kernel.getInstance(this.getApplicationContext());
+            mAuroraCommunicator = mKernel.getAuroraCommunicator();
+        } catch (ContextNullException e) {
+            Log.e("MainActivity",
+                    "The kernel was not initialized with a valid android application context", e);
+        }
 
         /*
         Set up plugins
@@ -110,14 +137,6 @@ public class MainActivity extends AppCompatActivity
 
         /* Initialize FirebaseAnalytics */
         mFirebaseAnalytics = FirebaseAnalytics.getInstance(this);
-
-        /* Set system properties for DOCX */
-        System.setProperty("org.apache.poi.javax.xml.stream.XMLInputFactory",
-                "com.fasterxml.aalto.stax.InputFactoryImpl");
-        System.setProperty("org.apache.poi.javax.xml.stream.XMLOutputFactory",
-                "com.fasterxml.aalto.stax.OutputFactoryImpl");
-        System.setProperty("org.apache.poi.javax.xml.stream.XMLEventFactory",
-                "com.fasterxml.aalto.stax.EventFactoryImpl");
 
         /* Add toolbar when activity is created */
         Toolbar toolbar = findViewById(R.id.toolbar);
@@ -149,38 +168,78 @@ public class MainActivity extends AppCompatActivity
         CardFileAdapter adapter = new CardFileAdapter(mKernel, this);
         mRecyclerView.setAdapter(adapter);
 
+
+        /* Show TextView when RecyclerView is empty */
+        if (adapter.getItemCount() == 0) {
+            findViewById(R.id.cl_empty_text).setVisibility(View.VISIBLE);
+            ImageView arrow = findViewById(R.id.img_arrow);
+
+            // Set the animation of the arrow in the startscreen
+            TranslateAnimation mAnimation = new TranslateAnimation(
+                    TranslateAnimation.ABSOLUTE, 0F,
+                    TranslateAnimation.ABSOLUTE, 0F,
+                    TranslateAnimation.RELATIVE_TO_PARENT, 0F,
+                    TranslateAnimation.RELATIVE_TO_PARENT, END_POINT_OF_ANIMATION);
+            mAnimation.setDuration(ANIMATION_DURATION);
+            mAnimation.setRepeatCount(-1);
+            mAnimation.setRepeatMode(Animation.REVERSE);
+            mAnimation.setInterpolator(new LinearInterpolator());
+            arrow.setAnimation(mAnimation);
+        }
+
         // If opening the file is done from a file explorer
         if (Intent.ACTION_VIEW.equals(getIntent().getAction())) {
             // This method is also called when a file is opened from the file chooser
-            onActivityResult(REQUEST_FILE_GET,RESULT_OK, getIntent());
+            onActivityResult(REQUEST_FILE_GET, RESULT_OK, getIntent());
         }
+    }
 
+    /**
+     * Helper method that register the plugins with their info in the pluginregistry
+     * TODO: when the pluginmarket is implemented, remove this method
+     */
+    private void registerPlugins() {
+        final Plugin basicPlugin = new Plugin(
+                "com.aurora.basicplugin",
+                "Basic Plugin",
+                null,
+                "Basic plugin to open any file and display extracted text.",
+                4,
+                "v0.4");
+
+        final Plugin souschefPlugin = new Plugin(
+                "com.aurora.souschef",
+                "Souschef",
+                null,
+                "Plugin to open recipes and display them in an enhanced way.",
+                9,
+                "v0.5.1");
+
+        final Plugin hulpchefPlugin = new Plugin(
+                "com.aurora.hulpchef",
+                "Hulpchef",
+                null,
+                "Plugin to open recipes and display them in dutch.",
+                1,
+                "v1.0");
+
+        final Plugin paperViewerPlugin = new Plugin(
+                "com.aurora.paperviewer",
+                "Paperviewer",
+                null,
+                "Plugin to open papers and display them in an enhanced way.",
+                5,
+                "v0.5");
+
+        // Register plugins in the registry
+        mAuroraCommunicator.registerPlugin(basicPlugin);
+        mAuroraCommunicator.registerPlugin(souschefPlugin);
+        mAuroraCommunicator.registerPlugin(hulpchefPlugin);
+        mAuroraCommunicator.registerPlugin(paperViewerPlugin);
     }
 
     /**
      * Creates an intent to open the file manager.
-     * <p>
-     * Creates an intent to open the file manager.
-     * If more filetypes need to be opened, use a final String[].
-     * </p>
-     * <br>
-     * <p>
-     * For example: <br>
-     * final String[] ACCEPT_MIME_TYPES = {
-     * "application/pdf",
-     * "image/*"
-     * };
-     * </p>
-     * <br>
-     * <p>
-     * Intent intent = new Intent();
-     * <br>
-     * intent.setType("* / *");
-     * <br>
-     * intent.setAction(Intent.ACTION_GET_CONTENT);
-     * <br>
-     * intent.putExtra(Intent.EXTRA_MIME_TYPES,ACCEPT_MIME_TYPES);
-     * </p
      */
     protected void selectFile() {
         final String[] mimeTypes = {
@@ -211,9 +270,11 @@ public class MainActivity extends AppCompatActivity
             try {
                 if (textFile != null) {
                     Log.i("URI", textFile.toString());
-                    ContentResolver cR = getApplicationContext().getContentResolver();
-                    String type = MimeTypeMap.getSingleton().getExtensionFromMimeType(cR.getType(textFile));
+                    String type = MimeTypeMap.getSingleton().getExtensionFromMimeType(
+                            getApplicationContext().getContentResolver().getType(textFile));
                     Log.i("MIME", type);
+                    String fileName = getFileName(textFile);
+                    Log.i("FILENAME", fileName);
 
                     /*
                      * Firebase Analytics
@@ -227,23 +288,72 @@ public class MainActivity extends AppCompatActivity
                     // Make inputstream reader for aurora communicator
                     InputStream read = getContentResolver().openInputStream(textFile);
 
+                    // TODO: create and call custom chooser here, and let it return the unique plugin name of the
+                    // plugin to open the file with (package name, e.g. "com.aurora.basicplugin")
+
+
                     // Create intent to open file with a certain plugin
                     Intent pluginAction = new Intent(Constants.PLUGIN_ACTION);
 
                     // Create chooser to let user choose the plugin
                     Intent chooser = Intent.createChooser(pluginAction, getString(R.string.select_plugin));
-
-                    mAuroraCommunicator.openFileWithPlugin(textFile.toString(), type,
+                    mAuroraCommunicator.openFileWithPluginChooser(fileName, type,
                             read, pluginAction, chooser, getApplicationContext());
 
                 } else {
-                    Toast.makeText(this, "The selected file was null", Snackbar.LENGTH_LONG).show();
+                    showPopUpView("The selected file was null, please select another file!");
                 }
             } catch (FileNotFoundException e) {
-                Toast.makeText(this, "The file could not be found", Snackbar.LENGTH_LONG).show();
+                showPopUpView("The file could not be found, please select another file!");
                 Log.e("FILE_NOT_FOUND", "The file could not be found", e);
             }
         }
+    }
+
+    /**
+     * Private helper method to extract the displayed filename from the Cursor combined with the
+     * Uri.
+     *
+     * <p>
+     * This method is needed because files from for example Google Drive get an automatically
+     * generated uri that does not contain the actual file name. This method allows to
+     * extract the filename displayed in the Android file picker.
+     * </p>
+     *
+     * <p>
+     * To ensure uniqueness, a hash of the uri path will be prepended before the filename.
+     * </p>
+     *
+     * @param uri the Uri to get the displayed filename from
+     * @return The displayed filename
+     */
+    private String getFileName(Uri uri) {
+
+        String result;
+
+        // Add hash to filename so we have a unique filename for different files with the same filename on different
+        // locations
+        if (uri.getPath() != null) {
+            result = Integer.toString(uri.getPath().hashCode(), HEX_RADIX) + "_";
+        } else {
+            return null;
+        }
+
+        try (Cursor cursor = getContentResolver()
+                .query(uri, null, null, null, null, null)) {
+            // moveToFirst() returns false if the cursor has 0 rows.  Very handy for
+            // "if there's anything to look at, look at it" conditionals.
+            if (cursor != null && cursor.moveToFirst()) {
+
+                // Note it's called "Display Name".  This is
+                // provider-specific, and might not necessarily be the file name.
+                result += cursor.getString(
+                        cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME));
+
+                return result;
+            }
+        }
+        return null;
     }
 
     /**
@@ -292,8 +402,8 @@ public class MainActivity extends AppCompatActivity
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_search) {
             // Create a LayoutInflater which will create the view for the pop-up
-            LayoutInflater li = LayoutInflater.from(this);
-            View promptView = li.inflate(R.layout.search_prompt, null);
+            LayoutInflater inflater = LayoutInflater.from(this);
+            View promptView = inflater.inflate(R.layout.search_prompt, mRecyclerView, false);
             final EditText userInput = promptView.findViewById(R.id.et_search_prompt);
 
             // Create a builder to build the actual alertdialog from the previous inflated view
@@ -312,7 +422,6 @@ public class MainActivity extends AppCompatActivity
             // Create and show the pop-up
             alertDialogBuilder.create().show();
         }
-
         return super.onOptionsItemSelected(item);
     }
 
@@ -329,35 +438,27 @@ public class MainActivity extends AppCompatActivity
      * @param item Selected menu item.
      * @return whether or not successful.
      */
-    @SuppressWarnings("StatementWithEmptyBody")
     @Override
-    public boolean onNavigationItemSelected(MenuItem item) {
+    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
-        // TODO: Remove string and boolean if all activities are implemented
-        // String for demo
-        String text = "";
         boolean home = false;
         if (id == R.id.nav_about_us) {
-            text = "About us";
-            // Change text and visibility (Used for demo)
-            mTextViewMain.setText(text);
+            mTextViewMain.setText(R.string.about_us);
         } else if (id == R.id.nav_help_feedback) {
             Intent intent = new Intent(MainActivity.this, FeedbackActivity.class);
             startActivity(intent);
         } else if (id == R.id.nav_home) {
             home = true;
         } else {
-            text = "Settings";
-            // Change text and visibility (Used for demo)
-            mTextViewMain.setText(text);
+            mTextViewMain.setText(R.string.settings);
         }
         if (home) {
-            mRecyclerView.setVisibility(View.VISIBLE);
+            findViewById(R.id.cl_recycler_content).setVisibility(View.VISIBLE);
             mTextViewMain.setVisibility(View.INVISIBLE);
         } else {
-            mRecyclerView.setVisibility(View.INVISIBLE);
+            findViewById(R.id.cl_recycler_content).setVisibility(View.INVISIBLE);
             mTextViewMain.setVisibility(View.VISIBLE);
         }
 
@@ -366,39 +467,22 @@ public class MainActivity extends AppCompatActivity
         return true;
     }
 
-    /**
-     * Helper method that register the plugins with their info in the pluginregistry
-     * TODO: when the pluginmarket is implemented, remove this method
-     */
-    private void registerPlugins() {
-        final Plugin basicPlugin = new Plugin(
-                "com.aurora.basicplugin",
-                "Basic Plugin",
-                null,
-                "Basic plugin to open any file and display extracted text.",
-                4,
-                "v0.4");
 
-        final Plugin souschefPlugin = new Plugin(
-                "com.aurora.souschef",
-                "Souschef",
-                null,
-                "Plugin to open recipes and display them in an enhanced way.",
-                4,
-                "v0.4");
+    private void showPopUpView(String message) {
+        // Create a LayoutInflater which will create the view for the pop-up
+        LayoutInflater inflater = LayoutInflater.from(this);
+        View promptView = inflater.inflate(R.layout.popup_card, mRecyclerView, false);
 
-        final Plugin paperViewerPlugin = new Plugin(
-                "com.aurora.paperviewer",
-                "Paperviewer",
-                null,
-                "Plugin to open papers and display them in an enhanced way.",
-                4,
-                "v0.4");
+        // Set the message of the TextView
+        TextView messageText = promptView.findViewById(R.id.tv_message);
+        messageText.setText(message);
 
-        // Register plugins in the registry
-        mAuroraCommunicator.registerPlugin(basicPlugin);
-        mAuroraCommunicator.registerPlugin(souschefPlugin);
-        mAuroraCommunicator.registerPlugin(paperViewerPlugin);
+        // Create a builder to build the actual alertdialog from the previous inflated view
+        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
+        alertDialogBuilder.setView(promptView);
+        alertDialogBuilder.setCancelable(false);
+
+        // Create and show the pop-up
+        alertDialogBuilder.create().show();
     }
 }
-

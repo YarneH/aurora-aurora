@@ -1,1 +1,1 @@
-include ':app', ':auroralib'
+include ':app', ':auroralib_old', ':auroralib'

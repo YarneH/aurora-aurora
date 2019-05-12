@@ -11,6 +11,7 @@ public class RemoveFromCacheRequest implements Event {
     /**
      * a reference to the file to be removed from the cache. If null, either all files from the specified plugin are
      * deleted, or if the plugin name is null too, clears the cache.
+     * (should be hash_displayName). Check the getFileName method from MainActivity.
      */
     private String mFileRef;
 
@@ -25,6 +26,7 @@ public class RemoveFromCacheRequest implements Event {
      * plugin from the cache.
      *
      * @param fileRef          a reference to the original file of which the cached version should be removed
+     *                         (should be hash_displayName). Check the getFileName method from MainActivity.
      * @param uniquePluginName the name of the plugin that this file was processed with
      */
     public RemoveFromCacheRequest(@NonNull String fileRef, @NonNull String uniquePluginName) {
@@ -53,7 +55,6 @@ public class RemoveFromCacheRequest implements Event {
     }
 
     /**
-     *
      * @return A reference to the file of which the cached version should be removed, or null if there is no particular
      * file to be removed, but multiple files
      */
@@ -62,7 +63,6 @@ public class RemoveFromCacheRequest implements Event {
     }
 
     /**
-     *
      * @return The name of the plugin of which one or all files should be removed from the cache, or null if the
      * entire cache has to be cleared
      */

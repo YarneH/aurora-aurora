@@ -1,6 +1,7 @@
 package com.aurora.kernel;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
 
 import com.aurora.auroralib.PluginObject;
 import com.aurora.internalservice.internalcache.CachedFileInfo;
@@ -61,7 +62,7 @@ public class AuroraInternalServiceCommunicatorUnitTest {
         observable.map(CacheFileResponse::isSuccessful).subscribe(testObserver);
 
         // Create cache file request and post on bus
-        PluginObject dummyPluginObject = new DummyPluginObject();
+        String dummyPluginObject = new DummyPluginObject().toJSON();
         CacheFileRequest request = new CacheFileRequest(fileRef, dummyPluginObject, pluginName);
         mBus.post(request);
 
@@ -213,13 +214,13 @@ public class AuroraInternalServiceCommunicatorUnitTest {
         }
 
         @Override
-        public boolean cacheFile(String fileRef, PluginObject pluginObject, String uniquePluginName) {
+        public boolean cacheFile(String fileRef, String pluginObject, String uniquePluginName) {
             // Just return true
             return true;
         }
 
         @Override
-        public CachedFileInfo checkCacheForProcessedFile(String fileRef, String uniquePluginName) {
+        public CachedFileInfo checkCacheForProcessedFile(@NonNull String fileRef, @NonNull String uniquePluginName) {
             return dummyCachedFileInfo;
         }
 
@@ -258,5 +259,8 @@ public class AuroraInternalServiceCommunicatorUnitTest {
      * Dummy implementation for testing purposes
      */
     private class DummyPluginObject extends PluginObject {
+        public DummyPluginObject() {
+            super("dummyfilename", "dummyplugin");
+        }
     }
 }

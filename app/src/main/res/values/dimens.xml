@@ -10,13 +10,19 @@
 
     <!-- File card dimentions in main menu -->
     <dimen name="fc_margin_vertical">20dp</dimen>
-    <dimen name="fc_margin_horizontal">15dp</dimen>
+    <dimen name="fc_margin_horizontal">20dp</dimen>
     <dimen name="fc_corner_radius">6dp</dimen>
     <dimen name="fc_elevation">6dp</dimen>
     <dimen name="fc_individual_padding">20dp</dimen>
-    <dimen name="fc_large_text">18sp</dimen>
+    <dimen name="fc_large_text">20sp</dimen>
     <dimen name="fc_small_text">14sp</dimen>
     <dimen name="fc_open_button_margin">20dp</dimen>
+    <dimen name="fc_padding">15dp</dimen>
+
+
+    <!-- Start screen -->
+    <!-- This is the same as a default FloatingActionButton -->
+    <dimen name="arrow_icon">56dp</dimen>
     
     <!-- Search prompt values -->
     <dimen name="sp_padding">10dp</dimen>

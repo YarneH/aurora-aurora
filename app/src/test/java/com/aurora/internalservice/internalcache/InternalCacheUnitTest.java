@@ -23,22 +23,23 @@ public class InternalCacheUnitTest {
     @BeforeClass
     public static void initialize() {
         mInternalCache = new InternalCache(new MockContext());
+        mInternalCache.clear();
     }
 
     @Test
     public void InternalCache_cacheFile_shouldWriteObjectToFile() {
         // Create arguments
-        String fileRef = "testFile.pdf";
+        String fileRef = "-123456_testFile.pdf";
         String title = "title";
         String text = "text";
-        PluginObject pluginObject = new DummyPluginObject1(title, text);
+        String pluginObject = new DummyPluginObject1(title, text).toJSON();
         String uniquePluginName = "DummyPlugin";
 
         // Call method under test
         mInternalCache.cacheFile(fileRef, pluginObject, uniquePluginName);
 
         // Check that file has been written to the right location
-        File cachedFile = new File("testFile.aur");
+        File cachedFile = new File("-123456_testFile.aur");
 
         Assert.assertTrue(cachedFile.exists());
 
@@ -61,10 +62,10 @@ public class InternalCacheUnitTest {
     @Test
     public void InternalCache_cacheFile_shouldReturnTrueOnSuccess() {
         // Create arguments
-        String fileRef = "testFile.pdf";
+        String fileRef = "-123456_testFile.pdf";
         String title = "title";
         String text = "text";
-        PluginObject pluginObject = new DummyPluginObject1(title, text);
+        String pluginObject = new DummyPluginObject1(title, text).toJSON();
         String uniquePluginName = "DummyPlugin";
 
         // Call method under test
@@ -77,10 +78,10 @@ public class InternalCacheUnitTest {
     public void InternalCache_cacheFile_shouldReturnFalseOnFailure() {
         // Create arguments
         // Invalid filename works on windows. Linux should also have a problem with the slashes
-        String invalidFileRef = "te///st??File!.pdf";
+        String invalidFileRef = "-1234_te///st??File!.pdf";
         String title = "title";
         String text = "text";
-        PluginObject pluginObject = new DummyPluginObject1(title, text);
+        String pluginObject = new DummyPluginObject1(title, text).toJSON();
         String uniquePluginName = "DummyPlugin";
 
         // Call method under test
@@ -92,10 +93,10 @@ public class InternalCacheUnitTest {
     @Test
     public void InternalCache_checkCacheForProcessedFile_shouldReturnProcessedFileName() {
         // First cache an element
-        String fileRef = "testFile.pdf";
+        String fileRef = "-123456_testFile.pdf";
         String title = "title";
         String text = "text";
-        PluginObject pluginObject = new DummyPluginObject1(title, text);
+        String pluginObject = new DummyPluginObject1(title, text).toJSON();
         String uniquePluginName = "DummyPlugin";
         mInternalCache.cacheFile(fileRef, pluginObject, uniquePluginName);
 
@@ -146,12 +147,12 @@ public class InternalCacheUnitTest {
         addCacheFiles();
 
         // Add one yourself
-        String fileRef = "award-winning-text.pdf";
+        String fileRef = "-1234567_award-winning-text.pdf";
         String title = "A Good Title";
         String text = "This is a very good text. Nobel prize worthy, even!";
         String pluginName = "DummyPlugin";
 
-        DummyPluginObject1 object1 = new DummyPluginObject1(title, text);
+        String object1 = new DummyPluginObject1(title, text).toJSON();
         mInternalCache.cacheFile(fileRef, object1, pluginName);
 
         // Now, we want to retrieve the text again
@@ -162,8 +163,8 @@ public class InternalCacheUnitTest {
                 DummyPluginObject1.fromJson(cachedProcessedFile.getJsonRepresentation(), DummyPluginObject1.class);
 
         // Assert that the two objects are equal
-        Assert.assertEquals(object1.getTitle(), reconstructedObject.getTitle());
-        Assert.assertEquals(object1.getText(), reconstructedObject.getText());
+        Assert.assertEquals(title, reconstructedObject.getTitle());
+        Assert.assertEquals(text, reconstructedObject.getText());
     }
 
     @Test
@@ -172,12 +173,12 @@ public class InternalCacheUnitTest {
         addCacheFiles();
 
         // Add one yourself
-        String fileRef = "award-winning-text.pdf";
+        String fileRef = "-123456_award-winning-text.pdf";
         String title = "A Good Title";
         String text = "This is a very good text. Nobel prize worthy, even!";
         String pluginName = "DummyPlugin";
 
-        DummyPluginObject1 object1 = new DummyPluginObject1(title, text);
+        String object1 = new DummyPluginObject1(title, text).toJSON();
         mInternalCache.cacheFile(fileRef, object1, pluginName);
 
         // Now we want to remove this one file
@@ -192,7 +193,7 @@ public class InternalCacheUnitTest {
         addCacheFiles();
 
         // Add one yourself
-        String fileRef = "award-winning-text.pdf";
+        String fileRef = "-123456_award-winning-text.pdf";
         String pluginName = "DummyPlugin";
 
         // Now we want to remove this one file
@@ -207,16 +208,16 @@ public class InternalCacheUnitTest {
         addCacheFiles();
 
         // Add multiple files by another plugin
-        String fileRef1 = "award-winning-text.pdf";
-        String fileRef2 = "bad-text.pdf";
+        String fileRef1 = "-123456_award-winning-text.pdf";
+        String fileRef2 = "-122455_bad-text.pdf";
         String title1 = "A Good Title";
         String title2 = "A Bad Title";
         String text1 = "This is a very good text. Nobel prize worthy, even!";
         String text2 = "This text will never win any prize!";
         String pluginName = "DummyPlugin";
 
-        DummyPluginObject1 object1 = new DummyPluginObject1(title1, text1);
-        DummyPluginObject1 object2 = new DummyPluginObject1(title2, text2);
+        String object1 = new DummyPluginObject1(title1, text1).toJSON();
+        String object2 = new DummyPluginObject1(title2, text2).toJSON();
         mInternalCache.cacheFile(fileRef1, object1, pluginName);
         mInternalCache.cacheFile(fileRef2, object2, pluginName);
 
@@ -265,20 +266,20 @@ public class InternalCacheUnitTest {
      * Helper method that adds 5 files to the cache of different types
      */
     private static void addCacheFiles() {
-        String[] filerefs1 = {"fileref1.pdf", "fileref2.docx", "fileref3.pdf"};
+        String[] filerefs1 = {"-123_fileref1.pdf", "-456_fileref2.docx", "-789_fileref3.pdf"};
         String[] titles1 = {"Title1", "Title2", "Title3"};
         String[] texts1 = {"Text1", "Text2", "Text3"};
         String pluginName1 = "DummyPlugin1";
 
         for (int i = 0; i < titles1.length; i++) {
             // Create plugin object
-            DummyPluginObject1 object1 = new DummyPluginObject1(titles1[i], texts1[i]);
+            String object1 = new DummyPluginObject1(titles1[i], texts1[i]).toJSON();
 
             // Add to cache
             mInternalCache.cacheFile(filerefs1[i], object1, pluginName1);
         }
 
-        String[] filerefs2 = {"fileref4.docx", "fileref5.txt"};
+        String[] filerefs2 = {"-123_fileref4.docx", "-456_fileref5.txt"};
         String[] titles2 = {"Title4", "Title5"};
         int[] numbers = {2, 3};
         String[] names = {"Name4", "Name 5"};
@@ -286,7 +287,7 @@ public class InternalCacheUnitTest {
 
         for (int i = 0; i < titles2.length; i++) {
             // Create plugin object
-            DummyPluginObject2 object2 = new DummyPluginObject2(titles1[i], numbers[i], names[i]);
+            String object2 = new DummyPluginObject2(titles1[i], numbers[i], names[i]).toJSON();
 
             // Add to cache
             mInternalCache.cacheFile(filerefs2[i], object2, pluginName2);
@@ -301,6 +302,7 @@ public class InternalCacheUnitTest {
         private String mText;
 
         public DummyPluginObject1(String title, String text) {
+            super("dummyfilename", "dummyplugin");
             mTitle = title;
             mText = text;
         }
@@ -321,6 +323,7 @@ public class InternalCacheUnitTest {
         private String mName;
 
         public DummyPluginObject2(String title, int number, String name) {
+            super("dummyfilename", "dummyplugin");
             mTitle = title;
             mNumber = number;
             mName = name;

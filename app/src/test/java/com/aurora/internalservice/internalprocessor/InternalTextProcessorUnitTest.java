@@ -41,14 +41,6 @@ public class InternalTextProcessorUnitTest {
     // Test if, when a 'docx'-file is passed, text is extracted
     @Test
     public void processFile_shouldReturnExtractedTextDOCX() throws FileTypeNotSupportedException {
-        /* Set system properties for DOCX */
-        System.setProperty("org.apache.poi.javax.xml.stream.XMLInputFactory",
-                "com.fasterxml.aalto.stax.InputFactoryImpl");
-        System.setProperty("org.apache.poi.javax.xml.stream.XMLOutputFactory",
-                "com.fasterxml.aalto.stax.OutputFactoryImpl");
-        System.setProperty("org.apache.poi.javax.xml.stream.XMLEventFactory",
-                "com.fasterxml.aalto.stax.EventFactoryImpl");
-
         String fileRef = RES_PATH + "Pasta.docx";
         File file = new File(fileRef);
         try {

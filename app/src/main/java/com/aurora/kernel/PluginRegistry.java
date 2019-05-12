@@ -1,6 +1,8 @@
 package com.aurora.kernel;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.aurora.plugin.Plugin;
@@ -35,23 +37,16 @@ class PluginRegistry {
     private String mConfigFileRef;
 
     /**
-     * A reference to the processing communicator
-     */
-    private ProcessingCommunicator mProcessingCommunicator;
-
-    /**
      * The android context
      */
     private Context mContext;
 
     /**
      * Creates a new PluginRegistry. There should be only one instance at a time
-     * @param processingCommunicator a reference to the ProcessingCommunicator TODO: might be removed
      * @param configFileRef a string containing the path to the config file of the registry
      * @param context a reference to the android context, necessary for file IO
      */
-    PluginRegistry(ProcessingCommunicator processingCommunicator, String configFileRef, Context context) {
-        this.mProcessingCommunicator = processingCommunicator;
+    PluginRegistry(@NonNull final String configFileRef, @NonNull final Context context) {
 
         this.mConfigFileRef = configFileRef;
 
@@ -67,7 +62,7 @@ class PluginRegistry {
      * @param pluginName the name of the plugin to load
      * @return the Plugin associated with the plugin name or null if not found
      */
-    public Plugin getPlugin(String pluginName) {
+    public @Nullable Plugin getPlugin(@NonNull final String pluginName) {
         return mPluginsMap.get(pluginName);
     }
 
@@ -76,7 +71,7 @@ class PluginRegistry {
      *
      * @return List of Plugin objects with basic information
      */
-    public List<Plugin> getPlugins() {
+    public @NonNull List<Plugin> getPlugins() {
         // Create list from the values
         return new ArrayList<>(mPluginsMap.values());
     }
@@ -90,8 +85,8 @@ class PluginRegistry {
      *                            with a new version (compares the version numbers)
      * @return true if the plugin was added, false if the plugin could not be added (e.g. if it was already present)
      */
-    boolean registerPlugin(String pluginName, Plugin plugin, boolean overwriteOldVersion) {
-        // TODO: write back config file immediately
+    public boolean registerPlugin(@NonNull final String pluginName, @NonNull final Plugin plugin,
+                                  final boolean overwriteOldVersion) {
         if (!mPluginsMap.containsKey(pluginName) || (overwriteOldVersion &&
                 Objects.requireNonNull(mPluginsMap.get(pluginName)).getVersionNumber() < plugin.getVersionNumber())) {
 
@@ -116,7 +111,7 @@ class PluginRegistry {
      * @param plugin              the plugin object that contains the plugin
      * @return true if the plugin was added, false if the plugin could not be added (e.g. if it was already present)
      */
-    boolean registerPlugin(String pluginName, Plugin plugin) {
+    public boolean registerPlugin(@NonNull final String pluginName, @NonNull final Plugin plugin) {
         return this.registerPlugin(pluginName, plugin, false);
     }
 
@@ -125,7 +120,7 @@ class PluginRegistry {
      *
      * @param pluginName the name of the plugin to remove from the registry
      */
-    void removePlugin(String pluginName) {
+    public void removePlugin(@NonNull final String pluginName) {
         mPluginsMap.remove(pluginName);
         persistPluginsMap();
     }
@@ -133,7 +128,7 @@ class PluginRegistry {
     /**
      * Removes all plugins from the registry
      */
-    void removeAllPlugins() {
+    public void removeAllPlugins() {
         mPluginsMap.clear();
         persistPluginsMap();
     }
@@ -154,7 +149,6 @@ class PluginRegistry {
             Plugin[] registeredPlugins = gson.fromJson(pluginsJson, Plugin[].class);
 
             for (Plugin p : registeredPlugins) {
-                // TODO: add appropriate pluginenvironment and processor to the plugin
                 // Add the plugin to the map
                 mPluginsMap.put(p.getUniqueName(), p);
             }
@@ -170,7 +164,7 @@ class PluginRegistry {
      * @return a JSONArray containing the various JSON objects representing plugins
      * @throws IOException when the file does not exist or something went wrong during the file read
      */
-    private String parsePluginFile() throws IOException {
+    private @NonNull String parsePluginFile() throws IOException {
         // Get file at specified path
         File pluginConfig = new File(mContext.getFilesDir(), mConfigFileRef);
 
