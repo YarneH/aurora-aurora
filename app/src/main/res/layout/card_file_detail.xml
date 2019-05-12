@@ -10,12 +10,12 @@
 
     <!-- This shows the day this file is last opened -->
     <TextView
-        android:id="@+id/tv_card_last_opened"
+        android:id="@+id/tv_card_location"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
-        android:text="@string/file_last"
+        android:text="@string/file_location"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 

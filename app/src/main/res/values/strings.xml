@@ -30,6 +30,10 @@
     <string name="null_file">The selected file was null</string>
     <string name="file_not_found">The file could not be found</string>
 
+    <!-- Plugin Chooser strings -->
+    <string name="plugin_name">Plugin name</string>
+    <string name="plugin_description">Plugin description</string>
+
     <!-- Feedback Activity -->
     <string name="feedback_sent">Feedback sent, thank you!</string>
     <string name="feedback_wrong">Something went wrong. Please try again.</string>

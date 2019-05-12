@@ -41,14 +41,14 @@ public class Plugin {
     private String mDescription;
 
     /**
-     * A version number for the plugin.
+     * A version code for the plugin.
      */
-    private int mVersionNumber;
+    private int mVersionCode;
 
     /**
-     * A version code for the plugin, For example "v1.0" or "v2.2.3"
+     * The version name for the plugin, For example "v1.0" or "v2.2.3"
      */
-    private String mVersionCode;
+    private String mVersionName;
 
     /**
      * The internal services needed by the plugin.
@@ -62,19 +62,19 @@ public class Plugin {
      * @param name             the display name of the plugin
      * @param pluginLogo       the logo of the plugin
      * @param description      the description of what the plugin is used for
-     * @param versionNumber    the version number for the plugin
      * @param versionCode      the version code for the plugin
+     * @param versionName      the version name for the plugin
      * @param internalServices the internal services needed by the plugin
      */
     public Plugin(@NonNull String uniqueName, @NonNull String name, Bitmap pluginLogo, @NonNull String description,
-                  int versionNumber, @NonNull String versionCode,
+                  int versionCode, @NonNull String versionName,
                   @NonNull List<InternalServices> internalServices) {
         mUniqueName = uniqueName;
         mName = name;
         mPluginLogo = pluginLogo;
         mDescription = description;
-        mVersionNumber = versionNumber;
         mVersionCode = versionCode;
+        mVersionName = versionName;
         mInternalServices = internalServices;
     }
 
@@ -85,12 +85,12 @@ public class Plugin {
      * @param name          the display name of the plugin
      * @param pluginLogo    the logo of the plugin
      * @param description   the description of what the plugin is used for
-     * @param versionNumber the version number for the plugin
      * @param versionCode   the version code for the plugin
+     * @param versionName   the version name for the plugin
      */
     public Plugin(String uniqueName, String name, Bitmap pluginLogo, String description,
-                  int versionNumber, String versionCode) {
-        this(uniqueName, name, pluginLogo, description, versionNumber, versionCode, DEFAULT_INTERNAL_SERVICES);
+                  int versionCode, String versionName) {
+        this(uniqueName, name, pluginLogo, description, versionCode, versionName, DEFAULT_INTERNAL_SERVICES);
     }
 
     /**
@@ -124,15 +124,15 @@ public class Plugin {
     /**
      * @return the version number of the plugin. For example: 1,2,3,...
      */
-    public int getVersionNumber() {
-        return mVersionNumber;
+    public int getVersionCode() {
+        return mVersionCode;
     }
 
     /**
      * @return the version code of the plugin. For example: "v0.1", "v1.1.2", "v2.3.2-beta",...
      */
-    public String getVersionCode() {
-        return mVersionCode;
+    public String getVersionName() {
+        return mVersionName;
     }
 
     /**

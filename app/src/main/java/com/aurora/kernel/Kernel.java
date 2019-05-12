@@ -118,7 +118,7 @@ public final class Kernel {
         PluginRegistry pluginRegistry = new PluginRegistry(PLUGINS_CFG, applicationContext);
 
         // Create the different communicators
-        sAuroraCommunicator = new AuroraCommunicator(bus, pluginRegistry);
+        sAuroraCommunicator = new AuroraCommunicator(bus, pluginRegistry, applicationContext);
         sProcessingCommunicator = new ProcessingCommunicator(bus);
         sPluginCommunicator = new PluginCommunicator(bus, pluginRegistry);
 

@@ -21,19 +21,24 @@ public class InternalTextProcessor implements InternalService {
 
     /**
      * extracts text from a file using the right Extractor
-     * @param file the stream containing the file
-     * @param fileRef a reference to where the file can be found
-     * @param type the mimetype of the file
+     *
+     * @param file          the stream containing the file
+     * @param fileRef       a reference to where the file can be found
+     * @param type          the mimetype of the file
      * @param extractImages True if images also need to be extracted, false otherwise
      * @return The extracted content from the file
+     * @throws FileTypeNotSupportedException if the filetype is not recognized
+     * @throws DocumentNotSupportedException if the file could not be processed for another reason
      */
     public ExtractedText processFile(InputStream file, String fileRef, String type,
                                      boolean extractImages)
-            throws FileTypeNotSupportedException {
+            throws FileTypeNotSupportedException, DocumentNotSupportedException {
         ExtractedText extractedText;
         TextExtractor extractor = fileFormatExtractorMap.get(type);
         if (extractor != null) {
+
             extractedText = extractor.extract(file, fileRef, extractImages);
+
             try {
                 Objects.requireNonNull(file).close();
             } catch (IOException e) {
@@ -41,7 +46,8 @@ public class InternalTextProcessor implements InternalService {
             }
         } else {
             Log.d("InternalTextProcessor", "File type not supported");
-            throw new FileTypeNotSupportedException("");
+            throw new FileTypeNotSupportedException("You have opened a file with type: " + type +
+                    "\n This type is not supported.");
         }
         return extractedText;
     }
