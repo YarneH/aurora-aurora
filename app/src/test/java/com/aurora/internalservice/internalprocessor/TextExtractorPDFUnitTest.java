@@ -29,17 +29,18 @@ public class TextExtractorPDFUnitTest {
         File file = new File(mfileRef);
         InputStream inputStream = new FileInputStream(file);
         // Extract the text
-        mExtractedText = textExtractorPDF.extract(inputStream, mfileRef, false);
+        try {
+            mExtractedText = textExtractorPDF.extract(inputStream, mfileRef, false);
+        } catch (DocumentNotSupportedException e) {
+            e.printStackTrace();
+        }
     }
 
-    @Ignore
     @Test
     public void extract_shouldReturnExtractedText() {
         assertNotNull("PDF text extraction: Failed to extract", mExtractedText);
     }
 
-    // Checks if the title is extracted correctly
-    @Ignore("The implementation of PDF extraction is not yet on this level")
     @Test
     public void extract_shouldExtractTitleCorrectly() {
 
@@ -48,21 +49,23 @@ public class TextExtractorPDFUnitTest {
                 mExtractedText.getTitle());
     }
 
-    // Checks if the title of a section is extracted correctly
-    @Ignore
+    /**
+     *  Checks if the title of a section is extracted correctly
+     */
+
     @Test
     public void extract_shouldExtractSectionTitleCorrectly() {
         assertEquals("PDF text extraction: SectionTitle is not extracted correctly",
-                "Yield",
+                "General Properties ",
                 mExtractedText.getSections().get(0).getTitle());
     }
 
     // Checks if the body of a section is extracted correctly
-    @Ignore
     @Test
     public void extract_shouldExtractSectionBodyCorrectly() {
         assertEquals("PDF text extraction: Section is not extracted correctly",
-                "4 servings", mExtractedText.getSections().get(0).getBody());
+                "4 servings ",
+                mExtractedText.getSections().get(0).getBody().split("\n")[1]);
     }
 
 

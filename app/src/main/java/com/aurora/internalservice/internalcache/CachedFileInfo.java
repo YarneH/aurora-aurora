@@ -1,5 +1,7 @@
 package com.aurora.internalservice.internalcache;
 
+import android.support.annotation.NonNull;
+
 import java.util.Date;
 import java.util.Objects;
 
@@ -25,7 +27,7 @@ public class CachedFileInfo {
     /**
      * Creates a new CachedFileInfo instance
      *
-     * @param fileRef          the file reference to the original file
+     * @param fileRef          a unique file reference to the original file, consisting of hash_fileDisplayName
      * @param uniquePluginName the name of plugin that the file was processed with
      * @param lastOpened       the date that the file was last opened.
      */
@@ -38,7 +40,7 @@ public class CachedFileInfo {
     /**
      * Creates a new CachedFileInfo instance with the last opened date set to now
      *
-     * @param fileRef          the file reference to the original file
+     * @param fileRef          the file reference to the original file consisting of hash_fileDisplayName
      * @param uniquePluginName the name of plugin that the file was processed with
      * @see #CachedFileInfo(String, String, Date)
      */
@@ -47,10 +49,27 @@ public class CachedFileInfo {
     }
 
     /**
+     * Creates a new CachedFileInfo instance that is a copy of the existing instance given as argument
+     * @param cachedFileInfo an existing instance of CachedFileInfo
+     */
+    public CachedFileInfo(@NonNull final CachedFileInfo cachedFileInfo) {
+        this(cachedFileInfo.mFileRef, cachedFileInfo.mUniquePluginName, cachedFileInfo.mLastOpened);
+    }
+
+    /**
      * @return the file reference of the original file
      */
     public String getFileRef() {
         return mFileRef;
+    }
+
+    /**
+     * @return the name of the file that should be used in UI
+     */
+    public String getFileDisplayName() {
+        int firstIndex = mFileRef.indexOf('_') + 1;
+
+        return mFileRef.substring(firstIndex);
     }
 
     /**

@@ -14,4 +14,4 @@ app/cached-files.json
 *.aur
 
 # auroralib
-auroralib.iml
+auroralib/auroralib.iml

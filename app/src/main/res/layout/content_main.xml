@@ -8,7 +8,6 @@
     tools:context=".MainActivity"
     tools:showIn="@layout/app_bar_main">
 
-
     <TextView
         android:id="@+id/tv_main"
         android:layout_width="wrap_content"
@@ -20,15 +19,52 @@
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <!-- RecyclerView used for the recent files in the main view -->
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/rv_files"
+    <android.support.constraint.ConstraintLayout
+        android:id="@+id/cl_recycler_content"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@drawable/background_gradient"
-        android:paddingBottom="20dp"
-        android:clipToPadding="false">
+        android:layout_height="match_parent">
 
-    </android.support.v7.widget.RecyclerView>
+        <!-- RecyclerView used for the recent files in the main view -->
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/rv_files"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@drawable/background_gradient"
+            android:clipToPadding="false"
+            android:paddingBottom="20dp" />
 
+        <!-- ConstraintLayout which is visible only when the RecyclerView is empty -->
+        <android.support.constraint.ConstraintLayout
+            android:id="@+id/cl_empty_text"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@color/colorPrimary"
+            android:visibility="gone">
+
+            <!-- TextView which is visible when the RecyclerView is empty -->
+            <TextView
+                android:id="@+id/tv_empty_recent"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:gravity="center"
+                android:padding="16dp"
+                android:text="@string/empty_recent"
+                android:textColor="#FFFFFF"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <ImageView
+                android:id="@+id/img_arrow"
+                android:layout_width="@dimen/arrow_icon"
+                android:layout_height="@dimen/arrow_icon"
+                android:layout_margin="@dimen/fab_margin"
+                android:layout_marginStart="8dp"
+                android:src="@drawable/ic_arrow_down_white"
+                app:layout_constraintEnd_toEndOf="@id/tv_empty_recent"
+                app:layout_constraintTop_toBottomOf="@id/tv_empty_recent" />
+        </android.support.constraint.ConstraintLayout>
+    </android.support.constraint.ConstraintLayout>
 </android.support.constraint.ConstraintLayout>

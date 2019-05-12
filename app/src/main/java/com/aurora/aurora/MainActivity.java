@@ -1,13 +1,19 @@
 package com.aurora.aurora;
 
-import android.content.ContentResolver;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
+import android.database.Cursor;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.provider.OpenableColumns;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
-import android.support.design.widget.Snackbar;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -21,22 +27,32 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.LinearInterpolator;
+import android.view.animation.TranslateAnimation;
 import android.webkit.MimeTypeMap;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.aurora.auroralib.Constants;
+import com.aurora.internalservice.internalcache.CachedFileInfo;
 import com.aurora.kernel.AuroraCommunicator;
 import com.aurora.kernel.ContextNullException;
 import com.aurora.kernel.Kernel;
 import com.aurora.market.ui.MarketPluginListActivity;
 import com.aurora.market.ui.PluginMarketViewModel;
+import com.aurora.plugin.InternalServices;
 import com.aurora.plugin.Plugin;
 import com.google.firebase.analytics.FirebaseAnalytics;
+import io.reactivex.Observer;
+import io.reactivex.disposables.Disposable;
 
 import java.io.FileNotFoundException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * The main activity of the application, started when the app is opened.
@@ -49,14 +65,28 @@ import java.io.InputStream;
  * Implements {@code NavigationView.OnNavigationItemSelectedListener} to listen to events
  * on the NavigationView.
  */
+@SuppressWarnings("squid:S1200")
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
+    /**
+     * Tag for logging
+     */
+    private static final String LOG_TAG = MainActivity.class.getSimpleName();
+
+
+    /**
+     * Constant for radix of Integer.toString()
+     */
+    private static final int HEX_RADIX = 16;
 
     /**
      * The request-code used to start the file-chooser intent.
      * Chosen to be 1.
      */
     private static final int REQUEST_FILE_GET = 1;
+    private static final int ANIMATION_DURATION = 500;
+    private static final float END_POINT_OF_ANIMATION = 0.2F;
+
 
     /**
      * Toast that holds the dummy text after a file is searched for.
@@ -76,6 +106,8 @@ public class MainActivity extends AppCompatActivity
      * It contains all recently opened files.
      */
     private RecyclerView mRecyclerView = null;
+
+    private Context mContext = this;
 
     /**
      * An instance of the {@link Kernel}.
@@ -97,6 +129,11 @@ public class MainActivity extends AppCompatActivity
      */
     private FirebaseAnalytics mFirebaseAnalytics = null;
 
+    /**
+     * The list of cached files, which will be shown in the RecyclerView
+     */
+    private List<CachedFileInfo> mCachedFileInfoList = new ArrayList<>();
+
 
     /**
      * {@inheritDoc}
@@ -115,11 +152,14 @@ public class MainActivity extends AppCompatActivity
                     "The kernel was not initialized with a valid android application context", e);
         }
 
-        /*
-        Set up plugins
-        TODO: Now this is static, later the pluginmarket should register new plugins.
-         */
-        registerPlugins();
+        /* Setup RecyclerView */
+        mRecyclerView = findViewById(R.id.rv_files);
+        mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+        CardFileAdapter adapter = new CardFileAdapter(mKernel, this, mCachedFileInfoList);
+        mRecyclerView.setAdapter(adapter);
+
+        /* Get list of cached files */
+        refreshCachedFileInfoList();
 
         /* Initialize FirebaseAnalytics */
         mFirebaseAnalytics = FirebaseAnalytics.getInstance(this);
@@ -148,17 +188,76 @@ public class MainActivity extends AppCompatActivity
         /* Setup Main TextView */
         mTextViewMain = findViewById(R.id.tv_main);
 
-        /* Setup RecyclerView */
-        mRecyclerView = findViewById(R.id.rv_files);
-        mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
-        CardFileAdapter adapter = new CardFileAdapter(mKernel, this);
-        mRecyclerView.setAdapter(adapter);
 
+        /* Show TextView when RecyclerView is empty */
+        if (adapter.getItemCount() == 0) {
+            findViewById(R.id.cl_empty_text).setVisibility(View.VISIBLE);
+            ImageView arrow = findViewById(R.id.img_arrow);
+
+            // Set the animation of the arrow in the startscreen
+            TranslateAnimation mAnimation = new TranslateAnimation(
+                    TranslateAnimation.ABSOLUTE, 0F,
+                    TranslateAnimation.ABSOLUTE, 0F,
+                    TranslateAnimation.RELATIVE_TO_PARENT, 0F,
+                    TranslateAnimation.RELATIVE_TO_PARENT, END_POINT_OF_ANIMATION);
+            mAnimation.setDuration(ANIMATION_DURATION);
+            mAnimation.setRepeatCount(-1);
+            mAnimation.setRepeatMode(Animation.REVERSE);
+            mAnimation.setInterpolator(new LinearInterpolator());
+            arrow.setAnimation(mAnimation);
+        }
 
         // If opening the file is done from a file explorer
         if (Intent.ACTION_VIEW.equals(getIntent().getAction())) {
             // This method is also called when a file is opened from the file chooser
             onActivityResult(REQUEST_FILE_GET, RESULT_OK, getIntent());
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected void onResume() {
+        super.onResume();
+        refreshCachedFileInfoList();
+    }
+
+    /**
+     * Refresh the list of info of the cached files
+     */
+    private void refreshCachedFileInfoList() {
+        /* Get list of cached files */
+        if (mAuroraCommunicator != null) {
+            mAuroraCommunicator.getListOfCachedFiles(0, new Observer<List<CachedFileInfo>>() {
+                private Disposable mDisposable;
+
+                @Override
+                public void onSubscribe(Disposable d) {
+                    mDisposable = d;
+                }
+
+                @Override
+                public void onNext(List<CachedFileInfo> cachedFileInfos) {
+                    mCachedFileInfoList = cachedFileInfos;
+                    ((CardFileAdapter)mRecyclerView.getAdapter()).updateData(mCachedFileInfoList);
+                    if (cachedFileInfos.isEmpty()) {
+                        findViewById(R.id.cl_empty_text).setVisibility(View.VISIBLE);
+                    } else{
+                        findViewById(R.id.cl_empty_text).setVisibility(View.GONE);
+                    }
+                }
+
+                @Override
+                public void onError(Throwable e) {
+                    Log.e("MainActivity", "Error while trying to get the list of cached files", e);
+                }
+
+                @Override
+                public void onComplete() {
+                    mDisposable.dispose();
+                }
+            });
         }
     }
 
@@ -217,9 +316,11 @@ public class MainActivity extends AppCompatActivity
             try {
                 if (textFile != null) {
                     Log.i("URI", textFile.toString());
-                    ContentResolver cR = getApplicationContext().getContentResolver();
-                    String type = MimeTypeMap.getSingleton().getExtensionFromMimeType(cR.getType(textFile));
+                    String type = MimeTypeMap.getSingleton().getExtensionFromMimeType(
+                            getApplicationContext().getContentResolver().getType(textFile));
                     Log.i("MIME", type);
+                    String fileName = getFileName(textFile);
+                    Log.i("FILENAME", fileName);
 
                     /*
                      * Firebase Analytics
@@ -240,26 +341,187 @@ public class MainActivity extends AppCompatActivity
                     // Create intent to open file with a certain plugin
                     Intent pluginAction = new Intent(Constants.PLUGIN_ACTION);
 
-                    // Create chooser to let user choose the plugin
-                    Intent chooser = Intent.createChooser(pluginAction, getString(R.string.select_plugin));
-                    mAuroraCommunicator.openFileWithPluginChooser(textFile.toString(), type,
-                            read, pluginAction, chooser, getApplicationContext());
-                    /*
-                    // For now hard coded constant
-                    String uniquePluginName = "com.aurora.basicplugin";
+                    pluginAction.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    pluginAction.setType("*/*");
 
-                    mAuroraCommunicator.openFileWithPlugin(textFile.toString(), type,
-                            read, uniquePluginName, getApplicationContext());
-                    */
+
+                    // Look for plugins that can answer the pluginAction
+                    PackageManager manager = getPackageManager();
+                    List<ResolveInfo> infos = manager.queryIntentActivities(pluginAction,
+                            PackageManager.MATCH_DEFAULT_ONLY);
+
+                    if (!infos.isEmpty()) {
+                        List<String> packageNames = new ArrayList<>();
+                        for (ResolveInfo info : infos) {
+                            Log.i(LOG_TAG,
+                                    "Found Plugin: " + info.activityInfo.packageName +
+                                            " - " + info.getIconResource());
+                            packageNames.add(info.activityInfo.packageName);
+                        }
+                        // Get a list of filled in Plugin objects
+                        List<Plugin> plugins = getPlugins(packageNames);
+                        // Show the chooser
+                        showPluginAdapterAlertDialog(plugins, fileName, type, read);
+
+                    } else {
+                        Log.i(LOG_TAG, "NO PLUGINS FOUND");
+                        showPopUpView("No plugins were found");
+                    }
+
 
                 } else {
-                    Toast.makeText(this, "The selected file was null", Snackbar.LENGTH_LONG).show();
+                    showPopUpView("The selected file was null, please select another file!");
                 }
             } catch (FileNotFoundException e) {
-                Toast.makeText(this, "The file could not be found", Snackbar.LENGTH_LONG).show();
-                Log.e("FILE_NOT_FOUND", "The file could not be found", e);
+                showPopUpView("The file could not be found, please select another file!");
+                Log.e(LOG_TAG, "The file could not be found", e);
             }
         }
+    }
+
+    /**
+     * Get all plugins on device and their info form their packageNames
+     *
+     * @param packageNames  The packageNames of the plugins that where found using Intent querying
+     * @return              The list of plugins that were resolved
+     */
+    private List<Plugin> getPlugins(List<String> packageNames){
+        List<Plugin> plugins = new ArrayList<>();
+        PackageManager packageManager = getPackageManager();
+
+        for(String packageName : packageNames){
+            // Get the ApplicationInfo and PackageInfo to get the attributes of the Plugin
+            ApplicationInfo applicationInfo = null;
+            PackageInfo packageInfo = null;
+            try {
+                 applicationInfo = packageManager.getApplicationInfo(packageName,
+                         PackageManager.GET_META_DATA);
+                 packageInfo = packageManager.getPackageInfo(packageName, 0);
+            } catch (final PackageManager.NameNotFoundException e) {
+                Log.e(LOG_TAG, "Package not found", e);
+            }
+
+            plugins.add(createPlugin(packageName, applicationInfo, packageInfo, packageManager));
+        }
+
+        return plugins;
+    }
+
+    /**
+     * Create a Plugin object with info obtained from a packageName
+     *
+     * @param packageName name of the plugin's package
+     * @param applicationInfo          ApplicationInfo obtained for the package
+     * @param packageInfo          PackageInfo obtained for the package
+     * @param packageManager          A packageManager to resolve some final info
+     * @return
+     */
+    private Plugin createPlugin(String packageName, ApplicationInfo applicationInfo,
+                                PackageInfo packageInfo, PackageManager packageManager){
+        // Create the Plugin object
+        Plugin plugin;
+        if (applicationInfo != null && packageInfo != null) {
+            // Get the requested Internal Services for preprocessing
+            List<InternalServices> internalServices = new ArrayList<>();
+            for (InternalServices internalService : InternalServices.values()){
+                if (applicationInfo.metaData.getBoolean(internalService.name())){
+                    internalServices.add(internalService);
+                }
+            }
+            // Get the version code without deprecation:
+            int versionCode;
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.P){
+                versionCode = packageInfo.versionCode;
+            } else {
+                versionCode = (int) packageInfo.getLongVersionCode();
+            }
+
+            // Create the plugin
+            plugin = new Plugin(packageName, (String) packageManager.getApplicationLabel(
+                    applicationInfo), null, (String) applicationInfo.loadDescription(
+                            packageManager), versionCode, packageInfo.versionName, internalServices);
+        } else {
+            plugin = new Plugin(packageName, packageName.substring(
+                    packageName.lastIndexOf('.') + 1), null, null, 0, "");
+        }
+        return plugin;
+    }
+
+
+    /**
+     *
+     * @param plugins       The plugins to be offered in the chooser dialog
+     * @param fileName      The name of the file to be opened
+     * @param type          The MIME type of the file to be opened
+     * @param readFile      An InputStream to the read file
+     */
+    private void showPluginAdapterAlertDialog(List<Plugin> plugins, String fileName, String type,
+                                              InputStream readFile) {
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        // Set title value.
+        builder.setTitle(getString(R.string.select_plugin));
+        // Set adapter and define the onClickListener
+        builder.setAdapter(new PluginAdapter(plugins, this), (
+                DialogInterface dialogInterface, int itemIndex) -> {
+                    if (plugins.get(itemIndex).getUniqueName() != null) {
+                        Plugin selectedPlugin = plugins.get(itemIndex);
+                        Log.i(LOG_TAG, "Selected Plugin: " + selectedPlugin.getUniqueName());
+                        mAuroraCommunicator.openFileWithPlugin(fileName, type, readFile,
+                                selectedPlugin);
+                    }
+        });
+
+        builder.setCancelable(true);
+        builder.create();
+        builder.show();
+    }
+
+
+    /**
+     * Private helper method to extract the displayed filename from the Cursor combined with the
+     * Uri.
+     *
+     * <p>
+     * This method is needed because files from for example Google Drive get an automatically
+     * generated uri that does not contain the actual file name. This method allows to
+     * extract the filename displayed in the Android file picker.
+     * </p>
+     *
+     * <p>
+     * To ensure uniqueness, a hash of the uri path will be prepended before the filename.
+     * </p>
+     *
+     * @param uri the Uri to get the displayed filename from
+     * @return The displayed filename
+     */
+    private String getFileName(Uri uri) {
+
+        String result;
+
+        // Add hash to filename so we have a unique filename for different files with the same filename on different
+        // locations
+        if (uri.getPath() != null) {
+            result = Integer.toString(uri.getPath().hashCode(), HEX_RADIX) + "_";
+        } else {
+            return null;
+        }
+
+        try (Cursor cursor = getContentResolver()
+                .query(uri, null, null, null, null, null)) {
+            // moveToFirst() returns false if the cursor has 0 rows.  Very handy for
+            // "if there's anything to look at, look at it" conditionals.
+            if (cursor != null && cursor.moveToFirst()) {
+
+                // Note it's called "Display Name".  This is
+                // provider-specific, and might not necessarily be the file name.
+                result += cursor.getString(
+                        cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME));
+
+                return result;
+            }
+        }
+        return null;
     }
 
     /**
@@ -309,7 +571,7 @@ public class MainActivity extends AppCompatActivity
         if (id == R.id.action_search) {
             // Create a LayoutInflater which will create the view for the pop-up
             LayoutInflater li = LayoutInflater.from(this);
-            View promptView = li.inflate(R.layout.search_prompt, null);
+            View promptView = li.inflate(R.layout.search_prompt, mRecyclerView, false);
             final EditText userInput = promptView.findViewById(R.id.et_search_prompt);
 
             // Create a builder to build the actual alertdialog from the previous inflated view
@@ -328,7 +590,6 @@ public class MainActivity extends AppCompatActivity
             // Create and show the pop-up
             alertDialogBuilder.create().show();
         }
-
         return super.onOptionsItemSelected(item);
     }
 
@@ -366,39 +627,22 @@ public class MainActivity extends AppCompatActivity
         return true;
     }
 
-    /**
-     * Helper method that register the plugins with their info in the pluginregistry
-     * TODO: when the pluginmarket is implemented, remove this method
-     */
-    private void registerPlugins() {
-        final Plugin basicPlugin = new Plugin(
-                "com.aurora.basicplugin",
-                "Basic Plugin",
-                null,
-                "Basic plugin to open any file and display extracted text.",
-                4,
-                "v0.4");
 
-        final Plugin souschefPlugin = new Plugin(
-                "com.aurora.souschef",
-                "Souschef",
-                null,
-                "Plugin to open recipes and display them in an enhanced way.",
-                4,
-                "v0.4");
+    private void showPopUpView(String message) {
+        // Create a LayoutInflater which will create the view for the pop-up
+        LayoutInflater li = LayoutInflater.from(this);
+        View promptView = li.inflate(R.layout.popup_card, mRecyclerView, false);
 
-        final Plugin paperViewerPlugin = new Plugin(
-                "com.aurora.paperviewer",
-                "Paperviewer",
-                null,
-                "Plugin to open papers and display them in an enhanced way.",
-                4,
-                "v0.4");
+        // Set the message of the TextView
+        TextView messageText = promptView.findViewById(R.id.tv_message);
+        messageText.setText(message);
 
-        // Register plugins in the registry
-        mAuroraCommunicator.registerPlugin(basicPlugin);
-        mAuroraCommunicator.registerPlugin(souschefPlugin);
-        mAuroraCommunicator.registerPlugin(paperViewerPlugin);
+        // Create a builder to build the actual alertdialog from the previous inflated view
+        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
+        alertDialogBuilder.setView(promptView);
+        alertDialogBuilder.setCancelable(false);
+
+        // Create and show the pop-up
+        alertDialogBuilder.create().show();
     }
 }
-

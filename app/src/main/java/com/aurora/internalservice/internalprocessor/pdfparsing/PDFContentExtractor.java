@@ -10,6 +10,8 @@ package com.aurora.internalservice.internalprocessor.pdfparsing;
  */
 
 import android.util.Log;
+
+import com.aurora.internalservice.internalprocessor.DocumentNotSupportedException;
 import com.itextpdf.text.pdf.PdfArray;
 import com.itextpdf.text.pdf.PdfDictionary;
 import com.itextpdf.text.pdf.PdfName;
@@ -33,7 +35,9 @@ public class PDFContentExtractor {
 
     private ParsedPDF mParsedPDF;
 
-    // Subtract 48 from a char to get the number in int
+    /**
+     * Subtract 48 from a char to get the number in int
+     */
     private static final int CHAR_TO_INT = 48;
 
     public PDFContentExtractor() {
@@ -44,16 +48,21 @@ public class PDFContentExtractor {
      * Parses a string with structured content.
      *
      * @param reader the PdfReader that has access to the PDF file
+     * @throws DocumentNotSupportedException if the document cannot be processed
+     * @throws IOException                   in case the reading of the file goes wrong
      * @since 5.0.5
+     * @throws DocumentNotSupportedException when the pdf is not tagged
+     * @throws IOException when there is a fault reading the document
      */
     public void extractContent(PdfReader reader, ParsedPDF parsedPDF)
-            throws IOException {
+            throws IOException, DocumentNotSupportedException {
         this.mParsedPDF = parsedPDF;
-        // get the StructTreeRoot from the root object
         PdfDictionary catalog = reader.getCatalog();
+        // get the StructTreeRoot from the root object
         PdfDictionary struct = catalog.getAsDict(PdfName.STRUCTTREEROOT);
-        if (struct == null) {
-            Log.e("PDF text extraction", "Could not receive struct");
+        if (struct == null || !reader.isTagged()) {
+            throw new DocumentNotSupportedException("The opened PDF document is not supported " +
+                    "because it is not tagged");
         } else {
             // Inspect the child or children of the StructTreeRoot
             inspectChild(struct.getDirectObject(PdfName.K), "");
@@ -67,7 +76,7 @@ public class PDFContentExtractor {
      *
      * @param k         the child to inspect
      * @param tagParent the tag of the parent
-     * @throws IOException
+     * @throws IOException when it is not possible to read this object
      */
     private void inspectChild(PdfObject k, String tagParent) throws IOException {
         if (k == null) {
@@ -86,6 +95,7 @@ public class PDFContentExtractor {
      *
      * @param k         the child array to inspect
      * @param tagParent the tag of the parent
+     * @throws IOException when it is not possible to read this object
      */
     private void inspectChildArray(PdfArray k, String tagParent) throws IOException {
         if (k == null) {
@@ -102,6 +112,7 @@ public class PDFContentExtractor {
      *
      * @param k         the child dictionary to inspect
      * @param tagParent the tag of the parent
+     * @throws IOException when it is not possible to read this object
      */
     private void inspectChildDictionary(PdfDictionary k, String tagParent) throws IOException {
         if (k == null) {
@@ -111,7 +122,8 @@ public class PDFContentExtractor {
         PdfName s = k.getAsName(PdfName.S);
         if (s != null) {
             tag = PdfName.decodeName(s.toString());
-            if (!Pattern.matches("(H[0-9]+|P|Figure)", tag)) {
+            tag = TagConverter.convertTag(tag);
+            if (!Pattern.matches(TagConverter.MAIN_SUPPORTED_TAGS, tag)) {
                 tag = tagParent;
             }
             PdfDictionary dict = k.getAsDict(PdfName.PG);
@@ -184,7 +196,7 @@ public class PDFContentExtractor {
             PdfDictionary mcr = (PdfDictionary) object;
             parsed = parseTag(mcr.getDirectObject(PdfName.MCID), mcr
                     .getAsDict(PdfName.PG), image);
-        } else{
+        } else {
             parsed = "";
         }
         return parsed;

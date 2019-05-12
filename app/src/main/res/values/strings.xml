@@ -20,11 +20,20 @@
 
     <!-- Recycler View strings -->
     <string name="button_open">Open</string>
+    <string name="empty_recent">Press the button to open a file with Aurora!</string>
 
     <!-- Card File strings -->
+    <string name="file_location">\'Location of the file\'</string>
+    <string name="file_last">Last opened on:</string>
+    <string name="file_added_on">Added on:</string>
+    <string name="file_more_details">Hold for more info...</string>
     <string name="file_details">Details about file</string>
     <string name="null_file">The selected file was null</string>
     <string name="file_not_found">The file could not be found</string>
+
+    <!-- Plugin Chooser strings -->
+    <string name="plugin_name">Plugin name</string>
+    <string name="plugin_description">Plugin description</string>
 
     <!-- Feedback Activity -->
     <string name="feedback_sent">Feedback sent, thank you!</string>

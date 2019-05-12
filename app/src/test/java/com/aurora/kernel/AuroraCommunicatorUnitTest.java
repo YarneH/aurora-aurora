@@ -14,7 +14,6 @@ import com.aurora.kernel.event.InternalProcessorRequest;
 import com.aurora.kernel.event.InternalProcessorResponse;
 import com.aurora.kernel.event.ListPluginsResponse;
 import com.aurora.kernel.event.OpenCachedFileWithPluginRequest;
-import com.aurora.kernel.event.OpenFileWithPluginChooserRequest;
 import com.aurora.kernel.event.OpenFileWithPluginRequest;
 import com.aurora.kernel.event.QueryCacheResponse;
 import com.aurora.kernel.event.RetrieveFileFromCacheRequest;
@@ -58,7 +57,7 @@ public class AuroraCommunicatorUnitTest {
         final String pluginsCfg = "plugin-config.json";
         sPluginRegistry = new DummyPluginRegistry(processingCommunicator, pluginsCfg, new MockContext());
 
-        sAuroraCommunicator = new AuroraCommunicator(sBus, sPluginRegistry);
+        sAuroraCommunicator = new AuroraCommunicator(sBus, sPluginRegistry, new MockContext());
 
         // Register dummy plugin in registry
         sAuroraCommunicator.registerPlugin(DUMMY_PLUGIN);
@@ -79,8 +78,7 @@ public class AuroraCommunicatorUnitTest {
         String fileRef = "Dummy/file/ref";
         String fileType = "txt";
         InputStream file = new DummyInputStream();
-        String pluginName = DUMMY_PLUGIN.getUniqueName();
-        sAuroraCommunicator.openFileWithPlugin(fileRef, fileType, file, pluginName, new MockContext());
+        sAuroraCommunicator.openFileWithPlugin(fileRef, fileType, file, DUMMY_PLUGIN);
 
         // Assert that arguments passed are as expected
         fileRefObserver.assertSubscribed();
@@ -88,30 +86,6 @@ public class AuroraCommunicatorUnitTest {
         fileRefObserver.dispose();
     }
 
-    //TODO delete when custom picker is finished
-    @Test
-    public void AuroraCommunicator_openFileWithPluginChooser_shouldSendProcessRequest() {
-        // Subscribe to request
-        Observable<InternalProcessorRequest> requestObservable = sBus.register(InternalProcessorRequest.class);
-
-        // Create test observer
-        TestObserver<String> fileRefObserver = new TestObserver<>();
-
-        // Subscribe to observable
-        requestObservable.map(InternalProcessorRequest::getFileRef).subscribe(fileRefObserver);
-
-        // Call method under test
-        String fileRef = "Dummy/file/ref";
-        String fileType = "txt";
-        InputStream file = new DummyInputStream();
-        sAuroraCommunicator.openFileWithPluginChooser(fileRef, fileType, file, new DummyIntent(),
-                new DummyIntent(), new MockContext());
-
-        // Assert that arguments passed are as expected
-        fileRefObserver.assertSubscribed();
-        fileRefObserver.assertValue(fileRef);
-        fileRefObserver.dispose();
-    }
 
     @Test
     public void AuroraCommunicator_openFileWithPlugin_shouldSendOpenFileWithPluginRequestAfterExtractingText() {
@@ -142,7 +116,7 @@ public class AuroraCommunicatorUnitTest {
         String fileType = "docx";
         InputStream file = new DummyInputStream();
         String pluginName = DUMMY_PLUGIN.getUniqueName();
-        sAuroraCommunicator.openFileWithPlugin(dummyFileRef, fileType, file, pluginName, new MockContext());
+        sAuroraCommunicator.openFileWithPlugin(dummyFileRef, fileType, file, DUMMY_PLUGIN);
 
         // Assure that the correct values are contained in request event
         extractedTextObserver.assertSubscribed();
@@ -152,51 +126,6 @@ public class AuroraCommunicatorUnitTest {
         internalProccessorRequestDisposable.dispose();
     }
 
-    // TODO: remove this when custom plugin chooser is implemented
-    @Test
-    public void
-    AuroraCommunicator_openFileWithPluginChooser_shouldSendOpenFileWithPluginChooserRequestAfterExtractingText() {
-        // Create observable of internal processor request
-        Observable<InternalProcessorRequest> internalProcessorRequestObservable =
-                sBus.register(InternalProcessorRequest.class);
-
-        // Subscribe to observable to send response event
-        ExtractedText dummyExtractedText =
-                new ExtractedText("Bla", null, Arrays.asList("Dummy", "Paragraph"));
-
-
-        Disposable internalProcessorRequestDisposable =
-                internalProcessorRequestObservable.subscribe(internalProcessorRequest ->
-                        sBus.post(new InternalProcessorResponse(dummyExtractedText)));
-
-        // Create observable of open file with plugin request
-        Observable<OpenFileWithPluginChooserRequest> openFileWithPluginChooserRequestObservable =
-                sBus.register(OpenFileWithPluginChooserRequest.class);
-
-        // Create test observer
-        TestObserver<ExtractedText> extractedTextObserver = new TestObserver<>();
-
-        // Subscribe to observable
-        openFileWithPluginChooserRequestObservable
-                .map(OpenFileWithPluginChooserRequest::getExtractedText)
-                .subscribe(extractedTextObserver);
-
-
-        // Call the method under test
-        String dummyFileRef = "dummy/path/to/file";
-        String fileType = "docx";
-        InputStream file = new DummyInputStream();
-        String pluginName = DUMMY_PLUGIN.getUniqueName();
-        sAuroraCommunicator.openFileWithPluginChooser(dummyFileRef, fileType, file,
-                new DummyIntent(), new DummyIntent(), new MockContext());
-
-        // Assure that the correct values are contained in request event
-        extractedTextObserver.assertSubscribed();
-        extractedTextObserver.assertValue(dummyExtractedText);
-        extractedTextObserver.dispose();
-
-        internalProcessorRequestDisposable.dispose();
-    }
 
     @Test
     public void AuroraCommunicator_openFileWithCache_shouldSendOpenFileWithCacheRequestAfterRetrievingFileFromCache() {
@@ -234,7 +163,7 @@ public class AuroraCommunicatorUnitTest {
                 .subscribe(pluginNameTestObserver);
 
         // Call method under test
-        sAuroraCommunicator.openFileWithCache(fileRef, fileType, uniquePluginName, new MockContext());
+        sAuroraCommunicator.openFileWithCache(fileRef, uniquePluginName);
 
         // Assert values
         jsonTestObserver.assertSubscribed();
@@ -356,11 +285,11 @@ public class AuroraCommunicatorUnitTest {
         Map<String, Plugin> mPluginMap = new HashMap<>();
 
         DummyPluginRegistry(ProcessingCommunicator processingCommunicator, String configFileRef, Context context) {
-            super(processingCommunicator, configFileRef, context);
+            super(configFileRef, context);
         }
 
         @Override
-        boolean registerPlugin(String pluginName, Plugin plugin) {
+        public boolean registerPlugin(String pluginName, Plugin plugin) {
             if (!mPluginMap.containsKey(pluginName)) {
                 mPluginMap.put(pluginName, plugin);
                 return true;

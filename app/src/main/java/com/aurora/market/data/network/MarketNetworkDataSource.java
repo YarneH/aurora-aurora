@@ -80,11 +80,10 @@ public final class MarketNetworkDataSource {
     /**
      * A list of all the available MarketPlugins
      */
-    private static MutableLiveData<List<MarketPlugin>> mMarketPlugins;
+    private static MutableLiveData<List<MarketPlugin>> mMarketPlugins = new MutableLiveData<>();
 
     private MarketNetworkDataSource(Context context) {
         mContext = context;
-        mMarketPlugins = new MutableLiveData<>();
         Driver driver = new GooglePlayDriver(mContext);
         mDispatcher = new FirebaseJobDispatcher(driver);
     }

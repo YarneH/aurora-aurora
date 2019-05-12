@@ -2,38 +2,45 @@ package com.aurora.aurora;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
+import android.support.constraint.ConstraintLayout;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.FrameLayout;
 import android.widget.TextView;
 
+import com.aurora.internalservice.internalcache.CachedFileInfo;
 import com.aurora.kernel.Kernel;
 
-import java.util.Locale;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * The adapter for the RecyclerView of the file-cards
  */
 public class CardFileAdapter extends RecyclerView.Adapter<CardFileAdapter.CardFileViewHolder> {
+
     /**
      * The option to have no selected card in the RecyclerView
      */
     private static final int NO_DETAILS = -1;
-    // TODO: Remove dummy amount
 
     /**
-     * A dummy amount for the amount of card that the RecyclerView manages
+     * The format of a date used in the cards
      */
-    private static final int DUMMY_AMOUNT = 100;
+    private final SimpleDateFormat mDateFormat = new SimpleDateFormat("E, dd MMM yyyy");
 
     /**
      * The amount of cards that the RecyclerView manages
      */
-    private int mAmount = DUMMY_AMOUNT;
+    private int mAmount = 0;
+
+    /**
+     * The data of the cached files
+     */
+    private List<CachedFileInfo> mCachedFileInfoList = new ArrayList<>();
 
     /**
      * The index of the currently selected file (file card that is expanded)
@@ -45,16 +52,23 @@ public class CardFileAdapter extends RecyclerView.Adapter<CardFileAdapter.CardFi
      */
     private Kernel mKernel;
 
-    /**
-     * context for testing purposes
-     */
-    private Context mContext;
-
-    public CardFileAdapter(Kernel kernel, Context context) {
+    public CardFileAdapter(Kernel kernel, Context context, @NonNull List<CachedFileInfo> cachedFileInfoList) {
         // TODO: This could take an argument as input (which contains the recent files)
         // TODO: remove context variable if it is not needed by the test example anymore!
         mKernel = kernel;
-        mContext = context;
+        mCachedFileInfoList = cachedFileInfoList;
+        mAmount = mCachedFileInfoList.size();
+    }
+
+    /**
+     * Replaces the old list of info about the cached files with a new one
+     *
+     * @param cachedFileInfoList The new list which will replace the old one
+     */
+    public void updateData(@NonNull List<CachedFileInfo> cachedFileInfoList) {
+        mCachedFileInfoList = cachedFileInfoList;
+        mAmount = mCachedFileInfoList.size();
+        notifyDataSetChanged();
     }
 
     /**
@@ -62,7 +76,6 @@ public class CardFileAdapter extends RecyclerView.Adapter<CardFileAdapter.CardFi
      *
      * @param viewGroup view that contains other views. Used to set layout (inflate) of card
      * @param i         not used, index of the card
-     *
      * @return the CardFileViewHolder
      */
     @NonNull
@@ -98,13 +111,16 @@ public class CardFileAdapter extends RecyclerView.Adapter<CardFileAdapter.CardFi
     /**
      * ViewHolder for the recyclerview. Holds the file cards.
      */
-    public class CardFileViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
-        private TextView mTextView;
+    public class CardFileViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener,
+            View.OnLongClickListener {
+        /* UI related objects */
+        private TextView mTitleTextView;
+        private TextView mLastOpenedTextView;
         private CardView mCardView;
-        private Button mButton;
-        private int index;
 
-        // TODO: add fields for the details about the file
+        /* Data related objects */
+        private int index;
+        private CachedFileInfo mCachedFileInfo;
 
         /**
          * Constructor for the ViewHolder.
@@ -115,11 +131,11 @@ public class CardFileAdapter extends RecyclerView.Adapter<CardFileAdapter.CardFi
         public CardFileViewHolder(View itemView) {
             super(itemView);
             mCardView = itemView.findViewById(R.id.cv_file);
-            mTextView = itemView.findViewById(R.id.tv_card_title);
-            mButton = itemView.findViewById(R.id.button_card_file);
+            mTitleTextView = itemView.findViewById(R.id.tv_card_title);
+            mLastOpenedTextView = itemView.findViewById(R.id.tv_card_last_opened);
             // The card itself is clickable (for details), but also the open button.
             mCardView.setOnClickListener(this);
-            mButton.setOnClickListener(this);
+            mCardView.setOnLongClickListener(this);
         }
 
         /**
@@ -131,8 +147,16 @@ public class CardFileAdapter extends RecyclerView.Adapter<CardFileAdapter.CardFi
          */
         public void bind(int i) {
             index = i;
+            mCachedFileInfo = mCachedFileInfoList.get(index);
+            String lastOpenedBase = mLastOpenedTextView.getResources().getString(R.string.file_last);
+
             // Set name of the correct file to the reused container.
-            mTextView.setText(String.format(Locale.getDefault(), "File %d", i));
+            mTitleTextView.setText(mCachedFileInfo.getFileDisplayName());
+            StringBuilder bld = new StringBuilder(lastOpenedBase)
+                    .append(" ")
+                    .append(mDateFormat.format(mCachedFileInfo.getLastOpened()));
+
+            mLastOpenedTextView.setText(bld.toString());
 
             /*
             If the card is the selected card, expand it (as it was when it was scrolled away
@@ -147,21 +171,37 @@ public class CardFileAdapter extends RecyclerView.Adapter<CardFileAdapter.CardFi
         }
 
         /**
-         * Defines what happens on click of the card. This can be a button or the card itself.
+         * Defines what happens on click of the card. This can only be the card itself
          *
          * @param view the view that received the click
          */
-        // TODO: onClick for the open button, onClick for the open with different plugin button, delete button
         @Override
         public void onClick(View view) {
+            if (view.getId() == mCardView.getId()) {
+                mKernel.getAuroraCommunicator().openFileWithCache(mCachedFileInfo.getFileRef(),
+                        mCachedFileInfo.getUniquePluginName());
+            }
+        }
+
+        @Override
+        public boolean onLongClick(View view) {
+            boolean clickConsumed = false;
             // If the click happened on the card itself
             if (view.getId() == R.id.cv_file) {
+
+                // TODO: Remove this 'return' if card details should be enabled!
+                if (view.getId() != 0) {
+                    return true;
+                }
+
+                // If the click happened on the card itself
                 if (mSelectedIndex == NO_DETAILS) {
                     /*
                     Case no card selected. Sets the selected card and expands the view.
                      */
                     mSelectedIndex = index;
                     expand(view);
+                    clickConsumed = true;
                 } else if (mSelectedIndex == index) {
                     /*
                     Case the clicked card is the expanded card.
@@ -169,6 +209,7 @@ public class CardFileAdapter extends RecyclerView.Adapter<CardFileAdapter.CardFi
                      */
                     mSelectedIndex = NO_DETAILS;
                     collapse(view);
+                    clickConsumed = true;
                 } else {
                     /*
                     Case where a card is selected but a different card is clicked.
@@ -178,6 +219,7 @@ public class CardFileAdapter extends RecyclerView.Adapter<CardFileAdapter.CardFi
                     Set the index to the selected card, and expand that card.
                      */
                     RecyclerView recyclerView = (RecyclerView) view.getParent();
+
                     CardFileViewHolder prev = (CardFileViewHolder) recyclerView.findViewHolderForLayoutPosition(
                             mSelectedIndex);
                     if (prev != null) {
@@ -185,28 +227,18 @@ public class CardFileAdapter extends RecyclerView.Adapter<CardFileAdapter.CardFi
                     }
                     mSelectedIndex = index;
                     expand(view);
+                    clickConsumed = true;
                 }
                 // if the click happened on the open button
             }
-            // TODO add the case that view.getId() is R.id.button_card_file
-            // TODO update this preliminary code for opening a plugin.
-            // TODO this should make an event to open the cached file.
-            // Plugin should probably still be able to open this, but Souschef probably not
-            if (view.getId() == R.id.button_card_file) {
-
-                /* TODO Remove this test code
-                Eventually, here instead of opening a file, the cache will be called instead.
-                This is just a demonstration that it works.
-                TODO remove the 'mContext' variable from this class. It is used solely for demonstration purposes!
-
-                Note: this is basically mixed code as a result of a merge. This test code will be removed ASAP
-                */
-
-                mKernel.getAuroraCommunicator().openFileWithCache("dummyfilename", "docx",
-                        "com.aurora.basicplugin", mContext);
-            }
+            return clickConsumed;
         }
     }
+
+//    TODO: Expanding card when another expanded card is
+//    in view results in the card growing upwards instead of down.
+//    Scrolling down before expanding "solves" this.
+//    Fix This bug :)
 
     /**
      * Expand the view to show details.
@@ -215,8 +247,8 @@ public class CardFileAdapter extends RecyclerView.Adapter<CardFileAdapter.CardFi
      * @param v view to expand
      */
     public static void expand(final View v) {
-        FrameLayout detailView = v.findViewById(R.id.cv_fl_detail);
-        FrameLayout baseView = v.findViewById(R.id.cv_fl_base_card);
+        ConstraintLayout detailView = v.findViewById(R.id.cv_fl_detail);
+        TextView baseView = v.findViewById(R.id.tv_card_more_details);
         detailView.setVisibility(View.VISIBLE);
         baseView.setVisibility(View.GONE);
     }
@@ -228,9 +260,11 @@ public class CardFileAdapter extends RecyclerView.Adapter<CardFileAdapter.CardFi
      * @param v view to collapse
      */
     public static void collapse(final View v) {
-        FrameLayout detailView = v.findViewById(R.id.cv_fl_detail);
-        FrameLayout baseView = v.findViewById(R.id.cv_fl_base_card);
+        ConstraintLayout detailView = v.findViewById(R.id.cv_fl_detail);
+        // TODO: Uncomment if details of card should be used!
+        // TextView baseView = v.findViewById(R.id.tv_card_more_details)
         detailView.setVisibility(View.GONE);
-        baseView.setVisibility(View.VISIBLE);
+        // TODO: Uncomment if details of card should be used!
+        // baseView.setVisibility(View.VISIBLE)
     }
 }

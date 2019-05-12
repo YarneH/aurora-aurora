@@ -1,7 +1,10 @@
 package com.aurora.auroralib;
 
+import android.support.annotation.NonNull;
+
 import com.google.gson.annotations.JsonAdapter;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import edu.stanford.nlp.pipeline.Annotation;
@@ -43,9 +46,9 @@ public class Section {
     private transient Annotation mBodyAnnotation;
 
     /**
-     * The images in a section, as a Base64 String
+     * The images in a section, as an {@link ExtractedImage} object
      */
-    private List<String> mImages;
+    private List<ExtractedImage> mExtractedImages = new ArrayList<>();
     /**
      * The level of the section, default level is 0
      */
@@ -68,16 +71,30 @@ public class Section {
     }
 
     /**
-     * Constructor for creating a section with a title, content and images
+     * Copy constructor for a deep copy of a Section
      *
-     * @param title  the title of the section
-     * @param body   the content of the section
-     * @param images the images in the section
+     * @param section   the Section that needs a copy
      */
-    public Section(String title, String body, List<String> images) {
-        this.mTitle = title;
-        this.mBody = body;
-        this.mImages = images;
+    @SuppressWarnings("unused")
+    public Section(final Section section) {
+        // Immutable fields
+        mBody = section.mBody;
+        mTitle = section.mTitle;
+        mLevel = section.mLevel;
+
+        // Deep copy of objects
+        ProtobufAnnotationSerializer annotationSerializer = new ProtobufAnnotationSerializer(true);
+        if(mBodyAnnotationProto != null) {
+            mBodyAnnotationProto = annotationSerializer.toProto(section.getBodyAnnotation());
+        }
+        if(mTitleAnnotationProto != null) {
+            mTitleAnnotationProto = annotationSerializer.toProto(section.getTitleAnnotation());
+        }
+
+        mExtractedImages = new ArrayList<>();
+        for (ExtractedImage image: section.mExtractedImages) {
+            mExtractedImages.add(new ExtractedImage(image));
+        }
     }
 
     @Override
@@ -104,10 +121,6 @@ public class Section {
         this.mTitle = title;
     }
 
-    CoreNLPProtos.Document getTitleAnnotationProto() {
-        return mTitleAnnotationProto;
-    }
-
     public void setTitleAnnotationProto(CoreNLPProtos.Document titleAnnotations) {
         this.mTitleAnnotationProto = titleAnnotations;
     }
@@ -122,10 +135,6 @@ public class Section {
         }
 
         return mTitleAnnotation;
-    }
-
-    void setTitleAnnotation(Annotation annotation) {
-        this.mTitleAnnotation = annotation;
     }
 
     public String getBody() {
@@ -144,10 +153,6 @@ public class Section {
         }
     }
 
-    CoreNLPProtos.Document getBodyAnnotationProto() {
-        return mBodyAnnotationProto;
-    }
-
     public void setBodyAnnotationProto(CoreNLPProtos.Document bodyAnnotationProto) {
         this.mBodyAnnotationProto = bodyAnnotationProto;
     }
@@ -164,23 +169,94 @@ public class Section {
         return mBodyAnnotation;
     }
 
-    void setBodyAnnotation(Annotation mBodyAnnotation) {
-        this.mBodyAnnotation = mBodyAnnotation;
-    }
-
+    /**
+     * The old method for getting images, instead use {@link #getExtractedImages()}
+     *
+     * @return the list of base64 encode images
+     * @deprecated
+     */
+    @Deprecated
     public List<String> getImages() {
-        return mImages;
+        List<String> base64Images = new ArrayList<>();
+
+        for (ExtractedImage extractedImage : mExtractedImages) {
+            base64Images.add(extractedImage.getBase64EncodedImage());
+        }
+        return base64Images;
     }
 
-    public void setImages(List<String> images) {
-        this.mImages = images;
-    }
-
-    public void addImages(List<String> images) {
-        if (mImages == null) {
-            this.mImages = images;
+    /**
+     * Get the {@link ExtractedImage} objects of this Section. Will return an empty
+     * list when no images are present.
+     *
+     * @return the list of images
+     */
+    @SuppressWarnings("unused")
+    public @NonNull
+    List<ExtractedImage> getExtractedImages() {
+        if (mExtractedImages != null) {
+            return mExtractedImages;
         } else {
-            this.mImages.addAll(images);
+            return new ArrayList<>();
+        }
+    }
+
+    /**
+     * The old method of setting images, instead use {@link #setExtractedImages(List)}
+     *
+     * @param images List of base64 encode images
+     * @deprecated
+     */
+    @Deprecated
+    public void setImages(List<String> images) {
+        mExtractedImages = new ArrayList<>();
+        addImages(images);
+    }
+
+    /**
+     * Set the list of {@link ExtractedImage} objects
+     *
+     * @param extractedImages the List of {@link ExtractedImage} objects
+     */
+    public void setExtractedImages(List<ExtractedImage> extractedImages) {
+        this.mExtractedImages = extractedImages;
+    }
+
+    /**
+     * The old method of adding images, instead use {@link #addExtractedImages(List)}
+     *
+     * @param images List of base64 encoded images
+     * @deprecated
+     */
+    @Deprecated
+    public void addImages(Iterable<String> images) {
+        for (String image : images) {
+            mExtractedImages.add(new ExtractedImage(image));
+        }
+    }
+
+    /**
+     * Adds a single {@link ExtractedImage} to this section
+     *
+     * @param extractedImage the ExtractedImage to add
+     */
+    public void addExtractedImage(ExtractedImage extractedImage) {
+        if (mExtractedImages == null) {
+            this.mExtractedImages = new ArrayList<>();
+        }
+        this.mExtractedImages.add(extractedImage);
+    }
+
+    /**
+     * Add the list of {@link ExtractedImage} objects to the existing list
+     *
+     * @param extractedImages the List of {@link ExtractedImage} objects
+     */
+    public void addExtractedImages(List<ExtractedImage> extractedImages) {
+        if (mExtractedImages == null) {
+            this.mExtractedImages = extractedImages;
+        } else {
+            this.mExtractedImages.addAll(extractedImages);
         }
     }
 
