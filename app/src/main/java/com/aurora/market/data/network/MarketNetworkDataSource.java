@@ -186,7 +186,7 @@ public final class MarketNetworkDataSource {
                 URL downloadLink = new URL(url);
                 Bitmap bitmap = NetworkUtils.getBitmapFromHttpUrl(downloadLink);
                 ByteArrayOutputStream stream = new ByteArrayOutputStream();
-                bitmap.compress(Bitmap.CompressFormat.JPEG, COMPRESS_QUALITY, stream);
+                bitmap.compress(Bitmap.CompressFormat.PNG, COMPRESS_QUALITY, stream);
                 return stream.toByteArray();
             } catch (Exception e) {
                 Logger.getLogger(this.getClass().getSimpleName()).log(Level.FINE, null, e);
