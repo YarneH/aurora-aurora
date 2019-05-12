@@ -2,7 +2,6 @@ package com.aurora.market.data.database;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.util.Base64;
 
 import java.io.Serializable;
 import java.net.MalformedURLException;
@@ -79,7 +78,6 @@ public class MarketPlugin implements Serializable {
     public URL getDownloadLink() {
         return mDownloadLink;
     }
-
 
     public String getCreator() {
         return mCreator;

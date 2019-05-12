@@ -4,14 +4,7 @@ import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.drawable.BitmapDrawable;
-import android.net.Network;
 import android.os.AsyncTask;
-import android.os.Build;
-import android.os.Environment;
-import android.util.Log;
-import com.aurora.aurora.R;
 import com.aurora.market.data.database.MarketPlugin;
 import com.firebase.jobdispatcher.Driver;
 import com.firebase.jobdispatcher.FirebaseJobDispatcher;
@@ -21,36 +14,73 @@ import org.json.JSONObject;
 
 
 import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Base64;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public final class MarketNetworkDataSource {
-    private static final String DEBUG_TAG = "MARKET";
-
+    /**
+     * One of the JSON keys
+     */
     private static final String JSON_LOCATION_KEY = "apk_location";
+    /**
+     * One of the JSON keys
+     */
     private static final String JSON_DESCRIPTION_KEY = "description";
+    /**
+     * One of the JSON keys
+     */
     private static final String JSON_LOGO_KEY = "plugin_logo";
+    /**
+     * One of the JSON keys
+     */
     private static final String JSON_NAME_KEY = "name";
+    /**
+     * One of the JSON keys
+     */
     private static final String JSON_CREATOR_KEY = "creator";
+    /**
+     * One of the JSON keys
+     */
     private static final String JSON_VERSION_KEY = "version_code";
+    /**
+     * One of the JSON keys
+     */
     private static final String JSON_UNIQUE_NAME = "unique_name";
+    /**
+     * One of the JSON keys
+     */
     private static final String JSON_INTERNAL_SERVICES_KEY = "internal_services";
+    /**
+     * The HTTP prefix of a url
+     */
     private static final String URL_PREFIX = "http://";
-
-
-    // For Singleton
+    /**
+     * The quality percentage for the compressing of the logo
+     */
+    private static final int COMPRESS_QUALITY = 100;
+    /**
+     * A lock for the data
+     */
     private static final Object LOCK = new Object();
+    /**
+     * Singleton instance
+     */
     private static MarketNetworkDataSource sInstance;
+    /**
+     * The context of the app
+     */
     private final Context mContext;
+    /**
+     * Dispatcher for Firebase
+     */
     private FirebaseJobDispatcher mDispatcher;
-
-    private MutableLiveData<List<MarketPlugin>> mMarketPlugins;
+    /**
+     * A list of all the available MarketPlugins
+     */
+    private static MutableLiveData<List<MarketPlugin>> mMarketPlugins;
 
     private MarketNetworkDataSource(Context context) {
         mContext = context;
@@ -79,28 +109,27 @@ public final class MarketNetworkDataSource {
     }
 
     /**
-     *
+     * Get all the available MarketPlugins
      */
     public void fetchMarketPlugins() {
         new GetMarketPlugins().execute();
     }
 
-    private class GetMarketPlugins extends AsyncTask<Void, Void, JSONArray> {
+    /**
+     * Returns a JSONArray of all the MarketPlugins available on the Plugin Market Server
+     */
+    private static class GetMarketPlugins extends AsyncTask<Void, Void, JSONArray> {
 
         @Override
         protected JSONArray doInBackground(Void... strings) {
             try {
                 URL marketPluginListURL = NetworkUtils.getMarketPluginURL();
                 if (marketPluginListURL == null) {
-                    Log.d(DEBUG_TAG, "URL is null");
-                    // TODO: Handle null
                     return null;
                 }
 
                 // Get response
                 String jsonPluginListResponse = NetworkUtils.getResponseFromHttpUrl(marketPluginListURL);
-
-                Log.d(DEBUG_TAG, "Response: " + jsonPluginListResponse);
 
                 // Parse response
                 return new JSONArray(jsonPluginListResponse);
@@ -117,8 +146,6 @@ public final class MarketNetworkDataSource {
                 try {
                     ArrayList<MarketPlugin> tempList = new ArrayList<>();
 
-                    Log.d(DEBUG_TAG, "Result: " + pluginList.toString());
-
                     for (int i = 0; i < pluginList.length(); i++) {
                         JSONObject currentPlugin = pluginList.getJSONObject(i);
                         String imageLocation = currentPlugin.getString(JSON_LOGO_KEY);
@@ -131,8 +158,6 @@ public final class MarketNetworkDataSource {
 
                         MarketPlugin currentMarketPlugin =
                                 new MarketPlugin(logo, name, description, creator, version, downloadLocation);
-
-                        Log.d(DEBUG_TAG, "New plugin: " + currentMarketPlugin);
 
                         tempList.add(currentMarketPlugin);
                     }
@@ -149,7 +174,7 @@ public final class MarketNetworkDataSource {
     /**
      * Get the Bitmap of an image via the provided link
      */
-    private class GetMarketPluginLogo extends AsyncTask<String, Void, byte[]> {
+    private static class GetMarketPluginLogo extends AsyncTask<String, Void, byte[]> {
 
         @Override
         protected byte[] doInBackground(String... strings) {
@@ -162,12 +187,12 @@ public final class MarketNetworkDataSource {
                 URL downloadLink = new URL(url);
                 Bitmap bitmap = NetworkUtils.getBitmapFromHttpUrl(downloadLink);
                 ByteArrayOutputStream stream = new ByteArrayOutputStream();
-                bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream);
+                bitmap.compress(Bitmap.CompressFormat.JPEG, COMPRESS_QUALITY, stream);
                 return stream.toByteArray();
             } catch (Exception e) {
                 Logger.getLogger(this.getClass().getSimpleName()).log(Level.FINE, null, e);
             }
-            return null;
+            return new byte[0];
         }
 
     }
