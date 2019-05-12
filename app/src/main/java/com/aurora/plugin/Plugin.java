@@ -122,14 +122,14 @@ public class Plugin {
     }
 
     /**
-     * @return the version number of the plugin. For example: 1,2,3,...
+     * @return the version code of the plugin. For example: 1,2,3,...
      */
     public int getVersionCode() {
         return mVersionCode;
     }
 
     /**
-     * @return the version code of the plugin. For example: "v0.1", "v1.1.2", "v2.3.2-beta",...
+     * @return the version name of the plugin. For example: "v0.1", "v1.1.2", "v2.3.2-beta",...
      */
     public String getVersionName() {
         return mVersionName;
