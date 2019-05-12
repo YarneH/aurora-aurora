@@ -32,6 +32,10 @@ public final class Kernel {
      * A constant indicating how the plugin config file is named
      */
     private static final String PLUGINS_CFG = "plugin-config.json";
+
+    /**
+     * A static reference to the Kernel if it has been created
+     */
     private static Kernel sKernel = null;
 
     /**
@@ -105,7 +109,7 @@ public final class Kernel {
         sKernel = new Kernel();
 
         // Create 1 bus to be shared among all communicators
-        Bus sBus = new Bus(Schedulers.computation());
+        Bus bus = new Bus(Schedulers.computation());
 
         // Initialize plugin config
         initializePluginConfig(applicationContext);
@@ -114,20 +118,20 @@ public final class Kernel {
         PluginRegistry pluginRegistry = new PluginRegistry(PLUGINS_CFG, applicationContext);
 
         // Create the different communicators
-        sAuroraCommunicator = new AuroraCommunicator(sBus, pluginRegistry, applicationContext);
-        sProcessingCommunicator = new ProcessingCommunicator(sBus);
-        sPluginCommunicator = new PluginCommunicator(sBus, pluginRegistry);
+        sAuroraCommunicator = new AuroraCommunicator(bus, pluginRegistry, applicationContext);
+        sProcessingCommunicator = new ProcessingCommunicator(bus);
+        sPluginCommunicator = new PluginCommunicator(bus, pluginRegistry);
 
         // Create internal text processor for the PluginInternalServiceCommunicator
         InternalTextProcessor internalTextProcessing = new InternalTextProcessor();
 
-        sPluginInternalServiceCommunicator = new PluginInternalServiceCommunicator(sBus,
+        sPluginInternalServiceCommunicator = new PluginInternalServiceCommunicator(bus,
                 internalTextProcessing, new Translator(Volley.newRequestQueue(applicationContext)));
 
 
         // Create cache
         InternalCache internalCache = new InternalCache(applicationContext);
-        sAuroraInternalServiceCommunicator = new AuroraInternalServiceCommunicator(sBus, internalCache);
+        sAuroraInternalServiceCommunicator = new AuroraInternalServiceCommunicator(bus, internalCache);
         return sKernel;
     }
 

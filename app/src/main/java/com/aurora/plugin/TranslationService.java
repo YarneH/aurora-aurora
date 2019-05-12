@@ -43,7 +43,7 @@ public class TranslationService extends Service {
          */
         @Override
         public List<String> translate(List<String> sentences, String sourceLanguage, String destinationLanguage) {
-            Log.d("AURORA_TRANSLATE", "SERVICE IS BEING RUN FOR:" + sentences + "\n" +
+            Log.i("AURORA_TRANSLATE", "SERVICE IS BEING RUN FOR:" + sentences + "\n" +
                     sourceLanguage  + "\n" + destinationLanguage);
 
             // Get the kernel and appropriate communicator

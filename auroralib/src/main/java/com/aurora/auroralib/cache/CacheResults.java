@@ -4,6 +4,13 @@ package com.aurora.auroralib.cache;
  * Class of constants indicating results of the caching operation.
  * The {@link CacheServiceCaller} has a cache method that will try to cache a file in Aurora, and it will return
  * one of the constant return codes in this class.
+ *
+ * <p>
+ * The reason that this is a class with constant ints instead of an enum, is that these status codes are used in ICache.
+ * This is an AIDL file, and we have noticed that AIDL doesn't like working with non-primitive types. That is why
+ * we simulate an enum with a class full of constants.
+ * </p>
+ *
  * @see CacheServiceCaller
  */
 public final class CacheResults {

@@ -64,7 +64,6 @@ public class CacheServiceCaller extends ServiceCaller {
         }
     }
 
-
     /**
      * Will start a new thread to cache the file
      *
@@ -100,7 +99,7 @@ public class CacheServiceCaller extends ServiceCaller {
     public void onServiceConnected(ComponentName className, IBinder binder) {
         synchronized (mMonitor) {
             mCacheBinding = ICache.Stub.asInterface(binder);
-            Log.d(LOG_TAG, "Plugin Bound");
+            Log.i(LOG_TAG, "Plugin Bound");
 
             mServiceConnected = true;
             mMonitor.notifyAll();
@@ -114,7 +113,7 @@ public class CacheServiceCaller extends ServiceCaller {
     protected void disconnect() {
         mServiceConnected = false;
         mCacheBinding = null;
-        Log.d(LOG_TAG, "Plugin Unbound");
+        Log.i(LOG_TAG, "Plugin Unbound");
     }
 
     /**
@@ -150,13 +149,13 @@ public class CacheServiceCaller extends ServiceCaller {
          */
         @Override
         public void run() {
-            Log.d(LOG_TAG, "cache called");
+            Log.i(LOG_TAG, "cache called");
             try {
 
                 // I don't think the if ever happens
                 if (mCacheBinding == null) {
                     synchronized (mMonitor) {
-                        Log.d(LOG_TAG, "Entering sync block" + mCacheResult);
+                        Log.v(LOG_TAG, "Entering sync block" + mCacheResult);
 
                         mCacheResult = cache();
                     }
@@ -164,7 +163,7 @@ public class CacheServiceCaller extends ServiceCaller {
                     mCacheResult = mCacheBinding.cache(mFileName, mUniquePluginName,
                             writeToAurora());
 
-                    Log.d(LOG_TAG, "" + mCacheResult);
+                    Log.v(LOG_TAG, "" + mCacheResult);
                 }
 
             } catch (RemoteException e) {

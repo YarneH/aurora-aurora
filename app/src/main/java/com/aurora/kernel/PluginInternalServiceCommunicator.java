@@ -26,7 +26,7 @@ import io.reactivex.Observable;
 /**
  * Communicator that communicates with internal services offered to plugin processors
  */
-public class PluginInternalServiceCommunicator extends Communicator {
+class PluginInternalServiceCommunicator extends Communicator {
 
     /**
      * Tag for logging purposes
@@ -66,8 +66,9 @@ public class PluginInternalServiceCommunicator extends Communicator {
      * @param processor a reference to the InternalTextProcessor
      * @param translator a reference to the internal translator
      */
-    public PluginInternalServiceCommunicator(@NonNull final Bus mBus, @NonNull final InternalTextProcessor processor,
-                                             @NonNull final Translator translator) {
+    PluginInternalServiceCommunicator(@NonNull final Bus mBus,
+                                      @NonNull final InternalTextProcessor processor,
+                                      @NonNull final Translator translator) {
         super(mBus);
         mInternalTextProcessor = processor;
         mTranslator = translator;
@@ -109,17 +110,14 @@ public class PluginInternalServiceCommunicator extends Communicator {
 
         // If extractedText is null for some reason: return default extracted text
         if (extractedText == null) {
-            extractedText = new ExtractedText("", null);
+            mBus.post(new InternalProcessorResponse(new ExtractedText("")));
         }
 
         // STEP TWO
         doNLPTask(extractedText, internalServices);
 
-        // Create response
-        InternalProcessorResponse response = new InternalProcessorResponse(extractedText);
-
         // Post response
-        mBus.post(response);
+        mBus.post(new InternalProcessorResponse(extractedText));
     }
 
     /**
@@ -146,10 +144,10 @@ public class PluginInternalServiceCommunicator extends Communicator {
                 extractedText = mInternalTextProcessor.processFile(file, fileRef, type,
                         extractImages);
 
-                Log.d(CLASS_TAG,
+                Log.i(CLASS_TAG,
                         "Service completed: " + InternalServices.TEXT_EXTRACTION.name());
                 if (extractImages) {
-                    Log.d(CLASS_TAG,
+                    Log.i(CLASS_TAG,
                             "Service completed: " + InternalServices.IMAGE_EXTRACTION.name());
                 }
 
@@ -181,6 +179,7 @@ public class PluginInternalServiceCommunicator extends Communicator {
         for (InternalServices internalService : internalServices) {
 
             if (internalService.name().startsWith("NLP_")) {
+                // Only create internalNLP when NLP services requested
                 if (mInternalNLP == null) {
                     mInternalNLP = new InternalNLP();
                 }
@@ -196,9 +195,8 @@ public class PluginInternalServiceCommunicator extends Communicator {
 
         if (doNLP) {
             mInternalNLP.annotate(extractedText);
-            Log.d(CLASS_TAG, "Service completed: " + "NLP ANNOTATION");
+            Log.i(CLASS_TAG, "Service completed: " + "NLP ANNOTATION");
         }
         mInternalNLP = null;
     }
-
 }

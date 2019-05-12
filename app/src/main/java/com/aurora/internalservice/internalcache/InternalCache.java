@@ -48,7 +48,8 @@ public class InternalCache implements InternalService {
 
     /**
      * Data structure that keeps track of cached files per plugin
-     * The key is a unique plugin name. The value is a list of file references associated with that plugin.
+     * The key is a unique plugin name. The value is a list of file references associated with
+     * that plugin.
      */
     private Map<String, List<CachedFileInfo>> mCachedFiles;
 
@@ -73,7 +74,8 @@ public class InternalCache implements InternalService {
              BufferedReader reader = new BufferedReader(new InputStreamReader(cacheRegistryFile))) {
             Gson gson = new Gson();
 
-            CacheRegistryElement[] cacheRegistryElements = gson.fromJson(reader, CacheRegistryElement[].class);
+            CacheRegistryElement[] cacheRegistryElements = gson.fromJson(reader,
+                    CacheRegistryElement[].class);
             mCachedFiles = convertToMap(cacheRegistryElements);
 
         } catch (FileNotFoundException e) {
@@ -81,7 +83,6 @@ public class InternalCache implements InternalService {
             mCachedFiles = new HashMap<>();
             writeCacheRegistry();
         } catch (IOException e) {
-            // If something goes wrong when reading the file, log the exception
             Log.e(CLASS_TAG, "Something went wrong while reading the cache registry file", e);
         }
     }
@@ -90,24 +91,26 @@ public class InternalCache implements InternalService {
      * Converts an array of CacheRegistryElements to a map
      *
      * @param elements the elements to be converted to a map
-     * @return a map with Strings (unique plugin names) as key and a list of associated file references as a value
+     * @return a map with Strings (unique plugin names) as key and a list of associated file
+     * references as a value
      */
     private static Map<String, List<CachedFileInfo>> convertToMap(CacheRegistryElement[] elements) {
         Map<String, List<CachedFileInfo>> cacheMap = new HashMap<>();
-        for (CacheRegistryElement el : elements) {
+        for (CacheRegistryElement element : elements) {
             // Convert cached fileRefs to list
             // Needs to be wrapped in new list because else it is not mutable
-            List<CachedFileInfo> fileRefs = new ArrayList<>(Arrays.asList(el.cachedFileRefs));
+            List<CachedFileInfo> fileRefs = new ArrayList<>(Arrays.asList(element.cachedFileRefs));
 
             // Add element to map
-            cacheMap.put(el.uniquePluginName, fileRefs);
+            cacheMap.put(element.uniquePluginName, fileRefs);
         }
 
         return cacheMap;
     }
 
     /**
-     * Writes the cache registry state back to a file. This should be called when the cache registry state is changed
+     * Writes the cache registry state back to a file. This should be called when the cache
+     * registry state is changed
      */
     private void writeCacheRegistry() {
         // Convert map to array of CacheRegistryElements
@@ -128,8 +131,8 @@ public class InternalCache implements InternalService {
     }
 
     /**
-     * Converts a map with unique plugin names as key and a list of associated file references as value
-     * to an array of CacheRegistryElements for easier serialization.
+     * Converts a map with unique plugin names as key and a list of associated file references as
+     * value to an array of CacheRegistryElements for easier serialization.
      *
      * @param cacheMap the map to convert
      * @return an array of easier to serialize elements
@@ -161,10 +164,12 @@ public class InternalCache implements InternalService {
     public boolean cacheFile(String fileRef, String pluginObject, String uniquePluginName) {
         /*
         This method consists of two parts: We have to actually write the representation to a file.
-        We should do this by mapping a file ref to another fileref that represents the cached representation.
+        We should do this by mapping a file ref to another fileref that represents the cached
+        representation.
         In this file, we should have a json representation of the plugin object representation.
 
-        Secondly, we have to update the plugin registry as to keep track of which files are cached and which are not.
+        Secondly, we have to update the plugin registry as to keep track of which files are
+        cached and which are not.
          */
 
         // Get the path where to store the file
@@ -178,7 +183,8 @@ public class InternalCache implements InternalService {
             }
 
             // Create cachedFileInfo object with current date as date object
-            CachedFileInfo cachedFileInfo = new CachedFileInfo(fileRef, uniquePluginName, new Date());
+            CachedFileInfo cachedFileInfo = new CachedFileInfo(fileRef, uniquePluginName,
+                    new Date());
 
             // Require non null not really necessary because of precondition above
             List<CachedFileInfo> pluginEntry = mCachedFiles.get(uniquePluginName);
@@ -231,7 +237,6 @@ public class InternalCache implements InternalService {
         // Get the file ref to it without extension
         String cachedPath;
 
-
         if (fileRef.contains(".")) {
             cachedPath = fileRef.substring(0, fileRef.indexOf('.'));
         } else {
@@ -263,14 +268,17 @@ public class InternalCache implements InternalService {
     }
 
     /**
-     * Checks the cache if a processed version of the file is present and returns it if it is the case
+     * Checks the cache if a processed version of the file is present and returns it if it is the
+     * case
      *
-     * @param fileRef          a reference to the file to check the cache for (should be hash_displayName)
-     *                         Check the getFileName method from mainactivity.
+     * @param fileRef          a reference to the file to check the cache for (should be
+     *                         hash_displayName)
+     *                         Check the getFileName method from {@link com.aurora.aurora.MainActivity}.
      * @param uniquePluginName the name of the plugin to open the representation with
      * @return the processed file info if it is present, null otherwise
      */
-    public CachedFileInfo checkCacheForProcessedFile(@NonNull String fileRef, @NonNull String uniquePluginName) {
+    public CachedFileInfo checkCacheForProcessedFile(@NonNull String fileRef,
+                                                     @NonNull String uniquePluginName) {
 
         // Create cached file info object
         CachedFileInfo lookupFile = new CachedFileInfo(fileRef, uniquePluginName);
@@ -299,7 +307,8 @@ public class InternalCache implements InternalService {
     /**
      * Gets a list of already processed file representations ordered on most recent date
      *
-     * @param amount the amount of files that should be retrieved, if 0 or negative, all files will be retrieved.
+     * @param amount the amount of files that should be retrieved, if 0 or negative, all files
+     *               will be retrieved.
      * @return a list of metadata of cached files, ordered on the date most recently opened.
      */
     public List<CachedFileInfo> getFullCache(int amount) {
@@ -345,7 +354,8 @@ public class InternalCache implements InternalService {
 
             // Create a reader to read the file
             try (FileInputStream fileInputStream = mContext.openFileInput(cachedPath);
-                 BufferedReader reader = new BufferedReader(new InputStreamReader(fileInputStream))) {
+                 BufferedReader reader =
+                         new BufferedReader(new InputStreamReader(fileInputStream))) {
                 // Read file in string, use string builder for speed
                 StringBuilder stringBuilder = new StringBuilder();
                 String currentLine;
@@ -373,7 +383,8 @@ public class InternalCache implements InternalService {
      * Helper method that checks if a file is in the cache registry
      *
      * @param fileRef          the reference to the file to check if it is in the cache registry
-     *                         (should be hash_displayName). Check the getFileName method from MainActivity.
+     *                         (should be hash_displayName). Check the getFileName method from
+     *                         MainActivity.
      * @param uniquePluginName the name of the plugin that the file would be processed with
      * @return true if the file is in the cache, false otherwise
      */
@@ -389,7 +400,8 @@ public class InternalCache implements InternalService {
     /**
      * Clears the entire cache
      *
-     * @return true if the entire operation was successful or if the cache was empty, false otherwise
+     * @return true if the entire operation was successful or if the cache was empty, false
+     * otherwise
      */
     public boolean clear() {
         boolean successful = true;
@@ -421,7 +433,8 @@ public class InternalCache implements InternalService {
         }
 
         for (CachedFileInfo cachedFileInfo : new ArrayList<>(cachedFilesByPlugin)) {
-            // First call remove file to ensure that it is called even when 'successful' is already false
+            // First call remove file to ensure that it is called even when 'successful' is
+            // already false
             successful = removeFile(cachedFileInfo.getFileRef(), uniquePluginName) && successful;
         }
 
@@ -434,10 +447,13 @@ public class InternalCache implements InternalService {
      * Removes a file from the cache given its path and plugin name
      *
      * @param fileRef          a reference to the file that should be removed from the cache
-     *                         (should be hash_displayName). Check the getFileName method from MainActivity.
+     *                         (should be hash_displayName). Check the getFileName method from
+     *                         MainActivity.
      * @param uniquePluginName the name of the plugin to remove the file from
-     *                         It could be that a file was processed by different plugins (or different versions)
-     *                         so it should be possible to only remove those for no longer supported versions.
+     *                         It could be that a file was processed by different plugins (or
+     *                         different versions)
+     *                         so it should be possible to only remove those for no longer
+     *                         supported versions.
      * @return true if the file was successfully removed
      */
     public boolean removeFile(String fileRef, String uniquePluginName) {
@@ -483,7 +499,7 @@ public class InternalCache implements InternalService {
          * @param uniquePluginName the name of the plugin that processed the cached files
          * @param cachedFileRefs   an array of CachedFileInfo objects
          */
-        public CacheRegistryElement(String uniquePluginName, CachedFileInfo[] cachedFileRefs) {
+        CacheRegistryElement(String uniquePluginName, CachedFileInfo[] cachedFileRefs) {
             this.uniquePluginName = uniquePluginName;
             this.cachedFileRefs = cachedFileRefs;
         }
