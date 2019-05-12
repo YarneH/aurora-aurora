@@ -20,6 +20,10 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+/**
+ * A singleton structure that is responsible for all the data of the Plugin Marget
+ * that is gather from online services
+ */
 public final class MarketNetworkDataSource {
     /**
      * One of the JSON keys

@@ -10,11 +10,25 @@ import java.util.List;
  * Handles the data operations of Aurora
  */
 public final class MarketRepository {
+    /**
+     * The instance of the singleton
+     */
     private static MarketRepository sInstance;
-    private boolean mInitialized = false;
+    /**
+     * A boolean representing whether the instance is initialized
+     */
+    private boolean mDataInitialized = false;
+    /**
+     * The MarketNetworkDataSource, responsible for the communication with online services
+     */
     private final MarketNetworkDataSource mNetworkDataSource;
 
-    private MarketRepository(MarketNetworkDataSource networkDataSource){
+    /**
+     * Private constructor of the singleton
+     *
+     * @param networkDataSource the used MarketNetworkDataSource
+     */
+    private MarketRepository(MarketNetworkDataSource networkDataSource) {
         mNetworkDataSource = networkDataSource;
     }
 
@@ -26,14 +40,18 @@ public final class MarketRepository {
         return sInstance;
     }
 
-    public synchronized void initializeData() {
-        if (!mInitialized) {
-            mNetworkDataSource.fetchMarketPlugins();
-        }
+    /**
+     * Fetch the MarketPlugins from the NetworkDataSource
+     */
+    private synchronized void initializeData() {
+        mNetworkDataSource.fetchMarketPlugins();
+        mDataInitialized = true;
     }
 
     public LiveData<List<MarketPlugin>> getCurrentMarketPlugins() {
-        initializeData();
+        if (!mDataInitialized) {
+            initializeData();
+        }
         return mNetworkDataSource.getCurrentMarketPlugins();
     }
 }

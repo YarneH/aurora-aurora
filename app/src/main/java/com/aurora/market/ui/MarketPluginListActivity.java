@@ -39,7 +39,9 @@ public class MarketPluginListActivity extends AppCompatActivity {
      * device.
      */
     private boolean mTwoPane = false;
-
+    /**
+     * The ViewModel of the PluginMarket, containing all the data needed for the UI
+     */
     private PluginMarketViewModel mViewModel = null;
 
     @Override
