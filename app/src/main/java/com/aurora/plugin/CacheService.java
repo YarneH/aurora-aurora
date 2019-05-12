@@ -42,7 +42,7 @@ public class CacheService extends Service {
          */
         @Override
         public int cache(String fileRef, String pluginObject, String uniquePluginName) {
-            Log.d("AURORA_CACHE", "SERVICE IS BEING RUN FOR:" + fileRef + "\n" +
+            Log.i("AURORA_CACHE", "SERVICE IS BEING RUN FOR:" + fileRef + "\n" +
                     uniquePluginName  + "\n" + pluginObject);
 
             // Get the kernel and appropriate communicator

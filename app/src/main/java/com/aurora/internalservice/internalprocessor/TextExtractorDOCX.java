@@ -77,7 +77,7 @@ public class TextExtractorDOCX implements TextExtractor {
      */
     @Override
     public ExtractedText extract(InputStream file, String fileRef, boolean extractImages) {
-        mExtractedText = new ExtractedText(fileRef, null);
+        mExtractedText = new ExtractedText(fileRef);
 
         // Set the values to defaults
         mSectionInProgress = null;

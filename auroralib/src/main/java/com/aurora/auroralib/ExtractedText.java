@@ -65,12 +65,20 @@ public class ExtractedText implements InternallyProcessedFile, Serializable {
     private List<Section> mSections;
 
     /**
+     * Default constructor for creating an empty extracted text
+     * @param filename      the name of the file
+     */
+    public ExtractedText(@NonNull final String filename) {
+        this.mFilename = filename;
+    }
+
+    /**
      * This constructor will create an empty extracted text
      *
      * @param filename     the name of the file
      * @param dateLastEdit the moment the file was last edited
      */
-    public ExtractedText(String filename, Date dateLastEdit) {
+    public ExtractedText(@NonNull final String filename, @NonNull final Date dateLastEdit) {
         this.mFilename = filename;
         this.mDateLastEdit = dateLastEdit;
     }
@@ -82,7 +90,7 @@ public class ExtractedText implements InternallyProcessedFile, Serializable {
      * @param dateLastEdit the moment the file was last edited
      * @param sections     the sections in the file (only plain sections)
      */
-    public ExtractedText(String filename, Date dateLastEdit, List<String> sections) {
+    public ExtractedText(@NonNull final String filename, Date dateLastEdit, List<String> sections) {
         mFilename = filename;
         mDateLastEdit = dateLastEdit;
 
@@ -105,7 +113,8 @@ public class ExtractedText implements InternallyProcessedFile, Serializable {
      * @param mAuthors      the authors of the file
      * @param mSections     the sections in the file
      */
-    public ExtractedText(String mFilename, Date mDateLastEdit, String mTitle, List<String> mAuthors,
+    public ExtractedText(@NonNull final String mFilename, Date mDateLastEdit, String mTitle,
+                         List<String> mAuthors,
                          List<Section> mSections) {
         this(mFilename, mDateLastEdit);
         this.mTitle = mTitle;

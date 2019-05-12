@@ -147,7 +147,7 @@ class PluginCommunicator extends Communicator {
         Intent launchIntent = context.getPackageManager().getLaunchIntentForPackage(uniquePluginName);
 
         if (launchIntent == null) {
-            showToastAndLog(context, context.getString(R.string.could_not_open_plugin), null);
+            showToastAndLogError(context, context.getString(R.string.could_not_open_plugin), null);
             return;
         }
 
@@ -155,7 +155,7 @@ class PluginCommunicator extends Communicator {
 
         // Convert the extracted text to JSON
         String extractedTextInJSON = extractedText.toJSON();
-        Log.d("JSON", extractedTextInJSON);
+        Log.v("JSON", extractedTextInJSON);
 
         // Start by clearing the old transfer files
         removeFilesThatStartWithFromDir(context.getCacheDir(), PROCESSED_PREFIX);
@@ -165,7 +165,7 @@ class PluginCommunicator extends Communicator {
         try {
             uri = writeToTempFile(context, extractedTextInJSON, PROCESSED_PREFIX);
         } catch (IOException e) {
-            showToastAndLog(context, ERROR_LOG, e);
+            showToastAndLogError(context, ERROR_LOG, e);
             return;
         }
 
@@ -181,7 +181,7 @@ class PluginCommunicator extends Communicator {
         if (pluginOpens) {
             context.startActivity(launchIntent);
         } else {
-            showToastAndLog(context, context.getString(R.string.could_not_open_plugin), null);
+            showToastAndLogError(context, context.getString(R.string.could_not_open_plugin), null);
         }
     }
 
@@ -202,7 +202,7 @@ class PluginCommunicator extends Communicator {
 
         // Convert the extracted text to JSON
         String extractedTextInJSON = extractedText.toJSON();
-        Log.d("JSON", extractedTextInJSON);
+        Log.v("JSON", extractedTextInJSON);
 
         // Start by clearing the old transfer files
         removeFilesThatStartWithFromDir(context.getCacheDir(), PROCESSED_PREFIX);
@@ -212,7 +212,7 @@ class PluginCommunicator extends Communicator {
         try {
             uri = writeToTempFile(context, extractedTextInJSON, PROCESSED_PREFIX);
         } catch (IOException e) {
-            showToastAndLog(context, ERROR_LOG, e);
+            showToastAndLogError(context, ERROR_LOG, e);
             return;
         }
 
@@ -228,7 +228,7 @@ class PluginCommunicator extends Communicator {
         if (pluginOpens) {
             context.startActivity(chooser);
         } else {
-            showToastAndLog(context, context.getString(R.string.no_plugins_available), null);
+            showToastAndLogError(context, context.getString(R.string.no_plugins_available), null);
         }
     }
 
@@ -271,7 +271,7 @@ class PluginCommunicator extends Communicator {
             try {
                 uri = writeToTempFile(context, jsonRepresentation, CACHED_PREFIX);
             } catch (IOException e) {
-                showToastAndLog(context, ERROR_LOG, e);
+                showToastAndLogError(context, ERROR_LOG, e);
                 return;
             }
 
@@ -283,7 +283,7 @@ class PluginCommunicator extends Communicator {
                 return;
             }
         }
-        showToastAndLog(context, context.getString(R.string.could_not_open_plugin), null);
+        showToastAndLogError(context, context.getString(R.string.could_not_open_plugin), null);
     }
 
     /**
@@ -316,7 +316,7 @@ class PluginCommunicator extends Communicator {
                 if (file.getName().startsWith(prefix)) {
                     boolean success = file.delete();
                     if (!success) {
-                        Log.d(CLASS_TAG, "There was a problem removing old files from "
+                        Log.e(CLASS_TAG, "There was a problem removing old files from "
                                 + dir.getName());
                         return;
                     }
@@ -344,12 +344,12 @@ class PluginCommunicator extends Communicator {
      * @param message the message that needs to be shown
      * @param e       the throwable error
      */
-    private void showToastAndLog(Context context, String message, @Nullable Throwable e) {
+    private void showToastAndLogError(Context context, String message, @Nullable Throwable e) {
         showToast(context, message);
         if (e != null) {
             Log.e(CLASS_TAG, message, e);
         } else {
-            Log.d(CLASS_TAG, message);
+            Log.e(CLASS_TAG, message);
         }
 
     }

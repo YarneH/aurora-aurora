@@ -108,17 +108,14 @@ class PluginInternalServiceCommunicator extends Communicator {
 
         // If extractedText is null for some reason: return default extracted text
         if (extractedText == null) {
-            mBus.post(new InternalProcessorResponse(new ExtractedText("", null)));
+            mBus.post(new InternalProcessorResponse(new ExtractedText("")));
         }
 
         // STEP TWO
         doNLPTask(extractedText, internalServices);
 
-        // Create response
-        InternalProcessorResponse response = new InternalProcessorResponse(extractedText);
-
         // Post response
-        mBus.post(response);
+        mBus.post(new InternalProcessorResponse(extractedText));
     }
 
     /**
@@ -145,10 +142,10 @@ class PluginInternalServiceCommunicator extends Communicator {
                 extractedText = mInternalTextProcessor.processFile(file, fileRef, type,
                         extractImages);
 
-                Log.d(CLASS_TAG,
+                Log.i(CLASS_TAG,
                         "Service completed: " + InternalServices.TEXT_EXTRACTION.name());
                 if (extractImages) {
-                    Log.d(CLASS_TAG,
+                    Log.i(CLASS_TAG,
                             "Service completed: " + InternalServices.IMAGE_EXTRACTION.name());
                 }
 
@@ -172,6 +169,7 @@ class PluginInternalServiceCommunicator extends Communicator {
         for (InternalServices internalService : internalServices) {
 
             if (internalService.name().startsWith("NLP_")) {
+                // Only create internalNLP when NLP services requested
                 if (mInternalNLP == null) {
                     mInternalNLP = new InternalNLP();
                 }
@@ -187,7 +185,7 @@ class PluginInternalServiceCommunicator extends Communicator {
 
         if (doNLP) {
             mInternalNLP.annotate(extractedText);
-            Log.d(CLASS_TAG, "Service completed: " + "NLP ANNOTATION");
+            Log.i(CLASS_TAG, "Service completed: " + "NLP ANNOTATION");
         }
         mInternalNLP = null;
     }
