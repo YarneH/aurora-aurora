@@ -127,14 +127,10 @@ public class PluginCommunicator extends Communicator {
      */
     private void openFileWithPlugin(ExtractedText extractedText, String uniquePluginName, Context context) {
         // Create intent to open plugin
-        Intent launchIntent = context.getPackageManager().getLaunchIntentForPackage(uniquePluginName);
-
-        if (launchIntent == null) {
-            showToastAndLogError(context, context.getString(R.string.could_not_open_plugin), null);
-            return;
-        }
-
+        Intent launchIntent = new Intent();
         launchIntent.setAction(Constants.PLUGIN_ACTION);
+        launchIntent.setPackage(uniquePluginName);
+        launchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 
         // Convert the extracted text to JSON
         String extractedTextInJSON = extractedText.toJSON();
@@ -174,49 +170,33 @@ public class PluginCommunicator extends Communicator {
      */
     private void openCachedFileWithPlugin(@NonNull final String jsonRepresentation,
                                           @NonNull final String uniquePluginName, @NonNull final Context context) {
+        Intent launchIntent = new Intent();
+        launchIntent.setAction(Constants.PLUGIN_ACTION);
+        launchIntent.setPackage(uniquePluginName);
+        launchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 
-        Intent pluginAction = new Intent(Constants.PLUGIN_ACTION);
-        pluginAction.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        pluginAction.setType("*/*");
-        List<ResolveInfo> possiblePlugins = context.getPackageManager().queryIntentActivities(pluginAction, 0);
 
-        // Loop over the plugins to see if the wanted plugin is in there
-        ActivityInfo activityInfo = null;
-        for (ResolveInfo pluginInfo : possiblePlugins) {
-            if (uniquePluginName.equals(pluginInfo.activityInfo.applicationInfo.packageName)) {
-                // If the wanted plugin is found, change activityInfo and break
-                activityInfo = pluginInfo.activityInfo;
-                break;
-            }
+        // Start by clearing the old transfer files
+        removeFilesThatStartWithFromDir(context.getCacheDir(), CACHED_PREFIX);
+
+        Uri uri;
+
+        try {
+            uri = writeToTempFile(context, jsonRepresentation, CACHED_PREFIX);
+        } catch (IOException e) {
+            showToastAndLogError(context, ERROR_LOG, e);
+            return;
         }
 
-        if (activityInfo != null) {
-            Intent launchIntent = new Intent(pluginAction);
+        setDataAndFlags(launchIntent, uri, Constants.PLUGIN_INPUT_TYPE_OBJECT);
 
-            ComponentName cn = new ComponentName(activityInfo.applicationInfo.packageName, activityInfo.name);
-            launchIntent.setComponent(cn);
-
-            // Start by clearing the old transfer files
-            removeFilesThatStartWithFromDir(context.getCacheDir(), CACHED_PREFIX);
-
-            Uri uri;
-
-            try {
-                uri = writeToTempFile(context, jsonRepresentation, CACHED_PREFIX);
-            } catch (IOException e) {
-                showToastAndLogError(context, ERROR_LOG, e);
-                return;
-            }
-
-            setDataAndFlags(launchIntent, uri, Constants.PLUGIN_INPUT_TYPE_OBJECT);
-
-            boolean cachedFileOpens = launchIntent.resolveActivity(context.getPackageManager()) != null;
-            if (cachedFileOpens) {
-                context.startActivity(launchIntent);
-                return;
-            }
+        boolean cachedFileOpens = launchIntent.resolveActivity(context.getPackageManager()) != null;
+        if (cachedFileOpens) {
+            context.startActivity(launchIntent);
+        } else {
+            showToastAndLogError(context, context.getString(R.string.could_not_open_plugin), null);
         }
-        showToastAndLogError(context, context.getString(R.string.could_not_open_plugin), null);
+
     }
 
     /**
