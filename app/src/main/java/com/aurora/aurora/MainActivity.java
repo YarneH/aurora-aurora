@@ -627,7 +627,7 @@ public class MainActivity extends AppCompatActivity
         // Create a builder to build the actual alertdialog from the previous inflated view
         AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
         alertDialogBuilder.setView(promptView);
-        alertDialogBuilder.setCancelable(false);
+        alertDialogBuilder.setCancelable(true);
 
         // Create and show the pop-up
         alertDialogBuilder.create().show();
