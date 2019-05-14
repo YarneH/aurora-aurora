@@ -134,10 +134,6 @@ public class MainActivity extends AppCompatActivity
      * The list of cached files, which will be shown in the RecyclerView
      */
     private List<CachedFileInfo> mCachedFileInfoList = new ArrayList<>();
-    /**
-     * String to identify the loading parameter in the saved instance.
-     */
-    private static final String sLoading = "loading";
 
 
     /**
