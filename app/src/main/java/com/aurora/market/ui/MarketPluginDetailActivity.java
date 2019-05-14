@@ -68,6 +68,11 @@ public class MarketPluginDetailActivity extends AppCompatActivity {
     private FloatingActionButton mDownloadFAB;
 
     /**
+     * A boolean that indicates whether the plugin is installed already
+     */
+    private boolean mInstalled;
+
+    /**
      * {@inheritDoc}
      */
     @Override
@@ -85,7 +90,7 @@ public class MarketPluginDetailActivity extends AppCompatActivity {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "This will download the plugin", Snackbar.LENGTH_LONG)
+                Snackbar.make(view, "Downloading the plugin!", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
 
                 // Check if the permissions for reading and writing are acquired
@@ -149,15 +154,20 @@ public class MarketPluginDetailActivity extends AppCompatActivity {
      */
     private void updateDownloadUI() {
         if (mDownloadFAB != null && mProgressBar != null) {
-            Drawable intent =
-                    null;
             try {
-                intent = getBaseContext().getPackageManager().getApplicationIcon("com.aurora." + mMarketPlugin.getPluginName().toLowerCase());
-                Log.d("Download", "Installed");
+                // Try to get the icon, if it is null, the plugin is not yet installed
+                getBaseContext().getPackageManager()
+                        .getApplicationIcon("com.aurora." + mMarketPlugin.getPluginName().toLowerCase());
+                mInstalled = true;
             } catch (PackageManager.NameNotFoundException e) {
-                e.printStackTrace();
-                Log.d("Download", "Not installed");
+                // The plugin is not yet installed
+                mInstalled = false;
             }
+            if (mInstalled) {
+                mDownloadFAB.setImageResource(R.drawable.ic_check_white);
+                return;
+            }
+
             if (MarketNetworkDataSource.getInstance(getBaseContext()).isDownloading(mMarketPlugin)) {
                 mProgressBar.setVisibility(View.VISIBLE);
                 mDownloadFAB.setImageDrawable(null);
