@@ -33,13 +33,13 @@ public abstract class ProcessorCommunicator {
      * Mind that this is an abstract class so no actual instances can be created. This is just to make sure that
      * Communicators in the plugin have these arguments
      *
-     * @param packageName The package name of the main activity in the plugin. It is important that the package name
-     *                    is the one from the main activity (the one you see when the plugin opens).
-     * @param context an android context
+     * @param mainPackageName The package name of the main activity in the plugin. It is important that the package name
+     *                        is the one from the main activity (the one you see when the plugin opens).
+     * @param context         an android context
      */
     @SuppressWarnings("unused")
-    public ProcessorCommunicator(String packageName, Context context) {
-        mUniquePluginName = packageName;
+    public ProcessorCommunicator(String mainPackageName, Context context) {
+        mUniquePluginName = mainPackageName;
         mContext = context;
         mCacheServiceCaller = new CacheServiceCaller(context);
     }
