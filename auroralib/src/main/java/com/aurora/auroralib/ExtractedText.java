@@ -88,6 +88,54 @@ public class ExtractedText implements InternallyProcessedFile, Serializable {
     }
 
     /**
+     * Turn the JSON string back into an ExtractedText object, mainly for use by plugins.
+     *
+     * @param json The extracted JSON string of the ExtractedText object
+     * @return ExtractedText
+     */
+    @SuppressWarnings({"unused", "WeakerAccess"})
+    public static ExtractedText fromJson(@NonNull final String json) {
+        Gson gson = new Gson();
+
+        return gson.fromJson(json, ExtractedText.class);
+    }
+
+    /**
+     * Method to convert the file accessed by the Uri to an ExtractedText object
+     *
+     * @param fileUri The Uri to the temp file
+     * @param context The context
+     * @return ExtractedText object
+     * @throws IOException          On IO trouble
+     * @throws NullPointerException When the file cannot be found.
+     */
+    @SuppressWarnings("unused")
+    public static ExtractedText getExtractedTextFromFile(@NonNull Uri fileUri,
+                                                         @NonNull Context context)
+            throws IOException {
+
+        // Open the file
+        ParcelFileDescriptor inputPFD = context.getContentResolver().openFileDescriptor(fileUri,
+                "r");
+
+        if (inputPFD == null) {
+            throw new IllegalArgumentException("The file could not be opened");
+        }
+
+        // Read the file
+        StringBuilder total = new StringBuilder();
+        InputStream fileStream = new FileInputStream(inputPFD.getFileDescriptor());
+        try (BufferedReader r = new BufferedReader(new InputStreamReader(fileStream))) {
+            for (String line; (line = r.readLine()) != null; ) {
+                total.append(line).append('\n');
+            }
+        }
+
+        // Convert the read file to an ExtractedText object
+        return ExtractedText.fromJson(total.toString());
+    }
+
+    /**
      * Get the sections of this ExtractedText. Will return an empty list when no Sections are
      * present
      *
@@ -140,7 +188,7 @@ public class ExtractedText implements InternallyProcessedFile, Serializable {
      * Sets the name of the file, this should consist of the filename with a prepended hash to
      * make it unique
      *
-     * @param mFilename the name of the file
+     * @param filename the name of the file
      */
     @SuppressWarnings("unused")
     public void setFilename(@NonNull final String filename) {
@@ -273,53 +321,5 @@ public class ExtractedText implements InternallyProcessedFile, Serializable {
     public String toJSON() {
         Gson gson = new Gson();
         return gson.toJson(this);
-    }
-
-    /**
-     * Turn the JSON string back into an ExtractedText object, mainly for use by plugins.
-     *
-     * @param json The extracted JSON string of the ExtractedText object
-     * @return ExtractedText
-     */
-    @SuppressWarnings({"unused", "WeakerAccess"})
-    public static ExtractedText fromJson(@NonNull final String json) {
-        Gson gson = new Gson();
-
-        return gson.fromJson(json, ExtractedText.class);
-    }
-
-    /**
-     * Method to convert the file accessed by the Uri to an ExtractedText object
-     *
-     * @param fileUri The Uri to the temp file
-     * @param context The context
-     * @return ExtractedText object
-     * @throws IOException          On IO trouble
-     * @throws NullPointerException When the file cannot be found.
-     */
-    @SuppressWarnings("unused")
-    public static ExtractedText getExtractedTextFromFile(@NonNull Uri fileUri,
-                                                         @NonNull Context context)
-            throws IOException {
-
-        // Open the file
-        ParcelFileDescriptor inputPFD = context.getContentResolver().openFileDescriptor(fileUri,
-                "r");
-
-        if (inputPFD == null) {
-            throw new IllegalArgumentException("The file could not be opened");
-        }
-
-        // Read the file
-        StringBuilder total = new StringBuilder();
-        InputStream fileStream = new FileInputStream(inputPFD.getFileDescriptor());
-        try (BufferedReader r = new BufferedReader(new InputStreamReader(fileStream))) {
-            for (String line; (line = r.readLine()) != null; ) {
-                total.append(line).append('\n');
-            }
-        }
-
-        // Convert the read file to an ExtractedText object
-        return ExtractedText.fromJson(total.toString());
     }
 }

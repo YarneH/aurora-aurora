@@ -37,7 +37,7 @@ public class ExtractedImage {
     }
 
     /**
-     * Constructor to create a base64Encoded image with a caption
+     * Constructor to create a base64Encoded image withØ a caption
      *
      * @param base64EncodedImage the base64 encode String
      * @param caption            the caption String
@@ -72,6 +72,16 @@ public class ExtractedImage {
     }
 
     /**
+     * Sets the base64 encoded image of the {@link ExtractedImage}.
+     *
+     * @param base64EncodedImage String of the base64 encoded image
+     */
+    @SuppressWarnings("unused")
+    public void setBase64EncodedImage(@NonNull final String base64EncodedImage) {
+        mBase64EncodedImage = base64EncodedImage;
+    }
+
+    /**
      * Returns the decoded image as Bitmap
      *
      * @return the Bitmap of the image
@@ -82,16 +92,6 @@ public class ExtractedImage {
         InputStream stream = new ByteArrayInputStream(Base64.decode(mBase64EncodedImage.getBytes()
                 , Base64.DEFAULT));
         return BitmapFactory.decodeStream(stream);
-    }
-
-    /**
-     * Sets the base64 encoded image of the {@link ExtractedImage}.
-     *
-     * @param base64EncodedImage String of the base64 encoded image
-     */
-    @SuppressWarnings("unused")
-    public void setBase64EncodedImage(@NonNull final String base64EncodedImage) {
-        mBase64EncodedImage = base64EncodedImage;
     }
 
     @SuppressWarnings("unused")

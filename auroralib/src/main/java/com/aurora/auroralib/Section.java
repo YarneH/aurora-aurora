@@ -249,6 +249,18 @@ public class Section {
     }
 
     /**
+     * The old method of setting images, instead use {@link #setExtractedImages(List)}
+     *
+     * @param images List of base64 encode images
+     * @deprecated
+     */
+    @Deprecated
+    public void setImages(@NonNull final List<String> images) {
+        mExtractedImages = new ArrayList<>();
+        addImages(images);
+    }
+
+    /**
      * Get the {@link ExtractedImage} objects of this Section. Will return an empty
      * list when no images are present.
      *
@@ -261,18 +273,6 @@ public class Section {
             return new ArrayList<>();
         }
         return mExtractedImages;
-    }
-
-    /**
-     * The old method of setting images, instead use {@link #setExtractedImages(List)}
-     *
-     * @param images List of base64 encode images
-     * @deprecated
-     */
-    @Deprecated
-    public void setImages(@NonNull final List<String> images) {
-        mExtractedImages = new ArrayList<>();
-        addImages(images);
     }
 
     /**

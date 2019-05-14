@@ -20,61 +20,24 @@ import java.io.Serializable;
 public abstract class PluginObject implements Serializable {
 
     /**
+     * Gson object for turning PluginObject to Json string
+     */
+    @SuppressWarnings("WeakerAccess")
+    protected static Gson sGson = new Gson();
+    /**
      * The name of the file that contained the text that is now displayed in the PluginObject,
      * this also contains the prepended hash
      */
     @SuppressWarnings("WeakerAccess")
     protected String mFileName;
-
     /**
      * The name of the plugin that the file was processed with
      */
     protected String mUniquePluginName;
 
-    /**
-     * Gson object for turning PluginObject to Json string
-     */
-    @SuppressWarnings("WeakerAccess")
-    protected static Gson sGson = new Gson();
-
     public PluginObject(@NonNull final String fileName, @NonNull final String uniquePluginName) {
         mFileName = fileName;
         mUniquePluginName = uniquePluginName;
-    }
-
-    /**
-     * @return NonNull filename
-     */
-    @NonNull
-    public final String getFileName() {
-        return mFileName == null ? "" : mFileName;
-    }
-
-    /**
-     * @return NonNull name of the plugin
-     */
-    @NonNull
-    public String getUniquePluginName() {
-        return mUniquePluginName == null ? "" : mUniquePluginName;
-    }
-
-    /**
-     * Sets the name of the plugin
-     *
-     * @param uniquePluginName name of the plugin
-     */
-    public void setUniquePluginName(@NonNull final String uniquePluginName) {
-        mUniquePluginName = uniquePluginName;
-    }
-
-    /**
-     * Turns the PluginObject to a JSON string for easy caching.
-     *
-     * @return String (in JSON format)
-     */
-    @NonNull
-    public String toJSON() {
-        return sGson.toJson(this);
     }
 
     /**
@@ -121,6 +84,47 @@ public abstract class PluginObject implements Serializable {
 
         // Convert the read file to an ExtractedText object
         return fromJson(total.toString(), type);
+    }
+
+    /**
+     * @return NonNull filename
+     */
+    @NonNull
+    public final String getFileName() {
+        if (mFileName == null) {
+            return "";
+        }
+        return mFileName;
+    }
+
+    /**
+     * @return NonNull name of the plugin
+     */
+    @NonNull
+    public String getUniquePluginName() {
+        if (mUniquePluginName == null) {
+            return "";
+        }
+        return mUniquePluginName;
+    }
+
+    /**
+     * Sets the name of the plugin
+     *
+     * @param uniquePluginName name of the plugin
+     */
+    public void setUniquePluginName(@NonNull final String uniquePluginName) {
+        mUniquePluginName = uniquePluginName;
+    }
+
+    /**
+     * Turns the PluginObject to a JSON string for easy caching.
+     *
+     * @return String (in JSON format)
+     */
+    @NonNull
+    public String toJSON() {
+        return sGson.toJson(this);
     }
 
 }
