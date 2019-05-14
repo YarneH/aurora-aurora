@@ -2,41 +2,22 @@ package com.aurora.market.ui;
 
 import android.Manifest;
 import android.app.Activity;
-import android.app.DownloadManager;
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.pm.PackageManager;
-import android.graphics.drawable.Drawable;
-import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Environment;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.FileProvider;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.View;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.app.ActionBar;
 import android.view.MenuItem;
 
 import android.widget.ProgressBar;
-import android.widget.TextView;
-import com.aurora.aurora.CardFileAdapter;
 import com.aurora.aurora.R;
 import com.aurora.market.data.database.MarketPlugin;
 import com.aurora.market.data.network.MarketNetworkDataSource;
-
-import java.io.File;
-import java.net.URL;
-
-import static java.lang.Thread.sleep;
 
 /**
  * An activity representing a single MarketPlugin detail screen. This
@@ -58,19 +39,19 @@ public class MarketPluginDetailActivity extends AppCompatActivity {
     private MarketPlugin mMarketPlugin = null;
 
     /**
-     *
+     * The progressbar which indicates the current plugin is downloading
      */
     private ProgressBar mProgressBar;
 
     /**
-     *
+     * The FAB which is used to download the plugin
      */
     private FloatingActionButton mDownloadFAB;
 
     /**
      * A boolean that indicates whether the plugin is installed already
      */
-    private boolean mInstalled;
+    private boolean mInstalled = false;
 
     /**
      * {@inheritDoc}
@@ -86,11 +67,15 @@ public class MarketPluginDetailActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
         // Setup the FAB for downloading the Plugin
         Activity activity = this;
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab_download_plugin);
-        fab.setOnClickListener(new View.OnClickListener() {
+        mDownloadFAB.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "Downloading the plugin!", Snackbar.LENGTH_LONG)
+                if (mInstalled) {
+                    Snackbar.make(view, getResources().getString(R.string.already_installed), Snackbar.LENGTH_LONG)
+                            .setAction("Action", null).show();
+                    return;
+                }
+                Snackbar.make(view, getResources().getString(R.string.download_plugin), Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
 
                 // Check if the permissions for reading and writing are acquired
@@ -143,6 +128,9 @@ public class MarketPluginDetailActivity extends AppCompatActivity {
         updateDownloadUI();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     protected void onResume() {
         super.onResume();

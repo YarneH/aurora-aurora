@@ -5,7 +5,6 @@ import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -46,6 +45,9 @@ public class MarketPluginDetailFragment extends Fragment {
         // Mandatory empty constructor
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -62,6 +64,9 @@ public class MarketPluginDetailFragment extends Fragment {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -73,16 +78,11 @@ public class MarketPluginDetailFragment extends Fragment {
             ((TextView) rootView.findViewById(R.id.tv_creator_input)).setText(mMarketPlugin.getCreator());
             ((TextView) rootView.findViewById(R.id.tv_version_input)).setText(mMarketPlugin.getVersion());
 
-
             Bitmap imgBitmap = mMarketPlugin.getLogo();
-            Log.d("image", "" + imgBitmap);
             if (imgBitmap != null) {
                 ((ImageView)rootView.findViewById(R.id.iv_icon)).setImageBitmap(imgBitmap);
             }
         }
-
-
-
         return rootView;
     }
 }
