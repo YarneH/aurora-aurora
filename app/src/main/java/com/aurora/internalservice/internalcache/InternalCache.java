@@ -251,7 +251,7 @@ public class InternalCache implements InternalService {
             partPluginName = uniquePluginName.substring(uniquePluginName.lastIndexOf('.') + 1);
         }
 
-        cachedPath += partPluginName;
+        cachedPath += "_" + partPluginName;
 
         // Concatenate .aur extension
         return cachedPath + CACHE_EXTENSION;

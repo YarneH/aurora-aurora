@@ -34,13 +34,13 @@ public class InternalCacheUnitTest {
         String title = "title";
         String text = "text";
         String pluginObject = new DummyPluginObject1(title, text).toJSON();
-        String uniquePluginName = "DummyPlugin";
+        String uniquePluginName = "com.aurora.dummyplugin";
 
         // Call method under test
         mInternalCache.cacheFile(fileRef, pluginObject, uniquePluginName);
 
         // Check that file has been written to the right location
-        File cachedFile = new File("-123456_testFile.aur");
+        File cachedFile = new File("-123456_testFile_dummyplugin.aur");
 
         Assert.assertTrue(cachedFile.exists());
 
