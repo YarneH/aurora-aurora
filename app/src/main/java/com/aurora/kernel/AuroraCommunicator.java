@@ -24,6 +24,7 @@ import com.aurora.kernel.event.UpdateCachedFileDateRequest;
 import com.aurora.plugin.Plugin;
 
 import java.io.InputStream;
+import java.util.Date;
 import java.util.List;
 
 import io.reactivex.Observable;
@@ -233,7 +234,7 @@ public class AuroraCommunicator extends Communicator {
 
         // Create request to update the dateLastOpened of the file
         UpdateCachedFileDateRequest updateCachedFileDateRequest =
-                new UpdateCachedFileDateRequest(fileRef, uniquePluginName);
+                new UpdateCachedFileDateRequest(fileRef, uniquePluginName, new Date());
         mBus.post(updateCachedFileDateRequest);
     }
 

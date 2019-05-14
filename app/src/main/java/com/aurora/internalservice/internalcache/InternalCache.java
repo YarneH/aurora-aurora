@@ -254,13 +254,15 @@ public class InternalCache implements InternalService {
      * @param fileRef          a reference to the original file that was processed
      * @param uniquePluginName the unique name of the plugin that the file was processed with
      */
-    public void updateCachedFileDate(@NonNull final String fileRef, @NonNull final String uniquePluginName) {
+    public void updateCachedFileDate(@NonNull final String fileRef, @NonNull final String uniquePluginName,
+                                     @NonNull final Date newDate) {
         // Check if the file is in the cache
         CachedFileInfo fileInfo = checkCacheForProcessedFile(fileRef, uniquePluginName);
 
-        if (fileInfo != null) {
-            // Update date
-            fileInfo.setLastOpened(new Date());
+        // Update date if the file is in the cache and if the new date is more recent than the old date
+        if (fileInfo != null && newDate.after(fileInfo.getLastOpened())) {
+            fileInfo.setLastOpened(newDate);
+
 
             // Write back to cache registry
             // requireNonNull just to stop warning, should never be null in reality
@@ -271,6 +273,7 @@ public class InternalCache implements InternalService {
                 Objects.requireNonNull(mCachedFiles.get(uniquePluginName)).set(fileIndex, fileInfo);
             }
         }
+
     }
 
     /**

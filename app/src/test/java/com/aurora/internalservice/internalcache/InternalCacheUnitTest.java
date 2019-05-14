@@ -14,6 +14,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.Calendar;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -269,7 +270,9 @@ public class InternalCacheUnitTest {
         CachedFileInfo originalFileInfo = mInternalCache.checkCacheForProcessedFile(fileRef1, pluginName);
 
         // Update date
-        mInternalCache.updateCachedFileDate(fileRef1, pluginName);
+        Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.SECOND, 5);
+        mInternalCache.updateCachedFileDate(fileRef1, pluginName, calendar.getTime());
 
         // Get file from cache
         CachedFileInfo updatedFile = mInternalCache.checkCacheForProcessedFile(fileRef1, pluginName);
