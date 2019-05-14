@@ -47,6 +47,10 @@ public class AuroraCommunicator extends Communicator {
      * The android application context
      */
     private Context mContext;
+    /**
+     * Indicates whether or not the text is being extracted.
+     */
+    private boolean mLoading = false;
 
     /**
      * Observable keeping track of events indicating that a document is not supported
@@ -82,25 +86,29 @@ public class AuroraCommunicator extends Communicator {
      * the text from the given file reference,
      * then it will send a request to let the plugin make the representation.
      *
-     * @param fileRef            a reference to the file that needs to be opened
-     * @param fileType           the file type
-     * @param file               the input stream of the file
-     * @param plugin             the plugin to open the file with.
+     * @param fileRef  a reference to the file that needs to be opened
+     * @param fileType the file type
+     * @param file     the input stream of the file
+     * @param plugin   the plugin to open the file with.
      */
     public void openFileWithPlugin(String fileRef, String fileType, InputStream file,
                                    Plugin plugin) {
 
+        // Set the state to loading.
+        mLoading = true;
+
         // Register observable
         Observable<InternalProcessorResponse> internalProcessorResponseObservable =
                 mBus.register(InternalProcessorResponse.class);
-
         // Subscribe to observable
         // The subscribe will only be triggered after the file was processed internally
         internalProcessorResponseObservable
                 .map(InternalProcessorResponse::getExtractedText)
                 .take(1)
-                .subscribe((ExtractedText extractedText) ->
-                                sendOpenFileRequest(extractedText, plugin.getUniqueName())
+                .subscribe((ExtractedText extractedText) -> {
+                            mLoading = false;
+                            sendOpenFileRequest(extractedText, plugin.getUniqueName());
+                        }
                         , (Throwable e) ->
                                 Log.e(CLASS_TAG,
                                         "Something went wrong when receiving the internally processed file.", e)
@@ -113,8 +121,6 @@ public class AuroraCommunicator extends Communicator {
         // Post request on the bus
         mBus.post(internalProcessorRequest);
     }
-
-
 
 
     /**
@@ -239,5 +245,14 @@ public class AuroraCommunicator extends Communicator {
      */
     private void showDocumentNotSupportedMessage(String reason) {
         Toast.makeText(mContext, reason, Toast.LENGTH_LONG).show();
+    }
+
+    /**
+     * Getter for the loading state.
+     *
+     * @return true if loading.
+     */
+    public boolean isLoading() {
+        return mLoading;
     }
 }

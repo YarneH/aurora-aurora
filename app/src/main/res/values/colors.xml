@@ -7,4 +7,5 @@
     <color name="colorAccent1">#0e8884</color>
     <color name="colorAccent2">#D50000</color>
     <color name="ic_launcher_background">#FFFFFF</color>
+    <color name="alpha_grey">#DD000000</color>
 </resources>
