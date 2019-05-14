@@ -100,7 +100,7 @@ public class Translator implements InternalService {
             Log.e(LOG_TAG, "Translation failed", e);
             evaluateResponse(e);
         }
-        // either the request is added or an error response will be created so wait untill a response
+        // either the request is added or an error response will be created so wait until a response
         // is made
         synchronized (mLock) {
             while (mInternalResponse == null) {
