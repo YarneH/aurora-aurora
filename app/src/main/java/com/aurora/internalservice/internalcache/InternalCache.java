@@ -173,7 +173,7 @@ public class InternalCache implements InternalService {
          */
 
         // Get the path where to store the file
-        String cachedPath = getCachedPath(fileRef);
+        String cachedPath = getCachedPath(fileRef, uniquePluginName);
 
         // Write the plugin object to the path
         if (writeCacheFile(cachedPath, pluginObject)) {
@@ -231,9 +231,10 @@ public class InternalCache implements InternalService {
      * Gets the path of the cached file given the fileRef
      *
      * @param fileRef a reference to a file
+     * @param uniquePluginName the name of the plugin that the file is (about to be) cached with
      * @return the path to where the cached representation corresponding to this file can be found
      */
-    private static String getCachedPath(String fileRef) {
+    private static String getCachedPath(String fileRef, String uniquePluginName) {
         // Get the file ref to it without extension
         String cachedPath;
 
@@ -242,6 +243,15 @@ public class InternalCache implements InternalService {
         } else {
             cachedPath = fileRef;
         }
+
+        // Append the last part of the pluginName
+        String partPluginName = uniquePluginName;
+        if (uniquePluginName.lastIndexOf('.') >= 0 &&
+                uniquePluginName.lastIndexOf('.') < uniquePluginName.length()) {
+            partPluginName = uniquePluginName.substring(uniquePluginName.lastIndexOf('.') + 1);
+        }
+
+        cachedPath += partPluginName;
 
         // Concatenate .aur extension
         return cachedPath + CACHE_EXTENSION;
@@ -350,7 +360,7 @@ public class InternalCache implements InternalService {
         if (isInCache(fileRef, uniquePluginName)) {
 
             // file is in cache, retrieve it
-            String cachedPath = getCachedPath(fileRef);
+            String cachedPath = getCachedPath(fileRef, uniquePluginName);
 
             // Create a reader to read the file
             try (FileInputStream fileInputStream = mContext.openFileInput(cachedPath);
@@ -461,7 +471,7 @@ public class InternalCache implements InternalService {
         CachedFileInfo cachedFileInfo = new CachedFileInfo(fileRef, uniquePluginName);
 
         // First check if the file is in the cache registry, if it is, remove it
-        if (isInCache(fileRef, uniquePluginName) && mContext.deleteFile(getCachedPath(fileRef))) {
+        if (isInCache(fileRef, uniquePluginName) && mContext.deleteFile(getCachedPath(fileRef, uniquePluginName))) {
             // If file was successfully removed, remove the fileRef from the list
             Objects.requireNonNull(mCachedFiles.get(uniquePluginName)).remove(cachedFileInfo);
 
