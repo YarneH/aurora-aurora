@@ -1,6 +1,5 @@
 package com.aurora.auroralib;
 
-import android.app.Activity;
 import android.content.Context;
 
 import com.aurora.auroralib.cache.CacheServiceCaller;
@@ -34,12 +33,13 @@ public abstract class ProcessorCommunicator {
      * Mind that this is an abstract class so no actual instances can be created. This is just to make sure that
      * Communicators in the plugin have these arguments
      *
-     * @param mainActivity A reference to the main activity of the plugin
-     * @param context an android application context
+     * @param packageName The package name of the main activity in the plugin. It is important that the package name
+     *                    is the one from the main activity (the one you see when the plugin opens).
+     * @param context an android context
      */
     @SuppressWarnings("unused")
-    public ProcessorCommunicator(Activity mainActivity, Context context) {
-        mUniquePluginName = mainActivity.getPackageName();
+    public ProcessorCommunicator(String packageName, Context context) {
+        mUniquePluginName = packageName;
         mContext = context;
         mCacheServiceCaller = new CacheServiceCaller(context);
     }
