@@ -1,10 +1,19 @@
 package com.aurora.market.data.network;
 
+import android.app.DownloadManager;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Environment;
+import android.support.v4.content.FileProvider;
+import android.util.Log;
+import com.aurora.aurora.R;
 import com.aurora.market.data.database.MarketPlugin;
 import com.firebase.jobdispatcher.Driver;
 import com.firebase.jobdispatcher.FirebaseJobDispatcher;
@@ -14,6 +23,7 @@ import org.json.JSONObject;
 
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -25,6 +35,10 @@ import java.util.logging.Logger;
  * that is gather from online services
  */
 public final class MarketNetworkDataSource {
+    /**
+     * The log tag of this class
+     */
+    private static final String LOG_TAG = MarketNetworkDataSource.class.getSimpleName();
     /**
      * One of the JSON keys
      */
@@ -86,6 +100,11 @@ public final class MarketNetworkDataSource {
      */
     private static MutableLiveData<List<MarketPlugin>> mMarketPlugins = new MutableLiveData<>();
 
+    /**
+     * A list of the unique names of the downloading plugins
+     */
+    private List<String> mDownladingPlugins = new ArrayList<>();
+
     private MarketNetworkDataSource(Context context) {
         mContext = context;
         Driver driver = new GooglePlayDriver(mContext);
@@ -118,6 +137,20 @@ public final class MarketNetworkDataSource {
         new GetMarketPlugins().execute();
     }
 
+    /**
+     * Download the MarketPlugin
+     */
+    public void downloadMarketPlugin(MarketPlugin marketPlugin) {
+        mDownladingPlugins.add(marketPlugin.getPluginName());
+        new DownloadAndInstallPluginTask().execute(marketPlugin);
+    }
+
+    /**
+     * Returns whether the plugin is downloading or not
+     */
+    public boolean isDownloading(MarketPlugin marketPlugin) {
+        return mDownladingPlugins.contains(marketPlugin.getPluginName());
+    }
     /**
      * Returns a JSONArray of all the MarketPlugins available on the Plugin Market Server
      */
@@ -198,5 +231,78 @@ public final class MarketNetworkDataSource {
             return new byte[0];
         }
 
+    }
+
+    /**
+     * A AsyncTask that will download an install a plugin from the market
+     */
+    private class DownloadAndInstallPluginTask extends AsyncTask<MarketPlugin, Void, Void> {
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        protected Void doInBackground(MarketPlugin... marketPlugins) {
+            try {
+                MarketPlugin marketPlugin = marketPlugins[0];
+                // Create request for android download manager
+                android.net.Uri uri = Uri.parse(marketPlugin.getDownloadLink().toString());
+                DownloadManager downloadManager = (DownloadManager) mContext.getSystemService(Context.DOWNLOAD_SERVICE);
+                DownloadManager.Request request = new DownloadManager.Request(uri);
+                request.setAllowedNetworkTypes(DownloadManager.Request.NETWORK_WIFI |
+                        DownloadManager.Request.NETWORK_MOBILE);
+
+                // Set title and description
+                request.setTitle(marketPlugin.getPluginName() + ".apk");
+                request.setDescription(mContext.getResources().getString(R.string.download_plugin));
+
+                request.allowScanningByMediaScanner();
+                request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE);
+
+                // Set the destination for download file to a path within the application's external files directory
+                request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS,
+                        marketPlugin.getPluginName() + ".apk");
+                request.setMimeType("application/vnd.android.package-archive");
+
+                // Save the downloadID for later
+                long downloadID = downloadManager.enqueue(request);
+
+                // Boolean for state of the download
+
+                BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
+                    @Override
+                    public void onReceive(Context context, Intent intent) {
+                        long id = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1);
+                        if (id == downloadID) {
+                            context.unregisterReceiver(this);
+                            Intent installIntent = new Intent(Intent.ACTION_INSTALL_PACKAGE);
+
+                            // Build up the path to the downloaded plugin
+                            String path = String.valueOf(Environment.getExternalStorageDirectory()) +
+                                    File.pathSeparator +
+                                    Environment.DIRECTORY_DOWNLOADS +
+                                    File.separator +
+                                    marketPlugin.getPluginName() +
+                                    ".apk";
+
+                            // Get the URI of the downloaded apk and prepare intent
+                            Uri apkURI = FileProvider.getUriForFile(context,
+                                    context.getApplicationContext().getPackageName() + ".provider",
+                                    new File(path));
+                            installIntent.setDataAndType(apkURI, "application/vnd.android.package-archive");
+                            installIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                            installIntent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                            // Start install intent
+                            mDownladingPlugins.remove(marketPlugin.getPluginName());
+                            mContext.startActivity(installIntent);
+                        }
+                    }
+                };
+                mContext.registerReceiver(broadcastReceiver, new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
+            } catch (Exception e) {
+                Log.e(LOG_TAG, "exception", e);
+            }
+            return null;
+        }
     }
 }
