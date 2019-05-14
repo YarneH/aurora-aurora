@@ -1,5 +1,6 @@
 package com.aurora.auroralib;
 
+import android.app.Activity;
 import android.content.Context;
 
 import com.aurora.auroralib.cache.CacheServiceCaller;
@@ -29,8 +30,8 @@ public abstract class ProcessorCommunicator {
     protected Context mContext;
 
     @SuppressWarnings("unused")
-    public ProcessorCommunicator(String uniquePluginName, Context context) {
-        mUniquePluginName = uniquePluginName;
+    public ProcessorCommunicator(Activity mainActivity, Context context) {
+        mUniquePluginName = mainActivity.getPackageName();
         mContext = context;
         mCacheServiceCaller = new CacheServiceCaller(context);
     }
