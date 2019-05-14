@@ -29,6 +29,14 @@ public abstract class ProcessorCommunicator {
      */
     protected Context mContext;
 
+    /**
+     * Creates a new instance of a ProcessorCommunicator.
+     * Mind that this is an abstract class so no actual instances can be created. This is just to make sure that
+     * Communicators in the plugin have these arguments
+     *
+     * @param mainActivity A reference to the main activity of the plugin
+     * @param context an android application context
+     */
     @SuppressWarnings("unused")
     public ProcessorCommunicator(Activity mainActivity, Context context) {
         mUniquePluginName = mainActivity.getPackageName();
