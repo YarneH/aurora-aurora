@@ -41,12 +41,12 @@ public class MarketPluginDetailActivity extends AppCompatActivity {
     /**
      * The progressbar which indicates the current plugin is downloading
      */
-    private ProgressBar mProgressBar;
+    private ProgressBar mProgressBar = null;
 
     /**
      * The FAB which is used to download the plugin
      */
-    private FloatingActionButton mDownloadFAB;
+    private FloatingActionButton mDownloadFAB = null;
 
     /**
      * A boolean that indicates whether the plugin is installed already

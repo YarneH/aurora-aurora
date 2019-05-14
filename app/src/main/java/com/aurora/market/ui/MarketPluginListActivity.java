@@ -148,7 +148,8 @@ public class MarketPluginListActivity extends AppCompatActivity {
          * @param items A list of all the displayed MarketPlugins
          * @param twoPane indicating whether the screen is a wide screen
          */
-        public MarketPluginsRecyclerViewAdapter(MarketPluginListActivity parent, List<MarketPlugin> items, boolean twoPane) {
+        public MarketPluginsRecyclerViewAdapter(
+                MarketPluginListActivity parent, List<MarketPlugin> items, boolean twoPane) {
             mMarketPlugins = items;
             mParentActivity = parent;
             mTwoPane = twoPane;

@@ -298,7 +298,8 @@ public final class MarketNetworkDataSource {
                         }
                     }
                 };
-                mContext.registerReceiver(broadcastReceiver, new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
+                mContext.registerReceiver(
+                        broadcastReceiver, new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
             } catch (Exception e) {
                 Log.e(LOG_TAG, "exception", e);
             }

@@ -24,18 +24,23 @@ final class NetworkUtils {
             "http://pluginmarket.aurora-files.ml/plugin";
 
 
+    /**
+     * Constructor that should not be accessed
+     */
     private NetworkUtils() {
         throw new IllegalStateException("Utility class");
     }
 
+    /**
+     * Get the MarketPluginURL
+     * @return a URL, which locates to the plugins
+     */
     static URL getMarketPluginURL() {
         try {
             return new URL(PLUGINLIST_URL);
         } catch (MalformedURLException e) {
             Logger.getLogger("NetworkUtils").log(Level.SEVERE, null, e);
-
         }
-
         return null;
     }
 
