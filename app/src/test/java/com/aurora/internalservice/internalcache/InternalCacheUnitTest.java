@@ -15,6 +15,7 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 public class InternalCacheUnitTest {
 
@@ -288,16 +289,14 @@ public class InternalCacheUnitTest {
 
         mInternalCache.cacheFile(fileRef1, object1, pluginName);
 
-        // Wait for 1 second
+        // Wait for 1 second to cache the file so the dateLastOpened is later
         try {
-            Thread.sleep(1000);
-
-            // Cache the second file after 1 second
-            mInternalCache.cacheFile(fileRef2, object2, pluginName);
+            TimeUnit.SECONDS.sleep(1);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
 
+        mInternalCache.cacheFile(fileRef2, object2, pluginName);
 
         // Get files from cache
         List<CachedFileInfo> cachedFiles = mInternalCache.getFullCache();
