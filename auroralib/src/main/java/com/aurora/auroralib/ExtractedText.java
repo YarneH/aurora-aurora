@@ -4,6 +4,7 @@ import android.content.Context;
 import android.net.Uri;
 import android.os.ParcelFileDescriptor;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 import com.google.gson.Gson;
 import com.google.gson.annotations.JsonAdapter;
@@ -15,7 +16,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import edu.stanford.nlp.pipeline.Annotation;
@@ -32,11 +32,6 @@ public class ExtractedText implements InternallyProcessedFile, Serializable {
      * The filename, which is made unique with a prepended hash
      */
     private String mFilename;
-
-    /**
-     * The Date of the last edit
-     */
-    private Date mDateLastEdit;
 
     /**
      * The text of the title of the file
@@ -66,33 +61,21 @@ public class ExtractedText implements InternallyProcessedFile, Serializable {
 
     /**
      * Default constructor for creating an empty extracted text
-     * @param filename      the name of the file
+     *
+     * @param filename the name of the file
      */
     public ExtractedText(@NonNull final String filename) {
-        this.mFilename = filename;
-    }
-
-    /**
-     * This constructor will create an empty extracted text
-     *
-     * @param filename     the name of the file
-     * @param dateLastEdit the moment the file was last edited
-     */
-    public ExtractedText(@NonNull final String filename, @NonNull final Date dateLastEdit) {
-        this.mFilename = filename;
-        this.mDateLastEdit = dateLastEdit;
-    }
-
-    /**
-     * This constructor will create an empty extracted text
-     *
-     * @param filename     the name of the file
-     * @param dateLastEdit the moment the file was last edited
-     * @param sections     the sections in the file (only plain sections)
-     */
-    public ExtractedText(@NonNull final String filename, Date dateLastEdit, List<String> sections) {
         mFilename = filename;
-        mDateLastEdit = dateLastEdit;
+    }
+
+    /**
+     * This constructor will create an empty extracted text
+     *
+     * @param filename the name of the file
+     * @param sections the sections in the file (only plain sections)
+     */
+    public ExtractedText(@NonNull final String filename, @NonNull final List<String> sections) {
+        mFilename = filename;
 
         mSections = new ArrayList<>();
 
@@ -105,29 +88,12 @@ public class ExtractedText implements InternallyProcessedFile, Serializable {
     }
 
     /**
-     * Constructor for an extracted text with all arguments
-     *
-     * @param mFilename     the name of the file
-     * @param mDateLastEdit the moment the file was last edited
-     * @param mTitle        the title of the file
-     * @param mAuthors      the authors of the file
-     * @param mSections     the sections in the file
-     */
-    public ExtractedText(@NonNull final String mFilename, Date mDateLastEdit, String mTitle,
-                         List<String> mAuthors,
-                         List<Section> mSections) {
-        this(mFilename, mDateLastEdit);
-        this.mTitle = mTitle;
-        this.mAuthors = mAuthors;
-        this.mSections = mSections;
-    }
-
-    /**
      * Get the sections of this ExtractedText. Will return an empty list when no Sections are
      * present
      *
      * @return the list of sections
      */
+    @NonNull
     public List<Section> getSections() {
         if (mSections != null) {
             return this.mSections;
@@ -141,7 +107,7 @@ public class ExtractedText implements InternallyProcessedFile, Serializable {
      *
      * @param section the section to be added
      */
-    public void addSection(Section section) {
+    public void addSection(@NonNull final Section section) {
         if (mSections == null) {
             mSections = new ArrayList<>();
         }
@@ -153,9 +119,8 @@ public class ExtractedText implements InternallyProcessedFile, Serializable {
      *
      * @param sectionText the content of the section
      */
-    public void addSimpleSection(String sectionText) {
-        Section section = new Section();
-        section.setBody(sectionText);
+    public void addSimpleSection(@NonNull final String sectionText) {
+        Section section = new Section(sectionText);
         addSection(section);
     }
 
@@ -163,18 +128,32 @@ public class ExtractedText implements InternallyProcessedFile, Serializable {
      * @return the (unique) filename given by aurora
      */
     @SuppressWarnings("unused")
+    @NonNull
     public String getFilename() {
-        return mFilename;
+        return mFilename == null ? "" : mFilename;
     }
 
-    public void setFilename(String mFilename) {
+    /**
+     * Sets the name of the file, this should consist of the filename with a prepended hash to
+     * make it unique
+     *
+     * @param mFilename the name of the file
+     */
+    @SuppressWarnings("unused")
+    public void setFilename(@NonNull final String mFilename) {
         this.mFilename = mFilename;
     }
 
     /**
      * @return the display name that should be used in the plugins to display the name of the files.
      */
+    @SuppressWarnings("unused")
+    @NonNull
     public String getFileDisplayName() {
+        if (mFilename == null) {
+            return "";
+        }
+
         if (mFilename.contains("_")) {
             return mFilename.substring(mFilename.indexOf('_') + 1);
         }
@@ -182,33 +161,37 @@ public class ExtractedText implements InternallyProcessedFile, Serializable {
     }
 
     /**
-     * @return the date on which the file was last edited
+     * @return the title of the text
      */
-    @SuppressWarnings("unused")
-    public Date getDateLastEdit() {
-        return mDateLastEdit;
-    }
-
-    public void setDateLastEdit(Date mDateLastEdit) {
-        this.mDateLastEdit = mDateLastEdit;
+    @NonNull
+    public String getTitle() {
+        return mTitle == null ? "" : mTitle;
     }
 
     /**
-     * @return the title of the text
+     * Sets the title of the text
+     *
+     * @param title the title to set
      */
-    public String getTitle() {
-        return mTitle;
-    }
-
-    public void setTitle(String title) {
+    public void setTitle(@NonNull final String title) {
         this.mTitle = title;
     }
 
-    public void setTitleAnnotationProto(CoreNLPProtos.Document titleAnnotationProto) {
+    /**
+     * Sets the {@link Annotation} for the title as a Protobuf object generated by
+     * {@link ProtobufAnnotationSerializer} that is Serializable
+     *
+     * @param titleAnnotationProto protobuf object of the Annotation
+     */
+    public void setTitleAnnotationProto(@Nullable final CoreNLPProtos.Document titleAnnotationProto) {
         this.mTitleAnnotationProto = titleAnnotationProto;
     }
 
+    /**
+     * @return the {@link Annotation} set in the {@link #mTitleAnnotationProto}.
+     */
     @SuppressWarnings("unused")
+    @Nullable
     public Annotation getTitleAnnotation() {
         // Recover the title CoreNLP annotations
         if (mTitleAnnotationProto != null && mTitleAnnotation == null) {
@@ -220,25 +203,33 @@ public class ExtractedText implements InternallyProcessedFile, Serializable {
         return mTitleAnnotation;
     }
 
+    /**
+     * @return NonNull List of authors
+     */
     @SuppressWarnings("unused")
+    @NonNull
     public List<String> getAuthors() {
-        if (mAuthors != null) {
-            return mAuthors;
-        } else {
-            return new ArrayList<>();
-        }
+        return mAuthors == null ? new ArrayList<String>() : mAuthors;
     }
 
-    public void setAuthors(List<String> authors) {
+    /**
+     * Sets the List of authors
+     *
+     * @param authors NonNull list of authors
+     */
+    @SuppressWarnings("unused")
+    public void setAuthors(@NonNull final List<String> authors) {
         this.mAuthors = authors;
     }
 
     /**
-     * Convenience method for getting all the images
+     * Convenience method for retrieving all the images in the {@link ExtractedText}
+     * {@link Section}.
      *
-     * @return List of {@link ExtractedImage} objects
+     * @return NonNull List of {@link ExtractedImage} objects
      */
     @SuppressWarnings("unused")
+    @NonNull
     public List<ExtractedImage> getImages() {
         List<ExtractedImage> extractedImages = new ArrayList<>();
 
@@ -249,6 +240,7 @@ public class ExtractedText implements InternallyProcessedFile, Serializable {
         return extractedImages;
     }
 
+    @NonNull
     @Override
     public String toString() {
         StringBuilder res = new StringBuilder();
@@ -268,6 +260,7 @@ public class ExtractedText implements InternallyProcessedFile, Serializable {
      *
      * @return String (in JSON format)
      */
+    @NonNull
     public String toJSON() {
         Gson gson = new Gson();
         return gson.toJson(this);
@@ -279,8 +272,8 @@ public class ExtractedText implements InternallyProcessedFile, Serializable {
      * @param json The extracted JSON string of the ExtractedText object
      * @return ExtractedText
      */
-    @SuppressWarnings("unused")
-    public static ExtractedText fromJson(String json) {
+    @SuppressWarnings({"unused", "WeakerAccess"})
+    public static ExtractedText fromJson(@NonNull final String json) {
         Gson gson = new Gson();
 
         return gson.fromJson(json, ExtractedText.class);
@@ -290,7 +283,7 @@ public class ExtractedText implements InternallyProcessedFile, Serializable {
      * Method to convert the file accessed by the Uri to an ExtractedText object
      *
      * @param fileUri The Uri to the temp file
-     * @param context The conext
+     * @param context The context
      * @return ExtractedText object
      * @throws IOException          On IO trouble
      * @throws NullPointerException When the file cannot be found.

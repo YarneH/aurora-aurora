@@ -1,6 +1,7 @@
 package com.aurora.auroralib;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
 
 import com.aurora.auroralib.cache.CacheServiceCaller;
 import com.aurora.auroralib.cache.ProcessorCacheThread;
@@ -21,6 +22,7 @@ public abstract class ProcessorCommunicator {
     /**
      * A CacheServiceCaller for caching the processed file
      */
+    @SuppressWarnings("WeakerAccess")
     protected CacheServiceCaller mCacheServiceCaller;
 
     /**
@@ -28,8 +30,16 @@ public abstract class ProcessorCommunicator {
      */
     protected Context mContext;
 
+    /**
+     * Constructor for the ProcessorCommunicator, will also instantiate a
+     * {@link CacheServiceCaller}.
+     *
+     * @param uniquePluginName NonNull unique name for the plugin
+     * @param context          NonNull context
+     */
     @SuppressWarnings("unused")
-    public ProcessorCommunicator(String uniquePluginName, Context context) {
+    public ProcessorCommunicator(@NonNull final String uniquePluginName,
+                                 @NonNull final Context context) {
         mUniquePluginName = uniquePluginName;
         mContext = context;
         mCacheServiceCaller = new CacheServiceCaller(context);
@@ -42,7 +52,8 @@ public abstract class ProcessorCommunicator {
      * @param extractedText The text that was extracted after Aurora's internal processing
      * @return The PluginObject that is the result of the plugin's processing of the extractedText
      */
-    protected abstract PluginObject process(ExtractedText extractedText);
+    @SuppressWarnings("WeakerAccess")
+    protected abstract PluginObject process(@NonNull final ExtractedText extractedText);
 
 
     /**
@@ -52,8 +63,8 @@ public abstract class ProcessorCommunicator {
      * @param extractedText the text extracted by aurora
      * @return the PluginObject that is returned by {@link #process(ExtractedText)}.
      */
-    @SuppressWarnings("unused")
-    public final PluginObject pipeline(ExtractedText extractedText) {
+    @SuppressWarnings({"unused", "WeakerAccess"})
+    public final PluginObject pipeline(@NonNull final ExtractedText extractedText) {
         PluginObject pluginObject = process(extractedText);
         ProcessorCacheThread processorCacheThread = new ProcessorCacheThread(pluginObject,
                 mCacheServiceCaller);

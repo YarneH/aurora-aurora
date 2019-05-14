@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Serializable;
+
 /**
  * Class to represent text processed by the plugin
  */
@@ -36,51 +37,76 @@ public abstract class PluginObject implements Serializable {
     @SuppressWarnings("WeakerAccess")
     protected static Gson sGson = new Gson();
 
-    public PluginObject(String fileName, String uniquePluginName) {
+    public PluginObject(@NonNull final String fileName, @NonNull final String uniquePluginName) {
         mFileName = fileName;
         mUniquePluginName = uniquePluginName;
     }
 
+    /**
+     * @return NonNull filename
+     */
+    @NonNull
     public final String getFileName() {
-        return mFileName;
+        return mFileName == null ? "" : mFileName;
     }
 
+    /**
+     * @return NonNull name of the plugin
+     */
+    @NonNull
     public String getUniquePluginName() {
-        return mUniquePluginName;
+        return mUniquePluginName == null ? "" : mUniquePluginName;
     }
 
-    public void setUniquePluginName(String uniquePluginName) {
+    /**
+     * Sets the name of the plugin
+     *
+     * @param uniquePluginName name of the plugin
+     */
+    public void setUniquePluginName(@NonNull final String uniquePluginName) {
         mUniquePluginName = uniquePluginName;
     }
 
     /**
-     * Turns the PLuginObject to a JSON string for easy caching.
+     * Turns the PluginObject to a JSON string for easy caching.
      *
      * @return String (in JSON format)
      */
-    public String toJSON(){
+    @NonNull
+    public String toJSON() {
         return sGson.toJson(this);
     }
 
     /**
      * Turn the JSON string back into a PluginObject object.
      *
-     * @param json  The extracted JSON string of the PluginObject object
+     * @param json The extracted JSON string of the PluginObject object
      * @return PluginObject
      */
-    public static final <T extends PluginObject> T fromJson(String json, Class<T> type){
+    public static final <T extends PluginObject> T fromJson(String json, Class<T> type) {
         return sGson.fromJson(json, type);
     }
 
+    /**
+     * Method to convert the file accessed by the Uri to an PluginObject object
+     *
+     * @param fileUri The Uri to the temp file
+     * @param context The context
+     * @return ExtractedText object
+     * @throws IOException          On IO trouble
+     * @throws NullPointerException When the file cannot be found.
+     */
     @SuppressWarnings("unused")
     public static <T extends PluginObject> T getPluginObjectFromFile(@NonNull Uri fileUri,
-                                                      @NonNull Context context, @NonNull Class<T> type)
+                                                                     @NonNull Context context,
+                                                                     @NonNull Class<T> type)
             throws IOException {
 
         // Open the file
-        ParcelFileDescriptor inputPFD = context.getContentResolver().openFileDescriptor(fileUri, "r");
+        ParcelFileDescriptor inputPFD = context.getContentResolver().openFileDescriptor(fileUri,
+                "r");
 
-        if(inputPFD == null) {
+        if (inputPFD == null) {
             throw new IllegalArgumentException("The file could not be opened");
         }
 
