@@ -82,9 +82,7 @@ public class ProcessingCommunicator extends Communicator {
                         notifyAll();
                     }
                 });
-
         // Create request to cache the file
-
         CacheFileRequest cacheFileRequest = new CacheFileRequest(fileRef, pluginObject, uniquePluginName);
 
         // Post on the bus
