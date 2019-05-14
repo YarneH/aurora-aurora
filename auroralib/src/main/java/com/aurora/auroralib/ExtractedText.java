@@ -96,7 +96,7 @@ public class ExtractedText implements InternallyProcessedFile, Serializable {
     @NonNull
     public List<Section> getSections() {
         if (mSections != null) {
-            return this.mSections;
+            return mSections;
         } else {
             return new ArrayList<>();
         }
@@ -111,7 +111,7 @@ public class ExtractedText implements InternallyProcessedFile, Serializable {
         if (mSections == null) {
             mSections = new ArrayList<>();
         }
-        this.mSections.add(section);
+        mSections.add(section);
     }
 
     /**
@@ -130,7 +130,10 @@ public class ExtractedText implements InternallyProcessedFile, Serializable {
     @SuppressWarnings("unused")
     @NonNull
     public String getFilename() {
-        return mFilename == null ? "" : mFilename;
+        if (mFilename == null) {
+            return "";
+        }
+        return mFilename;
     }
 
     /**
@@ -140,8 +143,8 @@ public class ExtractedText implements InternallyProcessedFile, Serializable {
      * @param mFilename the name of the file
      */
     @SuppressWarnings("unused")
-    public void setFilename(@NonNull final String mFilename) {
-        this.mFilename = mFilename;
+    public void setFilename(@NonNull final String filename) {
+        mFilename = filename;
     }
 
     /**
@@ -165,7 +168,10 @@ public class ExtractedText implements InternallyProcessedFile, Serializable {
      */
     @NonNull
     public String getTitle() {
-        return mTitle == null ? "" : mTitle;
+        if (mTitle == null) {
+            return "";
+        }
+        return mTitle;
     }
 
     /**
@@ -174,7 +180,7 @@ public class ExtractedText implements InternallyProcessedFile, Serializable {
      * @param title the title to set
      */
     public void setTitle(@NonNull final String title) {
-        this.mTitle = title;
+        mTitle = title;
     }
 
     /**
@@ -184,7 +190,7 @@ public class ExtractedText implements InternallyProcessedFile, Serializable {
      * @param titleAnnotationProto protobuf object of the Annotation
      */
     public void setTitleAnnotationProto(@Nullable final CoreNLPProtos.Document titleAnnotationProto) {
-        this.mTitleAnnotationProto = titleAnnotationProto;
+        mTitleAnnotationProto = titleAnnotationProto;
     }
 
     /**
@@ -209,7 +215,10 @@ public class ExtractedText implements InternallyProcessedFile, Serializable {
     @SuppressWarnings("unused")
     @NonNull
     public List<String> getAuthors() {
-        return mAuthors == null ? new ArrayList<String>() : mAuthors;
+        if (mAuthors == null) {
+            return new ArrayList<>();
+        }
+        return mAuthors;
     }
 
     /**
@@ -219,7 +228,7 @@ public class ExtractedText implements InternallyProcessedFile, Serializable {
      */
     @SuppressWarnings("unused")
     public void setAuthors(@NonNull final List<String> authors) {
-        this.mAuthors = authors;
+        mAuthors = authors;
     }
 
     /**

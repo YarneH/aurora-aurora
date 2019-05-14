@@ -130,7 +130,10 @@ public class Section {
      */
     @NonNull
     public String getTitle() {
-        return mTitle == null ? "" : mTitle;
+        if (mTitle == null) {
+            return "";
+        }
+        return mTitle;
     }
 
     /**
@@ -173,7 +176,10 @@ public class Section {
      */
     @NonNull
     public String getBody() {
-        return mBody == null ? "" : mBody;
+        if (mBody == null) {
+            return "";
+        }
+        return mBody;
     }
 
     /**
@@ -192,7 +198,11 @@ public class Section {
      * @param body NonNull body
      */
     public void concatBody(@NonNull final String body) {
-        mBody = mBody == null ? body : mBody.concat(body);
+        if (mBody == null) {
+            mBody = body;
+        } else {
+            mBody = mBody.concat(body);
+        }
     }
 
     /**
@@ -247,7 +257,10 @@ public class Section {
     @SuppressWarnings("unused")
     @NonNull
     public List<ExtractedImage> getExtractedImages() {
-        return mExtractedImages == null ? new ArrayList<ExtractedImage>() : mExtractedImages;
+        if (mExtractedImages == null) {
+            return new ArrayList<>();
+        }
+        return mExtractedImages;
     }
 
     /**
@@ -323,6 +336,6 @@ public class Section {
      * @param level the level of the Section
      */
     public void setLevel(int level) {
-        this.mLevel = level;
+        mLevel = level;
     }
 }
