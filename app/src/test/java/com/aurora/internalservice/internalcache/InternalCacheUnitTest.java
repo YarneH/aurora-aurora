@@ -277,6 +277,35 @@ public class InternalCacheUnitTest {
         Assert.assertTrue(originalFileInfo.getLastOpened().before(updatedFile.getLastOpened()));
     }
 
+    @Test
+    public void InternalCache_getFullCache_shouldReturnFilesSortedOnDateMostRecent() {
+        // Add files to cache
+        String fileRef1 = "123_dummyFileRef1.docx";
+        String fileRef2 = "456_dummyfileRef2.pdf";
+        String object1 = new DummyPluginObject1("Title", "Text").toJSON();
+        String object2 = new DummyPluginObject2("Title", 2, "Name").toJSON();
+        String pluginName = "com.aurora.dummyplugin";
+
+        mInternalCache.cacheFile(fileRef1, object1, pluginName);
+
+        // Wait for 1 second
+        try {
+            Thread.sleep(1000);
+
+            // Cache the second file after 1 second
+            mInternalCache.cacheFile(fileRef2, object2, pluginName);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+
+        // Get files from cache
+        List<CachedFileInfo> cachedFiles = mInternalCache.getFullCache();
+
+        // Assert that the date of the first element is more recent than the date of the second element
+        Assert.assertTrue(cachedFiles.get(0).getLastOpened().after(cachedFiles.get(1).getLastOpened()));
+    }
+
     // After every test, reset the cache
     @After
     public void resetCache() {

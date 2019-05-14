@@ -20,6 +20,7 @@ import com.aurora.kernel.event.QueryCacheRequest;
 import com.aurora.kernel.event.QueryCacheResponse;
 import com.aurora.kernel.event.RetrieveFileFromCacheRequest;
 import com.aurora.kernel.event.RetrieveFileFromCacheResponse;
+import com.aurora.kernel.event.UpdateCachedFileDateRequest;
 import com.aurora.plugin.Plugin;
 
 import java.io.InputStream;
@@ -82,10 +83,10 @@ public class AuroraCommunicator extends Communicator {
      * the text from the given file reference,
      * then it will send a request to let the plugin make the representation.
      *
-     * @param fileRef            a reference to the file that needs to be opened
-     * @param fileType           the file type
-     * @param file               the input stream of the file
-     * @param plugin             the plugin to open the file with.
+     * @param fileRef  a reference to the file that needs to be opened
+     * @param fileType the file type
+     * @param file     the input stream of the file
+     * @param plugin   the plugin to open the file with.
      */
     public void openFileWithPlugin(String fileRef, String fileType, InputStream file,
                                    Plugin plugin) {
@@ -115,8 +116,6 @@ public class AuroraCommunicator extends Communicator {
     }
 
 
-
-
     /**
      * Method to open an already cached file with the plugin
      *
@@ -142,7 +141,7 @@ public class AuroraCommunicator extends Communicator {
 
                             } else {
                                 sendOpenCachedFileRequest(processedFile.getJsonRepresentation(),
-                                        processedFile.getUniquePluginName());
+                                        processedFile.getFileRef(), processedFile.getUniquePluginName());
                             }
                         }, (Throwable e) ->
                                 Log.e(CLASS_TAG, "Something went wrong while retrieving a file from the cache!", e)
@@ -225,11 +224,17 @@ public class AuroraCommunicator extends Communicator {
      * @param jsonRepresentation the representation of the object to represent
      * @param uniquePluginName   the name of the plugin that the file was processed with
      */
-    private void sendOpenCachedFileRequest(final String jsonRepresentation, final String uniquePluginName) {
+    private void sendOpenCachedFileRequest(@NonNull final String jsonRepresentation, @NonNull final String fileRef,
+                                           @NonNull final String uniquePluginName) {
         // Create request and post it on bus
         OpenCachedFileWithPluginRequest openCachedFileWithPluginRequest =
                 new OpenCachedFileWithPluginRequest(jsonRepresentation, uniquePluginName, mContext);
         mBus.post(openCachedFileWithPluginRequest);
+
+        // Create request to update the dateLastOpened of the file
+        UpdateCachedFileDateRequest updateCachedFileDateRequest =
+                new UpdateCachedFileDateRequest(fileRef, uniquePluginName);
+        mBus.post(updateCachedFileDateRequest);
     }
 
     /**
@@ -237,7 +242,7 @@ public class AuroraCommunicator extends Communicator {
      *
      * @param reason the reason why the document could not be processed
      */
-    private void showDocumentNotSupportedMessage(String reason) {
+    private void showDocumentNotSupportedMessage(@NonNull final String reason) {
         Toast.makeText(mContext, reason, Toast.LENGTH_LONG).show();
     }
 }
