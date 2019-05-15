@@ -32,6 +32,11 @@ public final class MarketRepository {
         mNetworkDataSource = networkDataSource;
     }
 
+    /**
+     * Default getter
+     * @param networkDataSource the current MarketNetworkDataSource
+     * @return The MarketRepository instance
+     */
     public static synchronized MarketRepository getInstance(MarketNetworkDataSource networkDataSource) {
         if (sInstance == null) {
             sInstance = new MarketRepository(networkDataSource);
@@ -48,6 +53,10 @@ public final class MarketRepository {
         mDataInitialized = true;
     }
 
+    /**
+     * Getter for the MarketPlugins
+     * @return the cached MarketPlugins
+     */
     public LiveData<List<MarketPlugin>> getCurrentMarketPlugins() {
         if (!mDataInitialized) {
             initializeData();
