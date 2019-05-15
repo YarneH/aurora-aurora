@@ -12,8 +12,6 @@ import com.aurora.internalservice.internalcache.CachedProcessedFile;
 import com.aurora.kernel.event.DocumentNotSupportedEvent;
 import com.aurora.kernel.event.InternalProcessorRequest;
 import com.aurora.kernel.event.InternalProcessorResponse;
-import com.aurora.kernel.event.ListPluginsRequest;
-import com.aurora.kernel.event.ListPluginsResponse;
 import com.aurora.kernel.event.OpenCachedFileWithPluginRequest;
 import com.aurora.kernel.event.OpenFileWithPluginRequest;
 import com.aurora.kernel.event.QueryCacheRequest;
@@ -41,11 +39,6 @@ public class AuroraCommunicator extends Communicator {
     private static final String CLASS_TAG = "AuroraCommunicator";
 
     /**
-     * A reference to the plugin registry
-     */
-    private PluginRegistry mPluginRegistry;
-
-    /**
      * The android application context
      */
     private Context mContext;
@@ -64,13 +57,11 @@ public class AuroraCommunicator extends Communicator {
      *
      * @param bus                A reference to the unique bus instance over which
      *                           the communicators will communicate events
-     * @param pluginRegistry     a reference to the plugin registry
      * @param applicationContext the android context
      */
-    public AuroraCommunicator(@NonNull final Bus bus, @NonNull final PluginRegistry pluginRegistry,
-                              @NonNull final Context applicationContext) {
+    public AuroraCommunicator(@NonNull final Bus bus, @NonNull final Context applicationContext) {
         super(bus);
-        mPluginRegistry = pluginRegistry;
+
         mContext = applicationContext;
 
         // Register for incoming events
@@ -181,34 +172,6 @@ public class AuroraCommunicator extends Communicator {
         QueryCacheRequest request = new QueryCacheRequest(maxLength);
         mBus.post(request);
 
-    }
-
-    /**
-     * Gets a list of all the available plugins
-     *
-     * @param observer an observer containing code that will be executed when the list of plugins comes in
-     */
-    public void getListOfPlugins(@NonNull final Observer<List<Plugin>> observer) {
-        Observable<ListPluginsResponse> mListPluginsResponse
-                = this.mBus.register(ListPluginsResponse.class);
-
-        mListPluginsResponse
-                .map(ListPluginsResponse::getPlugins)
-                .take(1)
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(observer);
-
-        this.mBus.post(new ListPluginsRequest());
-    }
-
-    /**
-     * Registers a plugin in the pluginRegistry
-     *
-     * @param plugin the plugin metadata object
-     * @return true if the plugin was successfully saved in the plugin registry, false otherwise
-     */
-    public boolean registerPlugin(@NonNull final Plugin plugin) {
-        return mPluginRegistry.registerPlugin(plugin.getUniqueName(), plugin);
     }
 
     /**

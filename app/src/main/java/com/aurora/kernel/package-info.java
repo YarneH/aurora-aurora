@@ -23,10 +23,5 @@
  * This way, the other parts of the application are abstracted away for everyone, with the kernel
  * functioning as a decoupling link.
  * </p>
- *
- * <p>
- * Finally, the {@link com.aurora.kernel.PluginRegistry} is responsible for registering plugins
- * along with metadata about that plugin.
- * </p>
  */
 package com.aurora.kernel;
