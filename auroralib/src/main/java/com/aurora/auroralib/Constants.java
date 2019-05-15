@@ -40,7 +40,7 @@ public final class Constants {
     /**
      * Key used for the reason why a plugin failed
      */
-    public static final String PLUGIN_PROCESSING_FAILED_REASON = "reason";
+    public static final String PLUGIN_PROCESSING_FAILED_REASON = "PLUGIN_PROCESSING_FAILED_REASON";
 
     /**
      * Private constructor to prevent instantiation (the class only contains constants)

@@ -26,7 +26,7 @@ public class PluginFailedActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeButtonEnabled(true);
 
-        getSupportActionBar().setTitle("Something went wrong...");
+        getSupportActionBar().setTitle(R.string.something_went_wrong);
 
         Intent intentThatStartedActivity = getIntent();
 

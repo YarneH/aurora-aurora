@@ -63,6 +63,7 @@
     <string name="title_marketplugin_detail">MarketPlugin Detail</string>
     <string name="cached_file_not_found_processing_file">The cached file was not found. Processing file.</string>
     <string name="could_not_open_plugin">The plugin could not be opened.</string>
+    <string name="something_went_wrong">Something went wrong…</string>
 
     <!-- Service Permission -->
     <string name="service_permission_label">Aurora Services</string>
