@@ -78,7 +78,7 @@ public class BitmapListAdapter extends TypeAdapter {
      * @throws IOException on failing to read the param in
      */
     @Override
-    public Object read(JsonReader in) throws IOException {
+    public List<Bitmap> read(JsonReader in) throws IOException {
 
         List<Bitmap> bitmaps = new ArrayList<>();
 

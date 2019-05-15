@@ -1,6 +1,7 @@
 package com.aurora.auroralib;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
 import android.content.Intent;
 
 import com.aurora.auroralib.cache.CacheServiceCaller;
@@ -22,6 +23,7 @@ public abstract class ProcessorCommunicator {
     /**
      * A CacheServiceCaller for caching the processed file
      */
+    @SuppressWarnings("WeakerAccess")
     protected CacheServiceCaller mCacheServiceCaller;
 
     /**
@@ -32,14 +34,16 @@ public abstract class ProcessorCommunicator {
     /**
      * Creates a new instance of a ProcessorCommunicator.
      * Mind that this is an abstract class so no actual instances can be created. This is just to make sure that
-     * Communicators in the plugin have these arguments
+     * Communicators in the plugin have these arguments and that a {@link CacheServiceCaller} is
+     * instantiated
      *
      * @param mainPackageName The package name of the main activity in the plugin. It is important that the package name
      *                        is the one from the main activity (the one you see when the plugin opens).
      * @param context         an android context
      */
     @SuppressWarnings("unused")
-    public ProcessorCommunicator(String mainPackageName, Context context) {
+    public ProcessorCommunicator(@NonNull final String mainPackageName,
+                                 @NonNull final Context context) {
         mUniquePluginName = mainPackageName;
         mContext = context;
         mCacheServiceCaller = new CacheServiceCaller(context);
@@ -52,7 +56,9 @@ public abstract class ProcessorCommunicator {
      * @param extractedText The text that was extracted after Aurora's internal processing
      * @return The PluginObject that is the result of the plugin's processing of the extractedText
      */
-    protected abstract PluginObject process(ExtractedText extractedText) throws ProcessingFailedException;
+    @SuppressWarnings("WeakerAccess")
+    protected abstract PluginObject process(@NonNull final ExtractedText extractedText)
+            throws ProcessingFailedException;
 
 
     /**
@@ -63,8 +69,8 @@ public abstract class ProcessorCommunicator {
      * @return the PluginObject that is returned by {@link #process(ExtractedText)} or null if something
      * went wrong.
      */
-    @SuppressWarnings("unused")
-    public final PluginObject pipeline(ExtractedText extractedText) {
+    @SuppressWarnings({"unused", "WeakerAccess"})
+    public final PluginObject pipeline(@NonNull final ExtractedText extractedText) {
         try {
             PluginObject pluginObject = process(extractedText);
             ProcessorCacheThread processorCacheThread = new ProcessorCacheThread(pluginObject,
