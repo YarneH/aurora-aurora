@@ -2,6 +2,7 @@ package com.aurora.auroralib;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
+import android.content.Intent;
 
 import com.aurora.auroralib.cache.CacheServiceCaller;
 import com.aurora.auroralib.cache.ProcessorCacheThread;
@@ -56,7 +57,8 @@ public abstract class ProcessorCommunicator {
      * @return The PluginObject that is the result of the plugin's processing of the extractedText
      */
     @SuppressWarnings("WeakerAccess")
-    protected abstract PluginObject process(@NonNull final ExtractedText extractedText);
+    protected abstract PluginObject process(@NonNull final ExtractedText extractedText)
+            throws ProcessingFailedException;
 
 
     /**
@@ -64,15 +66,27 @@ public abstract class ProcessorCommunicator {
      * and then caching this
      *
      * @param extractedText the text extracted by aurora
-     * @return the PluginObject that is returned by {@link #process(ExtractedText)}.
+     * @return the PluginObject that is returned by {@link #process(ExtractedText)} or null if something
+     * went wrong.
      */
     @SuppressWarnings({"unused", "WeakerAccess"})
     public final PluginObject pipeline(@NonNull final ExtractedText extractedText) {
-        PluginObject pluginObject = process(extractedText);
-        ProcessorCacheThread processorCacheThread = new ProcessorCacheThread(pluginObject,
-                mCacheServiceCaller);
-        processorCacheThread.start();
-        return pluginObject;
+        try {
+            PluginObject pluginObject = process(extractedText);
+            ProcessorCacheThread processorCacheThread = new ProcessorCacheThread(pluginObject,
+                    mCacheServiceCaller);
+            processorCacheThread.start();
+            return pluginObject;
+        } catch (ProcessingFailedException e) {
+            // If processing failed, start intent to open activity in aurora
+            Intent intent = new Intent(Constants.PLUGIN_PROCESSING_FAILED_ACTION);
+            intent.putExtra(Constants.PLUGIN_PROCESSING_FAILED_REASON, e.getMessage());
+
+            mContext.startActivity(intent);
+        }
+
+        // If not yet returned, return null
+        return null;
     }
 
 }

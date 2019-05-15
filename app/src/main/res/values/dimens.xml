@@ -34,4 +34,7 @@
     <dimen name="market_text_input">18sp</dimen>
     <dimen name="market_plugin_logo">100sp</dimen>
     <dimen name="market_plugin_name">25sp</dimen>
+
+    <!-- Failed plugin -->
+    <dimen name="text_failed_plugin">20sp</dimen>
 </resources>

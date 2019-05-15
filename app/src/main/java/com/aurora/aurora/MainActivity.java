@@ -326,7 +326,6 @@ public class MainActivity extends AppCompatActivity
 
                     // Create intent to open file with a certain plugin
                     Intent pluginAction = new Intent(Constants.PLUGIN_ACTION);
-
                     pluginAction.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     pluginAction.setType("*/*");
 
