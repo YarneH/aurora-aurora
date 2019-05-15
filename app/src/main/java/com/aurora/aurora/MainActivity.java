@@ -42,7 +42,6 @@ import com.aurora.kernel.AuroraCommunicator;
 import com.aurora.kernel.ContextNullException;
 import com.aurora.kernel.Kernel;
 import com.aurora.market.ui.MarketPluginListActivity;
-import com.aurora.market.ui.PluginMarketViewModel;
 import com.aurora.plugin.InternalServices;
 import com.aurora.plugin.Plugin;
 import com.google.firebase.analytics.FirebaseAnalytics;
@@ -51,6 +50,7 @@ import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import io.reactivex.Observer;
 import io.reactivex.disposables.Disposable;
@@ -62,7 +62,7 @@ import io.reactivex.disposables.Disposable;
  * </a>
  * for more information.
  * onCreate is called when this activity is launched.
- * <br>
+ * <p>
  * Implements {@code NavigationView.OnNavigationItemSelectedListener} to listen to events
  * on the NavigationView.
  */
@@ -103,11 +103,6 @@ public class MainActivity extends AppCompatActivity
     private Toast mToast = null;
 
     /**
-     * Contains placeholder-text when swapping between views via the NavigationView.
-     */
-    private TextView mTextViewMain = null;
-
-    /**
      * Android view which is basically a scrollview, but efficiently
      * reuses the containers.
      * <br>
@@ -119,11 +114,6 @@ public class MainActivity extends AppCompatActivity
      * An instance of the {@link Kernel}.
      */
     private Kernel mKernel = null;
-
-    /**
-     * The ViewModel of the PluginMarket, containing the downloadable plugins
-     */
-    private PluginMarketViewModel mPluginMarket = null;
 
     /**
      * Delivers the communication between the environment and the Kernel.
@@ -192,7 +182,6 @@ public class MainActivity extends AppCompatActivity
         mNavigationView.getMenu().getItem(0).setChecked(true);
 
         /* Setup Main TextView */
-        mTextViewMain = findViewById(R.id.tv_main);
 
 
         /* Show TextView when RecyclerView is empty */
@@ -246,10 +235,10 @@ public class MainActivity extends AppCompatActivity
                 @Override
                 public void onNext(List<CachedFileInfo> cachedFileInfos) {
                     mCachedFileInfoList = cachedFileInfos;
-                    ((CardFileAdapter)mRecyclerView.getAdapter()).updateData(mCachedFileInfoList);
+                    ((CardFileAdapter) Objects.requireNonNull(mRecyclerView.getAdapter())).updateData(mCachedFileInfoList);
                     if (cachedFileInfos.isEmpty()) {
                         findViewById(R.id.cl_empty_text).setVisibility(View.VISIBLE);
-                    } else{
+                    } else {
                         findViewById(R.id.cl_empty_text).setVisibility(View.GONE);
                     }
                 }
@@ -366,21 +355,21 @@ public class MainActivity extends AppCompatActivity
     /**
      * Get all plugins on device and their info form their packageNames
      *
-     * @param packageNames  The packageNames of the plugins that where found using Intent querying
-     * @return              The list of plugins that were resolved
+     * @param packageNames The packageNames of the plugins that where found using Intent querying
+     * @return The list of plugins that were resolved
      */
-    private List<Plugin> getPlugins(List<String> packageNames){
+    private List<Plugin> getPlugins(List<String> packageNames) {
         List<Plugin> plugins = new ArrayList<>();
         PackageManager packageManager = getPackageManager();
 
-        for(String packageName : packageNames){
+        for (String packageName : packageNames) {
             // Get the ApplicationInfo and PackageInfo to get the attributes of the Plugin
             ApplicationInfo applicationInfo = null;
             PackageInfo packageInfo = null;
             try {
-                 applicationInfo = packageManager.getApplicationInfo(packageName,
-                         PackageManager.GET_META_DATA);
-                 packageInfo = packageManager.getPackageInfo(packageName, 0);
+                applicationInfo = packageManager.getApplicationInfo(packageName,
+                        PackageManager.GET_META_DATA);
+                packageInfo = packageManager.getPackageInfo(packageName, 0);
             } catch (final PackageManager.NameNotFoundException e) {
                 Log.e(LOG_TAG, "Package not found", e);
             }
@@ -394,28 +383,28 @@ public class MainActivity extends AppCompatActivity
     /**
      * Create a Plugin object with info obtained from a packageName
      *
-     * @param packageName name of the plugin's package
-     * @param applicationInfo          ApplicationInfo obtained for the package
-     * @param packageInfo          PackageInfo obtained for the package
-     * @param packageManager          A packageManager to resolve some final info
-     * @return
+     * @param packageName     name of the plugin's package
+     * @param applicationInfo ApplicationInfo obtained for the package
+     * @param packageInfo     PackageInfo obtained for the package
+     * @param packageManager  A packageManager to resolve some final info
+     * @return the plugin object created
      */
     private Plugin createPlugin(String packageName, ApplicationInfo applicationInfo,
-                                PackageInfo packageInfo, PackageManager packageManager){
+                                PackageInfo packageInfo, PackageManager packageManager) {
         // Create the Plugin object
         Plugin plugin;
         if (applicationInfo != null && packageInfo != null) {
             // Get the requested Internal Services for preprocessing
             List<InternalServices> internalServices = new ArrayList<>();
-            for (InternalServices internalService : InternalServices.values()){
+            for (InternalServices internalService : InternalServices.values()) {
                 if (applicationInfo.metaData != null &&
-                        applicationInfo.metaData.getBoolean(internalService.name())){
+                        applicationInfo.metaData.getBoolean(internalService.name())) {
                     internalServices.add(internalService);
                 }
             }
             // Get the version code without deprecation:
             int versionCode;
-            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.P){
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.P) {
                 versionCode = packageInfo.versionCode;
             } else {
                 versionCode = (int) packageInfo.getLongVersionCode();
@@ -424,7 +413,7 @@ public class MainActivity extends AppCompatActivity
             // Create the plugin
             plugin = new Plugin(packageName, (String) packageManager.getApplicationLabel(
                     applicationInfo), null, (String) applicationInfo.loadDescription(
-                            packageManager), versionCode, packageInfo.versionName, internalServices);
+                    packageManager), versionCode, packageInfo.versionName, internalServices);
         } else {
             plugin = new Plugin(packageName, packageName.substring(
                     packageName.lastIndexOf('.') + 1), null, null, 0, "");
@@ -434,11 +423,12 @@ public class MainActivity extends AppCompatActivity
 
 
     /**
+     * Shows the plugin picker dialog.
      *
-     * @param plugins       The plugins to be offered in the chooser dialog
-     * @param fileName      The name of the file to be opened
-     * @param type          The MIME type of the file to be opened
-     * @param readFile      An InputStream to the read file
+     * @param plugins  The plugins to be offered in the chooser dialog
+     * @param fileName The name of the file to be opened
+     * @param type     The MIME type of the file to be opened
+     * @param readFile An InputStream to the read file
      */
     private void showPluginAdapterAlertDialog(List<Plugin> plugins, String fileName, String type,
                                               InputStream readFile) {
@@ -449,12 +439,12 @@ public class MainActivity extends AppCompatActivity
         // Set adapter and define the onClickListener
         builder.setAdapter(new PluginAdapter(plugins, this), (
                 DialogInterface dialogInterface, int itemIndex) -> {
-                    if (plugins.get(itemIndex).getUniqueName() != null) {
-                        Plugin selectedPlugin = plugins.get(itemIndex);
-                        Log.i(LOG_TAG, "Selected Plugin: " + selectedPlugin.getUniqueName());
-                        mAuroraCommunicator.openFileWithPlugin(fileName, type, readFile,
-                                selectedPlugin);
-                    }
+            if (plugins.get(itemIndex).getUniqueName() != null) {
+                Plugin selectedPlugin = plugins.get(itemIndex);
+                Log.i(LOG_TAG, "Selected Plugin: " + selectedPlugin.getUniqueName());
+                mAuroraCommunicator.openFileWithPlugin(fileName, type, readFile,
+                        selectedPlugin);
+            }
         });
 
         builder.setCancelable(true);
@@ -466,16 +456,12 @@ public class MainActivity extends AppCompatActivity
     /**
      * Private helper method to extract the displayed filename from the Cursor combined with the
      * Uri.
-     *
      * <p>
      * This method is needed because files from for example Google Drive get an automatically
      * generated uri that does not contain the actual file name. This method allows to
      * extract the filename displayed in the Android file picker.
-     * </p>
-     *
      * <p>
      * To ensure uniqueness, a hash of the uri path will be prepended before the filename.
-     * </p>
      *
      * @param uri the Uri to get the displayed filename from
      * @return The displayed filename
@@ -535,14 +521,11 @@ public class MainActivity extends AppCompatActivity
     }
 
     /**
-     * <p>
      * Handles the selection of menu options in the AppBar (top bar).
-     * </p>
      * <p>
      * The action bar will automatically handle clicks on the Home/Up button, so long
      * as you specify a parent activity in AndroidManifest.xml.
      * The AppBar of this activity only has the search button.
-     * </p>
      *
      * @param item The selected menu item
      * @return Return false to allow normal menu processing to proceed, true to consume it here
@@ -579,14 +562,11 @@ public class MainActivity extends AppCompatActivity
     }
 
     /**
-     * <p>
      * Handles selection of options in NavigationView (Drawer layout).
-     * </p>
      * <p>
      * The NavigationView contains links to different screens.
      * Selecting one of these should navigate to the corresponding
      * view.
-     * </p>
      *
      * @param item Selected menu item.
      * @return whether or not successful.
@@ -602,9 +582,8 @@ public class MainActivity extends AppCompatActivity
         } else if (id == R.id.nav_plugin_market) {
             Intent intent = new Intent(MainActivity.this, MarketPluginListActivity.class);
             startActivity(intent);
-        } else {
-            // Home is selected, nothing to do here
-        }
+        }  // Home is selected, nothing to do here
+
 
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);

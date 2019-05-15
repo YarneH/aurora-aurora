@@ -1,6 +1,8 @@
 package com.aurora.kernel;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
+import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.util.Log;
 import android.widget.Toast;
@@ -21,6 +23,7 @@ import com.aurora.kernel.event.QueryCacheResponse;
 import com.aurora.kernel.event.RetrieveFileFromCacheRequest;
 import com.aurora.kernel.event.RetrieveFileFromCacheResponse;
 import com.aurora.plugin.Plugin;
+import com.google.firebase.analytics.FirebaseAnalytics;
 
 import java.io.InputStream;
 import java.util.List;
@@ -47,6 +50,10 @@ public class AuroraCommunicator extends Communicator {
      * The android application context
      */
     private Context mContext;
+    /**
+     * Keeps track of the starting timestamp of processing.
+     */
+    private long mStartTime;
 
     /**
      * Observable keeping track of events indicating that a document is not supported
@@ -82,13 +89,17 @@ public class AuroraCommunicator extends Communicator {
      * the text from the given file reference,
      * then it will send a request to let the plugin make the representation.
      *
-     * @param fileRef            a reference to the file that needs to be opened
-     * @param fileType           the file type
-     * @param file               the input stream of the file
-     * @param plugin             the plugin to open the file with.
+     * @param fileRef  a reference to the file that needs to be opened
+     * @param fileType the file type
+     * @param file     the input stream of the file
+     * @param plugin   the plugin to open the file with.
      */
+    @SuppressLint("CheckResult")
     public void openFileWithPlugin(String fileRef, String fileType, InputStream file,
                                    Plugin plugin) {
+
+        // mark starting time
+        mStartTime = System.currentTimeMillis();
 
         // Register observable
         Observable<InternalProcessorResponse> internalProcessorResponseObservable =
@@ -99,8 +110,14 @@ public class AuroraCommunicator extends Communicator {
         internalProcessorResponseObservable
                 .map(InternalProcessorResponse::getExtractedText)
                 .take(1)
-                .subscribe((ExtractedText extractedText) ->
-                                sendOpenFileRequest(extractedText, plugin.getUniqueName())
+                .subscribe((ExtractedText extractedText) -> {
+                            Bundle params = new Bundle();
+                            params.putInt("extracted_text_length", extractedText.toString().length());
+                            params.putLong("processing_time", System.currentTimeMillis() - mStartTime);
+                            FirebaseAnalytics.getInstance(mContext).logEvent("processing_performance", params);
+
+                            sendOpenFileRequest(extractedText, plugin.getUniqueName());
+                        }
                         , (Throwable e) ->
                                 Log.e(CLASS_TAG,
                                         "Something went wrong when receiving the internally processed file.", e)
@@ -115,14 +132,13 @@ public class AuroraCommunicator extends Communicator {
     }
 
 
-
-
     /**
      * Method to open an already cached file with the plugin
      *
      * @param fileRef          a reference to the file to open
      * @param uniquePluginName the name of the plugin that the file was processed with
      */
+    @SuppressLint("CheckResult")
     public void openFileWithCache(String fileRef, String uniquePluginName) {
         // Create observable to listen to
         Observable<RetrieveFileFromCacheResponse> retrieveFileFromCacheResponse =

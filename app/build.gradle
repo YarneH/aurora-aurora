@@ -103,7 +103,7 @@ dependencies {
     testImplementation group: 'org.apache.httpcomponents', name: 'httpclient', version: '4.5.6'
 
 
-    implementation 'com.google.firebase:firebase-core:16.0.1'
+    implementation 'com.google.firebase:firebase-core:16.0.9'
     implementation 'com.firebase:firebase-jobdispatcher:0.8.6'
 
     // CoreNLP
