@@ -31,16 +31,19 @@ public abstract class ProcessorCommunicator {
     protected Context mContext;
 
     /**
-     * Constructor for the ProcessorCommunicator, will also instantiate a
-     * {@link CacheServiceCaller}.
+     * Creates a new instance of a ProcessorCommunicator.
+     * Mind that this is an abstract class so no actual instances can be created. This is just to make sure that
+     * Communicators in the plugin have these arguments and that a {@link CacheServiceCaller} is
+     * instantiated
      *
-     * @param uniquePluginName NonNull unique name for the plugin
-     * @param context          NonNull context
+     * @param mainPackageName The package name of the main activity in the plugin. It is important that the package name
+     *                        is the one from the main activity (the one you see when the plugin opens).
+     * @param context         an android context
      */
     @SuppressWarnings("unused")
-    public ProcessorCommunicator(@NonNull final String uniquePluginName,
+    public ProcessorCommunicator(@NonNull final String mainPackageName,
                                  @NonNull final Context context) {
-        mUniquePluginName = uniquePluginName;
+        mUniquePluginName = mainPackageName;
         mContext = context;
         mCacheServiceCaller = new CacheServiceCaller(context);
     }

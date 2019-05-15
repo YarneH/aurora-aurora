@@ -103,11 +103,6 @@ public class MainActivity extends AppCompatActivity
     private Toast mToast = null;
 
     /**
-     * Contains placeholder-text when swapping between views via the NavigationView.
-     */
-    private TextView mTextViewMain = null;
-
-    /**
      * Android view which is basically a scrollview, but efficiently
      * reuses the containers.
      * <br>
@@ -148,6 +143,7 @@ public class MainActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
 
         /* Set up kernel */
         try {
@@ -192,7 +188,6 @@ public class MainActivity extends AppCompatActivity
         mNavigationView.getMenu().getItem(0).setChecked(true);
 
         /* Setup Main TextView */
-        mTextViewMain = findViewById(R.id.tv_main);
 
 
         /* Show TextView when RecyclerView is empty */
@@ -227,6 +222,13 @@ public class MainActivity extends AppCompatActivity
     protected void onResume() {
         super.onResume();
         refreshCachedFileInfoList();
+
+        if (mAuroraCommunicator.isLoading()) {
+            // Show loading screen if it was visible before.
+            findViewById(R.id.pb_extracting).setVisibility(View.VISIBLE);
+        } else {
+            findViewById(R.id.pb_extracting).setVisibility(View.GONE);
+        }
     }
 
     /**
@@ -246,10 +248,10 @@ public class MainActivity extends AppCompatActivity
                 @Override
                 public void onNext(List<CachedFileInfo> cachedFileInfos) {
                     mCachedFileInfoList = cachedFileInfos;
-                    ((CardFileAdapter)mRecyclerView.getAdapter()).updateData(mCachedFileInfoList);
+                    ((CardFileAdapter) mRecyclerView.getAdapter()).updateData(mCachedFileInfoList);
                     if (cachedFileInfos.isEmpty()) {
                         findViewById(R.id.cl_empty_text).setVisibility(View.VISIBLE);
-                    } else{
+                    } else {
                         findViewById(R.id.cl_empty_text).setVisibility(View.GONE);
                     }
                 }
@@ -366,21 +368,21 @@ public class MainActivity extends AppCompatActivity
     /**
      * Get all plugins on device and their info form their packageNames
      *
-     * @param packageNames  The packageNames of the plugins that where found using Intent querying
-     * @return              The list of plugins that were resolved
+     * @param packageNames The packageNames of the plugins that where found using Intent querying
+     * @return The list of plugins that were resolved
      */
-    private List<Plugin> getPlugins(List<String> packageNames){
+    private List<Plugin> getPlugins(List<String> packageNames) {
         List<Plugin> plugins = new ArrayList<>();
         PackageManager packageManager = getPackageManager();
 
-        for(String packageName : packageNames){
+        for (String packageName : packageNames) {
             // Get the ApplicationInfo and PackageInfo to get the attributes of the Plugin
             ApplicationInfo applicationInfo = null;
             PackageInfo packageInfo = null;
             try {
-                 applicationInfo = packageManager.getApplicationInfo(packageName,
-                         PackageManager.GET_META_DATA);
-                 packageInfo = packageManager.getPackageInfo(packageName, 0);
+                applicationInfo = packageManager.getApplicationInfo(packageName,
+                        PackageManager.GET_META_DATA);
+                packageInfo = packageManager.getPackageInfo(packageName, 0);
             } catch (final PackageManager.NameNotFoundException e) {
                 Log.e(LOG_TAG, "Package not found", e);
             }
@@ -394,28 +396,28 @@ public class MainActivity extends AppCompatActivity
     /**
      * Create a Plugin object with info obtained from a packageName
      *
-     * @param packageName name of the plugin's package
-     * @param applicationInfo          ApplicationInfo obtained for the package
-     * @param packageInfo          PackageInfo obtained for the package
-     * @param packageManager          A packageManager to resolve some final info
-     * @return
+     * @param packageName     name of the plugin's package
+     * @param applicationInfo ApplicationInfo obtained for the package
+     * @param packageInfo     PackageInfo obtained for the package
+     * @param packageManager  A packageManager to resolve some final info
+     * @return Plugin object
      */
     private Plugin createPlugin(String packageName, ApplicationInfo applicationInfo,
-                                PackageInfo packageInfo, PackageManager packageManager){
+                                PackageInfo packageInfo, PackageManager packageManager) {
         // Create the Plugin object
         Plugin plugin;
         if (applicationInfo != null && packageInfo != null) {
             // Get the requested Internal Services for preprocessing
             List<InternalServices> internalServices = new ArrayList<>();
-            for (InternalServices internalService : InternalServices.values()){
+            for (InternalServices internalService : InternalServices.values()) {
                 if (applicationInfo.metaData != null &&
-                        applicationInfo.metaData.getBoolean(internalService.name())){
+                        applicationInfo.metaData.getBoolean(internalService.name())) {
                     internalServices.add(internalService);
                 }
             }
             // Get the version code without deprecation:
             int versionCode;
-            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.P){
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.P) {
                 versionCode = packageInfo.versionCode;
             } else {
                 versionCode = (int) packageInfo.getLongVersionCode();
@@ -424,7 +426,7 @@ public class MainActivity extends AppCompatActivity
             // Create the plugin
             plugin = new Plugin(packageName, (String) packageManager.getApplicationLabel(
                     applicationInfo), null, (String) applicationInfo.loadDescription(
-                            packageManager), versionCode, packageInfo.versionName, internalServices);
+                    packageManager), versionCode, packageInfo.versionName, internalServices);
         } else {
             plugin = new Plugin(packageName, packageName.substring(
                     packageName.lastIndexOf('.') + 1), null, null, 0, "");
@@ -434,11 +436,10 @@ public class MainActivity extends AppCompatActivity
 
 
     /**
-     *
-     * @param plugins       The plugins to be offered in the chooser dialog
-     * @param fileName      The name of the file to be opened
-     * @param type          The MIME type of the file to be opened
-     * @param readFile      An InputStream to the read file
+     * @param plugins  The plugins to be offered in the chooser dialog
+     * @param fileName The name of the file to be opened
+     * @param type     The MIME type of the file to be opened
+     * @param readFile An InputStream to the read file
      */
     private void showPluginAdapterAlertDialog(List<Plugin> plugins, String fileName, String type,
                                               InputStream readFile) {
@@ -449,12 +450,14 @@ public class MainActivity extends AppCompatActivity
         // Set adapter and define the onClickListener
         builder.setAdapter(new PluginAdapter(plugins, this), (
                 DialogInterface dialogInterface, int itemIndex) -> {
-                    if (plugins.get(itemIndex).getUniqueName() != null) {
-                        Plugin selectedPlugin = plugins.get(itemIndex);
-                        Log.i(LOG_TAG, "Selected Plugin: " + selectedPlugin.getUniqueName());
-                        mAuroraCommunicator.openFileWithPlugin(fileName, type, readFile,
-                                selectedPlugin);
-                    }
+            if (plugins.get(itemIndex).getUniqueName() != null) {
+                Plugin selectedPlugin = plugins.get(itemIndex);
+                Log.i(LOG_TAG, "Selected Plugin: " + selectedPlugin.getUniqueName());
+                findViewById(R.id.pb_extracting).setVisibility(View.VISIBLE);
+                mAuroraCommunicator.openFileWithPlugin(fileName, type, readFile,
+                        selectedPlugin);
+                dialogInterface.cancel();
+            }
         });
 
         builder.setCancelable(true);
@@ -535,14 +538,11 @@ public class MainActivity extends AppCompatActivity
     }
 
     /**
-     * <p>
      * Handles the selection of menu options in the AppBar (top bar).
-     * </p>
      * <p>
      * The action bar will automatically handle clicks on the Home/Up button, so long
      * as you specify a parent activity in AndroidManifest.xml.
      * The AppBar of this activity only has the search button.
-     * </p>
      *
      * @param item The selected menu item
      * @return Return false to allow normal menu processing to proceed, true to consume it here
@@ -611,7 +611,11 @@ public class MainActivity extends AppCompatActivity
         return true;
     }
 
-
+    /**
+     * Shows the popup view for some info text.
+     *
+     * @param message Text to show
+     */
     private void showPopUpView(String message) {
         // Create a LayoutInflater which will create the view for the pop-up
         LayoutInflater inflater = LayoutInflater.from(this);
@@ -629,4 +633,5 @@ public class MainActivity extends AppCompatActivity
         // Create and show the pop-up
         alertDialogBuilder.create().show();
     }
+
 }
