@@ -43,7 +43,7 @@ pipeline {
                     // Analyze coverage info
                     jacoco sourcePattern: '**/src/*/java', 
                         classPattern: '**/classes/com/aurora', 
-                        exclusionPattern: '**/*Test*.class,  **/aurora/*.class, **/util/*.class, **/*ICache*, **/R.class, **/R$*.class, **/BuildConfig, **/src/test/, **/src/androidTest/'
+                        exclusionPattern: '**/*Test*.class,  **/aurora/*.class, **/market/**/*.class, **/util/*.class, **/*ICache*, **/R.class, **/R$*.class, **/BuildConfig, **/src/test/, **/src/androidTest/'
                 }
             }
 
@@ -109,8 +109,8 @@ pipeline {
 
                     // Analyze coverage info
                      jacoco sourcePattern: '**/src/*/java', 
-                        classPattern: '**/classes/com/aurora', 
-                        exclusionPattern: '**/*Test*.class,  **/aurora/*.class, **/util/*.class, **/ICache*, **/R.class, **/R$*.class, **/BuildConfig, **/src/test, **/src/androidTest'
+                        classPattern: '**/classes/com/aurora',
+                        exclusionPattern: '**/*Test*.class,  **/aurora/*.class, **/market/**/*.class, **/util/*.class, **/*ICache*, **/R.class, **/R$*.class, **/BuildConfig, **/src/test/, **/src/androidTest/'
                 }
             }
             post {
@@ -136,8 +136,8 @@ pipeline {
 
                     // Analyze coverage info
                     jacoco sourcePattern: '**/src/*/java', 
-                        classPattern: '**/classes/com/aurora', 
-                        exclusionPattern: '**/*Test*.class,  **/aurora/*.class, **/util/*.class, **/ICache*, **/R.class, **/R$*.class, **/BuildConfig, **/src/test/, **/src/androidTest/'
+                        classPattern: '**/classes/com/aurora',
+                        exclusionPattern: '**/*Test*.class,  **/aurora/*.class, **/market/**/*.class, **/util/*.class, **/*ICache*, **/R.class, **/R$*.class, **/BuildConfig, **/src/test/, **/src/androidTest/'
                 }
             }
             post {
