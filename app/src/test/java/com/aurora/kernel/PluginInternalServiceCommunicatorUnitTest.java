@@ -63,7 +63,7 @@ public class PluginInternalServiceCommunicatorUnitTest {
         mCommunicator = new PluginInternalServiceCommunicator(mBus, mInternalTextProcessor, new Translator(new FakeRequestQueue()));
 
         // Initialize extracted text with dummy contents
-        mExtractedText = new ExtractedText(mTitle, null, mParagraphs);
+        mExtractedText = new ExtractedText(mTitle, mParagraphs);
     }
 
     @Before
@@ -159,7 +159,7 @@ public class PluginInternalServiceCommunicatorUnitTest {
 
                 assert (section.getBodyAnnotation().equals(annotation));
             }
-            if(section.getTitle() != null) {
+            if(!section.getTitle().isEmpty()) {
                 Assert.assertNotNull(section.getTitleAnnotation());
 
                 Annotation annotation = new Annotation(section.getTitle());

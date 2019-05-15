@@ -49,15 +49,15 @@ public class InternalNLPUnitTest {
         // Annotate
         mInternalNLP.annotate(extractedText);
 
-        if(extractedText.getTitle() != null) {
+        if(!extractedText.getTitle().isEmpty()) {
             Assert.assertNotNull(extractedText.getTitleAnnotation());
         }
 
         for (Section section: extractedText.getSections()) {
-            if(section.getBody() != null) {
+            if(!section.getBody().isEmpty()) {
                 Assert.assertNotNull(section.getBodyAnnotation());
             }
-            if(section.getTitle() != null) {
+            if(!section.getTitle().isEmpty()) {
                 Assert.assertNotNull(section.getTitleAnnotation());
             }
         }
