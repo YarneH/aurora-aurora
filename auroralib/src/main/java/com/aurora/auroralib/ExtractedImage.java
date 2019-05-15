@@ -9,10 +9,22 @@ import android.util.Base64;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 
+/**
+ * Class representing an Image extracted from Files by Aurora. An ExtractedImage contains the
+ * base64 encode image and possibly a caption.
+ * <p>
+ * Use {@link #getBitmap()} to retrieve the bitmap of the image.
+ */
 public class ExtractedImage {
 
+    /**
+     * Base 64 encode image
+     */
     private String mBase64EncodedImage;
 
+    /**
+     * Caption of the image
+     */
     private String mCaption;
 
     /**

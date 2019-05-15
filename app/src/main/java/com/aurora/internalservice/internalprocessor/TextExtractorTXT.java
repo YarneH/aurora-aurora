@@ -22,7 +22,7 @@ public class TextExtractorTXT implements TextExtractor {
      */
     @Override
     public ExtractedText extract(InputStream file, String fileRef, boolean extractImages) {
-        ExtractedText extractedText = new ExtractedText(fileRef, null);
+        ExtractedText extractedText = new ExtractedText(fileRef);
         String content = extractStringFromTXT(file, fileRef);
         String[] splitContent = new String[0];
         if (content != null) {

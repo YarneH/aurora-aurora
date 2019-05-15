@@ -23,9 +23,17 @@
     <!-- Start screen -->
     <!-- This is the same as a default FloatingActionButton -->
     <dimen name="arrow_icon">56dp</dimen>
-    
+
     <!-- Search prompt values -->
     <dimen name="sp_padding">10dp</dimen>
+    <dimen name="app_bar_height">200dp</dimen>
+    <dimen name="item_width">200dp</dimen>
+    <dimen name="text_margin">16dp</dimen>
+
+    <!-- Plugin Market values -->
+    <dimen name="market_text_input">18sp</dimen>
+    <dimen name="market_plugin_logo">100sp</dimen>
+    <dimen name="market_plugin_name">25sp</dimen>
 
     <!-- Failed plugin -->
     <dimen name="text_failed_plugin">20sp</dimen>

@@ -1,12 +1,17 @@
 package com.aurora.aurora;
 
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.provider.OpenableColumns;
+import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -32,14 +37,23 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.aurora.auroralib.Constants;
+import com.aurora.internalservice.internalcache.CachedFileInfo;
 import com.aurora.kernel.AuroraCommunicator;
 import com.aurora.kernel.ContextNullException;
 import com.aurora.kernel.Kernel;
+import com.aurora.market.ui.MarketPluginListActivity;
+import com.aurora.market.ui.PluginMarketViewModel;
+import com.aurora.plugin.InternalServices;
 import com.aurora.plugin.Plugin;
 import com.google.firebase.analytics.FirebaseAnalytics;
 
 import java.io.FileNotFoundException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
+
+import io.reactivex.Observer;
+import io.reactivex.disposables.Disposable;
 
 /**
  * The main activity of the application, started when the app is opened.
@@ -52,8 +66,14 @@ import java.io.InputStream;
  * Implements {@code NavigationView.OnNavigationItemSelectedListener} to listen to events
  * on the NavigationView.
  */
+@SuppressWarnings("squid:S1200")
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
+    /**
+     * Tag for logging
+     */
+    private static final String LOG_TAG = MainActivity.class.getSimpleName();
+
 
     /**
      * Constant for radix of Integer.toString()
@@ -65,9 +85,16 @@ public class MainActivity extends AppCompatActivity
      * Chosen to be 1.
      */
     private static final int REQUEST_FILE_GET = 1;
-    private static final int ANIMATION_DURATION = 500;
-    private static final float END_POINT_OF_ANIMATION = 0.2f;
 
+    /**
+     * Constant for the duration of the pointing arrow animation
+     */
+    private static final int ANIMATION_DURATION = 500;
+
+    /**
+     * Constant for the position of the pointing arrow animation
+     */
+    private static final float END_POINT_OF_ANIMATION = 0.2F;
 
     /**
      * Toast that holds the dummy text after a file is searched for.
@@ -76,23 +103,22 @@ public class MainActivity extends AppCompatActivity
     private Toast mToast = null;
 
     /**
-     * Contains placeholder-text when swapping between views via the NavigationView.
-     */
-    private TextView mTextViewMain = null;
-
-    /**
      * Android view which is basically a scrollview, but efficiently
      * reuses the containers.
      * <br>
      * It contains all recently opened files.
      */
     private RecyclerView mRecyclerView = null;
-    private Context mContext = this;
 
     /**
      * An instance of the {@link Kernel}.
      */
     private Kernel mKernel = null;
+
+    /**
+     * The ViewModel of the PluginMarket, containing the downloadable plugins
+     */
+    private PluginMarketViewModel mPluginMarket = null;
 
     /**
      * Delivers the communication between the environment and the Kernel.
@@ -104,6 +130,11 @@ public class MainActivity extends AppCompatActivity
      */
     private FirebaseAnalytics mFirebaseAnalytics = null;
 
+    /**
+     * The list of cached files, which will be shown in the RecyclerView
+     */
+    private List<CachedFileInfo> mCachedFileInfoList = new ArrayList<>();
+
 
     /**
      * {@inheritDoc}
@@ -112,6 +143,7 @@ public class MainActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
 
         /* Set up kernel */
         try {
@@ -122,12 +154,14 @@ public class MainActivity extends AppCompatActivity
                     "The kernel was not initialized with a valid android application context", e);
         }
 
-        /*
-        Set up plugins
-        TODO: Now this is static, later the pluginmarket should register new plugins.
-         */
-        registerPlugins();
+        /* Setup RecyclerView */
+        mRecyclerView = findViewById(R.id.rv_files);
+        mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+        CardFileAdapter adapter = new CardFileAdapter(mKernel, this, mCachedFileInfoList);
+        mRecyclerView.setAdapter(adapter);
 
+        /* Get list of cached files */
+        refreshCachedFileInfoList();
 
         /* Initialize FirebaseAnalytics */
         mFirebaseAnalytics = FirebaseAnalytics.getInstance(this);
@@ -137,7 +171,7 @@ public class MainActivity extends AppCompatActivity
         setSupportActionBar(toolbar);
 
         /* The floating action button to add files */
-        FloatingActionButton fab = findViewById(R.id.fab);
+        FloatingActionButton fab = findViewById(R.id.fab_download_plugin);
         /* Implementation of adding files in onClick */
         fab.setOnClickListener(view -> selectFile());
 
@@ -154,13 +188,6 @@ public class MainActivity extends AppCompatActivity
         mNavigationView.getMenu().getItem(0).setChecked(true);
 
         /* Setup Main TextView */
-        mTextViewMain = findViewById(R.id.tv_main);
-
-        /* Setup RecyclerView */
-        mRecyclerView = findViewById(R.id.rv_files);
-        mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
-        CardFileAdapter adapter = new CardFileAdapter(mKernel, this);
-        mRecyclerView.setAdapter(adapter);
 
 
         /* Show TextView when RecyclerView is empty */
@@ -189,64 +216,62 @@ public class MainActivity extends AppCompatActivity
     }
 
     /**
-     * Helper method that register the plugins with their info in the pluginregistry
-     * TODO: when the pluginmarket is implemented, remove this method
+     * {@inheritDoc}
      */
-    private void registerPlugins() {
-        final Plugin basicPlugin = new Plugin(
-                "com.aurora.basicplugin",
-                "Basic Plugin",
-                null,
-                "Basic plugin to open any file and display extracted text.",
-                4,
-                "v0.4");
+    @Override
+    protected void onResume() {
+        super.onResume();
+        refreshCachedFileInfoList();
 
-        final Plugin souschefPlugin = new Plugin(
-                "com.aurora.souschef",
-                "Souschef",
-                null,
-                "Plugin to open recipes and display them in an enhanced way.",
-                4,
-                "v0.4");
-
-        final Plugin paperViewerPlugin = new Plugin(
-                "com.aurora.paperviewer",
-                "Paperviewer",
-                null,
-                "Plugin to open papers and display them in an enhanced way.",
-                4,
-                "v0.4");
-
-        // Register plugins in the registry
-        mAuroraCommunicator.registerPlugin(basicPlugin);
-        mAuroraCommunicator.registerPlugin(souschefPlugin);
-        mAuroraCommunicator.registerPlugin(paperViewerPlugin);
+        if (mAuroraCommunicator.isLoading()) {
+            // Show loading screen if it was visible before.
+            findViewById(R.id.pb_extracting).setVisibility(View.VISIBLE);
+        } else {
+            findViewById(R.id.pb_extracting).setVisibility(View.GONE);
+        }
     }
 
     /**
+     * Refresh the list of info of the cached files
+     */
+    private void refreshCachedFileInfoList() {
+        /* Get list of cached files */
+        if (mAuroraCommunicator != null) {
+            mAuroraCommunicator.getListOfCachedFiles(0, new Observer<List<CachedFileInfo>>() {
+                private Disposable mDisposable;
+
+                @Override
+                public void onSubscribe(Disposable d) {
+                    mDisposable = d;
+                }
+
+                @Override
+                public void onNext(List<CachedFileInfo> cachedFileInfos) {
+                    mCachedFileInfoList = cachedFileInfos;
+                    ((CardFileAdapter) mRecyclerView.getAdapter()).updateData(mCachedFileInfoList);
+                    if (cachedFileInfos.isEmpty()) {
+                        findViewById(R.id.cl_empty_text).setVisibility(View.VISIBLE);
+                    } else {
+                        findViewById(R.id.cl_empty_text).setVisibility(View.GONE);
+                    }
+                }
+
+                @Override
+                public void onError(Throwable e) {
+                    Log.e("MainActivity", "Error while trying to get the list of cached files", e);
+                }
+
+                @Override
+                public void onComplete() {
+                    mDisposable.dispose();
+                }
+            });
+        }
+    }
+
+
+    /**
      * Creates an intent to open the file manager.
-     * <p>
-     * Creates an intent to open the file manager.
-     * If more filetypes need to be opened, use a final String[].
-     * </p>
-     * <br>
-     * <p>
-     * For example: <br>
-     * final String[] ACCEPT_MIME_TYPES = {
-     * "application/pdf",
-     * "image/*"
-     * };
-     * </p>
-     * <br>
-     * <p>
-     * Intent intent = new Intent();
-     * <br>
-     * intent.setType("* / *");
-     * <br>
-     * intent.setAction(Intent.ACTION_GET_CONTENT);
-     * <br>
-     * intent.putExtra(Intent.EXTRA_MIME_TYPES,ACCEPT_MIME_TYPES);
-     * </p
      */
     protected void selectFile() {
         final String[] mimeTypes = {
@@ -301,27 +326,144 @@ public class MainActivity extends AppCompatActivity
 
                     // Create intent to open file with a certain plugin
                     Intent pluginAction = new Intent(Constants.PLUGIN_ACTION);
-                    // Create chooser to let user choose the plugin
-                    Intent chooser = Intent.createChooser(pluginAction, getString(R.string.select_plugin));
-                    mAuroraCommunicator.openFileWithPluginChooser(fileName, type,
-                            read, pluginAction, chooser, getApplicationContext());
-                    /*
-                    // For now hard coded constant
-                    String uniquePluginName = "com.aurora.basicplugin";
+                    pluginAction.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    pluginAction.setType("*/*");
 
-                    mAuroraCommunicator.openFileWithPlugin(textFile.toString(), type,
-                            read, uniquePluginName, getApplicationContext());
-                    */
+
+                    // Look for plugins that can answer the pluginAction
+                    PackageManager manager = getPackageManager();
+                    List<ResolveInfo> infos = manager.queryIntentActivities(pluginAction,
+                            PackageManager.MATCH_DEFAULT_ONLY);
+
+                    if (!infos.isEmpty()) {
+                        List<String> packageNames = new ArrayList<>();
+                        for (ResolveInfo info : infos) {
+                            Log.i(LOG_TAG,
+                                    "Found Plugin: " + info.activityInfo.packageName +
+                                            " - " + info.getIconResource());
+                            packageNames.add(info.activityInfo.packageName);
+                        }
+                        // Get a list of filled in Plugin objects
+                        List<Plugin> plugins = getPlugins(packageNames);
+                        // Show the chooser
+                        showPluginAdapterAlertDialog(plugins, fileName, type, read);
+
+                    } else {
+                        Log.i(LOG_TAG, "NO PLUGINS FOUND");
+                        showPopUpView("No plugins were found");
+                    }
+
 
                 } else {
                     showPopUpView("The selected file was null, please select another file!");
                 }
             } catch (FileNotFoundException e) {
                 showPopUpView("The file could not be found, please select another file!");
-                Log.e("FILE_NOT_FOUND", "The file could not be found", e);
+                Log.e(LOG_TAG, "The file could not be found", e);
             }
         }
     }
+
+    /**
+     * Get all plugins on device and their info form their packageNames
+     *
+     * @param packageNames The packageNames of the plugins that where found using Intent querying
+     * @return The list of plugins that were resolved
+     */
+    private List<Plugin> getPlugins(List<String> packageNames) {
+        List<Plugin> plugins = new ArrayList<>();
+        PackageManager packageManager = getPackageManager();
+
+        for (String packageName : packageNames) {
+            // Get the ApplicationInfo and PackageInfo to get the attributes of the Plugin
+            ApplicationInfo applicationInfo = null;
+            PackageInfo packageInfo = null;
+            try {
+                applicationInfo = packageManager.getApplicationInfo(packageName,
+                        PackageManager.GET_META_DATA);
+                packageInfo = packageManager.getPackageInfo(packageName, 0);
+            } catch (final PackageManager.NameNotFoundException e) {
+                Log.e(LOG_TAG, "Package not found", e);
+            }
+
+            plugins.add(createPlugin(packageName, applicationInfo, packageInfo, packageManager));
+        }
+
+        return plugins;
+    }
+
+    /**
+     * Create a Plugin object with info obtained from a packageName
+     *
+     * @param packageName     name of the plugin's package
+     * @param applicationInfo ApplicationInfo obtained for the package
+     * @param packageInfo     PackageInfo obtained for the package
+     * @param packageManager  A packageManager to resolve some final info
+     * @return Plugin object
+     */
+    private Plugin createPlugin(String packageName, ApplicationInfo applicationInfo,
+                                PackageInfo packageInfo, PackageManager packageManager) {
+        // Create the Plugin object
+        Plugin plugin;
+        if (applicationInfo != null && packageInfo != null) {
+            // Get the requested Internal Services for preprocessing
+            List<InternalServices> internalServices = new ArrayList<>();
+            for (InternalServices internalService : InternalServices.values()) {
+                if (applicationInfo.metaData != null &&
+                        applicationInfo.metaData.getBoolean(internalService.name())) {
+                    internalServices.add(internalService);
+                }
+            }
+            // Get the version code without deprecation:
+            int versionCode;
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.P) {
+                versionCode = packageInfo.versionCode;
+            } else {
+                versionCode = (int) packageInfo.getLongVersionCode();
+            }
+
+            // Create the plugin
+            plugin = new Plugin(packageName, (String) packageManager.getApplicationLabel(
+                    applicationInfo), null, (String) applicationInfo.loadDescription(
+                    packageManager), versionCode, packageInfo.versionName, internalServices);
+        } else {
+            plugin = new Plugin(packageName, packageName.substring(
+                    packageName.lastIndexOf('.') + 1), null, null, 0, "");
+        }
+        return plugin;
+    }
+
+
+    /**
+     * @param plugins  The plugins to be offered in the chooser dialog
+     * @param fileName The name of the file to be opened
+     * @param type     The MIME type of the file to be opened
+     * @param readFile An InputStream to the read file
+     */
+    private void showPluginAdapterAlertDialog(List<Plugin> plugins, String fileName, String type,
+                                              InputStream readFile) {
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        // Set title value.
+        builder.setTitle(getString(R.string.select_plugin));
+        // Set adapter and define the onClickListener
+        builder.setAdapter(new PluginAdapter(plugins, this), (
+                DialogInterface dialogInterface, int itemIndex) -> {
+            if (plugins.get(itemIndex).getUniqueName() != null) {
+                Plugin selectedPlugin = plugins.get(itemIndex);
+                Log.i(LOG_TAG, "Selected Plugin: " + selectedPlugin.getUniqueName());
+                findViewById(R.id.pb_extracting).setVisibility(View.VISIBLE);
+                mAuroraCommunicator.openFileWithPlugin(fileName, type, readFile,
+                        selectedPlugin);
+                dialogInterface.cancel();
+            }
+        });
+
+        builder.setCancelable(true);
+        builder.create();
+        builder.show();
+    }
+
 
     /**
      * Private helper method to extract the displayed filename from the Cursor combined with the
@@ -395,14 +537,11 @@ public class MainActivity extends AppCompatActivity
     }
 
     /**
-     * <p>
      * Handles the selection of menu options in the AppBar (top bar).
-     * </p>
      * <p>
      * The action bar will automatically handle clicks on the Home/Up button, so long
      * as you specify a parent activity in AndroidManifest.xml.
      * The AppBar of this activity only has the search button.
-     * </p>
      *
      * @param item The selected menu item
      * @return Return false to allow normal menu processing to proceed, true to consume it here
@@ -415,8 +554,8 @@ public class MainActivity extends AppCompatActivity
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_search) {
             // Create a LayoutInflater which will create the view for the pop-up
-            LayoutInflater li = LayoutInflater.from(this);
-            View promptView = li.inflate(R.layout.search_prompt, mRecyclerView, false);
+            LayoutInflater inflater = LayoutInflater.from(this);
+            View promptView = inflater.inflate(R.layout.search_prompt, mRecyclerView, false);
             final EditText userInput = promptView.findViewById(R.id.et_search_prompt);
 
             // Create a builder to build the actual alertdialog from the previous inflated view
@@ -451,38 +590,19 @@ public class MainActivity extends AppCompatActivity
      * @param item Selected menu item.
      * @return whether or not successful.
      */
-    @SuppressWarnings("StatementWithEmptyBody")
     @Override
-    public boolean onNavigationItemSelected(MenuItem item) {
+    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
-        // TODO: Remove string and boolean if all activities are implemented
-        // String for demo
-        String text = "";
-        boolean home = false;
-        if (id == R.id.nav_about_us) {
-            text = "About us";
-            // Change text and visibility (Used for demo)
-            mTextViewMain.setText(text);
-        } else if (id == R.id.nav_help_feedback) {
+        if (id == R.id.nav_help_feedback) {
             Intent intent = new Intent(MainActivity.this, FeedbackActivity.class);
             startActivity(intent);
-        } else if (id == R.id.nav_home) {
-            home = true;
+        } else if (id == R.id.nav_plugin_market) {
+            Intent intent = new Intent(MainActivity.this, MarketPluginListActivity.class);
+            startActivity(intent);
         } else {
-            text = "Settings";
-            // Change text and visibility (Used for demo)
-            mTextViewMain.setText(text);
-        }
-        if (home) {
-            //mRecyclerView.setVisibility(View.VISIBLE);
-            findViewById(R.id.cl_recycler_content).setVisibility(View.VISIBLE);
-            mTextViewMain.setVisibility(View.INVISIBLE);
-        } else {
-            //mRecyclerView.setVisibility(View.INVISIBLE);
-            findViewById(R.id.cl_recycler_content).setVisibility(View.INVISIBLE);
-            mTextViewMain.setVisibility(View.VISIBLE);
+            // Home is selected, nothing to do here
         }
 
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
@@ -490,11 +610,15 @@ public class MainActivity extends AppCompatActivity
         return true;
     }
 
-
+    /**
+     * Shows the popup view for some info text.
+     *
+     * @param message Text to show
+     */
     private void showPopUpView(String message) {
         // Create a LayoutInflater which will create the view for the pop-up
-        LayoutInflater li = LayoutInflater.from(this);
-        View promptView = li.inflate(R.layout.popup_card, mRecyclerView, false);
+        LayoutInflater inflater = LayoutInflater.from(this);
+        View promptView = inflater.inflate(R.layout.popup_card, mRecyclerView, false);
 
         // Set the message of the TextView
         TextView messageText = promptView.findViewById(R.id.tv_message);
@@ -503,9 +627,10 @@ public class MainActivity extends AppCompatActivity
         // Create a builder to build the actual alertdialog from the previous inflated view
         AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
         alertDialogBuilder.setView(promptView);
-        alertDialogBuilder.setCancelable(false);
+        alertDialogBuilder.setCancelable(true);
 
         // Create and show the pop-up
         alertDialogBuilder.create().show();
     }
+
 }

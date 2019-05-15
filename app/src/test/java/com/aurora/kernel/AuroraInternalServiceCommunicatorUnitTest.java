@@ -15,12 +15,15 @@ import com.aurora.kernel.event.RemoveFromCacheRequest;
 import com.aurora.kernel.event.RemoveFromCacheResponse;
 import com.aurora.kernel.event.RetrieveFileFromCacheRequest;
 import com.aurora.kernel.event.RetrieveFileFromCacheResponse;
+import com.aurora.kernel.event.UpdateCachedFileDateRequest;
 import com.aurora.util.MockContext;
 
+import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import io.reactivex.Observable;
@@ -200,10 +203,31 @@ public class AuroraInternalServiceCommunicatorUnitTest {
         testObserver.dispose();
     }
 
+    @Test
+    public void AuroraInternalServiceCommunicator_shouldUpdateDateOnRequest() {
+        Assert.assertFalse(((DummyInternalCache) mInternalCache).isDateCalled());
+
+        // Create request on the bus
+        UpdateCachedFileDateRequest request =
+                new UpdateCachedFileDateRequest("fileRef", "com.aurora.dummyplugin", new Date());
+        mBus.post(request);
+
+        // Check if the method was called
+        Assert.assertTrue(((DummyInternalCache) mInternalCache).isDateCalled());
+
+        // Set false again
+        ((DummyInternalCache) mInternalCache).setDateCalled(false);
+    }
+
     /**
      * Dummy class with stub implementations for the cache
      */
     private static class DummyInternalCache extends InternalCache {
+        /**
+         * variable indicating if the method was called
+         */
+        private boolean dateCalled = false;
+
         /**
          * Creates an instance of the internal cache
          *
@@ -252,6 +276,20 @@ public class AuroraInternalServiceCommunicatorUnitTest {
         @Override
         public boolean clear() {
             return true;
+        }
+
+        @Override
+        public void updateCachedFileDate(@NonNull final String fileRef, @NonNull final String uniquePluginName,
+                                         @NonNull final Date date) {
+            dateCalled = true;
+        }
+
+        public boolean isDateCalled() {
+            return dateCalled;
+        }
+
+        public void setDateCalled(boolean dateCalled) {
+            this.dateCalled = dateCalled;
         }
     }
 

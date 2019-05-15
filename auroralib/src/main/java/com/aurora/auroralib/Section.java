@@ -84,10 +84,10 @@ public class Section {
 
         // Deep copy of objects
         ProtobufAnnotationSerializer annotationSerializer = new ProtobufAnnotationSerializer(true);
-        if(mBodyAnnotationProto != null) {
+        if(section.getBodyAnnotation() != null) {
             mBodyAnnotationProto = annotationSerializer.toProto(section.getBodyAnnotation());
         }
-        if(mTitleAnnotationProto != null) {
+        if(section.getTitleAnnotation() != null) {
             mTitleAnnotationProto = annotationSerializer.toProto(section.getTitleAnnotation());
         }
 

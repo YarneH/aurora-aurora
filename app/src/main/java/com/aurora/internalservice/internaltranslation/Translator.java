@@ -18,7 +18,12 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 
-public final class Translator implements InternalService {
+/**
+ * A class that responds to translation requests by creating a url to use the Google Translate API and sending this
+ * url via a {@link RequestQueue}. The core function to be called after receiving a translation request is
+ * {@link #translate(TranslationRequest)}
+ */
+public class Translator implements InternalService {
 
     /**
      * A static variable for accessing the google API service, it is the beginning of the url that
@@ -49,7 +54,7 @@ public final class Translator implements InternalService {
     /**
      * A lock for parallel programming
      */
-    private final Object lock = new Object();
+    private final Object mLock = new Object();
     /**
      * A queue to post http requests to
      */
@@ -59,6 +64,11 @@ public final class Translator implements InternalService {
      * The most recent mInternalResponse received from the queue
      */
     private TranslationResponse mInternalResponse;
+
+    /**
+     * The tag of this class for logging purposes
+     */
+    private final String LOG_TAG = Translator.class.getSimpleName();
 
     public Translator(RequestQueue requestQueue) {
 
@@ -78,24 +88,24 @@ public final class Translator implements InternalService {
         try {
             String url = makeUrl(request.getSentencesToTranslate(), request.getSourceLanguage(),
                     request.getTargetLanguage());
-            Log.d("TRANSLATE", url);
+
             // Request a json mInternalResponse from the provided URL.
             JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET, url,
                     null, this::evaluateResponse, this::evaluateResponse);
             jsonObjectRequest.setTag("TRANSLATOR");
 
             mRequestQueue.add(jsonObjectRequest);
-            Log.d("TRANSLATE", "request added");
+            Log.i(LOG_TAG, "request added");
         } catch (IOException e) {
-            Log.e("TRANSLATION", "Translation failed", e);
+            Log.e(LOG_TAG, "Translation failed", e);
             evaluateResponse(e);
         }
-        // either the request is added or an error response will be created so wait untill a response
+        // either the request is added or an error response will be created so wait until a response
         // is made
-        synchronized (lock) {
+        synchronized (mLock) {
             while (mInternalResponse == null) {
                 try {
-                    lock.wait();
+                    mLock.wait();
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
                 }
@@ -155,12 +165,12 @@ public final class Translator implements InternalService {
     private void evaluateResponse(JSONObject response) {
 
         try {
-            synchronized (lock) {
+            synchronized (mLock) {
                 this.mInternalResponse = Translator.getTranslationResponse(response);
-                lock.notifyAll();
+                mLock.notifyAll();
             }
         } catch (JSONException e) {
-            Log.e("JSON", "getting from json failed", e);
+            Log.e(LOG_TAG, "getting from json failed", e);
             evaluateResponse(e);
         }
 
@@ -173,9 +183,9 @@ public final class Translator implements InternalService {
      * @param error the reason why the translation failed
      */
     private void evaluateResponse(Exception error) {
-        synchronized (lock) {
+        synchronized (mLock) {
             mInternalResponse = new TranslationResponse(error.getMessage());
-            lock.notifyAll();
+            mLock.notifyAll();
         }
     }
 

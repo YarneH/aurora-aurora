@@ -29,7 +29,11 @@ public class TextExtractorPDFUnitTest {
         File file = new File(mfileRef);
         InputStream inputStream = new FileInputStream(file);
         // Extract the text
-        mExtractedText = textExtractorPDF.extract(inputStream, mfileRef, false);
+        try {
+            mExtractedText = textExtractorPDF.extract(inputStream, mfileRef, false);
+        } catch (DocumentNotSupportedException e) {
+            e.printStackTrace();
+        }
     }
 
     @Test

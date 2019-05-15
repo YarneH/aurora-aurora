@@ -15,7 +15,7 @@ public class CacheFileRequest implements Event {
     /**
      * The processed text to be cached
      */
-    private String mPluginObject;
+    private String mPluginObjectJson;
 
     /**
      * The unique name of the plugin that built the representation of the text
@@ -32,7 +32,7 @@ public class CacheFileRequest implements Event {
      */
     public CacheFileRequest(String fileRef, String pluginObject, String uniquePluginName) {
         mFileRef = fileRef;
-        mPluginObject = pluginObject;
+        mPluginObjectJson = pluginObject;
         mUniquePluginName = uniquePluginName;
     }
 
@@ -47,7 +47,7 @@ public class CacheFileRequest implements Event {
      * @return a json representation containing the processed contents of the file
      */
     public String getPluginObject() {
-        return mPluginObject;
+        return mPluginObjectJson;
     }
 
     /**

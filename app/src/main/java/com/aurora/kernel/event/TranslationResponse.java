@@ -2,7 +2,6 @@ package com.aurora.kernel.event;
 
 /**
  * Response to {@link TranslationRequest}.
- * // TODO subscribe to this event
  */
 public class TranslationResponse implements Event {
 

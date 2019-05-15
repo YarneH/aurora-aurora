@@ -14,8 +14,10 @@ import com.aurora.kernel.event.RemoveFromCacheRequest;
 import com.aurora.kernel.event.RemoveFromCacheResponse;
 import com.aurora.kernel.event.RetrieveFileFromCacheRequest;
 import com.aurora.kernel.event.RetrieveFileFromCacheResponse;
+import com.aurora.kernel.event.UpdateCachedFileDateRequest;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import io.reactivex.Observable;
@@ -50,9 +52,14 @@ public class AuroraInternalServiceCommunicator extends Communicator {
     private Observable<RetrieveFileFromCacheRequest> mRetrieveFileFromCacheRequestObservable;
 
     /**
-     * Observable keeping track of incoming request to remove files from the cache
+     * Observable keeping track of incoming requests to remove files from the cache
      */
     private Observable<RemoveFromCacheRequest> mRemoveFromCacheRequestObservable;
+
+    /**
+     * Observable keeping track of incoming requests to update the lastOpenedDate of files in the cache
+     */
+    private Observable<UpdateCachedFileDateRequest> mUpdateCachedFileDateRequestObservable;
 
     /**
      * Creates an AuroraInternalServiceCommunicator. There should be only one instance at a time
@@ -106,6 +113,13 @@ public class AuroraInternalServiceCommunicator extends Communicator {
                 removeFileFromCache(request.getFileRef(), request.getUniquePluginName());
             }
         });
+
+        // Subscribe to incoming requests to update the date of files
+        mUpdateCachedFileDateRequestObservable = mBus.register(UpdateCachedFileDateRequest.class);
+
+        // Call appropriate method when request comes in
+        mUpdateCachedFileDateRequestObservable.subscribe(request -> updateDate(request.getFileRef(),
+                request.getUniquePluginName(), request.getNewDate()));
     }
 
     /**
@@ -222,5 +236,16 @@ public class AuroraInternalServiceCommunicator extends Communicator {
         // Create response and post on bus
         RemoveFromCacheResponse response = new RemoveFromCacheResponse(success);
         mBus.post(response);
+    }
+
+    /**
+     * Updates the date (to now) of a file if it is in the cache
+     *
+     * @param fileRef          a reference to the originally processed file
+     * @param uniquePluginName the name of the plugin that the file was processed with
+     */
+    private void updateDate(@NonNull final String fileRef, @NonNull final String uniquePluginName,
+                            @NonNull final Date newDate) {
+        mInternalCache.updateCachedFileDate(fileRef, uniquePluginName, newDate);
     }
 }

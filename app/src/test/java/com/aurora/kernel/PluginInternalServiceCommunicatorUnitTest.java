@@ -1,8 +1,8 @@
 package com.aurora.kernel;
 
-import com.android.volley.RequestQueue;
 import com.aurora.auroralib.ExtractedText;
 import com.aurora.auroralib.Section;
+import com.aurora.internalservice.internalprocessor.DocumentNotSupportedException;
 import com.aurora.internalservice.internalprocessor.FileTypeNotSupportedException;
 import com.aurora.internalservice.internalprocessor.InternalTextProcessor;
 import com.aurora.internalservice.internaltranslation.Translator;
@@ -11,13 +11,11 @@ import com.aurora.kernel.event.InternalProcessorResponse;
 import com.aurora.plugin.InternalServices;
 import com.aurora.plugin.Plugin;
 import com.aurora.util.FakeRequestQueue;
-import com.aurora.util.MockContext;
 
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.File;
@@ -225,7 +223,7 @@ public class PluginInternalServiceCommunicatorUnitTest {
          */
         @Override
         public ExtractedText processFile(InputStream file, String fileRef, String type,
-                                         boolean extractImages) throws FileTypeNotSupportedException {
+                                         boolean extractImages) throws FileTypeNotSupportedException, DocumentNotSupportedException {
             // Just return the dummy extracted text
             mExtractedText = super.processFile(file, fileRef, type, extractImages);
             return mExtractedText;
