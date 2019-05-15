@@ -37,4 +37,7 @@
     <dimen name="market_plugin_logo">100sp</dimen>
     <dimen name="market_plugin_name">25sp</dimen>
     <dimen name="pb_download">40dp</dimen>
+
+    <!-- Failed plugin -->
+    <dimen name="text_failed_plugin">20sp</dimen>
 </resources>

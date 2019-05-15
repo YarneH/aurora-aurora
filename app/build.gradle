@@ -98,7 +98,7 @@ dependencies {
     implementation files('libs/poishadow-all.jar')
 
     //Translation
-    implementation  'com.android.volley:volley:1.1.1'
+    implementation 'com.android.volley:volley:1.1.1'
     // mocking in tests
     testImplementation group: 'org.apache.httpcomponents', name: 'httpclient', version: '4.5.6'
 
@@ -112,7 +112,6 @@ dependencies {
         exclude group: 'com.sun.xml.bind'
     }
     implementation files('libs/stanford-corenlp-3.9.2-models.jar-small')
-
 
 
 }

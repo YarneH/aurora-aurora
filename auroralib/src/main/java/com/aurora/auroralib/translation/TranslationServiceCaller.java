@@ -122,7 +122,7 @@ public class TranslationServiceCaller extends ServiceCaller {
     }
 
     /**
-     * A private thread class that will translate the senteces in another thread to avoid blocking
+     * A private thread class that will translate the sentences in another thread to avoid blocking
      * of the main thread
      */
     private class TranslateThread extends Thread {

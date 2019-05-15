@@ -129,7 +129,7 @@ public class TextExtractorDOCX implements TextExtractor {
         String formatted = run.trim();
 
         // First text line is always a title for simplicity
-        if(mExtractedText.getTitle() == null && !formatted.isEmpty()) {
+        if(mExtractedText.getTitle().isEmpty() && !formatted.isEmpty()) {
             mExtractedText.setTitle(formatted);
 
             // The title section contains extractedImages, add them to their own section.
@@ -177,7 +177,7 @@ public class TextExtractorDOCX implements TextExtractor {
 
             // If its empty, flush the previous section (if it has body or extractedImages)
             if(formatted.isEmpty() && mSectionInProgress != null &&
-                    (mSectionInProgress.getBody()!=null || !mSectionInProgress.getExtractedImages().isEmpty())) {
+                    (!mSectionInProgress.getBody().isEmpty() || !mSectionInProgress.getExtractedImages().isEmpty())) {
                 mSectionInProgress.addExtractedImages(extractedImages);
                 mExtractedText.addSection(mSectionInProgress);
                 mSectionInProgress = null;
@@ -245,7 +245,7 @@ public class TextExtractorDOCX implements TextExtractor {
                 XWPFRun currentRun = (XWPFRun) run;
 
                 //Loop over all breaks and tabs. This certainly signifies the end of a section.
-                for (String text: currentRun.text().split("(?<=\n|\t)")) {
+                for (String text: currentRun.text().split("(?<=[\n\t])")) {
                     // A section ends with a tab or an newline.
                     if((text.endsWith("\t") || text.endsWith("\n"))) {
                         if(textInProgress != null) {
