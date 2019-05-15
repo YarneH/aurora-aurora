@@ -124,14 +124,30 @@ public class CardFileAdapter extends RecyclerView.Adapter<CardFileAdapter.CardFi
      */
     public class CardFileViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener,
             View.OnLongClickListener {
-        /* UI related objects */
+        /**
+         * The Title TextView
+         */
         private TextView mTitleTextView;
+        /**
+         * The TextView showing the date on which the file was last opend
+         */
         private TextView mLastOpenedTextView;
+        /**
+         * The complete card of the current file
+         */
         private CardView mCardView;
+        /**
+         * The ImageView showing the icon of the plugin
+         */
         private ImageView mIconImageView;
 
-        /* Data related objects */
+        /**
+         * The index of the current file
+         */
         private int index;
+        /**
+         * The CachedFileInfo about the current file
+         */
         private CachedFileInfo mCachedFileInfo;
 
         /**

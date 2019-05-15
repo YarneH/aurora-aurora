@@ -10,13 +10,15 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Scanner;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * These utilities will be used to communicate with the weather servers.
  */
 final class NetworkUtils {
+    /**
+     * The tag used for Logs
+     */
+    private static final String LOG_TAG = NetworkUtils.class.getSimpleName();
     /**
      * The URL to the list of MarketPlugins
      */
@@ -39,7 +41,7 @@ final class NetworkUtils {
         try {
             return new URL(PLUGINLIST_URL);
         } catch (MalformedURLException e) {
-            Logger.getLogger("NetworkUtils").log(Level.SEVERE, null, e);
+            Log.e(LOG_TAG, "exception", e);
         }
         return null;
     }
