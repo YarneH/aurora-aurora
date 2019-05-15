@@ -55,6 +55,7 @@ public abstract class ProcessorCommunicator {
      *
      * @param extractedText The text that was extracted after Aurora's internal processing
      * @return The PluginObject that is the result of the plugin's processing of the extractedText
+     * @throws ProcessingFailedException when the processing fails for whatever reason, this exception should be thrown
      */
     @SuppressWarnings("WeakerAccess")
     protected abstract PluginObject process(@NonNull final ExtractedText extractedText)
