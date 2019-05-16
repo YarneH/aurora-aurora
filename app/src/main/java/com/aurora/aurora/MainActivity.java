@@ -516,59 +516,6 @@ public class MainActivity extends AppCompatActivity
     }
 
     /**
-     * Inflate the menu; this adds items to the action bar if it is present.
-     *
-     * @param menu The menu item that should be inflated.
-     * @return boolean whether or not successful.
-     */
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.main, menu);
-        return true;
-    }
-
-    /**
-     * Handles the selection of menu options in the AppBar (top bar).
-     * <p>
-     * The action bar will automatically handle clicks on the Home/Up button, so long
-     * as you specify a parent activity in AndroidManifest.xml.
-     * The AppBar of this activity only has the search button.
-     *
-     * @param item The selected menu item
-     * @return Return false to allow normal menu processing to proceed, true to consume it here
-     */
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // get the id of the selected item.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_search) {
-            // Create a LayoutInflater which will create the view for the pop-up
-            LayoutInflater inflater = LayoutInflater.from(this);
-            View promptView = inflater.inflate(R.layout.search_prompt, mRecyclerView, false);
-            final EditText userInput = promptView.findViewById(R.id.et_search_prompt);
-
-            // Create a builder to build the actual alertdialog from the previous inflated view
-            AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
-            alertDialogBuilder.setView(promptView);
-            alertDialogBuilder.setCancelable(true)
-                    .setPositiveButton("Ok", (DialogInterface dialogInterface, int i) -> {
-                        // Toast for demo
-                        if (mToast != null) {
-                            mToast.cancel();
-                        }
-                        mToast = Toast.makeText(MainActivity.this, "Search for "
-                                + userInput.getText().toString(), Toast.LENGTH_SHORT);
-                        mToast.show();
-                    });
-            // Create and show the pop-up
-            alertDialogBuilder.create().show();
-        }
-        return super.onOptionsItemSelected(item);
-    }
-
-    /**
      * Handles selection of options in NavigationView (Drawer layout).
      * <p>
      * The NavigationView contains links to different screens.
