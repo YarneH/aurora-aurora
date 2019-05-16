@@ -12,7 +12,7 @@ public class ExtractedImageUnitTest {
 
     @Test
     public void ExtractedImage_getters_shouldNotReturnNull() throws IOException {
-        File image1 =  new File("src\\test\\java\\com\\aurora\\auroralib\\testimage1.png");
+        File image1 =  new File("src/test/java/com/aurora/auroralib/testimage1.png");
         String encodedImage1 = Base64.getEncoder().encodeToString(Files.readAllBytes(image1.toPath()));
         ExtractedImage image = new ExtractedImage(encodedImage1);
 

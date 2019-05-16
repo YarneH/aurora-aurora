@@ -27,12 +27,12 @@ public class ExtractedTextUnitTest {
 
     @BeforeClass
     public static void setup() throws IOException {
-        File image1 =  new File("src\\test\\java\\com\\aurora\\auroralib\\testimage1.png");
+        File image1 =  new File("src/test/java/com/aurora/auroralib/testimage1.png");
         String encodedImage1 = Base64.getEncoder().encodeToString(Files.readAllBytes(image1.toPath()));
         ExtractedImage extractedImage1 = new ExtractedImage(encodedImage1);
         section1.addExtractedImage(extractedImage1);
 
-        File image2 =  new File("src\\test\\java\\com\\aurora\\auroralib\\testimage2.png");
+        File image2 =  new File("src/test/java/com/aurora/auroralib/testimage2.png");
         String encodedImage2 =
                 Base64.getEncoder().encodeToString(Files.readAllBytes(image2.toPath()));
         ExtractedImage extractedImage2 = new ExtractedImage(encodedImage1);
