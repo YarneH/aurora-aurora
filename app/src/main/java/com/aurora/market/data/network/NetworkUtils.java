@@ -23,7 +23,7 @@ final class NetworkUtils {
      * The URL to the list of MarketPlugins
      */
     private static final String PLUGINLIST_URL =
-            "http://pluginmarket.aurora-files.ml/plugin";
+            "https://pluginmarket.aurora-files.ml/plugin";
 
 
     /**
