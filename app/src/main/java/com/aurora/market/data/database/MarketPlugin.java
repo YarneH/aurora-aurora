@@ -59,6 +59,10 @@ public class MarketPlugin implements Serializable {
         this.mCreator = creator;
     }
 
+    /**
+     * Default getter
+     * @return the logo of the MarketPlugin
+     */
     public Bitmap getLogo() {
         if (mLogo != null) {
             return BitmapFactory.decodeByteArray(mLogo, 0, mLogo.length);
@@ -67,22 +71,42 @@ public class MarketPlugin implements Serializable {
         }
     }
 
+    /**
+     * Default getter
+     * @return the logo of the MarketPlugin
+     */
     public String getDescription() {
         return mDescription;
     }
 
+    /**
+     * Default getter
+     * @return the plugin name of the MarketPlugin
+     */
     public String getPluginName() {
         return mPluginName;
     }
 
+    /**
+     * Default getter
+     * @return the downloadlink of the MarketPlugin, as URL
+     */
     public URL getDownloadLink() {
         return mDownloadLink;
     }
 
+    /**
+     * Default getter
+     * @return the name of the creator of the MarketPlugin
+     */
     public String getCreator() {
         return mCreator;
     }
 
+    /**
+     * Default getter
+     * @return the versioncode of the MarketPlugin
+     */
     public String getVersion() {
         return mVersion;
     }

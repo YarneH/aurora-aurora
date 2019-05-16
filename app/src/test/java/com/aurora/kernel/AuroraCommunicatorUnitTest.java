@@ -77,11 +77,12 @@ public class AuroraCommunicatorUnitTest {
 
     @Test
     public void AuroraCommunicator_openFileWithPlugin_shouldSendOpenFileWithPluginRequestAfterExtractingText() {
+
         // Create observable of internal processor request
         Observable<InternalProcessorRequest> internalProcessorRequestObservable = sBus.register(InternalProcessorRequest.class);
 
         // Subscribe to observable to send response event
-        ExtractedText dummyExtractedText = new ExtractedText("Bla", null, Arrays.asList("Dummy", "Paragraph"));
+        ExtractedText dummyExtractedText = new ExtractedText("Bla", Arrays.asList("Dummy", "Paragraph"));
         Disposable internalProccessorRequestDisposable =
                 internalProcessorRequestObservable.subscribe(internalProcessorRequest ->
                         sBus.post(new InternalProcessorResponse(dummyExtractedText)));

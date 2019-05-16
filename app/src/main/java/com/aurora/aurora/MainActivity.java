@@ -24,14 +24,12 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.LinearInterpolator;
 import android.view.animation.TranslateAnimation;
 import android.webkit.MimeTypeMap;
-import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -42,7 +40,6 @@ import com.aurora.kernel.AuroraCommunicator;
 import com.aurora.kernel.ContextNullException;
 import com.aurora.kernel.Kernel;
 import com.aurora.market.ui.MarketPluginListActivity;
-import com.aurora.market.ui.PluginMarketViewModel;
 import com.aurora.plugin.InternalServices;
 import com.aurora.plugin.Plugin;
 import com.google.firebase.analytics.FirebaseAnalytics;
@@ -51,6 +48,7 @@ import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import io.reactivex.Observer;
 import io.reactivex.disposables.Disposable;
@@ -62,7 +60,7 @@ import io.reactivex.disposables.Disposable;
  * </a>
  * for more information.
  * onCreate is called when this activity is launched.
- * <br>
+ * <p>
  * Implements {@code NavigationView.OnNavigationItemSelectedListener} to listen to events
  * on the NavigationView.
  */
@@ -114,11 +112,6 @@ public class MainActivity extends AppCompatActivity
      * An instance of the {@link Kernel}.
      */
     private Kernel mKernel = null;
-
-    /**
-     * The ViewModel of the PluginMarket, containing the downloadable plugins
-     */
-    private PluginMarketViewModel mPluginMarket = null;
 
     /**
      * Delivers the communication between the environment and the Kernel.
@@ -248,7 +241,8 @@ public class MainActivity extends AppCompatActivity
                 @Override
                 public void onNext(List<CachedFileInfo> cachedFileInfos) {
                     mCachedFileInfoList = cachedFileInfos;
-                    ((CardFileAdapter) mRecyclerView.getAdapter()).updateData(mCachedFileInfoList);
+                    ((CardFileAdapter) Objects.requireNonNull(mRecyclerView.getAdapter()))
+                            .updateData(mCachedFileInfoList);
                     if (cachedFileInfos.isEmpty()) {
                         findViewById(R.id.cl_empty_text).setVisibility(View.VISIBLE);
                     } else {
@@ -326,7 +320,6 @@ public class MainActivity extends AppCompatActivity
 
                     // Create intent to open file with a certain plugin
                     Intent pluginAction = new Intent(Constants.PLUGIN_ACTION);
-
                     pluginAction.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     pluginAction.setType("*/*");
 
@@ -400,7 +393,7 @@ public class MainActivity extends AppCompatActivity
      * @param applicationInfo ApplicationInfo obtained for the package
      * @param packageInfo     PackageInfo obtained for the package
      * @param packageManager  A packageManager to resolve some final info
-     * @return Plugin object
+     * @return the plugin object created
      */
     private Plugin createPlugin(String packageName, ApplicationInfo applicationInfo,
                                 PackageInfo packageInfo, PackageManager packageManager) {
@@ -436,6 +429,8 @@ public class MainActivity extends AppCompatActivity
 
 
     /**
+     * Shows the plugin picker dialog.
+     *
      * @param plugins  The plugins to be offered in the chooser dialog
      * @param fileName The name of the file to be opened
      * @param type     The MIME type of the file to be opened
@@ -469,16 +464,12 @@ public class MainActivity extends AppCompatActivity
     /**
      * Private helper method to extract the displayed filename from the Cursor combined with the
      * Uri.
-     *
      * <p>
      * This method is needed because files from for example Google Drive get an automatically
      * generated uri that does not contain the actual file name. This method allows to
      * extract the filename displayed in the Android file picker.
-     * </p>
-     *
      * <p>
      * To ensure uniqueness, a hash of the uri path will be prepended before the filename.
-     * </p>
      *
      * @param uri the Uri to get the displayed filename from
      * @return The displayed filename
@@ -526,67 +517,11 @@ public class MainActivity extends AppCompatActivity
     }
 
     /**
-     * Inflate the menu; this adds items to the action bar if it is present.
-     *
-     * @param menu The menu item that should be inflated.
-     * @return boolean whether or not successful.
-     */
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.main, menu);
-        return true;
-    }
-
-    /**
-     * Handles the selection of menu options in the AppBar (top bar).
-     * <p>
-     * The action bar will automatically handle clicks on the Home/Up button, so long
-     * as you specify a parent activity in AndroidManifest.xml.
-     * The AppBar of this activity only has the search button.
-     *
-     * @param item The selected menu item
-     * @return Return false to allow normal menu processing to proceed, true to consume it here
-     */
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // get the id of the selected item.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_search) {
-            // Create a LayoutInflater which will create the view for the pop-up
-            LayoutInflater inflater = LayoutInflater.from(this);
-            View promptView = inflater.inflate(R.layout.search_prompt, mRecyclerView, false);
-            final EditText userInput = promptView.findViewById(R.id.et_search_prompt);
-
-            // Create a builder to build the actual alertdialog from the previous inflated view
-            AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
-            alertDialogBuilder.setView(promptView);
-            alertDialogBuilder.setCancelable(true)
-                    .setPositiveButton("Ok", (DialogInterface dialogInterface, int i) -> {
-                        // Toast for demo
-                        if (mToast != null) {
-                            mToast.cancel();
-                        }
-                        mToast = Toast.makeText(MainActivity.this, "Search for "
-                                + userInput.getText().toString(), Toast.LENGTH_SHORT);
-                        mToast.show();
-                    });
-            // Create and show the pop-up
-            alertDialogBuilder.create().show();
-        }
-        return super.onOptionsItemSelected(item);
-    }
-
-    /**
-     * <p>
      * Handles selection of options in NavigationView (Drawer layout).
-     * </p>
      * <p>
      * The NavigationView contains links to different screens.
      * Selecting one of these should navigate to the corresponding
      * view.
-     * </p>
      *
      * @param item Selected menu item.
      * @return whether or not successful.
@@ -602,9 +537,8 @@ public class MainActivity extends AppCompatActivity
         } else if (id == R.id.nav_plugin_market) {
             Intent intent = new Intent(MainActivity.this, MarketPluginListActivity.class);
             startActivity(intent);
-        } else {
-            // Home is selected, nothing to do here
         }
+
 
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);

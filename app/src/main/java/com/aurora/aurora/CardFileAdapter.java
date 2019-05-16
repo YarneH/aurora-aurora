@@ -1,13 +1,17 @@
 package com.aurora.aurora;
 
 import android.content.Context;
+import android.content.pm.PackageManager;
+import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
 import android.support.constraint.ConstraintLayout;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.aurora.internalservice.internalcache.CachedFileInfo;
@@ -21,6 +25,7 @@ import java.util.List;
  * The adapter for the RecyclerView of the file-cards
  */
 public class CardFileAdapter extends RecyclerView.Adapter<CardFileAdapter.CardFileViewHolder> {
+    private static final String LOG_TAG = CardFileAdapter.class.getSimpleName();
 
     /**
      * The option to have no selected card in the RecyclerView
@@ -48,6 +53,11 @@ public class CardFileAdapter extends RecyclerView.Adapter<CardFileAdapter.CardFi
     private int mSelectedIndex = NO_DETAILS;
 
     /**
+     * The context of the application
+     */
+    private Context mContext = null;
+
+    /**
      * A reference to the (unique) kernel instance
      */
     private Kernel mKernel;
@@ -58,6 +68,7 @@ public class CardFileAdapter extends RecyclerView.Adapter<CardFileAdapter.CardFi
         mKernel = kernel;
         mCachedFileInfoList = cachedFileInfoList;
         mAmount = mCachedFileInfoList.size();
+        mContext = context;
     }
 
     /**
@@ -113,13 +124,30 @@ public class CardFileAdapter extends RecyclerView.Adapter<CardFileAdapter.CardFi
      */
     public class CardFileViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener,
             View.OnLongClickListener {
-        /* UI related objects */
+        /**
+         * The Title TextView
+         */
         private TextView mTitleTextView;
+        /**
+         * The TextView showing the date on which the file was last opend
+         */
         private TextView mLastOpenedTextView;
+        /**
+         * The complete card of the current file
+         */
         private CardView mCardView;
+        /**
+         * The ImageView showing the icon of the plugin
+         */
+        private ImageView mIconImageView;
 
-        /* Data related objects */
+        /**
+         * The index of the current file
+         */
         private int index;
+        /**
+         * The CachedFileInfo about the current file
+         */
         private CachedFileInfo mCachedFileInfo;
 
         /**
@@ -133,6 +161,7 @@ public class CardFileAdapter extends RecyclerView.Adapter<CardFileAdapter.CardFi
             mCardView = itemView.findViewById(R.id.cv_file);
             mTitleTextView = itemView.findViewById(R.id.tv_card_title);
             mLastOpenedTextView = itemView.findViewById(R.id.tv_card_last_opened);
+            mIconImageView = itemView.findViewById(R.id.iv_icon);
             // The card itself is clickable (for details), but also the open button.
             mCardView.setOnClickListener(this);
             mCardView.setOnLongClickListener(this);
@@ -157,6 +186,15 @@ public class CardFileAdapter extends RecyclerView.Adapter<CardFileAdapter.CardFi
                     .append(mDateFormat.format(mCachedFileInfo.getLastOpened()));
 
             mLastOpenedTextView.setText(bld.toString());
+
+            try {
+                Drawable icon = mContext.getPackageManager().getApplicationIcon(
+                        mCachedFileInfo.getUniquePluginName());
+                mIconImageView.setImageDrawable(icon);
+            } catch (PackageManager.NameNotFoundException e) {
+                Log.e(LOG_TAG, "Package not found when getting icon for packageName: " +
+                        mCachedFileInfo.getUniquePluginName(), e);
+            }
 
             /*
             If the card is the selected card, expand it (as it was when it was scrolled away

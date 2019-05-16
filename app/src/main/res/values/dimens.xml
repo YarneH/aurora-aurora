@@ -5,8 +5,10 @@
     <dimen name="nav_header_vertical_spacing">8dp</dimen>
     <dimen name="nav_header_height">176dp</dimen>
 
-    <!-- Floating action button margins -->
+    <!-- Floating action button -->
     <dimen name="fab_margin">16dp</dimen>
+    <dimen name="fab_icon_dimen">24dp</dimen>
+    <dimen name="fab_button_dimen">56dp</dimen>
 
     <!-- File card dimentions in main menu -->
     <dimen name="fc_margin_vertical">20dp</dimen>
@@ -34,4 +36,8 @@
     <dimen name="market_text_input">18sp</dimen>
     <dimen name="market_plugin_logo">100sp</dimen>
     <dimen name="market_plugin_name">25sp</dimen>
+    <dimen name="pb_download">40dp</dimen>
+
+    <!-- Failed plugin -->
+    <dimen name="text_failed_plugin">20sp</dimen>
 </resources>

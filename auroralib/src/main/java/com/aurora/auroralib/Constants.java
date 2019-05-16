@@ -5,6 +5,11 @@ package com.aurora.auroralib;
  */
 public final class Constants {
     /**
+     * The package name of Aurora
+     */
+    public static final String AURORA = "com.aurora.aurora";
+
+    /**
      * Intent Action used to launch plugins
      */
     public static final String PLUGIN_ACTION = "com.aurora.auroralib.AURORA_PLUGIN";
@@ -31,6 +36,16 @@ public final class Constants {
      * PluginObject
      */
     public static final String PLUGIN_INPUT_TYPE_OBJECT = "PLUGIN_INPUT_TYPE_OBJECT";
+
+    /**
+     * Intent Action used to indicate that a plugin failed
+     */
+    public static final String PLUGIN_PROCESSING_FAILED_ACTION = "com.aurora.auroralib.AURORA_PLUGIN_FAILED";
+
+    /**
+     * Key used for the reason why a plugin failed
+     */
+    public static final String PLUGIN_PROCESSING_FAILED_REASON = "PLUGIN_PROCESSING_FAILED_REASON";
 
     /**
      * Private constructor to prevent instantiation (the class only contains constants)
