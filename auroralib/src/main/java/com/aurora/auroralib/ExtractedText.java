@@ -17,6 +17,7 @@ import java.io.InputStreamReader;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.pipeline.CoreNLPProtos;
@@ -198,7 +199,7 @@ public class ExtractedText implements InternallyProcessedFile, Serializable {
     /**
      * @return the display name that should be used in the plugins to display the name of the files.
      */
-    @SuppressWarnings("unused")
+    @SuppressWarnings({"unused", "WeakerAccess"})
     @NonNull
     public String getFileDisplayName() {
         if (mFilename == null) {
@@ -260,7 +261,7 @@ public class ExtractedText implements InternallyProcessedFile, Serializable {
     /**
      * @return NonNull List of authors
      */
-    @SuppressWarnings("unused")
+    @SuppressWarnings({"unused", "WeakerAccess"})
     @NonNull
     public List<String> getAuthors() {
         if (mAuthors == null) {
@@ -274,7 +275,7 @@ public class ExtractedText implements InternallyProcessedFile, Serializable {
      *
      * @param authors NonNull list of authors
      */
-    @SuppressWarnings("unused")
+    @SuppressWarnings({"unused", "WeakerAccess"})
     public void setAuthors(@NonNull final List<String> authors) {
         mAuthors = authors;
     }
@@ -285,7 +286,7 @@ public class ExtractedText implements InternallyProcessedFile, Serializable {
      *
      * @return NonNull List of {@link ExtractedImage} objects
      */
-    @SuppressWarnings("unused")
+    @SuppressWarnings({"unused", "WeakerAccess"})
     @NonNull
     public List<ExtractedImage> getImages() {
         List<ExtractedImage> extractedImages = new ArrayList<>();
@@ -309,7 +310,7 @@ public class ExtractedText implements InternallyProcessedFile, Serializable {
                 res.append("\n\n").append(s.toString());
             }
         }
-        return res.toString();
+        return res.toString().trim();
     }
 
     /**
@@ -322,4 +323,41 @@ public class ExtractedText implements InternallyProcessedFile, Serializable {
         Gson gson = new Gson();
         return gson.toJson(this);
     }
+
+
+    @Override
+    public boolean equals(Object o) {
+
+        if (this == o) {
+            return true;
+        }
+
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
+        ExtractedText other = (ExtractedText) o;
+
+        boolean equals;
+
+        equals = this.getFilename().equals(other.getFilename());
+
+        equals &= this.getTitle().equals(other.getTitle());
+
+        if (this.getTitleAnnotation() != null && other.getTitleAnnotation() != null) {
+            equals &= this.getTitleAnnotation().equals(other.getTitleAnnotation());
+        }
+        equals &= this.getAuthors().equals(other.getAuthors());
+
+        equals &= this.getSections().equals(other.getSections());
+
+        return equals;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getFilename(), getTitle(), getTitleAnnotation(), getAuthors(),
+                getSections());
+    }
+
 }

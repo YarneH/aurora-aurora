@@ -7,6 +7,7 @@ import android.util.Base64;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.util.Objects;
 
 /**
  * Class representing an Image extracted from Files by Aurora. An ExtractedImage contains the
@@ -94,7 +95,7 @@ public class ExtractedImage {
         return BitmapFactory.decodeStream(stream);
     }
 
-    @SuppressWarnings("unused")
+    @SuppressWarnings({"unused", "WeakerAccess"})
     @NonNull
     public String getCaption() {
         if (mCaption == null) {
@@ -111,5 +112,31 @@ public class ExtractedImage {
     @SuppressWarnings("unused")
     public void setCaption(@NonNull final String caption) {
         mCaption = caption;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+
+        if (this == o) {
+            return true;
+        }
+
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
+        ExtractedImage other = (ExtractedImage) o;
+
+        boolean equals;
+
+        equals = this.getBase64EncodedImage().equals(other.getBase64EncodedImage());
+        equals &= this.getCaption().equals(other.getCaption());
+
+        return equals;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getBase64EncodedImage(), getCaption());
     }
 }
