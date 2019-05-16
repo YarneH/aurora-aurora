@@ -36,7 +36,6 @@ import android.webkit.MimeTypeMap;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import com.aurora.auroralib.Constants;
 import com.aurora.internalservice.internalcache.CachedFileInfo;
 import com.aurora.kernel.AuroraCommunicator;
@@ -46,15 +45,14 @@ import com.aurora.market.ui.MarketPluginListActivity;
 import com.aurora.plugin.InternalServices;
 import com.aurora.plugin.Plugin;
 import com.google.firebase.analytics.FirebaseAnalytics;
+import io.reactivex.Observer;
+import io.reactivex.disposables.Disposable;
 
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-
-import io.reactivex.Observer;
-import io.reactivex.disposables.Disposable;
 
 /**
  * The main activity of the application, started when the app is opened.
@@ -221,9 +219,15 @@ public class MainActivity extends AppCompatActivity
 
         if (mAuroraCommunicator.isLoading()) {
             // Show loading screen if it was visible before.
+            // TODO: change back to visible
             findViewById(R.id.pb_extracting).setVisibility(View.VISIBLE);
+            ((DrawerLayout) findViewById(R.id.drawer_layout))
+                    .setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
         } else {
             findViewById(R.id.pb_extracting).setVisibility(View.GONE);
+            findViewById(R.id.nav_view).bringToFront();
+            ((DrawerLayout) findViewById(R.id.drawer_layout))
+                    .setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
         }
     }
 
@@ -248,8 +252,13 @@ public class MainActivity extends AppCompatActivity
                             .updateData(mCachedFileInfoList);
                     if (cachedFileInfos.isEmpty()) {
                         findViewById(R.id.cl_empty_text).setVisibility(View.VISIBLE);
+                        ((DrawerLayout) findViewById(R.id.drawer_layout))
+                                .setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
                     } else {
                         findViewById(R.id.cl_empty_text).setVisibility(View.GONE);
+                        ((DrawerLayout) findViewById(R.id.drawer_layout))
+                                .setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
+                        findViewById(R.id.nav_view).bringToFront();
                     }
                 }
 
@@ -452,6 +461,8 @@ public class MainActivity extends AppCompatActivity
                 Plugin selectedPlugin = plugins.get(itemIndex);
                 Log.i(LOG_TAG, "Selected Plugin: " + selectedPlugin.getUniqueName());
                 findViewById(R.id.pb_extracting).setVisibility(View.VISIBLE);
+                ((DrawerLayout) findViewById(R.id.drawer_layout))
+                        .setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
                 mAuroraCommunicator.openFileWithPlugin(fileName, type, readFile,
                         selectedPlugin);
                 dialogInterface.cancel();
@@ -534,7 +545,6 @@ public class MainActivity extends AppCompatActivity
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         // Handle navigation view item clicks here.
         int id = item.getItemId();
-
         if (id == R.id.nav_help_feedback) {
             Intent intent = new Intent(MainActivity.this, FeedbackActivity.class);
             startActivity(intent);
@@ -571,5 +581,4 @@ public class MainActivity extends AppCompatActivity
         // Create and show the pop-up
         alertDialogBuilder.create().show();
     }
-
 }

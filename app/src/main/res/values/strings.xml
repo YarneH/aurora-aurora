@@ -49,6 +49,7 @@
     <string name="download_plugin">Downloading the new plugin!</string>
     <string name="downloading">Downloading... See the progress in your notification bar!</string>
     <string name="already_installed">The plugin is already installed!</string>
+    <string name="already_downloading">The plugin is downloading! Check the progress in your notification header</string>
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>

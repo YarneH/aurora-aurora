@@ -74,7 +74,11 @@ public final class MarketNetworkDataSource {
     /**
      * The HTTP prefix of a url
      */
-    private static final String URL_PREFIX = "http://";
+    private static final String URL_HTTP_PREFIX = "http://";
+    /**
+     * The HTTPS prefix of a url
+     */
+    private static final String URL_HTTPS_PREFIX = "https://";
     /**
      * The quality percentage for the compressing of the logo
      */
@@ -202,10 +206,11 @@ public final class MarketNetworkDataSource {
                         String description = currentPlugin.getString(JSON_DESCRIPTION_KEY);
                         String creator = currentPlugin.getString(JSON_CREATOR_KEY);
                         String version = currentPlugin.getString(JSON_VERSION_KEY);
+                        String unique = currentPlugin.getString(JSON_UNIQUE_NAME);
                         byte[] logo = new GetMarketPluginLogo().execute(imageLocation).get();
 
                         MarketPlugin currentMarketPlugin =
-                                new MarketPlugin(logo, name, description, creator, version, downloadLocation);
+                                new MarketPlugin(logo, name, description, creator, version, unique, downloadLocation);
 
                         tempList.add(currentMarketPlugin);
                     }
@@ -231,8 +236,8 @@ public final class MarketNetworkDataSource {
         protected byte[] doInBackground(String... strings) {
             String url = strings[0];
 
-            if (!url.contains(URL_PREFIX)) {
-                url = URL_PREFIX + url;
+            if (!url.contains(URL_HTTP_PREFIX) && !url.contains(URL_HTTPS_PREFIX)) {
+                url = URL_HTTP_PREFIX + url;
             }
             try {
                 URL downloadLink = new URL(url);
@@ -303,14 +308,11 @@ public final class MarketNetworkDataSource {
                                 new File(path));
 
                         // Check if the Uri really points to a file
-                        if (new File(path).isFile()) {
-                            installIntent.setDataAndType(apkURI, "application/vnd.android.package-archive");
-                            installIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                            installIntent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                            // Start install intent
-                            mDownloadingPlugins.remove(marketPlugin.getPluginName());
-                            mContext.startActivity(installIntent);
-                        }
+                        installIntent.setDataAndType(apkURI, "application/vnd.android.package-archive");
+                        installIntent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION + Intent.FLAG_ACTIVITY_NEW_TASK);
+                        // Start install intent
+                        mDownloadingPlugins.remove(marketPlugin.getPluginName());
+                        mContext.startActivity(installIntent);
                     }
                 }
             };
