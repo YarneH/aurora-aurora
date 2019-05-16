@@ -274,7 +274,7 @@ public class ExtractedText implements InternallyProcessedFile, Serializable {
      *
      * @param authors NonNull list of authors
      */
-    @SuppressWarnings({"unused"})
+    @SuppressWarnings({"unused", "WeakerAccess"})
     public void setAuthors(@NonNull final List<String> authors) {
         mAuthors = authors;
     }
@@ -322,4 +322,35 @@ public class ExtractedText implements InternallyProcessedFile, Serializable {
         Gson gson = new Gson();
         return gson.toJson(this);
     }
+
+
+    @Override
+    public boolean equals(Object o) {
+
+        if (this == o) {
+            return true;
+        }
+
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
+        ExtractedText other = (ExtractedText) o;
+
+        boolean equals;
+
+        equals = this.getFilename().equals(other.getFilename());
+
+        equals &= this.getTitle().equals(other.getTitle());
+
+        if (this.getTitleAnnotation() != null && other.getTitleAnnotation() != null) {
+            equals &= this.getTitleAnnotation().equals(other.getTitleAnnotation());
+        }
+        equals &= this.getAuthors().equals(other.getAuthors());
+
+        equals &= this.getSections().equals(other.getSections());
+
+        return equals;
+    }
+
 }

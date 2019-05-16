@@ -92,10 +92,10 @@ public class Section {
 
         // Deep copy of objects
         ProtobufAnnotationSerializer annotationSerializer = new ProtobufAnnotationSerializer(true);
-        if(section.getBodyAnnotation() != null) {
+        if (section.getBodyAnnotation() != null) {
             mBodyAnnotationProto = annotationSerializer.toProto(section.getBodyAnnotation());
         }
-        if(section.getTitleAnnotation() != null) {
+        if (section.getTitleAnnotation() != null) {
             mTitleAnnotationProto = annotationSerializer.toProto(section.getTitleAnnotation());
         }
 
@@ -108,18 +108,18 @@ public class Section {
     @NonNull
     @Override
     public String toString() {
-        String result;
-        if (mTitle != null && mBody != null) {
-            result = mTitle + "\n" + mBody + "\n";
-        } else if (mBody != null) {
-            result = mBody + "\n";
-        } else if (mTitle != null) {
-            result = (mTitle + "\n");
-        } else {
-            result = "Empty paragraph.\n";
+        StringBuilder result = new StringBuilder();
+
+        if (mTitle != null && !mTitle.isEmpty()) {
+            result.append(mTitle);
+            result.append("\n");
+        }
+        if (mBody != null && !mBody.isEmpty()) {
+            result.append(mBody);
+            result.append("\n");
         }
 
-        return result.trim();
+        return result.toString().trim();
     }
 
     /**
@@ -322,7 +322,7 @@ public class Section {
     /**
      * @return the level at which the Section was extracted from the file. Default value is 0.
      */
-    @SuppressWarnings("unused")
+    @SuppressWarnings({"unused", "WeakerAccess"})
     public int getLevel() {
         return mLevel;
     }
@@ -334,5 +334,36 @@ public class Section {
      */
     public void setLevel(int level) {
         mLevel = level;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+
+        if (this == o) {
+            return true;
+        }
+
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
+        Section other = (Section) o;
+
+        boolean equals;
+
+        equals = this.getTitle().equals(other.getTitle());
+
+        if (this.getTitleAnnotation() != null && other.getTitleAnnotation() != null) {
+            equals &= this.getTitleAnnotation().equals(other.getTitleAnnotation());
+        }
+        equals &= this.getBody().equals(other.getBody());
+
+        if (this.getBodyAnnotation() != null && other.getBodyAnnotation() != null) {
+            equals &= this.getBodyAnnotation().equals(other.getBodyAnnotation());
+        }
+        equals &= this.getExtractedImages().equals(other.getExtractedImages());
+        equals &= this.getLevel() == other.getLevel();
+
+        return equals;
     }
 }
