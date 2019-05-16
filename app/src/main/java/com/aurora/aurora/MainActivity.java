@@ -550,16 +550,11 @@ public class MainActivity extends AppCompatActivity
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         // Handle navigation view item clicks here.
         int id = item.getItemId();
-        Log.d("NAVIGATION", "" + id);
-        Log.d("NAVIGATION", "feedback: " + R.id.nav_help_feedback);
-        Log.d("NAVIGATION", "market: " + R.id.nav_plugin_market);
         if (id == R.id.nav_help_feedback) {
             Intent intent = new Intent(MainActivity.this, FeedbackActivity.class);
-            Log.d("NAVIGATION", "start feedback");
             startActivity(intent);
         } else if (id == R.id.nav_plugin_market) {
             Intent intent = new Intent(MainActivity.this, MarketPluginListActivity.class);
-            Log.d("NAVIGATION", "start market");
             startActivity(intent);
         } else {
             // Home is selected, nothing to do here
