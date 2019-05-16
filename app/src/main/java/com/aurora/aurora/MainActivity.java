@@ -241,7 +241,8 @@ public class MainActivity extends AppCompatActivity
                 @Override
                 public void onNext(List<CachedFileInfo> cachedFileInfos) {
                     mCachedFileInfoList = cachedFileInfos;
-                    ((CardFileAdapter) Objects.requireNonNull(mRecyclerView.getAdapter())).updateData(mCachedFileInfoList);
+                    ((CardFileAdapter) Objects.requireNonNull(mRecyclerView.getAdapter()))
+                            .updateData(mCachedFileInfoList);
                     if (cachedFileInfos.isEmpty()) {
                         findViewById(R.id.cl_empty_text).setVisibility(View.VISIBLE);
                     } else {
@@ -536,7 +537,7 @@ public class MainActivity extends AppCompatActivity
         } else if (id == R.id.nav_plugin_market) {
             Intent intent = new Intent(MainActivity.this, MarketPluginListActivity.class);
             startActivity(intent);
-        }  // Home is selected, nothing to do here
+        }
 
 
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
