@@ -116,7 +116,7 @@ public class InternalCache implements InternalService {
 
                 // If the entry for this plugin is empty, remove it from the list
                 if (mCachedFiles.get(entry.getKey()) != null &&
-                        Objects.requireNonNull(mCachedFiles.get(entry.getKey())).size() <= 0) {
+                        Objects.requireNonNull(mCachedFiles.get(entry.getKey())).isEmpty()) {
                     mCachedFiles.remove(entry.getKey());
                 }
             }
