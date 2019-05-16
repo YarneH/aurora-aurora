@@ -90,6 +90,7 @@ public abstract class ProcessorCommunicator {
 
     /**
      * Method to return to the aurora main screen.
+     *
      * @param context the android context
      */
     public static final void returnToAurora(Context context) {
