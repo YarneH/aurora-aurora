@@ -31,7 +31,7 @@
             android:layout_height="match_parent"
             android:background="@drawable/background"
             android:clipToPadding="false"
-            android:paddingBottom="20dp" />
+            android:paddingBottom="80dp" />
 
         <!-- ConstraintLayout which is visible only when the RecyclerView is empty -->
         <android.support.constraint.ConstraintLayout

@@ -7,6 +7,8 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.database.Cursor;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -150,7 +152,6 @@ public class MainActivity extends AppCompatActivity
 
         /* Setup RecyclerView */
         mRecyclerView = findViewById(R.id.rv_files);
-        mRecyclerView.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL));
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         CardFileAdapter adapter = new CardFileAdapter(mKernel, this, mCachedFileInfoList);
         mRecyclerView.setAdapter(adapter);
@@ -458,8 +459,9 @@ public class MainActivity extends AppCompatActivity
         });
 
         builder.setCancelable(true);
-        builder.create();
-        builder.show();
+        AlertDialog dialog = builder.create();
+        dialog.getWindow().setBackgroundDrawable(getDrawable(R.drawable.inset_dialog));
+        dialog.show();
     }
 
 
