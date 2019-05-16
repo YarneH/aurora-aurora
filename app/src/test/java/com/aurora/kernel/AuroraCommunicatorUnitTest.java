@@ -1,7 +1,6 @@
 package com.aurora.kernel;
 
 import android.content.ComponentName;
-import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 
@@ -12,7 +11,6 @@ import com.aurora.internalservice.internalcache.CachedFileInfo;
 import com.aurora.internalservice.internalcache.CachedProcessedFile;
 import com.aurora.kernel.event.InternalProcessorRequest;
 import com.aurora.kernel.event.InternalProcessorResponse;
-import com.aurora.kernel.event.ListPluginsResponse;
 import com.aurora.kernel.event.OpenCachedFileWithPluginRequest;
 import com.aurora.kernel.event.OpenFileWithPluginRequest;
 import com.aurora.kernel.event.QueryCacheResponse;
@@ -21,7 +19,6 @@ import com.aurora.kernel.event.RetrieveFileFromCacheResponse;
 import com.aurora.plugin.Plugin;
 import com.aurora.util.MockContext;
 
-import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -29,9 +26,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import io.reactivex.Observable;
 import io.reactivex.disposables.Disposable;
@@ -42,7 +37,6 @@ import io.reactivex.schedulers.Schedulers;
 public class AuroraCommunicatorUnitTest {
 
     private static Bus sBus;
-    private static DummyPluginRegistry sPluginRegistry;
     private static AuroraCommunicator sAuroraCommunicator;
 
     private static final String UNIQUE_PLUGIN_NAME_DUMMY = "com.aurora.dummyplugin";
@@ -53,14 +47,8 @@ public class AuroraCommunicatorUnitTest {
     public static void initialize() {
         sBus = new Bus(Schedulers.trampoline());
 
-        ProcessingCommunicator processingCommunicator = new ProcessingCommunicator(sBus);
-        final String pluginsCfg = "plugin-config.json";
-        sPluginRegistry = new DummyPluginRegistry(processingCommunicator, pluginsCfg, new MockContext());
+        sAuroraCommunicator = new AuroraCommunicator(sBus, new MockContext());
 
-        sAuroraCommunicator = new AuroraCommunicator(sBus, sPluginRegistry, new MockContext());
-
-        // Register dummy plugin in registry
-        sAuroraCommunicator.registerPlugin(DUMMY_PLUGIN);
     }
 
     @Test
@@ -89,6 +77,7 @@ public class AuroraCommunicatorUnitTest {
 
     @Test
     public void AuroraCommunicator_openFileWithPlugin_shouldSendOpenFileWithPluginRequestAfterExtractingText() {
+
         // Create observable of internal processor request
         Observable<InternalProcessorRequest> internalProcessorRequestObservable = sBus.register(InternalProcessorRequest.class);
 
@@ -200,64 +189,6 @@ public class AuroraCommunicatorUnitTest {
         testObserver.assertValue(cachedFilesList);
     }
 
-    @Test
-    public void AuroraCommunicator_getListOfPlugins_shouldReturnListOfPlugins() {
-        // Create dummy arguments
-        String uniquePluginName = "com.aurora.dummyplugin";
-        String pluginName = "DummyPlugin";
-        String pluginDescription = "this is a dummy description.";
-        int pluginVersionNumber = 1;
-        String pluginVersionCode = "v0.1";
-
-        // Create observer to subscribe to observable
-        TestObserver<List<Plugin>> observer = new TestObserver<>();
-
-        // Call the method under test
-        sAuroraCommunicator.getListOfPlugins(observer);
-
-        // Make dummy list
-        List<Plugin> pluginList = new ArrayList<>();
-
-        // Add fake basic plugin
-        pluginList.add(new Plugin(uniquePluginName, pluginName, null,
-                pluginDescription, pluginVersionNumber, pluginVersionCode));
-
-        // Make response containing the list
-        ListPluginsResponse response = new ListPluginsResponse(pluginList);
-
-        // Post response
-        sBus.post(response);
-
-        // Assert values
-        observer.assertSubscribed();
-        observer.assertValue(pluginList);
-        observer.dispose();
-    }
-
-    @Test
-    public void AuroraCommunicator_registerPlugin_shouldRegisterPLuginInPluginRegistry() {
-        // Create dummy plugin
-        String uniquePluginName = "com.aurora.dummyplugin2";
-        String pluginName = "Dummy Plugin";
-        String description = "Dummy plugin description";
-        int versionNumber = 1;
-        String versionCode = "v0.1";
-
-        Plugin dummyPlugin = new Plugin(uniquePluginName, pluginName, null,
-                description, versionNumber, versionCode);
-
-        // Call register plugin method
-        boolean registerResult = sAuroraCommunicator.registerPlugin(dummyPlugin);
-
-        // Assert that the returned result is true
-        Assert.assertTrue(registerResult);
-
-        // Assert that the plugins map actually contains the plugin
-        Assert.assertTrue(sPluginRegistry.mPluginMap.containsKey(uniquePluginName));
-
-        // Assert that the plugin info is equal to the one that was entered
-        Assert.assertEquals(dummyPlugin, sPluginRegistry.mPluginMap.get(uniquePluginName));
-    }
 
     /**
      * Dummy stub class for testing purposes
@@ -277,30 +208,6 @@ public class AuroraCommunicatorUnitTest {
         @Override
         public ComponentName resolveActivity(@NonNull PackageManager pm) {
             return new ComponentName("com.aurora.dummyplugin", "MainActivity");
-        }
-    }
-
-    private static class DummyPluginRegistry extends PluginRegistry {
-
-        Map<String, Plugin> mPluginMap = new HashMap<>();
-
-        DummyPluginRegistry(ProcessingCommunicator processingCommunicator, String configFileRef, Context context) {
-            super(configFileRef, context);
-        }
-
-        @Override
-        public boolean registerPlugin(String pluginName, Plugin plugin) {
-            if (!mPluginMap.containsKey(pluginName)) {
-                mPluginMap.put(pluginName, plugin);
-                return true;
-            }
-
-            return false;
-        }
-
-        @Override
-        public Plugin getPlugin(String pluginName) {
-            return mPluginMap.get(pluginName);
         }
     }
 }

@@ -39,7 +39,6 @@ import com.aurora.kernel.AuroraCommunicator;
 import com.aurora.kernel.ContextNullException;
 import com.aurora.kernel.Kernel;
 import com.aurora.market.ui.MarketPluginListActivity;
-import com.aurora.market.ui.PluginMarketViewModel;
 import com.aurora.plugin.InternalServices;
 import com.aurora.plugin.Plugin;
 import com.google.firebase.analytics.FirebaseAnalytics;
@@ -50,6 +49,7 @@ import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * The main activity of the application, started when the app is opened.
@@ -58,7 +58,7 @@ import java.util.List;
  * </a>
  * for more information.
  * onCreate is called when this activity is launched.
- * <br>
+ * <p>
  * Implements {@code NavigationView.OnNavigationItemSelectedListener} to listen to events
  * on the NavigationView.
  */
@@ -110,11 +110,6 @@ public class MainActivity extends AppCompatActivity
      * An instance of the {@link Kernel}.
      */
     private Kernel mKernel = null;
-
-    /**
-     * The ViewModel of the PluginMarket, containing the downloadable plugins
-     */
-    private PluginMarketViewModel mPluginMarket = null;
 
     /**
      * Delivers the communication between the environment and the Kernel.
@@ -250,7 +245,8 @@ public class MainActivity extends AppCompatActivity
                 @Override
                 public void onNext(List<CachedFileInfo> cachedFileInfos) {
                     mCachedFileInfoList = cachedFileInfos;
-                    ((CardFileAdapter) mRecyclerView.getAdapter()).updateData(mCachedFileInfoList);
+                    ((CardFileAdapter) Objects.requireNonNull(mRecyclerView.getAdapter()))
+                            .updateData(mCachedFileInfoList);
                     if (cachedFileInfos.isEmpty()) {
                         findViewById(R.id.cl_empty_text).setVisibility(View.VISIBLE);
                         ((DrawerLayout) findViewById(R.id.drawer_layout))
@@ -406,7 +402,7 @@ public class MainActivity extends AppCompatActivity
      * @param applicationInfo ApplicationInfo obtained for the package
      * @param packageInfo     PackageInfo obtained for the package
      * @param packageManager  A packageManager to resolve some final info
-     * @return Plugin object
+     * @return the plugin object created
      */
     private Plugin createPlugin(String packageName, ApplicationInfo applicationInfo,
                                 PackageInfo packageInfo, PackageManager packageManager) {
@@ -442,6 +438,8 @@ public class MainActivity extends AppCompatActivity
 
 
     /**
+     * Shows the plugin picker dialog.
+     *
      * @param plugins  The plugins to be offered in the chooser dialog
      * @param fileName The name of the file to be opened
      * @param type     The MIME type of the file to be opened
@@ -477,16 +475,12 @@ public class MainActivity extends AppCompatActivity
     /**
      * Private helper method to extract the displayed filename from the Cursor combined with the
      * Uri.
-     *
      * <p>
      * This method is needed because files from for example Google Drive get an automatically
      * generated uri that does not contain the actual file name. This method allows to
      * extract the filename displayed in the Android file picker.
-     * </p>
-     *
      * <p>
      * To ensure uniqueness, a hash of the uri path will be prepended before the filename.
-     * </p>
      *
      * @param uri the Uri to get the displayed filename from
      * @return The displayed filename
@@ -534,14 +528,11 @@ public class MainActivity extends AppCompatActivity
     }
 
     /**
-     * <p>
      * Handles selection of options in NavigationView (Drawer layout).
-     * </p>
      * <p>
      * The NavigationView contains links to different screens.
      * Selecting one of these should navigate to the corresponding
      * view.
-     * </p>
      *
      * @param item Selected menu item.
      * @return whether or not successful.
@@ -556,9 +547,8 @@ public class MainActivity extends AppCompatActivity
         } else if (id == R.id.nav_plugin_market) {
             Intent intent = new Intent(MainActivity.this, MarketPluginListActivity.class);
             startActivity(intent);
-        } else {
-            // Home is selected, nothing to do here
         }
+
 
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);

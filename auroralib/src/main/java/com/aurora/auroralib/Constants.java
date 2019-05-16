@@ -5,6 +5,11 @@ package com.aurora.auroralib;
  */
 public final class Constants {
     /**
+     * The package name of Aurora
+     */
+    public static final String AURORA = "com.aurora.aurora";
+
+    /**
      * Intent Action used to launch plugins
      */
     public static final String PLUGIN_ACTION = "com.aurora.auroralib.AURORA_PLUGIN";

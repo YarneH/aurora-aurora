@@ -7,7 +7,6 @@ import com.google.gson.annotations.JsonAdapter;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.pipeline.CoreNLPProtos;
@@ -230,35 +229,6 @@ public class Section {
     }
 
     /**
-     * The old method for getting images, instead use {@link #getExtractedImages()}
-     *
-     * @return the list of base64 encode images
-     * @deprecated
-     */
-    @Deprecated
-    @NonNull
-    public List<String> getImages() {
-        List<String> base64Images = new ArrayList<>();
-
-        for (ExtractedImage extractedImage : mExtractedImages) {
-            base64Images.add(extractedImage.getBase64EncodedImage());
-        }
-        return base64Images;
-    }
-
-    /**
-     * The old method of setting images, instead use {@link #setExtractedImages(List)}
-     *
-     * @param images List of base64 encode images
-     * @deprecated
-     */
-    @Deprecated
-    public void setImages(@NonNull final List<String> images) {
-        mExtractedImages = new ArrayList<>();
-        addImages(images);
-    }
-
-    /**
      * Get the {@link ExtractedImage} objects of this Section. Will return an empty
      * list when no images are present.
      *
@@ -280,19 +250,6 @@ public class Section {
      */
     public void setExtractedImages(@NonNull final List<ExtractedImage> extractedImages) {
         mExtractedImages = extractedImages;
-    }
-
-    /**
-     * The old method of adding images, instead use {@link #addExtractedImages(List)}
-     *
-     * @param images List of base64 encoded images
-     * @deprecated
-     */
-    @Deprecated
-    public void addImages(@NonNull final Iterable<String> images) {
-        for (String image : images) {
-            mExtractedImages.add(new ExtractedImage(image));
-        }
     }
 
     /**

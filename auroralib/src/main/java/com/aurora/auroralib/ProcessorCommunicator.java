@@ -37,14 +37,11 @@ public abstract class ProcessorCommunicator {
      * Communicators in the plugin have these arguments and that a {@link CacheServiceCaller} is
      * instantiated
      *
-     * @param mainPackageName The package name of the main activity in the plugin. It is important that the package name
-     *                        is the one from the main activity (the one you see when the plugin opens).
-     * @param context         an android context
+     * @param context an android context
      */
     @SuppressWarnings("unused")
-    public ProcessorCommunicator(@NonNull final String mainPackageName,
-                                 @NonNull final Context context) {
-        mUniquePluginName = mainPackageName;
+    public ProcessorCommunicator(@NonNull final Context context) {
+        mUniquePluginName = context.getPackageName();
         mContext = context;
         mCacheServiceCaller = new CacheServiceCaller(context);
     }
@@ -64,7 +61,7 @@ public abstract class ProcessorCommunicator {
 
     /**
      * Executes the pipeline that consists of processing the ExtractedText to receive a PluginObject
-     * and then caching this
+     * and then caches the object. In case the processing fails, this will return to Aurora.
      *
      * @param extractedText the text extracted by aurora
      * @return the PluginObject that is returned by {@link #process(ExtractedText)} or null if something
@@ -82,12 +79,26 @@ public abstract class ProcessorCommunicator {
             // If processing failed, start intent to open activity in aurora
             Intent intent = new Intent(Constants.PLUGIN_PROCESSING_FAILED_ACTION);
             intent.putExtra(Constants.PLUGIN_PROCESSING_FAILED_REASON, e.getMessage());
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 
             mContext.startActivity(intent);
         }
 
         // If not yet returned, return null
         return null;
+    }
+
+    /**
+     * Method to return to the aurora main screen.
+     *
+     * @param context the android context
+     */
+    public static final void returnToAurora(Context context) {
+        Intent intent = context.getPackageManager().getLaunchIntentForPackage(Constants.AURORA);
+        if (intent != null) {
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            context.startActivity(intent);
+        }
     }
 
 }
