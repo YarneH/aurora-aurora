@@ -85,8 +85,7 @@ final class NetworkUtils {
         try (
                 InputStream in = urlConnection.getInputStream()
         ) {
-            Bitmap testBitmap = BitmapFactory.decodeStream(in);
-            return testBitmap;
+            return BitmapFactory.decodeStream(in);
         } finally {
             urlConnection.disconnect();
         }

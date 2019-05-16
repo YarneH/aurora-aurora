@@ -4,20 +4,17 @@ import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
-
 import com.aurora.aurora.R;
 import com.aurora.market.data.database.MarketPlugin;
 import com.aurora.market.data.network.MarketNetworkDataSource;
@@ -48,7 +45,7 @@ public class MarketPluginListActivity extends AppCompatActivity {
     /**
      * The TextView showing that there is no connection to the server
      */
-    private static TextView mNoConnectionTextView = null;
+    private TextView mNoConnectionTextView = null;
 
     /**
      * {@inheritDoc}
@@ -106,9 +103,14 @@ public class MarketPluginListActivity extends AppCompatActivity {
         recyclerView.setAdapter(new MarketPluginsRecyclerViewAdapter(this, marketPlugins, mTwoPane));
 
         // Observe the LiveData and update the MarketPluginsRecyclerViewAdapter when the data changes
-        mViewModel.getMarketPlugins().observe(this, (List<MarketPlugin> marketPlugins1) -> {
+        mViewModel.getMarketPlugins().observe(this, (List<MarketPlugin> newMarketPlugins) -> {
+            if (newMarketPlugins == null || newMarketPlugins.isEmpty()) {
+                mNoConnectionTextView.setVisibility(View.VISIBLE);
+            } else {
+                mNoConnectionTextView.setVisibility(View.GONE);
+            }
             Objects.requireNonNull((MarketPluginsRecyclerViewAdapter) recyclerView.getAdapter()).setMarketPlugins(
-                    marketPlugins1);
+                    newMarketPlugins);
             Objects.requireNonNull(recyclerView.getAdapter()).notifyDataSetChanged();
         });
     }
@@ -221,11 +223,6 @@ public class MarketPluginListActivity extends AppCompatActivity {
          */
         public void setMarketPlugins(List<MarketPlugin> items) {
             mMarketPlugins = items;
-            if (items == null || items.isEmpty()) {
-                mNoConnectionTextView.setVisibility(View.VISIBLE);
-            } else {
-                mNoConnectionTextView.setVisibility(View.GONE);
-            }
         }
 
         /**

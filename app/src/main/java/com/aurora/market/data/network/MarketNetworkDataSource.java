@@ -215,8 +215,10 @@ public final class MarketNetworkDataSource {
 
                         tempList.add(currentMarketPlugin);
                     }
-                } catch (JSONException | InterruptedException | ExecutionException e) {
+                } catch (JSONException | ExecutionException e) {
                     Log.e(LOG_TAG, "exception", e);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
                 }
             } else {
                 if (mMarketPlugins.getValue() != null && !mMarketPlugins.getValue().isEmpty()) {
