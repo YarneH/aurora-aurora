@@ -7,6 +7,7 @@ import com.google.gson.annotations.JsonAdapter;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.pipeline.CoreNLPProtos;
@@ -323,5 +324,11 @@ public class Section {
         equals &= this.getLevel() == other.getLevel();
 
         return equals;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getTitle(), getTitleAnnotation(), getBody(), getBodyAnnotation(),
+                getExtractedImages(), getLevel());
     }
 }

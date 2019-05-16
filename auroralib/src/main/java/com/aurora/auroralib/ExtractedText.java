@@ -17,6 +17,7 @@ import java.io.InputStreamReader;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.pipeline.CoreNLPProtos;
@@ -351,6 +352,12 @@ public class ExtractedText implements InternallyProcessedFile, Serializable {
         equals &= this.getSections().equals(other.getSections());
 
         return equals;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getFilename(), getTitle(), getTitleAnnotation(), getAuthors(),
+                getSections());
     }
 
 }
