@@ -9,6 +9,7 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.app.ActionBar;
@@ -72,6 +73,10 @@ public class MarketPluginDetailActivity extends AppCompatActivity {
             public void onClick(View view) {
                 if (mInstalled) {
                     Snackbar.make(view, getResources().getString(R.string.already_installed), Snackbar.LENGTH_LONG)
+                            .setAction("Action", null).show();
+                    return;
+                } else if (MarketNetworkDataSource.getInstance(getBaseContext()).isDownloading(mMarketPlugin)) {
+                    Snackbar.make(view, getResources().getString(R.string.already_downloading), Snackbar.LENGTH_LONG)
                             .setAction("Action", null).show();
                     return;
                 }
@@ -145,7 +150,7 @@ public class MarketPluginDetailActivity extends AppCompatActivity {
             try {
                 // Try to get the icon, if it is null, the plugin is not yet installed
                 getBaseContext().getPackageManager()
-                        .getApplicationIcon("com.aurora." + mMarketPlugin.getPluginName().toLowerCase());
+                        .getApplicationIcon(mMarketPlugin.getUniqueName());
                 mInstalled = true;
             } catch (PackageManager.NameNotFoundException e) {
                 // The plugin is not yet installed
@@ -153,6 +158,7 @@ public class MarketPluginDetailActivity extends AppCompatActivity {
             }
             if (mInstalled) {
                 mDownloadFAB.setImageResource(R.drawable.ic_check_white);
+                mProgressBar.setVisibility(View.GONE);
                 return;
             }
 

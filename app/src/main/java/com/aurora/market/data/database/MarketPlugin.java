@@ -34,10 +34,14 @@ public class MarketPlugin implements Serializable {
      */
     private String mVersion;
     /**
+     * The unique name of the plugin
+     */
+    private String mUniqueName;
+
+    /**
      * The link the plugin can be downloaded from
      */
     private URL mDownloadLink;
-
 
     /**
      * Dummy constructor for testing UI
@@ -46,8 +50,10 @@ public class MarketPlugin implements Serializable {
      * @param description   a string representing the description of the plugin
      * @param url           a string representing the link the plugin can be downloaded from
      */
-    public MarketPlugin(byte[] logo, String name, String description, String creator, String version, String url){
+    public MarketPlugin(byte[] logo, String name, String description, String creator, String version, String uniqueName,
+                        String url){
         this.mPluginName = name;
+        this.mUniqueName = uniqueName;
         this.mDescription = description;
         try {
             this.mDownloadLink = new URL(url);
@@ -109,5 +115,13 @@ public class MarketPlugin implements Serializable {
      */
     public String getVersion() {
         return mVersion;
+    }
+
+    /**
+     * Default getter
+     * @return the unique name of the plugin, used by the Package Installer
+     */
+    public String getUniqueName() {
+        return mUniqueName;
     }
 }
