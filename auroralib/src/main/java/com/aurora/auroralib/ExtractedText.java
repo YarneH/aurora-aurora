@@ -198,7 +198,7 @@ public class ExtractedText implements InternallyProcessedFile, Serializable {
     /**
      * @return the display name that should be used in the plugins to display the name of the files.
      */
-    @SuppressWarnings("unused")
+    @SuppressWarnings({"unused", "WeakerAccess"})
     @NonNull
     public String getFileDisplayName() {
         if (mFilename == null) {
@@ -260,7 +260,7 @@ public class ExtractedText implements InternallyProcessedFile, Serializable {
     /**
      * @return NonNull List of authors
      */
-    @SuppressWarnings("unused")
+    @SuppressWarnings({"unused", "WeakerAccess"})
     @NonNull
     public List<String> getAuthors() {
         if (mAuthors == null) {
@@ -274,7 +274,7 @@ public class ExtractedText implements InternallyProcessedFile, Serializable {
      *
      * @param authors NonNull list of authors
      */
-    @SuppressWarnings("unused")
+    @SuppressWarnings({"unused"})
     public void setAuthors(@NonNull final List<String> authors) {
         mAuthors = authors;
     }
@@ -285,7 +285,7 @@ public class ExtractedText implements InternallyProcessedFile, Serializable {
      *
      * @return NonNull List of {@link ExtractedImage} objects
      */
-    @SuppressWarnings("unused")
+    @SuppressWarnings({"unused", "WeakerAccess"})
     @NonNull
     public List<ExtractedImage> getImages() {
         List<ExtractedImage> extractedImages = new ArrayList<>();
@@ -309,7 +309,7 @@ public class ExtractedText implements InternallyProcessedFile, Serializable {
                 res.append("\n\n").append(s.toString());
             }
         }
-        return res.toString();
+        return res.toString().trim();
     }
 
     /**
