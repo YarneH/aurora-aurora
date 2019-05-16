@@ -1,6 +1,8 @@
 package com.aurora.kernel;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
+import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.util.Log;
 import android.widget.Toast;
@@ -12,8 +14,6 @@ import com.aurora.internalservice.internalcache.CachedProcessedFile;
 import com.aurora.kernel.event.DocumentNotSupportedEvent;
 import com.aurora.kernel.event.InternalProcessorRequest;
 import com.aurora.kernel.event.InternalProcessorResponse;
-import com.aurora.kernel.event.ListPluginsRequest;
-import com.aurora.kernel.event.ListPluginsResponse;
 import com.aurora.kernel.event.OpenCachedFileWithPluginRequest;
 import com.aurora.kernel.event.OpenFileWithPluginRequest;
 import com.aurora.kernel.event.QueryCacheRequest;
@@ -22,6 +22,7 @@ import com.aurora.kernel.event.RetrieveFileFromCacheRequest;
 import com.aurora.kernel.event.RetrieveFileFromCacheResponse;
 import com.aurora.kernel.event.UpdateCachedFileDateRequest;
 import com.aurora.plugin.Plugin;
+import com.google.firebase.analytics.FirebaseAnalytics;
 
 import java.io.InputStream;
 import java.util.Date;
@@ -41,14 +42,13 @@ public class AuroraCommunicator extends Communicator {
     private static final String CLASS_TAG = "AuroraCommunicator";
 
     /**
-     * A reference to the plugin registry
-     */
-    private PluginRegistry mPluginRegistry;
-
-    /**
      * The android application context
      */
     private Context mContext;
+    /**
+     * Keeps track of the starting timestamp of processing.
+     */
+    private long mStartTime;
     /**
      * Indicates whether or not the text is being extracted.
      */
@@ -64,13 +64,11 @@ public class AuroraCommunicator extends Communicator {
      *
      * @param bus                A reference to the unique bus instance over which
      *                           the communicators will communicate events
-     * @param pluginRegistry     a reference to the plugin registry
      * @param applicationContext the android context
      */
-    public AuroraCommunicator(@NonNull final Bus bus, @NonNull final PluginRegistry pluginRegistry,
-                              @NonNull final Context applicationContext) {
+    public AuroraCommunicator(@NonNull final Bus bus, @NonNull final Context applicationContext) {
         super(bus);
-        mPluginRegistry = pluginRegistry;
+
         mContext = applicationContext;
 
         // Register for incoming events
@@ -93,9 +91,12 @@ public class AuroraCommunicator extends Communicator {
      * @param file     the input stream of the file
      * @param plugin   the plugin to open the file with.
      */
+    @SuppressLint("CheckResult")
     public void openFileWithPlugin(String fileRef, String fileType, InputStream file,
                                    Plugin plugin) {
 
+        // mark starting time
+        mStartTime = System.currentTimeMillis();
         // Set the state to loading.
         mLoading = true;
 
@@ -108,6 +109,11 @@ public class AuroraCommunicator extends Communicator {
                 .map(InternalProcessorResponse::getExtractedText)
                 .take(1)
                 .subscribe((ExtractedText extractedText) -> {
+                            Bundle params = new Bundle();
+                            params.putInt("extracted_text_length", extractedText.toString().length());
+                            params.putLong("processing_time", System.currentTimeMillis() - mStartTime);
+                            FirebaseAnalytics.getInstance(mContext).logEvent("processing_performance", params);
+
                             mLoading = false;
                             sendOpenFileRequest(extractedText, plugin.getUniqueName());
                         }
@@ -131,6 +137,7 @@ public class AuroraCommunicator extends Communicator {
      * @param fileRef          a reference to the file to open
      * @param uniquePluginName the name of the plugin that the file was processed with
      */
+    @SuppressLint("CheckResult")
     public void openFileWithCache(String fileRef, String uniquePluginName) {
         // Create observable to listen to
         Observable<RetrieveFileFromCacheResponse> retrieveFileFromCacheResponse =
@@ -181,34 +188,6 @@ public class AuroraCommunicator extends Communicator {
         QueryCacheRequest request = new QueryCacheRequest(maxLength);
         mBus.post(request);
 
-    }
-
-    /**
-     * Gets a list of all the available plugins
-     *
-     * @param observer an observer containing code that will be executed when the list of plugins comes in
-     */
-    public void getListOfPlugins(@NonNull final Observer<List<Plugin>> observer) {
-        Observable<ListPluginsResponse> mListPluginsResponse
-                = this.mBus.register(ListPluginsResponse.class);
-
-        mListPluginsResponse
-                .map(ListPluginsResponse::getPlugins)
-                .take(1)
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(observer);
-
-        this.mBus.post(new ListPluginsRequest());
-    }
-
-    /**
-     * Registers a plugin in the pluginRegistry
-     *
-     * @param plugin the plugin metadata object
-     * @return true if the plugin was successfully saved in the plugin registry, false otherwise
-     */
-    public boolean registerPlugin(@NonNull final Plugin plugin) {
-        return mPluginRegistry.registerPlugin(plugin.getUniqueName(), plugin);
     }
 
     /**

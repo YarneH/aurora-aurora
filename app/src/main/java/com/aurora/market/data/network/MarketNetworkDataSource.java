@@ -12,16 +12,15 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Environment;
 import android.support.v4.content.FileProvider;
-import android.util.Log;
+
 import com.aurora.aurora.R;
 import com.aurora.market.data.database.MarketPlugin;
 import com.firebase.jobdispatcher.Driver;
 import com.firebase.jobdispatcher.FirebaseJobDispatcher;
 import com.firebase.jobdispatcher.GooglePlayDriver;
-import org.apache.commons.lang3.ObjectUtils;
+
 import org.json.JSONArray;
 import org.json.JSONObject;
-
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
