@@ -54,7 +54,7 @@
             app:layout_constraintTop_toTopOf="@id/cv_fl_base_card" />
 
         <!-- Details of the file -->
-        <!-- TODO: Remove invisibility is details should be used! -->
+        <!-- TODO: Remove invisibility if details should be used! -->
         <TextView
             android:id="@+id/tv_card_more_details"
             android:layout_width="wrap_content"

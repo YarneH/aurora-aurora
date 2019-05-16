@@ -35,6 +35,7 @@ final class NetworkUtils {
 
     /**
      * Get the MarketPluginURL
+     *
      * @return a URL, which locates to the plugins
      */
     static URL getMarketPluginURL() {
@@ -58,7 +59,7 @@ final class NetworkUtils {
         try (
                 InputStream in = urlConnection.getInputStream();
                 Scanner scanner = new Scanner(in)
-                ){
+        ) {
             scanner.useDelimiter("\\A");
 
             boolean hasInput = scanner.hasNext();
@@ -79,13 +80,12 @@ final class NetworkUtils {
      * @return The contents of the HTTP response, null if no response
      * @throws IOException Related to network and stream reading
      */
-    static Bitmap getBitmapFromHttpUrl(URL url) throws  IOException {
+    static Bitmap getBitmapFromHttpUrl(URL url) throws IOException {
         HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
         try (
                 InputStream in = urlConnection.getInputStream()
-        ){
+        ) {
             Bitmap testBitmap = BitmapFactory.decodeStream(in);
-            Log.d("image", "Bitmap: " + testBitmap);
             return testBitmap;
         } finally {
             urlConnection.disconnect();

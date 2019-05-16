@@ -50,14 +50,13 @@
     <string name="downloading">Downloading... See the progress in your notification bar!</string>
     <string name="already_installed">The plugin is already installed!</string>
     <string name="already_downloading">The plugin is downloading! Check the progress in your notification header</string>
-
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
-    <string name="select_plugin">Select a plugin</string>
-    <string name="no_plugins_available">No plugins available</string>
     <string name="creator">Creator</string>
     <string name="description">Description</string>
     <string name="version">Version</string>
+    <string name="no_internet_connection">Could not load plugins from the server...</string>
+
+    <string name="select_plugin">Select a plugin</string>
+    <string name="no_plugins_available">No plugins available</string>
 
     <!-- User warnings -->
     <string name="plugin_not_in_registry">The plugin was not found in the registry!</string>

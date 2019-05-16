@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.v7.widget.RecyclerView xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.v7.widget.RecyclerView
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/marketplugin_list"
@@ -8,7 +9,7 @@
     android:layout_height="match_parent"
     android:layout_marginLeft="16dp"
     android:layout_marginRight="16dp"
+    android:background="@drawable/background_cropped"
     app:layoutManager="LinearLayoutManager"
     tools:context="com.aurora.market.ui.MarketPluginListActivity"
-    tools:listitem="@layout/marketplugin_list_content"
-    android:backgroundTint="@color/colorPrimaryDark"/>
+    tools:listitem="@layout/marketplugin_list_content"/>

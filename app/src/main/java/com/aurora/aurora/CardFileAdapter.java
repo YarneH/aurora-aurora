@@ -63,8 +63,6 @@ public class CardFileAdapter extends RecyclerView.Adapter<CardFileAdapter.CardFi
     private Kernel mKernel;
 
     public CardFileAdapter(Kernel kernel, Context context, @NonNull List<CachedFileInfo> cachedFileInfoList) {
-        // TODO: This could take an argument as input (which contains the recent files)
-        // TODO: remove context variable if it is not needed by the test example anymore!
         mKernel = kernel;
         mCachedFileInfoList = cachedFileInfoList;
         mAmount = mCachedFileInfoList.size();
@@ -272,11 +270,6 @@ public class CardFileAdapter extends RecyclerView.Adapter<CardFileAdapter.CardFi
             return clickConsumed;
         }
     }
-
-//    TODO: Expanding card when another expanded card is
-//    in view results in the card growing upwards instead of down.
-//    Scrolling down before expanding "solves" this.
-//    Fix This bug :)
 
     /**
      * Expand the view to show details.

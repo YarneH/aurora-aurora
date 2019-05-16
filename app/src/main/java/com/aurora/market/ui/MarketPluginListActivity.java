@@ -4,12 +4,14 @@ import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,6 +20,7 @@ import android.widget.TextView;
 
 import com.aurora.aurora.R;
 import com.aurora.market.data.database.MarketPlugin;
+import com.aurora.market.data.network.MarketNetworkDataSource;
 import com.aurora.utilities.InjectorUtils;
 
 import java.util.List;
@@ -42,6 +45,10 @@ public class MarketPluginListActivity extends AppCompatActivity {
      * The ViewModel of the PluginMarket, containing all the data needed for the UI
      */
     private PluginMarketViewModel mViewModel = null;
+    /**
+     * The TextView showing that there is no connection to the server
+     */
+    private static TextView mNoConnectionTextView = null;
 
     /**
      * {@inheritDoc}
@@ -52,6 +59,8 @@ public class MarketPluginListActivity extends AppCompatActivity {
         setContentView(R.layout.activity_marketplugin_list);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        mNoConnectionTextView = findViewById(R.id.tv_no_connection);
+
         setSupportActionBar(toolbar);
         toolbar.setTitle(getTitle());
 
@@ -76,8 +85,18 @@ public class MarketPluginListActivity extends AppCompatActivity {
 
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        mNoConnectionTextView = findViewById(R.id.tv_no_connection);
+        mNoConnectionTextView.setVisibility(View.GONE);
+
+        MarketNetworkDataSource.getInstance(getBaseContext()).fetchMarketPlugins();
+    }
+
     /**
      * Set up the RecyclerView responsible for the CardViews of the MarketPlugins
+     *
      * @param recyclerView The RecyclerView which is responsible for the CardViews
      */
     private void setupRecyclerView(@NonNull RecyclerView recyclerView) {
@@ -144,8 +163,9 @@ public class MarketPluginListActivity extends AppCompatActivity {
 
         /**
          * Constructor for the MarketPluginsRecyclerViewAdapter
-         * @param parent The parent activity (the list activity)
-         * @param items A list of all the displayed MarketPlugins
+         *
+         * @param parent  The parent activity (the list activity)
+         * @param items   A list of all the displayed MarketPlugins
          * @param twoPane indicating whether the screen is a wide screen
          */
         public MarketPluginsRecyclerViewAdapter(
@@ -201,6 +221,11 @@ public class MarketPluginListActivity extends AppCompatActivity {
          */
         public void setMarketPlugins(List<MarketPlugin> items) {
             mMarketPlugins = items;
+            if (items == null || items.isEmpty()) {
+                mNoConnectionTextView.setVisibility(View.VISIBLE);
+            } else {
+                mNoConnectionTextView.setVisibility(View.GONE);
+            }
         }
 
         /**
