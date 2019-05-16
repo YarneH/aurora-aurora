@@ -11,8 +11,8 @@
     <dimen name="fab_button_dimen">56dp</dimen>
 
     <!-- File card dimentions in main menu -->
-    <dimen name="fc_margin_vertical">20dp</dimen>
-    <dimen name="fc_margin_horizontal">20dp</dimen>
+    <dimen name="fc_margin_vertical">10dp</dimen>
+    <dimen name="fc_margin_horizontal">10dp</dimen>
     <dimen name="fc_corner_radius">6dp</dimen>
     <dimen name="fc_elevation">6dp</dimen>
     <dimen name="fc_individual_padding">20dp</dimen>

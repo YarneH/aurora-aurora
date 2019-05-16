@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?><!-- The main view for the ViewHolder of the RecyclerView -->
-<android.support.v7.widget.CardView
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools" android:id="@+id/cv_file"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/cv_file"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginLeft="@dimen/fc_margin_horizontal"
@@ -16,6 +16,7 @@
         android:id="@+id/cv_fl_base_card"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:background="?android:attr/selectableItemBackground"
         android:padding="@dimen/fc_padding">
 
         <!-- File name -->
@@ -29,7 +30,7 @@
             android:textSize="@dimen/fc_large_text"
             android:textStyle="bold"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"/>
+            app:layout_constraintTop_toTopOf="parent" />
 
         <!-- Description of the file -->
         <TextView
@@ -40,17 +41,17 @@
             android:text="@string/file_last"
             android:textSize="@dimen/fc_small_text"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/tv_card_title"/>
+            app:layout_constraintTop_toBottomOf="@+id/tv_card_title" />
 
         <ImageView
             android:id="@+id/iv_icon"
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:scaleType="fitEnd"
-            app:layout_constraintStart_toStartOf="@id/cv_fl_base_card"
-            app:layout_constraintTop_toTopOf="@id/cv_fl_base_card"
             app:layout_constraintBottom_toBottomOf="@id/cv_fl_base_card"
-            app:layout_constraintEnd_toEndOf="@id/cv_fl_base_card"/>
+            app:layout_constraintEnd_toEndOf="@id/cv_fl_base_card"
+            app:layout_constraintStart_toStartOf="@id/cv_fl_base_card"
+            app:layout_constraintTop_toTopOf="@id/cv_fl_base_card" />
 
         <!-- Details of the file -->
         <!-- TODO: Remove invisibility is details should be used! -->
@@ -59,10 +60,10 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/file_more_details"
+            android:visibility="gone"
             app:layout_constraintBottom_toBottomOf="@+id/cv_fl_base_card"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/tv_card_location"
-            android:visibility="gone"/>
+            app:layout_constraintTop_toBottomOf="@+id/tv_card_location" />
 
         <!-- Include file detail content -->
         <include
@@ -70,6 +71,6 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             app:layout_constraintBottom_toBottomOf="@id/cv_fl_base_card"
-            app:layout_constraintTop_toBottomOf="@+id/tv_card_location"/>
+            app:layout_constraintTop_toBottomOf="@+id/tv_card_location" />
     </android.support.constraint.ConstraintLayout>
 </android.support.v7.widget.CardView>

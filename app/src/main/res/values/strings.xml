@@ -72,5 +72,6 @@
     <string name="service_permission_description">Allows the app to make use of Aurora services</string>
     <string name="plugin_processing_failed">The plugin\'s processing failed.</string>
     <string name="plugin_failed_label">plugin failed</string>
+    <string name="plugin_logo_description">Plugin logo</string>
 
 </resources>

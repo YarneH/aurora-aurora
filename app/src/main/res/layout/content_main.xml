@@ -29,16 +29,16 @@
             android:id="@+id/rv_files"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="@drawable/background_gradient"
+            android:background="@drawable/background"
             android:clipToPadding="false"
-            android:paddingBottom="20dp" />
+            android:paddingBottom="80dp" />
 
         <!-- ConstraintLayout which is visible only when the RecyclerView is empty -->
         <android.support.constraint.ConstraintLayout
             android:id="@+id/cl_empty_text"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="@color/colorPrimary"
+            android:background="@drawable/background"
             android:visibility="gone">
 
             <!-- TextView which is visible when the RecyclerView is empty -->
