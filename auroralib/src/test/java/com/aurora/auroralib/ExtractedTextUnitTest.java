@@ -17,7 +17,7 @@ public class ExtractedTextUnitTest {
         String fileName = "dummyFileName";
         Date dateLastEdit = new Date();
         List<String> sections = Arrays.asList("Hello", "there", "General", "Kenobi");
-        ExtractedText extractedText = new ExtractedText(fileName, dateLastEdit, sections);
+        ExtractedText extractedText = new ExtractedText(fileName, sections);
 
         Gson gson = new Gson();
         String jsonString = gson.toJson(extractedText, ExtractedText.class);

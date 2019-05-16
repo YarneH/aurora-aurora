@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!-- DrawerLayout adds the sidebar functionality -->
+<?xml version="1.0" encoding="utf-8"?><!-- DrawerLayout adds the sidebar functionality -->
 <android.support.v4.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -24,5 +23,32 @@
         android:fitsSystemWindows="true"
         app:headerLayout="@layout/nav_header_main"
         app:menu="@menu/activity_main_drawer" />
+
+    <!-- Progress bar view-->
+    <android.support.constraint.ConstraintLayout
+        android:visibility="gone"
+        android:id="@+id/pb_extracting"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <!-- Background for the loading screen -->
+        <View
+            android:clickable="true"
+            android:id="@+id/view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@color/alpha_grey"
+            android:focusable="true" />
+
+        <!-- Progressbar -->
+        <ProgressBar
+            android:progressTint="@color/colorAccent2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+    </android.support.constraint.ConstraintLayout>
 
 </android.support.v4.widget.DrawerLayout>

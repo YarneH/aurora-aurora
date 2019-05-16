@@ -3,7 +3,6 @@ package com.aurora.auroralib;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.util.Base64;
 
 import java.io.ByteArrayInputStream;
@@ -34,15 +33,18 @@ public class ExtractedImage {
      */
     public ExtractedImage(@NonNull final String base64EncodedImage) {
         mBase64EncodedImage = base64EncodedImage;
+        mCaption = "";
     }
 
     /**
-     * Constructor to create a base64Encoded image with a caption
+     * Constructor to create a base64Encoded image withØ a caption
+     *
      * @param base64EncodedImage the base64 encode String
-     * @param caption           the caption String
+     * @param caption            the caption String
      */
+    @SuppressWarnings("unused")
     public ExtractedImage(@NonNull final String base64EncodedImage,
-                          @Nullable final String caption) {
+                          @NonNull final String caption) {
         mBase64EncodedImage = base64EncodedImage;
         mCaption = caption;
     }
@@ -52,7 +54,8 @@ public class ExtractedImage {
      *
      * @param extractedImage Image that needs copying
      */
-    public ExtractedImage(final ExtractedImage extractedImage) {
+    @SuppressWarnings("WeakerAccess")
+    public ExtractedImage(@NonNull final ExtractedImage extractedImage) {
         mBase64EncodedImage = extractedImage.mBase64EncodedImage;
         mCaption = extractedImage.mCaption;
     }
@@ -62,8 +65,20 @@ public class ExtractedImage {
      *
      * @return the base64 encoded image
      */
-    public @NonNull String getBase64EncodedImage() {
+    @SuppressWarnings("WeakerAccess")
+    @NonNull
+    public String getBase64EncodedImage() {
         return mBase64EncodedImage;
+    }
+
+    /**
+     * Sets the base64 encoded image of the {@link ExtractedImage}.
+     *
+     * @param base64EncodedImage String of the base64 encoded image
+     */
+    @SuppressWarnings("unused")
+    public void setBase64EncodedImage(@NonNull final String base64EncodedImage) {
+        mBase64EncodedImage = base64EncodedImage;
     }
 
     /**
@@ -71,23 +86,30 @@ public class ExtractedImage {
      *
      * @return the Bitmap of the image
      */
-    @SuppressWarnings("unused")
-    public @NonNull Bitmap getBitmap() {
+    @SuppressWarnings({"unused", "WeakerAccess"})
+    @NonNull
+    public Bitmap getBitmap() {
         InputStream stream = new ByteArrayInputStream(Base64.decode(mBase64EncodedImage.getBytes()
                 , Base64.DEFAULT));
         return BitmapFactory.decodeStream(stream);
     }
 
-    public void setBase64EncodedImage(@NonNull final String base64EncodedImage) {
-        this.mBase64EncodedImage = base64EncodedImage;
-    }
-
     @SuppressWarnings("unused")
-    public @Nullable String getCaption() {
+    @NonNull
+    public String getCaption() {
+        if (mCaption == null) {
+            return "";
+        }
         return mCaption;
     }
 
-    public void setCaption(@Nullable final String caption) {
-        this.mCaption = caption;
+    /**
+     * Sets the caption of the {@link ExtractedImage}.
+     *
+     * @param caption String of the caption
+     */
+    @SuppressWarnings("unused")
+    public void setCaption(@NonNull final String caption) {
+        mCaption = caption;
     }
 }

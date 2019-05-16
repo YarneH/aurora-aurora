@@ -33,6 +33,16 @@ public final class Constants {
     public static final String PLUGIN_INPUT_TYPE_OBJECT = "PLUGIN_INPUT_TYPE_OBJECT";
 
     /**
+     * Intent Action used to indicate that a plugin failed
+     */
+    public static final String PLUGIN_PROCESSING_FAILED_ACTION = "com.aurora.auroralib.AURORA_PLUGIN_FAILED";
+
+    /**
+     * Key used for the reason why a plugin failed
+     */
+    public static final String PLUGIN_PROCESSING_FAILED_REASON = "PLUGIN_PROCESSING_FAILED_REASON";
+
+    /**
      * Private constructor to prevent instantiation (the class only contains constants)
      */
     private Constants() {

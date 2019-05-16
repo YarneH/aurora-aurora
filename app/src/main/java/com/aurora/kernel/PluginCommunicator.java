@@ -76,6 +76,11 @@ public class PluginCommunicator extends Communicator {
      */
     private static final String EXTENSION = ".aur";
 
+    /**
+     * a Toast to keep track of the current toast
+     */
+    private Toast mToast = null;
+
 
     /**
      * Creates a PluginCommunicator. There should be only one instance at a time
@@ -244,8 +249,13 @@ public class PluginCommunicator extends Communicator {
      */
     private void showToast(Context context, String message) {
         Handler handler = new Handler(Looper.getMainLooper());
-        handler.post(() -> Toast.makeText(context, message,
-                Toast.LENGTH_LONG).show());
+        if (mToast != null) {
+            mToast.cancel();
+        }
+        handler.post(() -> {
+            mToast = Toast.makeText(context, message, Toast.LENGTH_LONG);
+            mToast.show();
+        });
     }
 
     /**

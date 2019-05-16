@@ -22,10 +22,12 @@ import com.aurora.kernel.event.QueryCacheRequest;
 import com.aurora.kernel.event.QueryCacheResponse;
 import com.aurora.kernel.event.RetrieveFileFromCacheRequest;
 import com.aurora.kernel.event.RetrieveFileFromCacheResponse;
+import com.aurora.kernel.event.UpdateCachedFileDateRequest;
 import com.aurora.plugin.Plugin;
 import com.google.firebase.analytics.FirebaseAnalytics;
 
 import java.io.InputStream;
+import java.util.Date;
 import java.util.List;
 
 import io.reactivex.Observable;
@@ -54,6 +56,10 @@ public class AuroraCommunicator extends Communicator {
      * Keeps track of the starting timestamp of processing.
      */
     private long mStartTime;
+    /**
+     * Indicates whether or not the text is being extracted.
+     */
+    private boolean mLoading = false;
 
     /**
      * Observable keeping track of events indicating that a document is not supported
@@ -100,11 +106,12 @@ public class AuroraCommunicator extends Communicator {
 
         // mark starting time
         mStartTime = System.currentTimeMillis();
+        // Set the state to loading.
+        mLoading = true;
 
         // Register observable
         Observable<InternalProcessorResponse> internalProcessorResponseObservable =
                 mBus.register(InternalProcessorResponse.class);
-
         // Subscribe to observable
         // The subscribe will only be triggered after the file was processed internally
         internalProcessorResponseObservable
@@ -116,6 +123,7 @@ public class AuroraCommunicator extends Communicator {
                             params.putLong("processing_time", System.currentTimeMillis() - mStartTime);
                             FirebaseAnalytics.getInstance(mContext).logEvent("processing_performance", params);
 
+                            mLoading = false;
                             sendOpenFileRequest(extractedText, plugin.getUniqueName());
                         }
                         , (Throwable e) ->
@@ -158,7 +166,7 @@ public class AuroraCommunicator extends Communicator {
 
                             } else {
                                 sendOpenCachedFileRequest(processedFile.getJsonRepresentation(),
-                                        processedFile.getUniquePluginName());
+                                        processedFile.getFileRef(), processedFile.getUniquePluginName());
                             }
                         }, (Throwable e) ->
                                 Log.e(CLASS_TAG, "Something went wrong while retrieving a file from the cache!", e)
@@ -241,11 +249,17 @@ public class AuroraCommunicator extends Communicator {
      * @param jsonRepresentation the representation of the object to represent
      * @param uniquePluginName   the name of the plugin that the file was processed with
      */
-    private void sendOpenCachedFileRequest(final String jsonRepresentation, final String uniquePluginName) {
+    private void sendOpenCachedFileRequest(@NonNull final String jsonRepresentation, @NonNull final String fileRef,
+                                           @NonNull final String uniquePluginName) {
         // Create request and post it on bus
         OpenCachedFileWithPluginRequest openCachedFileWithPluginRequest =
                 new OpenCachedFileWithPluginRequest(jsonRepresentation, uniquePluginName, mContext);
         mBus.post(openCachedFileWithPluginRequest);
+
+        // Create request to update the dateLastOpened of the file
+        UpdateCachedFileDateRequest updateCachedFileDateRequest =
+                new UpdateCachedFileDateRequest(fileRef, uniquePluginName, new Date());
+        mBus.post(updateCachedFileDateRequest);
     }
 
     /**
@@ -253,7 +267,16 @@ public class AuroraCommunicator extends Communicator {
      *
      * @param reason the reason why the document could not be processed
      */
-    private void showDocumentNotSupportedMessage(String reason) {
+    private void showDocumentNotSupportedMessage(@NonNull final String reason) {
         Toast.makeText(mContext, reason, Toast.LENGTH_LONG).show();
+    }
+
+    /**
+     * Getter for the loading state.
+     *
+     * @return true if loading.
+     */
+    public boolean isLoading() {
+        return mLoading;
     }
 }

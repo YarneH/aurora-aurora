@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:fitsSystemWindows="true"
-    tools:context="com.aurora.market.ui.MarketPluginDetailActivity"
-    tools:ignore="MergeRootFrame">
+                                                 xmlns:app="http://schemas.android.com/apk/res-auto"
+                                                 xmlns:tools="http://schemas.android.com/tools"
+                                                 android:layout_width="match_parent"
+                                                 android:layout_height="match_parent"
+                                                 android:fitsSystemWindows="true"
+                                                 tools:context="com.aurora.market.ui.MarketPluginDetailActivity"
+                                                 tools:ignore="MergeRootFrame">
 
     <android.support.design.widget.AppBarLayout
         android:id="@+id/app_bar"
@@ -30,7 +30,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
                 app:layout_collapseMode="pin"
-                app:popupTheme="@style/ThemeOverlay.AppCompat.Light" />
+                app:popupTheme="@style/ThemeOverlay.AppCompat.Light"/>
 
         </android.support.design.widget.CollapsingToolbarLayout>
 
@@ -50,6 +50,20 @@
         android:layout_margin="@dimen/fab_margin"
         app:layout_anchor="@+id/marketplugin_detail_container"
         app:layout_anchorGravity="top|end"
-        app:srcCompat="@drawable/ic_download_white" />
+        app:srcCompat="@drawable/ic_download_white"/>
+
+    <ProgressBar
+        style="?android:attr/progressBarStyle"
+        android:id="@+id/pb_download"
+        android:elevation="9dp"
+        android:layout_width="@dimen/fab_button_dimen"
+        android:layout_height="@dimen/pb_download"
+        android:layout_gravity="center_vertical|start"
+        android:layout_margin="@dimen/fab_margin"
+        android:outlineProvider="none"
+        android:indeterminateTint="#FFFFFF"
+        app:layout_anchor="@+id/marketplugin_detail_container"
+        app:layout_anchorGravity="top|end"
+        android:visibility="gone"/>
 
 </android.support.design.widget.CoordinatorLayout>

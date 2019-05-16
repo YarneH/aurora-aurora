@@ -17,6 +17,7 @@ import com.aurora.kernel.event.RetrieveFileFromCacheResponse;
 import com.aurora.kernel.event.UpdateCachedFileDateRequest;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import io.reactivex.Observable;
@@ -118,7 +119,7 @@ public class AuroraInternalServiceCommunicator extends Communicator {
 
         // Call appropriate method when request comes in
         mUpdateCachedFileDateRequestObservable.subscribe(request -> updateDate(request.getFileRef(),
-                request.getUniquePluginName()));
+                request.getUniquePluginName(), request.getNewDate()));
     }
 
     /**
@@ -243,7 +244,8 @@ public class AuroraInternalServiceCommunicator extends Communicator {
      * @param fileRef          a reference to the originally processed file
      * @param uniquePluginName the name of the plugin that the file was processed with
      */
-    private void updateDate(@NonNull final String fileRef, @NonNull final String uniquePluginName) {
-        mInternalCache.updateCachedFileDate(fileRef, uniquePluginName);
+    private void updateDate(@NonNull final String fileRef, @NonNull final String uniquePluginName,
+                            @NonNull final Date newDate) {
+        mInternalCache.updateCachedFileDate(fileRef, uniquePluginName, newDate);
     }
 }

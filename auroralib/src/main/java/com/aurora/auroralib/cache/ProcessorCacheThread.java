@@ -7,7 +7,7 @@ import com.aurora.auroralib.PluginObject;
 /**
  * This class should be used to call the CacheServiceCaller
  * Using a separate thread is necessary to avoid threading issues (OnServiceBound in CacheServiceCaller
- * is automatically called on main thread, which leads to threading/waiting dificulties)
+ * is automatically called on main thread, which leads to threading/waiting difficulties)
  */
 public class ProcessorCacheThread extends Thread {
     /**

@@ -24,14 +24,12 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.LinearInterpolator;
 import android.view.animation.TranslateAnimation;
 import android.webkit.MimeTypeMap;
-import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -139,6 +137,7 @@ public class MainActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+
         /* Set up kernel */
         try {
             mKernel = Kernel.getInstance(this.getApplicationContext());
@@ -216,6 +215,13 @@ public class MainActivity extends AppCompatActivity
     protected void onResume() {
         super.onResume();
         refreshCachedFileInfoList();
+
+        if (mAuroraCommunicator.isLoading()) {
+            // Show loading screen if it was visible before.
+            findViewById(R.id.pb_extracting).setVisibility(View.VISIBLE);
+        } else {
+            findViewById(R.id.pb_extracting).setVisibility(View.GONE);
+        }
     }
 
     /**
@@ -313,7 +319,6 @@ public class MainActivity extends AppCompatActivity
 
                     // Create intent to open file with a certain plugin
                     Intent pluginAction = new Intent(Constants.PLUGIN_ACTION);
-
                     pluginAction.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     pluginAction.setType("*/*");
 
@@ -442,8 +447,10 @@ public class MainActivity extends AppCompatActivity
             if (plugins.get(itemIndex).getUniqueName() != null) {
                 Plugin selectedPlugin = plugins.get(itemIndex);
                 Log.i(LOG_TAG, "Selected Plugin: " + selectedPlugin.getUniqueName());
+                findViewById(R.id.pb_extracting).setVisibility(View.VISIBLE);
                 mAuroraCommunicator.openFileWithPlugin(fileName, type, readFile,
                         selectedPlugin);
+                dialogInterface.cancel();
             }
         });
 
@@ -590,7 +597,11 @@ public class MainActivity extends AppCompatActivity
         return true;
     }
 
-
+    /**
+     * Shows the popup view for some info text.
+     *
+     * @param message Text to show
+     */
     private void showPopUpView(String message) {
         // Create a LayoutInflater which will create the view for the pop-up
         LayoutInflater inflater = LayoutInflater.from(this);
@@ -608,4 +619,5 @@ public class MainActivity extends AppCompatActivity
         // Create and show the pop-up
         alertDialogBuilder.create().show();
     }
+
 }
