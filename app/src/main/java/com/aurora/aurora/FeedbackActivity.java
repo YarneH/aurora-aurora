@@ -39,6 +39,9 @@ public class FeedbackActivity extends AppCompatActivity {
      */
     private static final String FEEDBACK_WEBHOOK_URL =
             "https://hooks.slack.com/services/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";
+    /**
+     * Edit text field.
+     */
     private EditText mEditTextFeedback = null;
 
     /**
@@ -50,6 +53,8 @@ public class FeedbackActivity extends AppCompatActivity {
         setContentView(R.layout.activity_feedback);
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setTitle(R.string.feedback_title);
+
 
         mEditTextFeedback = findViewById(R.id.et_feedback);
         mEditTextFeedback.setHint(getString(R.string.enter_feedback));
