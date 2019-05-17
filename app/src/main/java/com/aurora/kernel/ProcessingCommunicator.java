@@ -104,7 +104,7 @@ public class ProcessingCommunicator extends Communicator {
     }
 
     /**
-     * Translate sentences sent by a plugin
+     * Sentences to translate sent by a plugin
      *
      * @param sentences           the list of strings to be translated
      * @param sourceLanguage      the language of the input sentences in ISO code
