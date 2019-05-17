@@ -6,6 +6,7 @@
     android:layout_height="match_parent"
     android:background="@drawable/background"
     android:orientation="vertical"
+    android:scrollbars="vertical"
     android:padding="@dimen/fab_margin"
     tools:context=".FeedbackActivity">
 
@@ -33,6 +34,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:maxLength="500"
+            android:maxLines="10"
             android:textColorHint="@color/colorPrimary" />
     </android.support.design.widget.TextInputLayout>
 
@@ -41,12 +43,15 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp"
         android:background="@drawable/rounded_button"
         android:onClick="onFeedbackClick"
         android:text="@string/feedback_send"
         android:textAllCaps="false"
         android:textColor="#FFFFFF"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/name_text_input" />
+        app:layout_constraintTop_toBottomOf="@+id/name_text_input"
+        app:layout_constraintVertical_bias="0.0" />
 
 </android.support.constraint.ConstraintLayout>
