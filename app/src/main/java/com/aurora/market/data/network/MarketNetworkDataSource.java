@@ -13,6 +13,7 @@ import android.os.AsyncTask;
 import android.os.Environment;
 import android.support.v4.content.FileProvider;
 
+import android.util.Log;
 import com.aurora.aurora.R;
 import com.aurora.market.data.database.MarketPlugin;
 import com.firebase.jobdispatcher.Driver;
@@ -20,15 +21,16 @@ import com.firebase.jobdispatcher.FirebaseJobDispatcher;
 import com.firebase.jobdispatcher.GooglePlayDriver;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.concurrent.ExecutionException;
 
 /**
  * A singleton structure that is responsible for all the data of the Plugin Marget
@@ -182,8 +184,8 @@ public final class MarketNetworkDataSource {
 
                 // Parse response
                 return new JSONArray(jsonPluginListResponse);
-            } catch (Exception e) {
-                Logger.getLogger(this.getClass().getSimpleName()).log(Level.SEVERE, null, e);
+            } catch (IOException | JSONException e) {
+                Log.e(LOG_TAG, "exception", e);
             }
 
             return null;
@@ -194,10 +196,9 @@ public final class MarketNetworkDataSource {
          */
         @Override
         protected void onPostExecute(JSONArray pluginList) {
+            ArrayList<MarketPlugin> tempList = new ArrayList<>();
             if (pluginList != null) {
                 try {
-                    ArrayList<MarketPlugin> tempList = new ArrayList<>();
-
                     for (int i = 0; i < pluginList.length(); i++) {
                         JSONObject currentPlugin = pluginList.getJSONObject(i);
                         String imageLocation = currentPlugin.getString(JSON_LOGO_KEY);
@@ -214,13 +215,17 @@ public final class MarketNetworkDataSource {
 
                         tempList.add(currentMarketPlugin);
                     }
-
-                    mMarketPlugins.postValue(tempList);
-
-                } catch (Exception e) {
-                    Logger.getLogger(this.getClass().getSimpleName()).log(Level.SEVERE, null, e);
+                } catch (JSONException | ExecutionException e) {
+                    Log.e(LOG_TAG, "exception", e);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+            } else {
+                if (mMarketPlugins.getValue() != null && !mMarketPlugins.getValue().isEmpty()) {
+                    return;
                 }
             }
+            mMarketPlugins.postValue(tempList);
         }
     }
 
@@ -245,8 +250,8 @@ public final class MarketNetworkDataSource {
                 ByteArrayOutputStream stream = new ByteArrayOutputStream();
                 bitmap.compress(Bitmap.CompressFormat.PNG, COMPRESS_QUALITY, stream);
                 return stream.toByteArray();
-            } catch (Exception e) {
-                Logger.getLogger(this.getClass().getSimpleName()).log(Level.FINE, null, e);
+            } catch (IOException e) {
+                Log.e(LOG_TAG, "exception", e);
             }
             return new byte[0];
         }

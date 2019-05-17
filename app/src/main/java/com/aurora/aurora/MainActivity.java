@@ -7,8 +7,6 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.database.Cursor;
-import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -21,7 +19,6 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
@@ -29,11 +26,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.animation.Animation;
-import android.view.animation.LinearInterpolator;
-import android.view.animation.TranslateAnimation;
 import android.webkit.MimeTypeMap;
-import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 import com.aurora.auroralib.Constants;
@@ -86,16 +79,6 @@ public class MainActivity extends AppCompatActivity
     private static final int REQUEST_FILE_GET = 1;
 
     /**
-     * Constant for the duration of the pointing arrow animation
-     */
-    private static final int ANIMATION_DURATION = 500;
-
-    /**
-     * Constant for the position of the pointing arrow animation
-     */
-    private static final float END_POINT_OF_ANIMATION = 0.2F;
-
-    /**
      * Toast that holds the dummy text after a file is searched for.
      * This will disappear after file-search is implemented.
      */
@@ -144,7 +127,7 @@ public class MainActivity extends AppCompatActivity
             mKernel = Kernel.getInstance(this.getApplicationContext());
             mAuroraCommunicator = mKernel.getAuroraCommunicator();
         } catch (ContextNullException e) {
-            Log.e("MainActivity",
+            Log.e(LOG_TAG,
                     "The kernel was not initialized with a valid android application context", e);
         }
 
@@ -187,19 +170,6 @@ public class MainActivity extends AppCompatActivity
         /* Show TextView when RecyclerView is empty */
         if (adapter.getItemCount() == 0) {
             findViewById(R.id.cl_empty_text).setVisibility(View.VISIBLE);
-            ImageView arrow = findViewById(R.id.img_arrow);
-
-            // Set the animation of the arrow in the startscreen
-            TranslateAnimation mAnimation = new TranslateAnimation(
-                    TranslateAnimation.ABSOLUTE, 0F,
-                    TranslateAnimation.ABSOLUTE, 0F,
-                    TranslateAnimation.RELATIVE_TO_PARENT, 0F,
-                    TranslateAnimation.RELATIVE_TO_PARENT, END_POINT_OF_ANIMATION);
-            mAnimation.setDuration(ANIMATION_DURATION);
-            mAnimation.setRepeatCount(-1);
-            mAnimation.setRepeatMode(Animation.REVERSE);
-            mAnimation.setInterpolator(new LinearInterpolator());
-            arrow.setAnimation(mAnimation);
         }
 
         // If opening the file is done from a file explorer
@@ -219,7 +189,6 @@ public class MainActivity extends AppCompatActivity
 
         if (mAuroraCommunicator.isLoading()) {
             // Show loading screen if it was visible before.
-            // TODO: change back to visible
             findViewById(R.id.pb_extracting).setVisibility(View.VISIBLE);
             ((DrawerLayout) findViewById(R.id.drawer_layout))
                     .setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
@@ -252,13 +221,8 @@ public class MainActivity extends AppCompatActivity
                             .updateData(mCachedFileInfoList);
                     if (cachedFileInfos.isEmpty()) {
                         findViewById(R.id.cl_empty_text).setVisibility(View.VISIBLE);
-                        ((DrawerLayout) findViewById(R.id.drawer_layout))
-                                .setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
                     } else {
                         findViewById(R.id.cl_empty_text).setVisibility(View.GONE);
-                        ((DrawerLayout) findViewById(R.id.drawer_layout))
-                                .setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
-                        findViewById(R.id.nav_view).bringToFront();
                     }
                 }
 
