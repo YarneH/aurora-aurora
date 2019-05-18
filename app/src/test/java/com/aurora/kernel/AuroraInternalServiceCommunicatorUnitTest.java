@@ -298,7 +298,7 @@ public class AuroraInternalServiceCommunicatorUnitTest {
      */
     private class DummyPluginObject extends PluginObject {
         public DummyPluginObject() {
-            super("dummyfilename", "dummyplugin");
+            super("dummyfilename");
         }
     }
 }

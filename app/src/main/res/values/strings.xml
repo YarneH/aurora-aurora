@@ -40,6 +40,8 @@
     <string name="feedback_wrong">Something went wrong. Please try again.</string>
     <string name="feedback_empty">Please enter your feedback first.</string>
     <string name="enter_feedback">Enter your feedback here</string>
+    <string name="feedback_title">Feedback</string>
+
 
     <!-- Feedback activity -->
     <string name="feedback_send">Send</string>
@@ -73,6 +75,6 @@
     <string name="plugin_processing_failed">The plugin\'s processing failed.</string>
     <string name="plugin_failed_label">plugin failed</string>
     <string name="plugin_logo_description">Plugin logo</string>
-    <string name="feedback_title">Feedback</string>
+
 
 </resources>
