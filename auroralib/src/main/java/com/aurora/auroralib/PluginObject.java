@@ -15,8 +15,8 @@ import java.io.InputStreamReader;
 import java.io.Serializable;
 
 /**
- * Abstract class to represent that should be the main dataclass of a plugin. An extended
- * PluginObject is automatically cached by the
+ * Abstract class from which an extended class should be the main dataclass of a plugin. An
+ * extended PluginObject is automatically cached by the
  * {@link ProcessorCommunicator#pipeline(ExtractedText)}. Make sure that all the fields are
  * serializable or transient and that a plugin environment (the frontend) has all the information
  * needed to properly display it to end users. A PluginObject retrieved from the Aurora cache
