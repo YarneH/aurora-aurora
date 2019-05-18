@@ -58,7 +58,8 @@ public abstract class PluginObject implements Serializable {
     /**
      * Turn the JSON string back into a PluginObject object.
      *
-     * @param json The extracted JSON string of the PluginObject object
+     * @param json  The extracted JSON string of the PluginObject object
+     * @param type  Class to convert the Json to
      * @return PluginObject
      */
     public static final <T extends PluginObject> T fromJson(String json, Class<T> type) {
@@ -66,11 +67,12 @@ public abstract class PluginObject implements Serializable {
     }
 
     /**
-     * Method to convert the file accessed by the Uri to an PluginObject object
+     * Method to convert the file accessed by the Uri to a PluginObject object
      *
-     * @param fileUri The Uri to the temp file
-     * @param context The context
-     * @return ExtractedText object
+     * @param fileUri   The Uri to the temp file
+     * @param context   The context
+     * @param type      Class of the Object stored in the file on Uri
+     * @return PluginObject object
      * @throws IOException          On IO trouble
      * @throws NullPointerException When the file cannot be found.
      */
@@ -97,7 +99,7 @@ public abstract class PluginObject implements Serializable {
             }
         }
 
-        // Convert the read file to an ExtractedText object
+        // Convert the read file to a PluginObject object
         return fromJson(total.toString(), type);
     }
 
