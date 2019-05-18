@@ -71,12 +71,11 @@ public abstract class ProcessorCommunicator {
     public final PluginObject pipeline(@NonNull final ExtractedText extractedText) {
         try {
             PluginObject pluginObject = process(extractedText);
+            // set the name so the plugin cannot claim it was another plugin
+            pluginObject.setUniquePluginName(mUniquePluginName);
             ProcessorCacheThread processorCacheThread = new ProcessorCacheThread(pluginObject,
                     mCacheServiceCaller);
             processorCacheThread.start();
-
-            // set the name so the plugin cannot claim it was another plugin
-            pluginObject.setUniquePluginName(mUniquePluginName);
 
             return pluginObject;
         } catch (ProcessingFailedException e) {

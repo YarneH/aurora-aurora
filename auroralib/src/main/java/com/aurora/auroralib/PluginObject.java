@@ -46,6 +46,7 @@ public abstract class PluginObject implements Serializable {
      */
     protected String mUniquePluginName;
 
+    @Deprecated
     private PluginObject(@NonNull final String fileName, @NonNull final String uniquePluginName) {
         mFileName = fileName;
         mUniquePluginName = uniquePluginName;
