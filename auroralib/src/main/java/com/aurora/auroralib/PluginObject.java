@@ -46,12 +46,26 @@ public abstract class PluginObject implements Serializable {
      */
     protected String mUniquePluginName;
 
+    /**
+     * @deprecated The uniquePluginName should only be passed to the ProcessorCommunicator for safety
+     * The ProcessorCommunicator will then correctly set it
+     *
+     * PluginObject constructor
+     *
+     * @param fileName          Name of the processed file
+     * @param uniquePluginName  Unique name of the plugin that processed the file
+     */
     @Deprecated
     private PluginObject(@NonNull final String fileName, @NonNull final String uniquePluginName) {
         mFileName = fileName;
         mUniquePluginName = uniquePluginName;
     }
 
+    /**
+     * PluginObject constructor
+     *
+     * @param fileName Name of the processed file
+     */
     public PluginObject(@NonNull final String fileName) {
         mFileName = fileName;
     }
