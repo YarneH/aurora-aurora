@@ -155,11 +155,11 @@ public class CacheServiceCaller extends ServiceCaller {
         /**
          * Constructs a CacheThread
          *
-         * @param context           An application context object
-         * @param fileName          The name of the original file of the PluginObject to be cached
-         * @param uniquePluginName  The unique plugin name of the plugin that is executing the caching
-         *                          operation
-         * @param pluginObjectJSON  The PluginObject to be cached in JSON format
+         * @param context          An application context object
+         * @param fileName         The name of the original file of the PluginObject to be cached
+         * @param uniquePluginName The unique plugin name of the plugin that is executing the caching
+         *                         operation
+         * @param pluginObjectJSON The PluginObject to be cached in JSON format
          */
         CacheThread(final Context context, String fileName, String uniquePluginName,
                     String pluginObjectJSON) {
@@ -215,9 +215,9 @@ public class CacheServiceCaller extends ServiceCaller {
          * the cache service in Aurora.
          * If there is no connection to the service yet, this function waits until it is connected
          *
-         * @return                  an int corresponding to a value in CacheResults
-         * @throws RemoteException  is thrown by {@link CacheThread#writeToAurora()}
-         * @throws IOException      is thrown when waiting for the connection to the service gets interrupted
+         * @return an int corresponding to a value in CacheResults
+         * @throws RemoteException is thrown by {@link CacheThread#writeToAurora()}
+         * @throws IOException     is thrown when waiting for the connection to the service gets interrupted
          */
         private int cache() throws RemoteException, IOException {
             synchronized (mMonitor) {
@@ -251,7 +251,7 @@ public class CacheServiceCaller extends ServiceCaller {
          */
         private Uri writeToAurora() throws RemoteException, IOException {
             // Get a Uri to a file in internal storage of Aurora.
-            Uri uri = mCacheBinding.getWritePermissionUri( mContext.getPackageName());
+            Uri uri = mCacheBinding.getWritePermissionUri(mContext.getPackageName());
 
             // Open the file
             ParcelFileDescriptor outputPFD = mContext.getContentResolver().openFileDescriptor(uri
