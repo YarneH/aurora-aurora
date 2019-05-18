@@ -25,9 +25,11 @@ import edu.stanford.nlp.pipeline.ProtobufAnnotationSerializer;
 
 
 /**
- * Class to represent extracted text from an internal processor
+ * This class represents everything that could be extracted from a file by Aurora. It contains a
+ * file unique identifier {@link #mFilename}, a Title, a list of authors and
+ * a list of {@link Section}.
  */
-public class ExtractedText implements InternallyProcessedFile, Serializable {
+public class ExtractedText implements Serializable {
 
     /**
      * The filename, which is made unique with a prepended hash

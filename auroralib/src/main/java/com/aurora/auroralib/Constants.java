@@ -1,7 +1,10 @@
 package com.aurora.auroralib;
 
 /**
- * A class containing constants used for interaction between aurora and the plugins.
+ * A class containing constants used for interaction between aurora and the plugins. The most
+ * important constants are {@link #PLUGIN_ACTION} which specifies that a plugin should be
+ * launched and {@link #PLUGIN_INPUT_TYPE} which is an {@link android.content.Intent} extra key
+ * where the value specifies the input type.
  */
 public final class Constants {
     /**

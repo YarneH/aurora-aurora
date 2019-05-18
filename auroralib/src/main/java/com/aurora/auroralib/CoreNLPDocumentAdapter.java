@@ -1,10 +1,10 @@
 package com.aurora.auroralib;
 
 import com.google.gson.JsonParser;
-import com.google.protobuf.util.JsonFormat;
 import com.google.gson.TypeAdapter;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
+import com.google.protobuf.util.JsonFormat;
 
 import java.io.IOException;
 
@@ -12,12 +12,12 @@ import edu.stanford.nlp.pipeline.CoreNLPProtos;
 
 /**
  * <p>
- *  An adapter class for converting CoreNLPProtos.Document based on Google's ProtoBuf scheme to
- *  Json with Gson and back.
+ * An adapter class for converting CoreNLPProtos.Document based on Google's ProtoBuf scheme to
+ * Json with Gson and back.
  * </p>
  * <p>
- *     Fields that are of CoreNLPProtos.Document type should be annotated with @JsonAdapter
- *     (CoreNLPDocumentAdapter.class) and the correct adapter will then automatically be called.
+ * Fields that are of CoreNLPProtos.Document type should be annotated with @JsonAdapter
+ * (CoreNLPDocumentAdapter.class) and the correct adapter will then automatically be called.
  * </p>
  */
 public class CoreNLPDocumentAdapter extends TypeAdapter {
@@ -33,7 +33,7 @@ public class CoreNLPDocumentAdapter extends TypeAdapter {
     @Override
     public void write(JsonWriter out, Object value) throws IOException {
         // Call the printer of the JsonFormat class to convert the Person proto message to Json
-        out.jsonValue(JsonFormat.printer().print((CoreNLPProtos.Document)value));
+        out.jsonValue(JsonFormat.printer().print((CoreNLPProtos.Document) value));
     }
 
     /**
