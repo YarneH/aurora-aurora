@@ -74,6 +74,10 @@ public abstract class ProcessorCommunicator {
             ProcessorCacheThread processorCacheThread = new ProcessorCacheThread(pluginObject,
                     mCacheServiceCaller);
             processorCacheThread.start();
+
+            // set the name so the plugin cannot claim it was another plugin
+            pluginObject.setUniquePluginName(mUniquePluginName);
+
             return pluginObject;
         } catch (ProcessingFailedException e) {
             // If processing failed, start intent to open activity in aurora

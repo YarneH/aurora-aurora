@@ -35,9 +35,13 @@ public abstract class PluginObject implements Serializable {
      */
     protected String mUniquePluginName;
 
-    public PluginObject(@NonNull final String fileName, @NonNull final String uniquePluginName) {
+    private PluginObject(@NonNull final String fileName, @NonNull final String uniquePluginName) {
         mFileName = fileName;
         mUniquePluginName = uniquePluginName;
+    }
+
+    public PluginObject(@NonNull final String fileName) {
+        mFileName = fileName;
     }
 
     /**
@@ -113,7 +117,7 @@ public abstract class PluginObject implements Serializable {
      *
      * @param uniquePluginName name of the plugin
      */
-    public void setUniquePluginName(@NonNull final String uniquePluginName) {
+     void setUniquePluginName(@NonNull final String uniquePluginName) {
         mUniquePluginName = uniquePluginName;
     }
 

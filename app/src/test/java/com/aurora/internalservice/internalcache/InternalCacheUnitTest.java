@@ -354,7 +354,7 @@ public class InternalCacheUnitTest {
         private String mText;
 
         public DummyPluginObject1(String title, String text) {
-            super("dummyfilename", "dummyplugin");
+            super("dummyfilename");
             mTitle = title;
             mText = text;
         }
@@ -375,7 +375,7 @@ public class InternalCacheUnitTest {
         private String mName;
 
         public DummyPluginObject2(String title, int number, String name) {
-            super("dummyfilename", "dummyplugin");
+            super("dummyfilename");
             mTitle = title;
             mNumber = number;
             mName = name;
