@@ -15,7 +15,18 @@ import java.io.InputStreamReader;
 import java.io.Serializable;
 
 /**
- * Class to represent text processed by the plugin
+ * Abstract class to represent that should be the main dataclass of a plugin. An extended
+ * PluginObject is automatically cached by the
+ * {@link ProcessorCommunicator#pipeline(ExtractedText)}. Make sure that all the fields are
+ * serializable or transient and that a plugin environment (the frontend) has all the information
+ * needed to properly display it to end users. A PluginObject retrieved from the Aurora cache
+ * should still have everything necessary to construct the views without additional processing.
+ *
+ * <p>
+ * Currently {@link com.google.gson.TypeAdapter} for the following not Serializable objects
+ * exist: {@link BitmapListAdapter} and {@link CoreNLPDocumentAdapter}. These can be used by
+ * placing an &#64;JsonAdapter({@link com.google.gson.TypeAdapter}.class) in front of the field.
+ * </p>
  */
 public abstract class PluginObject implements Serializable {
 
