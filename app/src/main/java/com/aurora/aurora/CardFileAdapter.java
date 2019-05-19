@@ -217,6 +217,10 @@ public class CardFileAdapter extends RecyclerView.Adapter<CardFileAdapter.CardFi
         }
     }
 
+    /**
+     * Remove a cached file from the list
+     * @param i the index of the cached file that needs to be removed
+     */
     public void removeCard(int i) {
         CachedFileInfo current = mCachedFileInfoList.remove(i);
         mKernel.getAuroraCommunicator().removeFileFromCache(current.getFileRef(), current.getUniquePluginName());

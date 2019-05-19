@@ -86,6 +86,11 @@ public class MainActivity extends AppCompatActivity
     private static final int REQUEST_FILE_GET = 1;
 
     /**
+     * Devide a number in half
+     */
+    private static final int DEVIDE_IN_HALF = 2;
+
+    /**
      * Android view which is basically a scrollview, but efficiently
      * reuses the containers.
      * <br>
@@ -126,7 +131,6 @@ public class MainActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-
         /* Set up kernel */
         /* Listen to the loading state of the communicator */
         try {
@@ -160,7 +164,8 @@ public class MainActivity extends AppCompatActivity
         /* Setup swipes of RecyclerView */
         ItemTouchHelper.SimpleCallback simpleCallback = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT) {
             @Override
-            public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder viewHolder1) {
+            public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder,
+                                  @NonNull RecyclerView.ViewHolder viewHolder1) {
                 return false;
             }
 
@@ -171,7 +176,9 @@ public class MainActivity extends AppCompatActivity
             }
 
             @Override
-            public void onChildDraw(@NonNull Canvas c, @NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, float dX, float dY, int actionState, boolean isCurrentlyActive) {
+            public void onChildDraw(@NonNull Canvas c, @NonNull RecyclerView recyclerView,
+                                    @NonNull RecyclerView.ViewHolder viewHolder, float dX, float dY, int actionState,
+                                    boolean isCurrentlyActive) {
                 super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive);
                 View itemView = viewHolder.itemView;
                 int itemHeight = itemView.getHeight();
@@ -180,8 +187,8 @@ public class MainActivity extends AppCompatActivity
                 int iconWidth = icon.getIntrinsicWidth();
 
                 // Calculate the position of the icon
-                int deleteIconTop = itemView.getTop() + (itemHeight - iconHeight) / 2;
-                int deleteIconMargin = (itemHeight - iconHeight) / 2;
+                int deleteIconTop = itemView.getTop() + (itemHeight - iconHeight) / DEVIDE_IN_HALF;
+                int deleteIconMargin = (itemHeight - iconHeight) / DEVIDE_IN_HALF;
                 int deleteIconLeft = itemView.getRight() - deleteIconMargin - iconWidth;
                 int deleteIconRight = itemView.getRight() - deleteIconMargin;
                 int deleteIconBottom = deleteIconTop + iconHeight;
@@ -189,7 +196,6 @@ public class MainActivity extends AppCompatActivity
                 // Draw icon
                 icon.setBounds(deleteIconLeft, deleteIconTop, deleteIconRight, deleteIconBottom);
                 icon.draw(c);
-
             }
         };
 
@@ -205,10 +211,8 @@ public class MainActivity extends AppCompatActivity
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        /* The floating action button to add files */
-        FloatingActionButton fab = findViewById(R.id.fab_download_plugin);
         /* Implementation of adding files in onClick */
-        fab.setOnClickListener(view -> selectFile());
+        findViewById(R.id.fab_download_plugin).setOnClickListener(view -> selectFile());
 
         /* Listener and sync are for navigationView functionality */
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
