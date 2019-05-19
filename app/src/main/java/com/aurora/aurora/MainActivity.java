@@ -151,9 +151,8 @@ public class MainActivity extends AppCompatActivity
 
             @Override
             public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int i) {
-                Log.d("Recycler", "" + i);
-                Log.d("Recycler", "" + viewHolder.getAdapterPosition());
                 ((CardFileAdapter) mRecyclerView.getAdapter()).removeCard(viewHolder.getAdapterPosition());
+                ((CardFileAdapter) mRecyclerView.getAdapter()).notifyDataSetChanged();
             }
 
             @Override

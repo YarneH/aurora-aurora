@@ -16,8 +16,6 @@ import android.widget.TextView;
 
 import com.aurora.internalservice.internalcache.CachedFileInfo;
 import com.aurora.kernel.Kernel;
-import io.reactivex.Observer;
-import io.reactivex.disposables.Disposable;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -178,6 +176,16 @@ public class CardFileAdapter extends RecyclerView.Adapter<CardFileAdapter.CardFi
             mCachedFileInfo = mCachedFileInfoList.get(index);
             String lastOpenedBase = mLastOpenedTextView.getResources().getString(R.string.file_last);
 
+            try {
+                Drawable icon = mContext.getPackageManager().getApplicationIcon(
+                        mCachedFileInfo.getUniquePluginName());
+                mIconImageView.setImageDrawable(icon);
+            } catch (PackageManager.NameNotFoundException e) {
+                // The plugin is no longer installed, so the file should be removed from the cache
+                removeCard(index);
+                return;
+            }
+
             // Set name of the correct file to the reused container.
             mTitleTextView.setText(mCachedFileInfo.getFileDisplayName());
             StringBuilder bld = new StringBuilder(lastOpenedBase)
@@ -185,15 +193,6 @@ public class CardFileAdapter extends RecyclerView.Adapter<CardFileAdapter.CardFi
                     .append(mDateFormat.format(mCachedFileInfo.getLastOpened()));
 
             mLastOpenedTextView.setText(bld.toString());
-
-            try {
-                Drawable icon = mContext.getPackageManager().getApplicationIcon(
-                        mCachedFileInfo.getUniquePluginName());
-                mIconImageView.setImageDrawable(icon);
-            } catch (PackageManager.NameNotFoundException e) {
-                Log.e(LOG_TAG, "Package not found when getting icon for packageName: " +
-                        mCachedFileInfo.getUniquePluginName(), e);
-            }
 
             /*
             If the card is the selected card, expand it (as it was when it was scrolled away
@@ -289,7 +288,6 @@ public class CardFileAdapter extends RecyclerView.Adapter<CardFileAdapter.CardFi
         CachedFileInfo current = mCachedFileInfoList.remove(i);
         mKernel.getAuroraCommunicator().removeFileFromCache(current.getFileRef(), current.getUniquePluginName());
         mAmount--;
-        notifyDataSetChanged();
     }
 
     /**
