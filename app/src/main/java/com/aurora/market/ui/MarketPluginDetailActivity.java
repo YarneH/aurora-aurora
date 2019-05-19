@@ -102,10 +102,15 @@ public class MarketPluginDetailActivity extends AppCompatActivity {
             }
         });
 
+        // Save the MarketPlugin
+        mMarketPlugin = (MarketPlugin) getIntent().getSerializableExtra(MarketPluginDetailFragment.ARG_MARKET_PLUGIN);
+        updateDownloadUI();
+
         // Show the Up button in the action bar.
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(true);
+            actionBar.setTitle(mMarketPlugin.getPluginName());
         }
 
         // savedInstanceState is non-null when there is fragment state saved from previous configurations
@@ -125,10 +130,6 @@ public class MarketPluginDetailActivity extends AppCompatActivity {
                     .add(R.id.marketplugin_detail_container, fragment)
                     .commit();
         }
-
-        // Save the MarketPlugin
-        mMarketPlugin = (MarketPlugin) getIntent().getSerializableExtra(MarketPluginDetailFragment.ARG_MARKET_PLUGIN);
-        updateDownloadUI();
     }
 
     /**
