@@ -9,7 +9,9 @@
     android:layout_height="wrap_content"
     android:layout_marginLeft="@dimen/fc_margin_horizontal"
     android:layout_marginTop="@dimen/fc_margin_vertical"
-    android:layout_marginRight="@dimen/fc_margin_horizontal">
+    android:layout_marginRight="@dimen/fc_margin_horizontal"
+    app:cardCornerRadius="@dimen/fc_corner_radius"
+    app:cardElevation="@dimen/fc_elevation">
 
     <!-- This LinearLayout holds the whole content of the cardview -->
     <android.support.constraint.ConstraintLayout
@@ -19,18 +21,27 @@
         android:background="?android:attr/selectableItemBackground"
         android:padding="@dimen/fc_padding">
 
+        <android.support.constraint.Guideline
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/guideline"
+            android:orientation="vertical"
+            app:layout_constraintGuide_percent="0.8"/>
+
         <!-- File name -->
         <!-- Gravity "start" in stead of "left".
             Users might use right to left text flow. -->
         <TextView
             android:id="@+id/tv_card_title"
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_gravity="start"
             android:textSize="@dimen/fc_large_text"
             android:textStyle="bold"
+            android:singleLine="true"
+            android:ellipsize="middle"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"/>
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/iv_icon" />
 
         <!-- Description of the file -->
         <TextView
@@ -48,10 +59,11 @@
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:scaleType="fitEnd"
+            android:contentDescription="@string/icon_of_the_plugin"
             app:layout_constraintBottom_toBottomOf="@id/cv_fl_base_card"
             app:layout_constraintEnd_toEndOf="@id/cv_fl_base_card"
-            app:layout_constraintStart_toStartOf="@id/cv_fl_base_card"
-            app:layout_constraintTop_toTopOf="@id/cv_fl_base_card"/>
+            app:layout_constraintStart_toStartOf="@+id/guideline"
+            app:layout_constraintTop_toTopOf="@id/cv_fl_base_card" android:layout_marginStart="8dp"/>
 
         <!-- Details of the file -->
         <!-- TODO: Remove invisibility if details should be used! -->
