@@ -17,6 +17,7 @@ import java.util.List;
 
 public class ExtractedTextUnitTest {
 
+    private static final String FILEURI = "dummyFileUri";
     private static final String FILENAME = "13456_dummyFileName";
 
     private static final String title = "UselessTitle";
@@ -50,7 +51,7 @@ public class ExtractedTextUnitTest {
     public void ExtractedText_fromJson_shouldCreateExtractedTextObjectFromJsonString() {
         // Create Extracted text object and then manually create jsonString
         List<String> sections = Arrays.asList("Hello", "there", "General", "Kenobi");
-        ExtractedText extractedText = new ExtractedText(FILENAME, sections);
+        ExtractedText extractedText = new ExtractedText(FILEURI, FILENAME, sections);
 
         Gson gson = new Gson();
         String jsonString = gson.toJson(extractedText, ExtractedText.class);
@@ -66,7 +67,7 @@ public class ExtractedTextUnitTest {
 
     @Test
     public void ExtractedText_getters_shouldRetrieveElements() {
-        ExtractedText extractedText = new ExtractedText(FILENAME);
+        ExtractedText extractedText = new ExtractedText(FILEURI, FILENAME);
 
         List<Section> sections = new ArrayList<>();
         sections.add(section1);
@@ -91,7 +92,7 @@ public class ExtractedTextUnitTest {
 
     @Test
     public void ExtractedText_getters_shouldNotReturnNull() {
-        ExtractedText extractedText = new ExtractedText(FILENAME);
+        ExtractedText extractedText = new ExtractedText(FILEURI, FILENAME);
 
         Assert.assertNotNull(extractedText.getFilename());
         Assert.assertNotNull(extractedText.getFileDisplayName());
@@ -104,7 +105,7 @@ public class ExtractedTextUnitTest {
     @Test
     public void ExctractedText_fromJson_toJsonFromJsonShouldBeIdemPotent(){
 
-        ExtractedText extractedText = new ExtractedText(FILENAME);
+        ExtractedText extractedText = new ExtractedText(FILEURI, FILENAME);
 
         extractedText.setTitle(title);
         extractedText.setAuthors(authors);
