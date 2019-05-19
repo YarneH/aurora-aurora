@@ -37,7 +37,7 @@
 
     <!-- Feedback Activity -->
     <string name="feedback_sent">Feedback sent, thank you!</string>
-    <string name="feedback_wrong">Something went wrong. Please try again.</string>
+    <string name="feedback_wrong">Something went wrong. Are you connected to the internet?</string>
     <string name="feedback_empty">Please enter your feedback first.</string>
     <string name="enter_feedback">Enter your feedback here</string>
     <string name="feedback_title">Feedback</string>
