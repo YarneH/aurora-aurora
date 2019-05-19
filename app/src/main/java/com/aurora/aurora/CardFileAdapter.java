@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
-import android.support.constraint.ConstraintLayout;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -201,11 +200,8 @@ public class CardFileAdapter extends RecyclerView.Adapter<CardFileAdapter.CardFi
         @Override
         public boolean onLongClick(View view) {
             // If the click happened on the card itself
-            if (view.getId() == R.id.cv_file) {
-
-                if (view.getId() != 0) {
+            if (view.getId() == R.id.cv_file && view.getId() != 0) {
                     return true;
-                }
                 // if the click happened on the open button
             }
             return false;
