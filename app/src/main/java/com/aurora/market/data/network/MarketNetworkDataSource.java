@@ -250,7 +250,7 @@ public final class MarketNetworkDataSource {
             try {
                 URL downloadLink = new URL(url);
                 bitmap = NetworkUtils.getBitmapFromHttpUrl(downloadLink);
-            } catch (IOException | NullPointerException e) {
+            } catch (IOException e) {
                 Log.e(LOG_TAG, "exception", e);
             }
 
