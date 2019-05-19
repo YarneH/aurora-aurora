@@ -20,7 +20,6 @@ import com.aurora.kernel.event.OpenFileWithPluginRequest;
 import com.aurora.kernel.event.QueryCacheRequest;
 import com.aurora.kernel.event.QueryCacheResponse;
 import com.aurora.kernel.event.RemoveFromCacheRequest;
-import com.aurora.kernel.event.RemoveFromCacheResponse;
 import com.aurora.kernel.event.RetrieveFileFromCacheRequest;
 import com.aurora.kernel.event.RetrieveFileFromCacheResponse;
 import com.aurora.kernel.event.UpdateCachedFileDateRequest;
