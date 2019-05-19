@@ -28,11 +28,6 @@ public class CardFileAdapter extends RecyclerView.Adapter<CardFileAdapter.CardFi
     private static final String LOG_TAG = CardFileAdapter.class.getSimpleName();
 
     /**
-     * The option to have no selected card in the RecyclerView
-     */
-    private static final int NO_DETAILS = -1;
-
-    /**
      * The format of a date used in the cards
      */
     private final SimpleDateFormat mDateFormat = new SimpleDateFormat("E, dd MMM yyyy");
@@ -46,11 +41,6 @@ public class CardFileAdapter extends RecyclerView.Adapter<CardFileAdapter.CardFi
      * The data of the cached files
      */
     private List<CachedFileInfo> mCachedFileInfoList = new ArrayList<>();
-
-    /**
-     * The index of the currently selected file (file card that is expanded)
-     */
-    private int mSelectedIndex = NO_DETAILS;
 
     /**
      * The context of the application
@@ -179,11 +169,11 @@ public class CardFileAdapter extends RecyclerView.Adapter<CardFileAdapter.CardFi
 
             // Set name of the correct file to the reused container.
             mTitleTextView.setText(mCachedFileInfo.getFileDisplayName());
-            StringBuilder bld = new StringBuilder(lastOpenedBase)
-                    .append(" ")
-                    .append(mDateFormat.format(mCachedFileInfo.getLastOpened()));
 
-            mLastOpenedTextView.setText(bld.toString());
+            String bld = lastOpenedBase +
+                    " " +
+                    mDateFormat.format(mCachedFileInfo.getLastOpened());
+            mLastOpenedTextView.setText(bld);
 
             try {
                 Drawable icon = mContext.getPackageManager().getApplicationIcon(
@@ -192,17 +182,6 @@ public class CardFileAdapter extends RecyclerView.Adapter<CardFileAdapter.CardFi
             } catch (PackageManager.NameNotFoundException e) {
                 Log.e(LOG_TAG, "Package not found when getting icon for packageName: " +
                         mCachedFileInfo.getUniquePluginName(), e);
-            }
-
-            /*
-            If the card is the selected card, expand it (as it was when it was scrolled away
-            from screen). Otherwise collapse. Collapse must happen, because the container might
-            still be expanded from the reuse of another container.
-             */
-            if (i == mSelectedIndex) {
-                expand(mCardView);
-            } else {
-                collapse(mCardView);
             }
         }
 
@@ -221,81 +200,16 @@ public class CardFileAdapter extends RecyclerView.Adapter<CardFileAdapter.CardFi
 
         @Override
         public boolean onLongClick(View view) {
-            boolean clickConsumed = false;
             // If the click happened on the card itself
             if (view.getId() == R.id.cv_file) {
 
-                // TODO: Remove this 'return' if card details should be enabled!
                 if (view.getId() != 0) {
                     return true;
                 }
-
-                // If the click happened on the card itself
-                if (mSelectedIndex == NO_DETAILS) {
-                    /*
-                    Case no card selected. Sets the selected card and expands the view.
-                     */
-                    mSelectedIndex = index;
-                    expand(view);
-                    clickConsumed = true;
-                } else if (mSelectedIndex == index) {
-                    /*
-                    Case the clicked card is the expanded card.
-                    Unset the selected card, collapse this card.
-                     */
-                    mSelectedIndex = NO_DETAILS;
-                    collapse(view);
-                    clickConsumed = true;
-                } else {
-                    /*
-                    Case where a card is selected but a different card is clicked.
-                    Find the previously expanded card, and collapse it only if it is in view.
-                    Otherwise a nullpointerException might be found (since it does not currently
-                    exist).
-                    Set the index to the selected card, and expand that card.
-                     */
-                    RecyclerView recyclerView = (RecyclerView) view.getParent();
-
-                    CardFileViewHolder prev = (CardFileViewHolder) recyclerView.findViewHolderForLayoutPosition(
-                            mSelectedIndex);
-                    if (prev != null) {
-                        collapse(prev.mCardView);
-                    }
-                    mSelectedIndex = index;
-                    expand(view);
-                    clickConsumed = true;
-                }
                 // if the click happened on the open button
             }
-            return clickConsumed;
+            return false;
         }
     }
 
-    /**
-     * Expand the view to show details.
-     * Simply sets the visibility of the details to VISIBLE, while setting the original card to GONE
-     *
-     * @param v view to expand
-     */
-    public static void expand(final View v) {
-        ConstraintLayout detailView = v.findViewById(R.id.cv_fl_detail);
-        TextView baseView = v.findViewById(R.id.tv_card_more_details);
-        detailView.setVisibility(View.VISIBLE);
-        baseView.setVisibility(View.GONE);
-    }
-
-    /**
-     * Collapse an expanded view.
-     * Swaps visibility of the detail view and base view to GONE and VISIBLE respectively.
-     *
-     * @param v view to collapse
-     */
-    public static void collapse(final View v) {
-        ConstraintLayout detailView = v.findViewById(R.id.cv_fl_detail);
-        // TODO: Uncomment if details of card should be used!
-        // TextView baseView = v.findViewById(R.id.tv_card_more_details)
-        detailView.setVisibility(View.GONE);
-        // TODO: Uncomment if details of card should be used!
-        // baseView.setVisibility(View.VISIBLE)
-    }
 }
