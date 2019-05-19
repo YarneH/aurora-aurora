@@ -109,8 +109,7 @@ public class CardFileAdapter extends RecyclerView.Adapter<CardFileAdapter.CardFi
     /**
      * ViewHolder for the recyclerview. Holds the file cards.
      */
-    public class CardFileViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener,
-            View.OnLongClickListener {
+    public class CardFileViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         /**
          * The Title TextView
          */
@@ -150,7 +149,6 @@ public class CardFileAdapter extends RecyclerView.Adapter<CardFileAdapter.CardFi
             mIconImageView = itemView.findViewById(R.id.iv_icon);
             // The card itself is clickable (for details), but also the open button.
             mCardView.setOnClickListener(this);
-            mCardView.setOnLongClickListener(this);
         }
 
         /**
@@ -163,7 +161,6 @@ public class CardFileAdapter extends RecyclerView.Adapter<CardFileAdapter.CardFi
         public void bind(int i) {
             index = i;
             mCachedFileInfo = mCachedFileInfoList.get(index);
-            String lastOpenedBase = mLastOpenedTextView.getResources().getString(R.string.file_last);
 
             try {
                 Drawable icon = mContext.getPackageManager().getApplicationIcon(
@@ -178,6 +175,7 @@ public class CardFileAdapter extends RecyclerView.Adapter<CardFileAdapter.CardFi
             // Set name of the correct file to the reused container.
             mTitleTextView.setText(mCachedFileInfo.getFileDisplayName());
 
+            String lastOpenedBase = mLastOpenedTextView.getResources().getString(R.string.file_last);
             String bld = lastOpenedBase +
                     " " +
                     mDateFormat.format(mCachedFileInfo.getLastOpened());
@@ -204,16 +202,6 @@ public class CardFileAdapter extends RecyclerView.Adapter<CardFileAdapter.CardFi
                 mKernel.getAuroraCommunicator().openFileWithCache(mCachedFileInfo.getFileRef(),
                         mCachedFileInfo.getUniquePluginName());
             }
-        }
-
-        @Override
-        public boolean onLongClick(View view) {
-            // If the click happened on the card itself
-            if (view.getId() == R.id.cv_file && view.getId() != 0) {
-                    return true;
-                // if the click happened on the open button
-            }
-            return false;
         }
     }
 

@@ -9,15 +9,12 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.database.Cursor;
 import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.OpenableColumns;
 import android.support.annotation.NonNull;
-import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -34,7 +31,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.webkit.MimeTypeMap;
 import android.widget.TextView;
-
 import com.aurora.auroralib.Constants;
 import com.aurora.internalservice.internalcache.CachedFileInfo;
 import com.aurora.kernel.AuroraCommunicator;
@@ -44,15 +40,14 @@ import com.aurora.market.ui.MarketPluginListActivity;
 import com.aurora.plugin.InternalServices;
 import com.aurora.plugin.Plugin;
 import com.google.firebase.analytics.FirebaseAnalytics;
+import io.reactivex.Observer;
+import io.reactivex.disposables.Disposable;
 
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-
-import io.reactivex.Observer;
-import io.reactivex.disposables.Disposable;
 
 /**
  * The main activity of the application, started when the app is opened.
@@ -132,28 +127,7 @@ public class MainActivity extends AppCompatActivity
         setContentView(R.layout.activity_main);
 
         /* Set up kernel */
-        /* Listen to the loading state of the communicator */
-        try {
-            mKernel = Kernel.getInstance(this.getApplicationContext());
-            mAuroraCommunicator = mKernel.getAuroraCommunicator();
-            mLoading = mAuroraCommunicator.getLoadingData();
-            mLoading.observe(this, (Boolean isLoading) -> {
-                if (isLoading == null || !isLoading) {
-                    findViewById(R.id.pb_extracting).setVisibility(View.GONE);
-                    findViewById(R.id.nav_view).bringToFront();
-                    ((DrawerLayout) findViewById(R.id.drawer_layout))
-                            .setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
-                } else {
-                    // Show loading screen if it was visible before.
-                    findViewById(R.id.pb_extracting).setVisibility(View.VISIBLE);
-                    ((DrawerLayout) findViewById(R.id.drawer_layout))
-                            .setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
-                }
-            });
-        } catch (ContextNullException e) {
-            Log.e(LOG_TAG,
-                    "The kernel was not initialized with a valid android application context", e);
-        }
+        setupKernel();
 
         /* Setup RecyclerView */
         mRecyclerView = findViewById(R.id.rv_files);
@@ -235,6 +209,34 @@ public class MainActivity extends AppCompatActivity
         if (Intent.ACTION_VIEW.equals(getIntent().getAction())) {
             // This method is also called when a file is opened from the file chooser
             onActivityResult(REQUEST_FILE_GET, RESULT_OK, getIntent());
+        }
+    }
+
+    /**
+     * Set up the kernel
+     */
+    private void setupKernel(){
+        /* Listen to the loading state of the communicator */
+        try {
+            mKernel = Kernel.getInstance(this.getApplicationContext());
+            mAuroraCommunicator = mKernel.getAuroraCommunicator();
+            mLoading = mAuroraCommunicator.getLoadingData();
+            mLoading.observe(this, (Boolean isLoading) -> {
+                if (isLoading == null || !isLoading) {
+                    findViewById(R.id.pb_extracting).setVisibility(View.GONE);
+                    findViewById(R.id.nav_view).bringToFront();
+                    ((DrawerLayout) findViewById(R.id.drawer_layout))
+                            .setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
+                } else {
+                    // Show loading screen if it was visible before.
+                    findViewById(R.id.pb_extracting).setVisibility(View.VISIBLE);
+                    ((DrawerLayout) findViewById(R.id.drawer_layout))
+                            .setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
+                }
+            });
+        } catch (ContextNullException e) {
+            Log.e(LOG_TAG,
+                    "The kernel was not initialized with a valid android application context", e);
         }
     }
 
