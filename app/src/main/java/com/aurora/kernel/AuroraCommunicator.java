@@ -18,6 +18,8 @@ import com.aurora.kernel.event.OpenCachedFileWithPluginRequest;
 import com.aurora.kernel.event.OpenFileWithPluginRequest;
 import com.aurora.kernel.event.QueryCacheRequest;
 import com.aurora.kernel.event.QueryCacheResponse;
+import com.aurora.kernel.event.RemoveFromCacheRequest;
+import com.aurora.kernel.event.RemoveFromCacheResponse;
 import com.aurora.kernel.event.RetrieveFileFromCacheRequest;
 import com.aurora.kernel.event.RetrieveFileFromCacheResponse;
 import com.aurora.kernel.event.UpdateCachedFileDateRequest;
@@ -188,6 +190,30 @@ public class AuroraCommunicator extends Communicator {
         QueryCacheRequest request = new QueryCacheRequest(maxLength);
         mBus.post(request);
 
+    }
+
+    /**
+     * Removes a file from the cache, if it is present. In case the file is not in the cache, nothing will happen.
+     *
+     * @param fileRef          a reference to the file to remove
+     * @param uniquePluginName the name of the plugin that the file was opened with
+     * @param observer an observer instance that contains code that will be executed when the response comes in.
+     *                 The boolean coming in indicates if the deletion was successful or not
+     */
+    public void removeFileFromCache(@NonNull final String fileRef, @NonNull final String uniquePluginName,
+                                    @NonNull final Observer<Boolean> observer) {
+        // Register for response
+        Observable<RemoveFromCacheResponse> removeFromCacheResponseObservable =
+                mBus.register(RemoveFromCacheResponse.class);
+
+        // Subscribe the observer to the observable
+        removeFromCacheResponseObservable
+                .map(RemoveFromCacheResponse::isSuccess)
+                .subscribe(observer);
+
+        // Create request and post it on the bus
+        RemoveFromCacheRequest removeFromCacheRequest = new RemoveFromCacheRequest(fileRef, uniquePluginName);
+        mBus.post(removeFromCacheRequest);
     }
 
     /**

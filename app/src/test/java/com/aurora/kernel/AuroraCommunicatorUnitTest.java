@@ -14,6 +14,8 @@ import com.aurora.kernel.event.InternalProcessorResponse;
 import com.aurora.kernel.event.OpenCachedFileWithPluginRequest;
 import com.aurora.kernel.event.OpenFileWithPluginRequest;
 import com.aurora.kernel.event.QueryCacheResponse;
+import com.aurora.kernel.event.RemoveFromCacheRequest;
+import com.aurora.kernel.event.RemoveFromCacheResponse;
 import com.aurora.kernel.event.RetrieveFileFromCacheRequest;
 import com.aurora.kernel.event.RetrieveFileFromCacheResponse;
 import com.aurora.plugin.Plugin;
@@ -187,6 +189,28 @@ public class AuroraCommunicatorUnitTest {
         // Assert values
         testObserver.assertSubscribed();
         testObserver.assertValue(cachedFilesList);
+    }
+
+    @Test
+    public void AuroraCommunicator_removeFileFromCache_shouldSendRequestToRemoveFile() {
+        // Create test observer
+        TestObserver<Boolean> testObserver = new TestObserver<>();
+
+        // Register for requests and subscribe
+        Observable<RemoveFromCacheRequest> removeFromCacheRequestObservable =
+                sBus.register(RemoveFromCacheRequest.class);
+
+        boolean success = true;
+        removeFromCacheRequestObservable.subscribe(removeFromCacheRequest ->
+                sBus.post(new RemoveFromCacheResponse(true)));
+
+        // Call method under test
+        String fileRef = "dummyfileref.pdf";
+        String uniquePluginName = "com.aurora.dummyplugin";
+        sAuroraCommunicator.removeFileFromCache(fileRef, uniquePluginName, testObserver);
+
+        testObserver.assertSubscribed();
+        testObserver.assertValue(success);
     }
 
 
