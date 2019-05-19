@@ -197,20 +197,8 @@ public class AuroraCommunicator extends Communicator {
      *
      * @param fileRef          a reference to the file to remove
      * @param uniquePluginName the name of the plugin that the file was opened with
-     * @param observer an observer instance that contains code that will be executed when the response comes in.
-     *                 The boolean coming in indicates if the deletion was successful or not
      */
-    public void removeFileFromCache(@NonNull final String fileRef, @NonNull final String uniquePluginName,
-                                    @NonNull final Observer<Boolean> observer) {
-        // Register for response
-        Observable<RemoveFromCacheResponse> removeFromCacheResponseObservable =
-                mBus.register(RemoveFromCacheResponse.class);
-
-        // Subscribe the observer to the observable
-        removeFromCacheResponseObservable
-                .map(RemoveFromCacheResponse::isSuccess)
-                .subscribe(observer);
-
+    public void removeFileFromCache(@NonNull final String fileRef, @NonNull final String uniquePluginName) {
         // Create request and post it on the bus
         RemoveFromCacheRequest removeFromCacheRequest = new RemoveFromCacheRequest(fileRef, uniquePluginName);
         mBus.post(removeFromCacheRequest);

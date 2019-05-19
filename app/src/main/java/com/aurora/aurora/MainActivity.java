@@ -7,6 +7,10 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.database.Cursor;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -22,6 +26,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.support.v7.widget.helper.ItemTouchHelper;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -136,6 +141,45 @@ public class MainActivity extends AppCompatActivity
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         CardFileAdapter adapter = new CardFileAdapter(mKernel, this, mCachedFileInfoList);
         mRecyclerView.setAdapter(adapter);
+
+        /* Setup swipes of RecyclerView */
+        ItemTouchHelper.SimpleCallback simpleCallback = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT) {
+            @Override
+            public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder viewHolder1) {
+                return false;
+            }
+
+            @Override
+            public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int i) {
+                Log.d("Recycler", "" + i);
+                Log.d("Recycler", "" + viewHolder.getAdapterPosition());
+                ((CardFileAdapter) mRecyclerView.getAdapter()).removeCard(viewHolder.getAdapterPosition());
+            }
+
+            @Override
+            public void onChildDraw(@NonNull Canvas c, @NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, float dX, float dY, int actionState, boolean isCurrentlyActive) {
+                super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive);
+                View itemView = viewHolder.itemView;
+                int itemHeight = itemView.getHeight();
+                Drawable icon = getDrawable(R.drawable.delete_shape);
+                int iconHeight = icon.getIntrinsicHeight();
+                int iconWidth = icon.getIntrinsicWidth();
+
+                // Calculate the position of the icon
+                int deleteIconTop = itemView.getTop() + (itemHeight - iconHeight) / 2;
+                int deleteIconMargin = (itemHeight - iconHeight) / 2;
+                int deleteIconLeft = itemView.getRight() - deleteIconMargin - iconWidth;
+                int deleteIconRight = itemView.getRight() - deleteIconMargin;
+                int deleteIconBottom = deleteIconTop + iconHeight;
+
+                // Draw icon
+                icon.setBounds(deleteIconLeft, deleteIconTop, deleteIconRight, deleteIconBottom);
+                icon.draw(c);
+
+            }
+        };
+
+        new ItemTouchHelper(simpleCallback).attachToRecyclerView(mRecyclerView);
 
         /* Get list of cached files */
         refreshCachedFileInfoList();

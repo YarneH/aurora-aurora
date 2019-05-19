@@ -16,6 +16,8 @@ import android.widget.TextView;
 
 import com.aurora.internalservice.internalcache.CachedFileInfo;
 import com.aurora.kernel.Kernel;
+import io.reactivex.Observer;
+import io.reactivex.disposables.Disposable;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -147,7 +149,6 @@ public class CardFileAdapter extends RecyclerView.Adapter<CardFileAdapter.CardFi
          * The CachedFileInfo about the current file
          */
         private CachedFileInfo mCachedFileInfo;
-
         /**
          * Constructor for the ViewHolder.
          * Sets the fields for the contents of the card.
@@ -282,6 +283,13 @@ public class CardFileAdapter extends RecyclerView.Adapter<CardFileAdapter.CardFi
         TextView baseView = v.findViewById(R.id.tv_card_more_details);
         detailView.setVisibility(View.VISIBLE);
         baseView.setVisibility(View.GONE);
+    }
+
+    public void removeCard(int i) {
+        CachedFileInfo current = mCachedFileInfoList.remove(i);
+        mKernel.getAuroraCommunicator().removeFileFromCache(current.getFileRef(), current.getUniquePluginName());
+        mAmount--;
+        notifyDataSetChanged();
     }
 
     /**
