@@ -109,8 +109,7 @@ public class CardFileAdapter extends RecyclerView.Adapter<CardFileAdapter.CardFi
     /**
      * ViewHolder for the recyclerview. Holds the file cards.
      */
-    public class CardFileViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener,
-            View.OnLongClickListener {
+    public class CardFileViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         /**
          * The Title TextView
          */
@@ -136,7 +135,6 @@ public class CardFileAdapter extends RecyclerView.Adapter<CardFileAdapter.CardFi
          * The CachedFileInfo about the current file
          */
         private CachedFileInfo mCachedFileInfo;
-
         /**
          * Constructor for the ViewHolder.
          * Sets the fields for the contents of the card.
@@ -151,7 +149,6 @@ public class CardFileAdapter extends RecyclerView.Adapter<CardFileAdapter.CardFi
             mIconImageView = itemView.findViewById(R.id.iv_icon);
             // The card itself is clickable (for details), but also the open button.
             mCardView.setOnClickListener(this);
-            mCardView.setOnLongClickListener(this);
         }
 
         /**
@@ -164,11 +161,21 @@ public class CardFileAdapter extends RecyclerView.Adapter<CardFileAdapter.CardFi
         public void bind(int i) {
             index = i;
             mCachedFileInfo = mCachedFileInfoList.get(index);
-            String lastOpenedBase = mLastOpenedTextView.getResources().getString(R.string.file_last);
+
+            try {
+                Drawable icon = mContext.getPackageManager().getApplicationIcon(
+                        mCachedFileInfo.getUniquePluginName());
+                mIconImageView.setImageDrawable(icon);
+            } catch (PackageManager.NameNotFoundException e) {
+                // The plugin is no longer installed, so the file should be removed from the cache
+                removeCard(index);
+                return;
+            }
 
             // Set name of the correct file to the reused container.
             mTitleTextView.setText(mCachedFileInfo.getFileDisplayName());
 
+            String lastOpenedBase = mLastOpenedTextView.getResources().getString(R.string.file_last);
             String bld = lastOpenedBase +
                     " " +
                     mDateFormat.format(mCachedFileInfo.getLastOpened());
@@ -196,16 +203,15 @@ public class CardFileAdapter extends RecyclerView.Adapter<CardFileAdapter.CardFi
                         mCachedFileInfo.getUniquePluginName());
             }
         }
-
-        @Override
-        public boolean onLongClick(View view) {
-            // If the click happened on the card itself
-            if (view.getId() == R.id.cv_file && view.getId() != 0) {
-                    return true;
-                // if the click happened on the open button
-            }
-            return false;
-        }
     }
 
+    /**
+     * Remove a cached file from the list
+     * @param i the index of the cached file that needs to be removed
+     */
+    public void removeCard(int i) {
+        CachedFileInfo current = mCachedFileInfoList.remove(i);
+        mKernel.getAuroraCommunicator().removeFileFromCache(current.getFileRef(), current.getUniquePluginName());
+        mAmount--;
+    }
 }

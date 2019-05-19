@@ -19,6 +19,7 @@ import com.aurora.kernel.event.OpenCachedFileWithPluginRequest;
 import com.aurora.kernel.event.OpenFileWithPluginRequest;
 import com.aurora.kernel.event.QueryCacheRequest;
 import com.aurora.kernel.event.QueryCacheResponse;
+import com.aurora.kernel.event.RemoveFromCacheRequest;
 import com.aurora.kernel.event.RetrieveFileFromCacheRequest;
 import com.aurora.kernel.event.RetrieveFileFromCacheResponse;
 import com.aurora.kernel.event.UpdateCachedFileDateRequest;
@@ -190,6 +191,18 @@ public class AuroraCommunicator extends Communicator {
         QueryCacheRequest request = new QueryCacheRequest(maxLength);
         mBus.post(request);
 
+    }
+
+    /**
+     * Removes a file from the cache, if it is present. In case the file is not in the cache, nothing will happen.
+     *
+     * @param fileRef          a reference to the file to remove
+     * @param uniquePluginName the name of the plugin that the file was opened with
+     */
+    public void removeFileFromCache(@NonNull final String fileRef, @NonNull final String uniquePluginName) {
+        // Create request and post it on the bus
+        RemoveFromCacheRequest removeFromCacheRequest = new RemoveFromCacheRequest(fileRef, uniquePluginName);
+        mBus.post(removeFromCacheRequest);
     }
 
     /**

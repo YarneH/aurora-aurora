@@ -8,12 +8,13 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.database.Cursor;
+import android.graphics.Canvas;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.OpenableColumns;
 import android.support.annotation.NonNull;
-import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -23,13 +24,13 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.support.v7.widget.helper.ItemTouchHelper;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.webkit.MimeTypeMap;
 import android.widget.TextView;
-
 import com.aurora.auroralib.Constants;
 import com.aurora.internalservice.internalcache.CachedFileInfo;
 import com.aurora.kernel.AuroraCommunicator;
@@ -39,15 +40,14 @@ import com.aurora.market.ui.MarketPluginListActivity;
 import com.aurora.plugin.InternalServices;
 import com.aurora.plugin.Plugin;
 import com.google.firebase.analytics.FirebaseAnalytics;
+import io.reactivex.Observer;
+import io.reactivex.disposables.Disposable;
 
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-
-import io.reactivex.Observer;
-import io.reactivex.disposables.Disposable;
 
 /**
  * The main activity of the application, started when the app is opened.
@@ -79,6 +79,11 @@ public class MainActivity extends AppCompatActivity
      * Chosen to be 1.
      */
     private static final int REQUEST_FILE_GET = 1;
+
+    /**
+     * Devide a number in half
+     */
+    private static final int DEVIDE_IN_HALF = 2;
 
     /**
      * Android view which is basically a scrollview, but efficiently
@@ -121,36 +126,54 @@ public class MainActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-
         /* Set up kernel */
-        /* Listen to the loading state of the communicator */
-        try {
-            mKernel = Kernel.getInstance(this.getApplicationContext());
-            mAuroraCommunicator = mKernel.getAuroraCommunicator();
-            mLoading = mAuroraCommunicator.getLoadingData();
-            mLoading.observe(this, (Boolean isLoading) -> {
-                if (isLoading == null || !isLoading) {
-                    findViewById(R.id.pb_extracting).setVisibility(View.GONE);
-                    findViewById(R.id.nav_view).bringToFront();
-                    ((DrawerLayout) findViewById(R.id.drawer_layout))
-                            .setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
-                } else {
-                    // Show loading screen if it was visible before.
-                    findViewById(R.id.pb_extracting).setVisibility(View.VISIBLE);
-                    ((DrawerLayout) findViewById(R.id.drawer_layout))
-                            .setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
-                }
-            });
-        } catch (ContextNullException e) {
-            Log.e(LOG_TAG,
-                    "The kernel was not initialized with a valid android application context", e);
-        }
+        setupKernel();
 
         /* Setup RecyclerView */
         mRecyclerView = findViewById(R.id.rv_files);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         CardFileAdapter adapter = new CardFileAdapter(mKernel, this, mCachedFileInfoList);
         mRecyclerView.setAdapter(adapter);
+
+        /* Setup swipes of RecyclerView */
+        ItemTouchHelper.SimpleCallback simpleCallback = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT) {
+            @Override
+            public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder,
+                                  @NonNull RecyclerView.ViewHolder viewHolder1) {
+                return false;
+            }
+
+            @Override
+            public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int i) {
+                ((CardFileAdapter) mRecyclerView.getAdapter()).removeCard(viewHolder.getAdapterPosition());
+                ((CardFileAdapter) mRecyclerView.getAdapter()).notifyDataSetChanged();
+            }
+
+            @Override
+            public void onChildDraw(@NonNull Canvas c, @NonNull RecyclerView recyclerView,
+                                    @NonNull RecyclerView.ViewHolder viewHolder, float dX, float dY, int actionState,
+                                    boolean isCurrentlyActive) {
+                super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive);
+                View itemView = viewHolder.itemView;
+                int itemHeight = itemView.getHeight();
+                Drawable icon = getDrawable(R.drawable.delete_shape);
+                int iconHeight = icon.getIntrinsicHeight();
+                int iconWidth = icon.getIntrinsicWidth();
+
+                // Calculate the position of the icon
+                int deleteIconTop = itemView.getTop() + (itemHeight - iconHeight) / DEVIDE_IN_HALF;
+                int deleteIconMargin = (itemHeight - iconHeight) / DEVIDE_IN_HALF;
+                int deleteIconLeft = itemView.getRight() - deleteIconMargin - iconWidth;
+                int deleteIconRight = itemView.getRight() - deleteIconMargin;
+                int deleteIconBottom = deleteIconTop + iconHeight;
+
+                // Draw icon
+                icon.setBounds(deleteIconLeft, deleteIconTop, deleteIconRight, deleteIconBottom);
+                icon.draw(c);
+            }
+        };
+
+        new ItemTouchHelper(simpleCallback).attachToRecyclerView(mRecyclerView);
 
         /* Get list of cached files */
         refreshCachedFileInfoList();
@@ -162,10 +185,8 @@ public class MainActivity extends AppCompatActivity
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        /* The floating action button to add files */
-        FloatingActionButton fab = findViewById(R.id.fab_download_plugin);
         /* Implementation of adding files in onClick */
-        fab.setOnClickListener(view -> selectFile());
+        findViewById(R.id.fab_download_plugin).setOnClickListener(view -> selectFile());
 
         /* Listener and sync are for navigationView functionality */
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
@@ -188,6 +209,34 @@ public class MainActivity extends AppCompatActivity
         if (Intent.ACTION_VIEW.equals(getIntent().getAction())) {
             // This method is also called when a file is opened from the file chooser
             onActivityResult(REQUEST_FILE_GET, RESULT_OK, getIntent());
+        }
+    }
+
+    /**
+     * Set up the kernel
+     */
+    private void setupKernel(){
+        /* Listen to the loading state of the communicator */
+        try {
+            mKernel = Kernel.getInstance(this.getApplicationContext());
+            mAuroraCommunicator = mKernel.getAuroraCommunicator();
+            mLoading = mAuroraCommunicator.getLoadingData();
+            mLoading.observe(this, (Boolean isLoading) -> {
+                if (isLoading == null || !isLoading) {
+                    findViewById(R.id.pb_extracting).setVisibility(View.GONE);
+                    findViewById(R.id.nav_view).bringToFront();
+                    ((DrawerLayout) findViewById(R.id.drawer_layout))
+                            .setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
+                } else {
+                    // Show loading screen if it was visible before.
+                    findViewById(R.id.pb_extracting).setVisibility(View.VISIBLE);
+                    ((DrawerLayout) findViewById(R.id.drawer_layout))
+                            .setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
+                }
+            });
+        } catch (ContextNullException e) {
+            Log.e(LOG_TAG,
+                    "The kernel was not initialized with a valid android application context", e);
         }
     }
 
