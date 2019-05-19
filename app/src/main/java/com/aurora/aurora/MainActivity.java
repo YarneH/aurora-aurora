@@ -1,5 +1,6 @@
 package com.aurora.aurora;
 
+import android.arch.lifecycle.MutableLiveData;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
@@ -33,7 +34,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.webkit.MimeTypeMap;
 import android.widget.TextView;
-import android.widget.Toast;
+
 import com.aurora.auroralib.Constants;
 import com.aurora.internalservice.internalcache.CachedFileInfo;
 import com.aurora.kernel.AuroraCommunicator;
@@ -43,14 +44,15 @@ import com.aurora.market.ui.MarketPluginListActivity;
 import com.aurora.plugin.InternalServices;
 import com.aurora.plugin.Plugin;
 import com.google.firebase.analytics.FirebaseAnalytics;
-import io.reactivex.Observer;
-import io.reactivex.disposables.Disposable;
 
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+
+import io.reactivex.Observer;
+import io.reactivex.disposables.Disposable;
 
 /**
  * The main activity of the application, started when the app is opened.
@@ -84,12 +86,6 @@ public class MainActivity extends AppCompatActivity
     private static final int REQUEST_FILE_GET = 1;
 
     /**
-     * Toast that holds the dummy text after a file is searched for.
-     * This will disappear after file-search is implemented.
-     */
-    private Toast mToast = null;
-
-    /**
      * Android view which is basically a scrollview, but efficiently
      * reuses the containers.
      * <br>
@@ -116,6 +112,10 @@ public class MainActivity extends AppCompatActivity
      * The list of cached files, which will be shown in the RecyclerView
      */
     private List<CachedFileInfo> mCachedFileInfoList = new ArrayList<>();
+    /**
+     * LiveData keeping track of the loading state of the kernel.
+     */
+    private MutableLiveData<Boolean> mLoading = null;
 
 
     /**
@@ -128,9 +128,24 @@ public class MainActivity extends AppCompatActivity
 
 
         /* Set up kernel */
+        /* Listen to the loading state of the communicator */
         try {
             mKernel = Kernel.getInstance(this.getApplicationContext());
             mAuroraCommunicator = mKernel.getAuroraCommunicator();
+            mLoading = mAuroraCommunicator.getLoadingData();
+            mLoading.observe(this, (Boolean isLoading) -> {
+                if (isLoading == null || !isLoading) {
+                    findViewById(R.id.pb_extracting).setVisibility(View.GONE);
+                    findViewById(R.id.nav_view).bringToFront();
+                    ((DrawerLayout) findViewById(R.id.drawer_layout))
+                            .setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
+                } else {
+                    // Show loading screen if it was visible before.
+                    findViewById(R.id.pb_extracting).setVisibility(View.VISIBLE);
+                    ((DrawerLayout) findViewById(R.id.drawer_layout))
+                            .setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
+                }
+            });
         } catch (ContextNullException e) {
             Log.e(LOG_TAG,
                     "The kernel was not initialized with a valid android application context", e);
@@ -151,9 +166,8 @@ public class MainActivity extends AppCompatActivity
 
             @Override
             public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int i) {
-                Log.d("Recycler", "" + i);
-                Log.d("Recycler", "" + viewHolder.getAdapterPosition());
                 ((CardFileAdapter) mRecyclerView.getAdapter()).removeCard(viewHolder.getAdapterPosition());
+                ((CardFileAdapter) mRecyclerView.getAdapter()).notifyDataSetChanged();
             }
 
             @Override
@@ -208,9 +222,6 @@ public class MainActivity extends AppCompatActivity
         mNavigationView.setNavigationItemSelectedListener(this);
         mNavigationView.getMenu().getItem(0).setChecked(true);
 
-        /* Setup Main TextView */
-
-
         /* Show TextView when RecyclerView is empty */
         if (adapter.getItemCount() == 0) {
             findViewById(R.id.cl_empty_text).setVisibility(View.VISIBLE);
@@ -230,18 +241,6 @@ public class MainActivity extends AppCompatActivity
     protected void onResume() {
         super.onResume();
         refreshCachedFileInfoList();
-
-        if (mAuroraCommunicator.isLoading()) {
-            // Show loading screen if it was visible before.
-            findViewById(R.id.pb_extracting).setVisibility(View.VISIBLE);
-            ((DrawerLayout) findViewById(R.id.drawer_layout))
-                    .setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
-        } else {
-            findViewById(R.id.pb_extracting).setVisibility(View.GONE);
-            findViewById(R.id.nav_view).bringToFront();
-            ((DrawerLayout) findViewById(R.id.drawer_layout))
-                    .setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
-        }
     }
 
     /**
@@ -283,7 +282,6 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-
     /**
      * Creates an intent to open the file manager.
      */
@@ -324,7 +322,6 @@ public class MainActivity extends AppCompatActivity
 
                     /*
                      * Firebase Analytics
-                     * TODO: convert to custom event, see https://firebase.google.com/docs/analytics/android/events
                      */
                     Bundle bundle = new Bundle();
                     bundle.putString(FirebaseAnalytics.Param.ITEM_NAME, textFile.toString());
@@ -560,7 +557,6 @@ public class MainActivity extends AppCompatActivity
             Intent intent = new Intent(MainActivity.this, MarketPluginListActivity.class);
             startActivity(intent);
         }
-
 
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);

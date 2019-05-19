@@ -3,6 +3,7 @@ package com.aurora.auroralib;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.util.Base64;
 
 import java.io.ByteArrayInputStream;
@@ -62,7 +63,8 @@ public class ExtractedImage {
     }
 
     /**
-     * Returns the raw base64 encoded image
+     * Returns the raw base64 encoded image. In odd cases the String may not contain an image but
+     * instead be an empty String.
      *
      * @return the base64 encoded image
      */
@@ -83,12 +85,12 @@ public class ExtractedImage {
     }
 
     /**
-     * Returns the decoded image as Bitmap
+     * Returns the decoded image as Bitmap. Can be null in special cases.
      *
      * @return the Bitmap of the image
      */
-    @SuppressWarnings({"unused", "WeakerAccess"})
-    @NonNull
+    @SuppressWarnings({"unused"})
+    @Nullable
     public Bitmap getBitmap() {
         InputStream stream = new ByteArrayInputStream(Base64.decode(mBase64EncodedImage.getBytes()
                 , Base64.DEFAULT));

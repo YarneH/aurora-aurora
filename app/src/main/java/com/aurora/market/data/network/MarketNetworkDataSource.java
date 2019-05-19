@@ -10,6 +10,7 @@ import android.content.IntentFilter;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Environment;
 import android.support.v4.content.FileProvider;
 
@@ -254,7 +255,7 @@ public final class MarketNetworkDataSource {
                 Log.e(LOG_TAG, "exception", e);
             }
 
-            if (bitmap != null){
+            if (bitmap != null) {
                 ByteArrayOutputStream stream = new ByteArrayOutputStream();
                 bitmap.compress(Bitmap.CompressFormat.PNG, COMPRESS_QUALITY, stream);
                 return stream.toByteArray();
@@ -303,27 +304,41 @@ public final class MarketNetworkDataSource {
                     long id = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1);
                     if (id == downloadID) {
                         context.unregisterReceiver(this);
-                        Intent installIntent = new Intent(Intent.ACTION_INSTALL_PACKAGE);
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
 
-                        // Build up the path to the downloaded plugin
-                        String path = Environment.getExternalStorageDirectory() +
-                                File.pathSeparator +
-                                Environment.DIRECTORY_DOWNLOADS +
-                                File.separator +
-                                marketPlugin.getPluginName() +
-                                ".apk";
+                            Intent installIntent = new Intent(Intent.ACTION_INSTALL_PACKAGE);
 
-                        // Get the URI of the downloaded apk and prepare intent
-                        Uri apkURI = FileProvider.getUriForFile(context,
-                                context.getApplicationContext().getPackageName() + ".provider",
-                                new File(path));
+                            // Build up the path to the downloaded plugin
+                            String path = Environment.getExternalStorageDirectory() +
+                                    File.pathSeparator +
+                                    Environment.DIRECTORY_DOWNLOADS +
+                                    File.separator +
+                                    marketPlugin.getPluginName() +
+                                    ".apk";
 
-                        // Check if the Uri really points to a file
-                        installIntent.setDataAndType(apkURI, "application/vnd.android.package-archive");
-                        installIntent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION + Intent.FLAG_ACTIVITY_NEW_TASK);
-                        // Start install intent
-                        mDownloadingPlugins.remove(marketPlugin.getPluginName());
-                        mContext.startActivity(installIntent);
+                            // Get the URI of the downloaded apk and prepare intent
+                            Uri apkURI = FileProvider.getUriForFile(context,
+                                    context.getApplicationContext().getPackageName() + ".provider",
+                                    new File(path));
+
+                            // Check if the Uri really points to a file
+                            installIntent.setDataAndType(apkURI, "application/vnd.android.package-archive");
+                            installIntent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION
+                                    + Intent.FLAG_ACTIVITY_NEW_TASK);
+                            // Start install intent
+                            mDownloadingPlugins.remove(marketPlugin.getPluginName());
+                            mContext.startActivity(installIntent);
+                        } else {
+                            String location = Environment.
+                                    getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
+                                    + "/" + marketPlugin.getPluginName() + ".apk";
+                            Uri uri = Uri.parse("file://" + location);
+
+                            Intent installIntent = new Intent(Intent.ACTION_VIEW);
+                            installIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP + Intent.FLAG_ACTIVITY_NEW_TASK);
+                            installIntent.setDataAndType(uri, "application/vnd.android.package-archive");
+                            mContext.startActivity(installIntent);
+                        }
                     }
                 }
             };
