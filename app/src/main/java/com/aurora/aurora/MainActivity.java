@@ -314,7 +314,7 @@ public class MainActivity extends AppCompatActivity
                         // Get a list of filled in Plugin objects
                         List<Plugin> plugins = getPlugins(packageNames);
                         // Show the chooser
-                        showPluginAdapterAlertDialog(plugins, fileName, type, read);
+                        showPluginAdapterAlertDialog(plugins, textFile, fileName, type, read);
 
                     } else {
                         Log.i(LOG_TAG, "NO PLUGINS FOUND");
@@ -406,11 +406,12 @@ public class MainActivity extends AppCompatActivity
      * Shows the plugin picker dialog.
      *
      * @param plugins  The plugins to be offered in the chooser dialog
+     * @param textFile The exact uri of the file to be opened
      * @param fileName The name of the file to be opened
      * @param type     The MIME type of the file to be opened
      * @param readFile An InputStream to the read file
      */
-    private void showPluginAdapterAlertDialog(List<Plugin> plugins, String fileName, String type,
+    private void showPluginAdapterAlertDialog(List<Plugin> plugins, Uri textFile, String fileName, String type,
                                               InputStream readFile) {
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -425,7 +426,7 @@ public class MainActivity extends AppCompatActivity
                 findViewById(R.id.pb_extracting).setVisibility(View.VISIBLE);
                 ((DrawerLayout) findViewById(R.id.drawer_layout))
                         .setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
-                mAuroraCommunicator.openFileWithPlugin(fileName, type, readFile,
+                mAuroraCommunicator.openFileWithPlugin(textFile.toString(), fileName, type, readFile,
                         selectedPlugin);
                 dialogInterface.cancel();
             }

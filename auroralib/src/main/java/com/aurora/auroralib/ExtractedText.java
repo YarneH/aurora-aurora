@@ -32,6 +32,11 @@ import edu.stanford.nlp.pipeline.ProtobufAnnotationSerializer;
 public class ExtractedText implements Serializable {
 
     /**
+     * The uri of the file
+     */
+    private String mFileUri;
+
+    /**
      * The filename, which is made unique with a prepended hash
      */
     private String mFilename;
@@ -67,7 +72,8 @@ public class ExtractedText implements Serializable {
      *
      * @param filename the name of the file
      */
-    public ExtractedText(@NonNull final String filename) {
+    public ExtractedText(@NonNull final String fileUri, @NonNull final String filename) {
+        mFileUri = fileUri;
         mFilename = filename;
     }
 
@@ -77,7 +83,9 @@ public class ExtractedText implements Serializable {
      * @param filename the name of the file
      * @param sections the sections in the file (only plain sections)
      */
-    public ExtractedText(@NonNull final String filename, @NonNull final List<String> sections) {
+    public ExtractedText(@NonNull final String fileUri, @NonNull final String filename,
+                         @NonNull final List<String> sections) {
+        mFileUri = fileUri;
         mFilename = filename;
 
         mSections = new ArrayList<>();
@@ -173,6 +181,15 @@ public class ExtractedText implements Serializable {
     public void addSimpleSection(@NonNull final String sectionText) {
         Section section = new Section(sectionText);
         addSection(section);
+    }
+
+    /**
+     * @return the uri of the file
+     */
+    @SuppressWarnings("unused")
+    @NonNull
+    public String getFileUri() {
+        return mFileUri;
     }
 
     /**

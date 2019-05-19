@@ -63,10 +63,11 @@ public class AuroraCommunicatorUnitTest {
         requestObservable.map(InternalProcessorRequest::getFileRef).subscribe(fileRefObserver);
 
         // Call method under test
+        String fileUri = "dummyUri";
         String fileRef = "Dummy/file/ref";
         String fileType = "txt";
         InputStream file = new DummyInputStream();
-        sAuroraCommunicator.openFileWithPlugin(fileRef, fileType, file, DUMMY_PLUGIN);
+        sAuroraCommunicator.openFileWithPlugin(fileUri, fileRef, fileType, file, DUMMY_PLUGIN);
 
         // Assert that arguments passed are as expected
         fileRefObserver.assertSubscribed();
@@ -82,7 +83,7 @@ public class AuroraCommunicatorUnitTest {
         Observable<InternalProcessorRequest> internalProcessorRequestObservable = sBus.register(InternalProcessorRequest.class);
 
         // Subscribe to observable to send response event
-        ExtractedText dummyExtractedText = new ExtractedText("Bla", Arrays.asList("Dummy", "Paragraph"));
+        ExtractedText dummyExtractedText = new ExtractedText("Bla", "Bla", Arrays.asList("Dummy", "Paragraph"));
         Disposable internalProccessorRequestDisposable =
                 internalProcessorRequestObservable.subscribe(internalProcessorRequest ->
                         sBus.post(new InternalProcessorResponse(dummyExtractedText)));
@@ -101,11 +102,12 @@ public class AuroraCommunicatorUnitTest {
 
 
         // Call the method under test
+        String fileUri = "dummyUri";
         String dummyFileRef = "dummy/path/to/file";
         String fileType = "docx";
         InputStream file = new DummyInputStream();
         String pluginName = DUMMY_PLUGIN.getUniqueName();
-        sAuroraCommunicator.openFileWithPlugin(dummyFileRef, fileType, file, DUMMY_PLUGIN);
+        sAuroraCommunicator.openFileWithPlugin(fileUri, dummyFileRef, fileType, file, DUMMY_PLUGIN);
 
         // Assure that the correct values are contained in request event
         extractedTextObserver.assertSubscribed();

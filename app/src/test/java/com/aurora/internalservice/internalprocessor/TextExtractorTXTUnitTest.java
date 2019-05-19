@@ -1,20 +1,14 @@
 package com.aurora.internalservice.internalprocessor;
 
 import com.aurora.auroralib.ExtractedText;
-import com.aurora.internalservice.internalnlp.InternalNLP;
-import com.aurora.plugin.InternalServices;
 
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -26,10 +20,11 @@ public class TextExtractorTXTUnitTest {
     @Before
     public void initialize() throws FileNotFoundException {
         TextExtractorTXT textExtractorTXT = new TextExtractorTXT();
+        String fileUri = "dummyUri";
         String fileRef = RES_PATH + "Pasta.txt";
         File file = new File(fileRef);
         InputStream inputStream = new FileInputStream(file);
-        mExtractedText = textExtractorTXT.extract(inputStream, fileRef, false);
+        mExtractedText = textExtractorTXT.extract(inputStream, fileUri, fileRef, false);
     }
 
 

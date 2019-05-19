@@ -43,6 +43,7 @@ public class PluginInternalServiceCommunicatorUnitTest {
     private static PluginInternalServiceCommunicator mCommunicator;
 
     private static String mTitle = "Dummy Title";
+    private static String mFileUri = "dummyFileUri";
     private static String mFileRef = "src/test/res/Pasta.txt";
     private static String mFileType = "txt";
     private static List<String> mParagraphs = Arrays.asList("Paragraph1", "Paragraph2");
@@ -63,7 +64,7 @@ public class PluginInternalServiceCommunicatorUnitTest {
         mCommunicator = new PluginInternalServiceCommunicator(mBus, mInternalTextProcessor, new Translator(new FakeRequestQueue()));
 
         // Initialize extracted text with dummy contents
-        mExtractedText = new ExtractedText(mTitle, mParagraphs);
+        mExtractedText = new ExtractedText(mFileUri, mTitle, mParagraphs);
     }
 
     @Before
@@ -97,7 +98,7 @@ public class PluginInternalServiceCommunicatorUnitTest {
         observable.map(InternalProcessorResponse::getExtractedText).subscribe(testObserver);
 
         // Create request to process file and put on bus
-        InternalProcessorRequest request = new InternalProcessorRequest(mFileRef, mFileType, mInputStream,
+        InternalProcessorRequest request = new InternalProcessorRequest(mFileUri, mFileRef, mFileType, mInputStream,
                 Plugin.getDefaultInternalServices());
         mBus.post(request);
 
@@ -130,7 +131,7 @@ public class PluginInternalServiceCommunicatorUnitTest {
                         InternalServices.NLP_POS
                 ));
 
-        InternalProcessorRequest request = new InternalProcessorRequest(mFileRef, mFileType, mInputStream,
+        InternalProcessorRequest request = new InternalProcessorRequest(mFileUri, mFileRef, mFileType, mInputStream,
                 internalServices);
         mBus.post(request);
 
@@ -190,7 +191,7 @@ public class PluginInternalServiceCommunicatorUnitTest {
                         InternalServices.IMAGE_EXTRACTION
                 ));
 
-        InternalProcessorRequest request = new InternalProcessorRequest(mFileRef, mFileType, mInputStream,
+        InternalProcessorRequest request = new InternalProcessorRequest(mFileUri, mFileRef, mFileType, mInputStream,
                 internalServices);
         mBus.post(request);
 
@@ -216,16 +217,17 @@ public class PluginInternalServiceCommunicatorUnitTest {
         /**
          * Dummy method that will just return a fake extracted text
          *
-         * @param fileRef a reference to where the file can be found
-         * @param extractImages
+         * @param fileUri the uri of the file
+         * @param fileRef the name of the file
+         * @param extractImages boolean indicating whether or not to extract images
          * @return dummy extracted text
          * @throws FileTypeNotSupportedException thrown when a file with an unsupported extension is opened
          */
         @Override
-        public ExtractedText processFile(InputStream file, String fileRef, String type,
+        public ExtractedText processFile(InputStream file, String fileUri, String fileRef, String type,
                                          boolean extractImages) throws FileTypeNotSupportedException, DocumentNotSupportedException {
             // Just return the dummy extracted text
-            mExtractedText = super.processFile(file, fileRef, type, extractImages);
+            mExtractedText = super.processFile(file, fileUri, fileRef, type, extractImages);
             return mExtractedText;
         }
     }

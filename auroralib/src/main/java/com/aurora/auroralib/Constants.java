@@ -51,6 +51,11 @@ public final class Constants {
     public static final String PLUGIN_PROCESSING_FAILED_REASON = "PLUGIN_PROCESSING_FAILED_REASON";
 
     /**
+     * Key used for giving the uri of the file on which the plugin failed
+     */
+    public static final String PLUGIN_PROCESSING_FAILED_FILEURI = "PLUGIN_PROCESSING_FAILED_FILEURI";
+
+    /**
      * Private constructor to prevent instantiation (the class only contains constants)
      */
     private Constants() {

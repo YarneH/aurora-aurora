@@ -7,12 +7,18 @@ import java.util.List;
 
 /**
  * Event to request that a file is processed with a InternalProcessor
+ *
  * @see InternalProcessorResponse
  */
 public class InternalProcessorRequest implements Event {
 
     /**
-     * A reference to the file to be opened
+     * The uri of the file to be opened
+     */
+    private String mFileUri;
+
+    /**
+     * The name of the file to be opened
      */
     private String mFileRef;
 
@@ -34,13 +40,15 @@ public class InternalProcessorRequest implements Event {
     /**
      * Creates a new InternalProcessorRequest
      *
-     * @param fileRef          a reference to the file that should be processed internally
+     * @param fileUri          the uri of the file to be opened
+     * @param fileRef          the name of the file that should be processed internally
      * @param fileType         the file type of the file that should be processed
      * @param file             an inputstream to process the file
      * @param internalServices the set of internal services that should be run on the file
      */
-    public InternalProcessorRequest(String fileRef, String fileType, InputStream file,
+    public InternalProcessorRequest(String fileUri, String fileRef, String fileType, InputStream file,
                                     List<InternalServices> internalServices) {
+        mFileUri = fileUri;
         mFile = file;
         mFileType = fileType;
         mFileRef = fileRef;
@@ -48,7 +56,14 @@ public class InternalProcessorRequest implements Event {
     }
 
     /**
-     * @return a reference to the file that will be processed internally
+     * @return the uri of the file to be opened
+     */
+    public String getFileUri() {
+        return mFileUri;
+    }
+
+    /**
+     * @return the name of the file that will be processed internally
      */
     public String getFileRef() {
         return mFileRef;
