@@ -82,6 +82,7 @@ public abstract class ProcessorCommunicator {
             // If processing failed, start intent to open activity in aurora
             Intent intent = new Intent(Constants.PLUGIN_PROCESSING_FAILED_ACTION);
             intent.putExtra(Constants.PLUGIN_PROCESSING_FAILED_REASON, e.getMessage());
+            intent.putExtra(Constants.PLUGIN_PROCESSING_FAILED_FILEURI, extractedText.getFileUri());
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 
             mContext.startActivity(intent);

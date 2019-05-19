@@ -78,7 +78,7 @@ class PluginInternalServiceCommunicator extends Communicator {
 
         mInternalProcessorRequestObservable = mBus.register(InternalProcessorRequest.class);
         mInternalProcessorRequestObservable.subscribe((InternalProcessorRequest request) ->
-                processFileWithInternalProcessor(request.getFileRef(), request.getFileType(),
+                processFileWithInternalProcessor(request.getFileUri(), request.getFileRef(), request.getFileType(),
                         request.getFile(),
                         request.getInternalServices()));
 
@@ -98,12 +98,14 @@ class PluginInternalServiceCommunicator extends Communicator {
     /**
      * Helper method to process a file with the internal processor when a request comes in
      *
-     * @param fileRef          a reference to the file that should be processed
+     * @param fileUri          the uri of the file to be processed
+     * @param fileRef          the name of the file that should be processed
      * @param type             the file type
      * @param file             the file input stream
      * @param internalServices the set of internal services that should be run on the file
      */
-    private void processFileWithInternalProcessor(@NonNull final String fileRef,
+    private void processFileWithInternalProcessor(@NonNull final String fileUri,
+                                                  @NonNull final String fileRef,
                                                   @NonNull String type,
                                                   final InputStream file,
                                                   @NonNull final List<InternalServices> internalServices) {
@@ -111,8 +113,7 @@ class PluginInternalServiceCommunicator extends Communicator {
         // STEP ONE
         ExtractedText extractedText;
         try {
-            extractedText = doTextAndImageExtractionTasks(internalServices, file,
-                    fileRef, type);
+            extractedText = doTextAndImageExtractionTasks(internalServices, file, fileUri, fileRef, type);
         } catch (DocumentNotSupportedException | FileTypeNotSupportedException e) {
             Log.e(CLASS_TAG, "Document is not supported", e);
 
@@ -125,7 +126,7 @@ class PluginInternalServiceCommunicator extends Communicator {
         }
 
         if (extractedText == null) {
-            mBus.post(new InternalProcessorResponse(new ExtractedText("")));
+            mBus.post(new InternalProcessorResponse(new ExtractedText("","")));
             return;
         }
 
@@ -141,6 +142,7 @@ class PluginInternalServiceCommunicator extends Communicator {
      *
      * @param internalServices the set of internal services that should be run on the file
      * @param file             the file inputstream
+     * @param fileUri          the uri of the file to be processed
      * @param fileRef          a reference to the file that should be processed
      * @param type             the file type (extension)
      * @return ExtractedText object
@@ -149,7 +151,7 @@ class PluginInternalServiceCommunicator extends Communicator {
      */
     @Nullable
     private ExtractedText doTextAndImageExtractionTasks(List<InternalServices> internalServices,
-                                                        InputStream file, String fileRef,
+                                                        InputStream file, String fileUri, String fileRef,
                                                         String type)
             throws FileTypeNotSupportedException, DocumentNotSupportedException {
         // Perform internal services that are in the given set
@@ -162,7 +164,7 @@ class PluginInternalServiceCommunicator extends Communicator {
             boolean extractImages =
                     internalServices.contains(InternalServices.IMAGE_EXTRACTION);
 
-            extractedText = mInternalTextProcessor.processFile(file, fileRef, type,
+            extractedText = mInternalTextProcessor.processFile(file, fileUri, fileRef, type,
                     extractImages);
 
             Log.i(CLASS_TAG,

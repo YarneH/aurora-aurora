@@ -1,6 +1,7 @@
 package com.aurora.aurora;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.widget.TextView;
@@ -36,5 +37,16 @@ public class PluginFailedActivity extends AppCompatActivity {
         // Set the text
         mTextViewReason = findViewById(R.id.tv_reason);
         mTextViewReason.setText(reason);
+
+        // Get uri and mimetype of the file to open it with another app
+        Uri fileUri = Uri.parse(intentThatStartedActivity.getStringExtra(Constants.PLUGIN_PROCESSING_FAILED_FILEURI));
+        String mimeType = getContentResolver().getType(fileUri);
+
+        Intent openWithOtherAppIntent = new Intent();
+        openWithOtherAppIntent.setAction(Intent.ACTION_VIEW);
+        openWithOtherAppIntent.setDataAndType(fileUri, mimeType);
+        openWithOtherAppIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        startActivity(openWithOtherAppIntent);
+
     }
 }

@@ -90,13 +90,14 @@ public class AuroraCommunicator extends Communicator {
      * the text from the given file reference,
      * then it will send a request to let the plugin make the representation.
      *
-     * @param fileRef  a reference to the file that needs to be opened
+     * @param fileUri  The uri of the file that needs to be opened
+     * @param fileRef  The name of the file that needs to be opened
      * @param fileType the file type
      * @param file     the input stream of the file
      * @param plugin   the plugin to open the file with.
      */
     @SuppressLint("CheckResult")
-    public void openFileWithPlugin(String fileRef, String fileType, InputStream file,
+    public void openFileWithPlugin(String fileUri, String fileRef, String fileType, InputStream file,
                                    Plugin plugin) {
 
         // mark starting time
@@ -127,7 +128,7 @@ public class AuroraCommunicator extends Communicator {
 
 
         InternalProcessorRequest internalProcessorRequest =
-                new InternalProcessorRequest(fileRef, fileType, file, plugin.getInternalServices());
+                new InternalProcessorRequest(fileUri, fileRef, fileType, file, plugin.getInternalServices());
 
         // Post request on the bus
         mBus.post(internalProcessorRequest);
