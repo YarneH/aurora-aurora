@@ -39,6 +39,7 @@ dependencies {
         exclude group: 'com.sun.xml.bind'
     }
     implementation group: 'com.google.protobuf', name: 'protobuf-java-util', version: '3.7.1'
+    implementation 'com.android.support:design:28.0.0'
 }
 
 
