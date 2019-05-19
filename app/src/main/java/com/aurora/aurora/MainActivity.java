@@ -1,6 +1,5 @@
 package com.aurora.aurora;
 
-import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -40,8 +39,6 @@ import com.aurora.market.ui.MarketPluginListActivity;
 import com.aurora.plugin.InternalServices;
 import com.aurora.plugin.Plugin;
 import com.google.firebase.analytics.FirebaseAnalytics;
-
-import org.apache.xpath.operations.Bool;
 
 import java.io.FileNotFoundException;
 import java.io.InputStream;
