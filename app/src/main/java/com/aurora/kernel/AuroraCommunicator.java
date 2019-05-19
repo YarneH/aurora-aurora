@@ -1,7 +1,6 @@
 package com.aurora.kernel;
 
 import android.annotation.SuppressLint;
-import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 import android.content.Context;
 import android.os.Bundle;
@@ -25,8 +24,6 @@ import com.aurora.kernel.event.RetrieveFileFromCacheResponse;
 import com.aurora.kernel.event.UpdateCachedFileDateRequest;
 import com.aurora.plugin.Plugin;
 import com.google.firebase.analytics.FirebaseAnalytics;
-
-import org.apache.xpath.operations.Bool;
 
 import java.io.InputStream;
 import java.util.Date;
