@@ -323,7 +323,8 @@ public final class MarketNetworkDataSource {
 
                             // Check if the Uri really points to a file
                             installIntent.setDataAndType(apkURI, "application/vnd.android.package-archive");
-                            installIntent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION + Intent.FLAG_ACTIVITY_NEW_TASK);
+                            installIntent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION
+                                    + Intent.FLAG_ACTIVITY_NEW_TASK);
                             // Start install intent
                             mDownloadingPlugins.remove(marketPlugin.getPluginName());
                             mContext.startActivity(installIntent);
