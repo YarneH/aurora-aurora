@@ -1,6 +1,7 @@
 package com.aurora.kernel;
 
 import android.annotation.SuppressLint;
+import android.arch.lifecycle.MutableLiveData;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -52,7 +53,7 @@ public class AuroraCommunicator extends Communicator {
     /**
      * Indicates whether or not the text is being extracted.
      */
-    private boolean mLoading = false;
+    private MutableLiveData<Boolean> mLoading;
 
     /**
      * Observable keeping track of events indicating that a document is not supported
@@ -70,6 +71,8 @@ public class AuroraCommunicator extends Communicator {
         super(bus);
 
         mContext = applicationContext;
+        mLoading = new MutableLiveData<>();
+        mLoading.postValue(false);
 
         // Register for incoming events
         mDocumentNotSupportedEventObservable = mBus.register(DocumentNotSupportedEvent.class);
@@ -98,7 +101,7 @@ public class AuroraCommunicator extends Communicator {
         // mark starting time
         mStartTime = System.currentTimeMillis();
         // Set the state to loading.
-        mLoading = true;
+        mLoading.postValue(true);
 
         // Register observable
         Observable<InternalProcessorResponse> internalProcessorResponseObservable =
@@ -113,8 +116,7 @@ public class AuroraCommunicator extends Communicator {
                             params.putInt("extracted_text_length", extractedText.toString().length());
                             params.putLong("processing_time", System.currentTimeMillis() - mStartTime);
                             FirebaseAnalytics.getInstance(mContext).logEvent("processing_performance", params);
-
-                            mLoading = false;
+                            mLoading.postValue(false);
                             sendOpenFileRequest(extractedText, plugin.getUniqueName());
                         }
                         , (Throwable e) ->
@@ -232,14 +234,15 @@ public class AuroraCommunicator extends Communicator {
      */
     private void showDocumentNotSupportedMessage(@NonNull final String reason) {
         Toast.makeText(mContext, reason, Toast.LENGTH_LONG).show();
+        mLoading.postValue(false);
     }
 
     /**
-     * Getter for the loading state.
+     * Getter for the loading state LiveData.
      *
-     * @return true if loading.
+     * @return LiveData that changes when the loading state changes
      */
-    public boolean isLoading() {
+    public MutableLiveData<Boolean> getLoadingData() {
         return mLoading;
     }
 }
