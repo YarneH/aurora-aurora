@@ -250,7 +250,7 @@ public final class MarketNetworkDataSource {
                 ByteArrayOutputStream stream = new ByteArrayOutputStream();
                 bitmap.compress(Bitmap.CompressFormat.PNG, COMPRESS_QUALITY, stream);
                 return stream.toByteArray();
-            } catch (IOException e) {
+            } catch (IOException | NullPointerException e) {
                 Log.e(LOG_TAG, "exception", e);
             }
             return new byte[0];
