@@ -242,16 +242,22 @@ public final class MarketNetworkDataSource {
             String url = strings[0];
 
             if (!url.contains(URL_HTTP_PREFIX) && !url.contains(URL_HTTPS_PREFIX)) {
-                url = URL_HTTP_PREFIX + url;
+                url = URL_HTTPS_PREFIX + url;
             }
+
+            Bitmap bitmap = null;
+
             try {
                 URL downloadLink = new URL(url);
-                Bitmap bitmap = NetworkUtils.getBitmapFromHttpUrl(downloadLink);
+                bitmap = NetworkUtils.getBitmapFromHttpUrl(downloadLink);
+            } catch (IOException e) {
+                Log.e(LOG_TAG, "exception", e);
+            }
+
+            if (bitmap != null){
                 ByteArrayOutputStream stream = new ByteArrayOutputStream();
                 bitmap.compress(Bitmap.CompressFormat.PNG, COMPRESS_QUALITY, stream);
                 return stream.toByteArray();
-            } catch (IOException e) {
-                Log.e(LOG_TAG, "exception", e);
             }
             return new byte[0];
         }
