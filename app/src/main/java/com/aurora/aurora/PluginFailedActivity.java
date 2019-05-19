@@ -46,7 +46,14 @@ public class PluginFailedActivity extends AppCompatActivity {
         openWithOtherAppIntent.setAction(Intent.ACTION_VIEW);
         openWithOtherAppIntent.setDataAndType(fileUri, mimeType);
         openWithOtherAppIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-        startActivity(openWithOtherAppIntent);
+        //startActivity(openWithOtherAppIntent);
+
+        Intent chooser = Intent.createChooser(openWithOtherAppIntent, "Choose another app to open the file");
+
+        // Verify the intent will resolve to at least one activity
+        if (openWithOtherAppIntent.resolveActivity(getPackageManager()) != null) {
+            startActivity(chooser);
+        }
 
     }
 }
