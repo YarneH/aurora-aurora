@@ -77,6 +77,7 @@
     <string name="plugin_failed_label">plugin failed</string>
     <string name="plugin_logo_description">Plugin logo</string>
     <string name="icon_of_the_plugin">The icon of the plugin</string>
+    <string name="open_file_with_other_app">Open file with other app</string>
 
 
 </resources>
