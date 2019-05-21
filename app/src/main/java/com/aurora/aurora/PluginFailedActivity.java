@@ -42,25 +42,22 @@ public class PluginFailedActivity extends AppCompatActivity {
 
         // Set button
         Button button = findViewById(R.id.btn_open);
-        button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                // Get uri and mimetype of the file to open it with another app
-                Uri fileUri = Uri.parse(intentThatStartedActivity
-                        .getStringExtra(Constants.PLUGIN_PROCESSING_FAILED_FILEURI));
-                String mimeType = getContentResolver().getType(fileUri);
+        button.setOnClickListener((View view) -> {
+            // Get uri and mimetype of the file to open it with another app
+            Uri fileUri = Uri.parse(intentThatStartedActivity
+                    .getStringExtra(Constants.PLUGIN_PROCESSING_FAILED_FILEURI));
+            String mimeType = getContentResolver().getType(fileUri);
 
-                Intent openWithOtherAppIntent = new Intent();
-                openWithOtherAppIntent.setAction(Intent.ACTION_VIEW);
-                openWithOtherAppIntent.setDataAndType(fileUri, mimeType);
-                openWithOtherAppIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            Intent openWithOtherAppIntent = new Intent();
+            openWithOtherAppIntent.setAction(Intent.ACTION_VIEW);
+            openWithOtherAppIntent.setDataAndType(fileUri, mimeType);
+            openWithOtherAppIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
 
-                Intent chooser = Intent.createChooser(openWithOtherAppIntent, "Choose another app to open the file");
+            Intent chooser = Intent.createChooser(openWithOtherAppIntent, "Choose another app to open the file");
 
-                // Verify the intent will resolve to at least one activity
-                if (openWithOtherAppIntent.resolveActivity(getPackageManager()) != null) {
-                    startActivity(chooser);
-                }
+            // Verify the intent will resolve to at least one activity
+            if (openWithOtherAppIntent.resolveActivity(getPackageManager()) != null) {
+                startActivity(chooser);
             }
         });
     }
