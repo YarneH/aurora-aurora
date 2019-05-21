@@ -5,7 +5,7 @@ public class HeadingFromPDF implements PDFStructureElement {
     private String mHeader;
     private int mLevel;
 
-    public HeadingFromPDF(String text, int level) {
+    HeadingFromPDF(String text, int level) {
         mHeader = text;
         mLevel = level;
     }

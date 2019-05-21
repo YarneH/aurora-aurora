@@ -129,7 +129,7 @@ public class Translator implements InternalService {
      * @return The url to access
      * @throws UnsupportedEncodingException if the sentences cannot be encoded into url
      */
-    public static String makeUrl(String[] sentencesToTranslate, String sourceLanguage, String targetLanguage)
+    static String makeUrl(String[] sentencesToTranslate, String sourceLanguage, String targetLanguage)
             throws UnsupportedEncodingException {
         StringBuilder bld = new StringBuilder(HTTP_BEGIN);
         boolean first = true;

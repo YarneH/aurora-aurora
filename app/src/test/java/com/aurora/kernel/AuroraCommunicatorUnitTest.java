@@ -42,8 +42,8 @@ public class AuroraCommunicatorUnitTest {
     private static AuroraCommunicator sAuroraCommunicator;
 
     private static final String UNIQUE_PLUGIN_NAME_DUMMY = "com.aurora.dummyplugin";
-    private static final Plugin DUMMY_PLUGIN = new Plugin(UNIQUE_PLUGIN_NAME_DUMMY, "DummyPlugin", null, "Dummy plugin",
-            1, "v0.1");
+    private static final Plugin DUMMY_PLUGIN = new Plugin(UNIQUE_PLUGIN_NAME_DUMMY, "DummyPlugin", null, "Dummy plugin"
+    );
 
     @BeforeClass
     public static void initialize() {
