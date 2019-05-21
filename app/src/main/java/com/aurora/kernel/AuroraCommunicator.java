@@ -154,7 +154,7 @@ public class AuroraCommunicator extends Communicator {
                 .subscribe((CachedProcessedFile processedFile) -> {
                             if ("{}".equals(processedFile.getJsonRepresentation())) {
                                 Toast.makeText(mContext,
-                                        mContext.getString(R.string.cached_file_not_found_processing_file),
+                                        mContext.getString(R.string.cached_file_not_found),
                                         Toast.LENGTH_LONG).show();
                                 // TODO: change this such that it processes the original file
 
