@@ -259,8 +259,14 @@ public class MainActivity extends AppCompatActivity
         }
 
         mAuroraCommunicator.getListOfCachedFiles(0, new Observer<List<CachedFileInfo>>() {
+            /**
+             * This is saved, because it needs to be disposed when finished
+             */
             private Disposable mDisposable;
-            private List<CachedFileInfo> currentInfos = new ArrayList<>();
+            /**
+             * The list of cards that have a plugin that is still installed
+             */
+            private List<CachedFileInfo> mCurrentInfos = new ArrayList<>();
 
             @Override
             public void onSubscribe(Disposable d) {
@@ -269,7 +275,7 @@ public class MainActivity extends AppCompatActivity
 
             @Override
             public void onNext(List<CachedFileInfo> cachedFileInfos) {
-                currentInfos = cachedFileInfos;
+                mCurrentInfos = cachedFileInfos;
                 if (cachedFileInfos.isEmpty()) {
                     findViewById(R.id.cl_empty_text).setVisibility(View.VISIBLE);
                 } else {
@@ -285,9 +291,10 @@ public class MainActivity extends AppCompatActivity
             @Override
             public void onComplete() {
                 mDisposable.dispose();
+
                 // Check which cards can be deleted
                 mCachedFileInfoList = new ArrayList<>();
-                for (CachedFileInfo currentInfo : currentInfos) {
+                for (CachedFileInfo currentInfo : mCurrentInfos) {
                     try {
                         getPackageManager().getApplicationIcon(currentInfo.getUniquePluginName());
                         mCachedFileInfoList.add(currentInfo);
