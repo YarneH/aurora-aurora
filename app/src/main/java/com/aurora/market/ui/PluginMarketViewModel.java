@@ -1,8 +1,8 @@
 package com.aurora.market.ui;
 
 import android.arch.lifecycle.LiveData;
-import android.arch.lifecycle.MutableLiveData;
 import android.arch.lifecycle.ViewModel;
+
 import com.aurora.market.data.MarketRepository;
 import com.aurora.market.data.database.MarketPlugin;
 

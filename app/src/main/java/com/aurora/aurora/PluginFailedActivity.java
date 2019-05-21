@@ -40,7 +40,7 @@ public class PluginFailedActivity extends AppCompatActivity {
         mTextViewReason.setText(reason);
         // Set button
         Button button = findViewById(R.id.btn_open);
-        button.setOnClickListener(view -> {
+        button.setOnClickListener((View view) -> {
             // Get uri and MimeType of the file to open it with another app
             Uri fileUri = Uri.parse(intentThatStartedActivity
                     .getStringExtra(Constants.PLUGIN_PROCESSING_FAILED_FILEURI));
