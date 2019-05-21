@@ -255,57 +255,60 @@ public class MainActivity extends AppCompatActivity
      */
     private void refreshCachedFileInfoList() {
         /* Get list of cached files */
-        if (mAuroraCommunicator != null) {
-            mAuroraCommunicator.getListOfCachedFiles(0, new Observer<List<CachedFileInfo>>() {
-                private Disposable mDisposable;
-                private List<CachedFileInfo> currentInfos = new ArrayList<>();
-
-                @Override
-                public void onSubscribe(Disposable d) {
-                    mDisposable = d;
-                }
-
-                @Override
-                public void onNext(List<CachedFileInfo> cachedFileInfos) {
-                    currentInfos = cachedFileInfos;
-                    if (cachedFileInfos.isEmpty()) {
-                        findViewById(R.id.cl_empty_text).setVisibility(View.VISIBLE);
-                    } else {
-                        findViewById(R.id.cl_empty_text).setVisibility(View.GONE);
-                    }
-                }
-
-                @Override
-                public void onError(Throwable e) {
-                    Log.e("MainActivity", "Error while trying to get the list of cached files", e);
-                }
-
-                @Override
-                public void onComplete() {
-                    mDisposable.dispose();
-                    // Check which cards can be deleted
-                    mCachedFileInfoList = new ArrayList<>();
-                    for (CachedFileInfo currentInfo : currentInfos) {
-                        try {
-                            getPackageManager().getApplicationIcon(currentInfo.getUniquePluginName());
-                            mCachedFileInfoList.add(currentInfo);
-                        } catch (PackageManager.NameNotFoundException e) {
-                            // The plugin is no longer installed, so the file should be removed from the cache
-                            mKernel.getAuroraCommunicator().removeFileFromCache(currentInfo.getFileRef(),
-                                    currentInfo.getUniquePluginName());
-                        }
-                    }
-                    runOnUiThread(() -> {
-                        CardFileAdapter adapter = new CardFileAdapter(mKernel, MainActivity.this, mCachedFileInfoList);
-                        mRecyclerView.setAdapter(adapter);
-                        /* Show TextView when RecyclerView is empty */
-                        if (adapter.getItemCount() == 0) {
-                            findViewById(R.id.cl_empty_text).setVisibility(View.VISIBLE);
-                        }
-                    });
-                }
-            });
+        if (mAuroraCommunicator == null) {
+            return;
         }
+
+        mAuroraCommunicator.getListOfCachedFiles(0, new Observer<List<CachedFileInfo>>() {
+            private Disposable mDisposable;
+            private List<CachedFileInfo> currentInfos = new ArrayList<>();
+
+            @Override
+            public void onSubscribe(Disposable d) {
+                mDisposable = d;
+            }
+
+            @Override
+            public void onNext(List<CachedFileInfo> cachedFileInfos) {
+                currentInfos = cachedFileInfos;
+                if (cachedFileInfos.isEmpty()) {
+                    findViewById(R.id.cl_empty_text).setVisibility(View.VISIBLE);
+                } else {
+                    findViewById(R.id.cl_empty_text).setVisibility(View.GONE);
+                }
+            }
+
+            @Override
+            public void onError(Throwable e) {
+                Log.e("MainActivity", "Error while trying to get the list of cached files", e);
+            }
+
+            @Override
+            public void onComplete() {
+                mDisposable.dispose();
+                // Check which cards can be deleted
+                mCachedFileInfoList = new ArrayList<>();
+                for (CachedFileInfo currentInfo : currentInfos) {
+                    try {
+                        getPackageManager().getApplicationIcon(currentInfo.getUniquePluginName());
+                        mCachedFileInfoList.add(currentInfo);
+                    } catch (PackageManager.NameNotFoundException e) {
+                        // The plugin is no longer installed, so the file should be removed from the cache
+                        mKernel.getAuroraCommunicator().removeFileFromCache(currentInfo.getFileRef(),
+                                currentInfo.getUniquePluginName());
+                    }
+                }
+                runOnUiThread(() -> {
+                    CardFileAdapter adapter = new CardFileAdapter(mKernel, MainActivity.this, mCachedFileInfoList);
+                    mRecyclerView.setAdapter(adapter);
+
+                    /* Show TextView when RecyclerView is empty */
+                    if (adapter.getItemCount() == 0) {
+                        findViewById(R.id.cl_empty_text).setVisibility(View.VISIBLE);
+                    }
+                });
+            }
+        });
     }
 
     /**
