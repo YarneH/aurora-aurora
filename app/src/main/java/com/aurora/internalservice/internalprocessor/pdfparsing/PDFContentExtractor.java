@@ -50,9 +50,9 @@ public class PDFContentExtractor {
      * @param reader the PdfReader that has access to the PDF file
      * @throws DocumentNotSupportedException if the document cannot be processed
      * @throws IOException                   in case the reading of the file goes wrong
-     * @since 5.0.5
      * @throws DocumentNotSupportedException when the pdf is not tagged
-     * @throws IOException when there is a fault reading the document
+     * @throws IOException                   when there is a fault reading the document
+     * @since 5.0.5
      */
     public void extractContent(PdfReader reader, ParsedPDF parsedPDF)
             throws IOException, DocumentNotSupportedException {
@@ -133,10 +133,10 @@ public class PDFContentExtractor {
                     mParsedPDF.addImage(content);
                 } else {
                     String content = parseTag(k.getDirectObject(PdfName.K), dict, false);
-                    if ("P".equals(tag)) {
-                        mParsedPDF.addParagraph(content);
-                    } else if (Pattern.matches("H[0-9]+", tag)) {
+                    if (Pattern.matches("H[0-9]+", tag)) {
                         mParsedPDF.addHeader(content, tag.charAt(1) - CHAR_TO_INT);
+                    } else {
+                        mParsedPDF.addParagraph(content);
                     }
                 }
             }

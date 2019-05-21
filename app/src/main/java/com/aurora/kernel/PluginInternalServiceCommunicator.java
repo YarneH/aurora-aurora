@@ -1,5 +1,6 @@
 package com.aurora.kernel;
 
+import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
@@ -97,6 +98,7 @@ class PluginInternalServiceCommunicator extends Communicator {
 
     /**
      * Helper method to process a file with the internal processor when a request comes in
+     * NLP internal services are only used if the API level is at least 26
      *
      * @param fileUri          the uri of the file to be processed
      * @param fileRef          the name of the file that should be processed
@@ -130,11 +132,14 @@ class PluginInternalServiceCommunicator extends Communicator {
             return;
         }
 
-        // STEP TWO
-        doNLPTask(extractedText, internalServices);
+        // STEP TWO: Perform NLP services, only if API level is at least 26
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            doNLPTask(extractedText, internalServices);
+        }
 
         // Post response
         mBus.post(new InternalProcessorResponse(extractedText));
+
     }
 
     /**

@@ -1,5 +1,7 @@
 package com.aurora.kernel;
 
+import android.os.Build;
+
 import com.aurora.auroralib.ExtractedText;
 import com.aurora.auroralib.Section;
 import com.aurora.internalservice.internalprocessor.DocumentNotSupportedException;
@@ -23,6 +25,8 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -78,12 +82,15 @@ public class PluginInternalServiceCommunicatorUnitTest {
     }
 
     @After
-    public void cleanUp() {
+    public void cleanUp() throws NoSuchFieldException, IllegalAccessException{
         try {
             mInputStream.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
+        // Set the SDK version back to 22
+        setFinalStatic(Build.VERSION.class.getField("SDK_INT"), Build.VERSION_CODES.LOLLIPOP_MR1);
+
     }
 
     @Test
@@ -111,7 +118,8 @@ public class PluginInternalServiceCommunicatorUnitTest {
     }
 
     @Test
-    public void PluginInternalServiceCommunicator_processFileWithInternalProcessor_shouldDoNLPWhenAsked(){
+    public void PluginInternalServiceCommunicator_processFileWithInternalProcessor_shouldDoNLPWhenAsked()
+    throws IllegalAccessException, NoSuchFieldException{
         // Listen for internal processor response
         Observable<InternalProcessorResponse> observable = mBus.register(InternalProcessorResponse.class);
 
@@ -120,6 +128,10 @@ public class PluginInternalServiceCommunicatorUnitTest {
 
         // Subscribe to observable
         observable.map(InternalProcessorResponse::getExtractedText).subscribe(testObserver);
+
+        // Set the SDK version to 26 (minimum for NLP)
+        // Can throw the exceptions
+        setFinalStatic(Build.VERSION.class.getField("SDK_INT"), Build.VERSION_CODES.O);
 
         // Create request to process file and put on bus
         List<InternalServices> internalServices =
@@ -141,6 +153,8 @@ public class PluginInternalServiceCommunicatorUnitTest {
         annotationPipeline.addAnnotator(new TokenizerAnnotator(false, "en"));
         annotationPipeline.addAnnotator(new WordsToSentencesAnnotator(false));
         annotationPipeline.addAnnotator(new POSTaggerAnnotator(false));
+
+
 
         if(extractedText.getTitle() != null) {
             Assert.assertNotNull(extractedText.getTitleAnnotation());
@@ -230,5 +244,24 @@ public class PluginInternalServiceCommunicatorUnitTest {
             mExtractedText = super.processFile(file, fileUri, fileRef, type, extractImages);
             return mExtractedText;
         }
+    }
+
+    /**
+     * Private method to set final static values during tests (e.g. Build Version)
+     *
+     * @param field                     Field to set
+     * @param newValue                  Value to be set
+     * @throws IllegalAccessException   thrown if the field cannot be accessed
+     * @throws NoSuchFieldException     thrown if the field does not exist
+     */
+    private static void setFinalStatic(Field field, Object newValue)
+            throws IllegalAccessException, NoSuchFieldException {
+        field.setAccessible(true);
+
+        Field modifiersField = Field.class.getDeclaredField("modifiers");
+        modifiersField.setAccessible(true);
+        modifiersField.setInt(field, field.getModifiers() & ~Modifier.FINAL);
+
+        field.set(null, newValue);
     }
 }

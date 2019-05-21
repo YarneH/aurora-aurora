@@ -126,11 +126,12 @@ public class MainActivity extends AppCompatActivity
         /* Set up kernel */
         setupKernel();
 
+        /* Get list of cached files */
+        refreshCachedFileInfoList();
+
         /* Setup RecyclerView */
         mRecyclerView = findViewById(R.id.rv_files);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
-        CardFileAdapter adapter = new CardFileAdapter(mKernel, this, mCachedFileInfoList);
-        mRecyclerView.setAdapter(adapter);
 
         /* Setup swipes of RecyclerView */
         ItemTouchHelper.SimpleCallback simpleCallback = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT) {
@@ -181,9 +182,6 @@ public class MainActivity extends AppCompatActivity
 
         new ItemTouchHelper(simpleCallback).attachToRecyclerView(mRecyclerView);
 
-        /* Get list of cached files */
-        refreshCachedFileInfoList();
-
         /* Initialize FirebaseAnalytics */
         mFirebaseAnalytics = FirebaseAnalytics.getInstance(this);
 
@@ -205,11 +203,6 @@ public class MainActivity extends AppCompatActivity
         NavigationView mNavigationView = findViewById(R.id.nav_view);
         mNavigationView.setNavigationItemSelectedListener(this);
         mNavigationView.getMenu().getItem(0).setChecked(true);
-
-        /* Show TextView when RecyclerView is empty */
-        if (adapter.getItemCount() == 0) {
-            findViewById(R.id.cl_empty_text).setVisibility(View.VISIBLE);
-        }
 
         // If opening the file is done from a file explorer
         if (Intent.ACTION_VIEW.equals(getIntent().getAction())) {
@@ -252,6 +245,7 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onResume() {
         super.onResume();
+        setupKernel();
         refreshCachedFileInfoList();
     }
 
@@ -260,38 +254,67 @@ public class MainActivity extends AppCompatActivity
      */
     private void refreshCachedFileInfoList() {
         /* Get list of cached files */
-        if (mAuroraCommunicator != null) {
-            mAuroraCommunicator.getListOfCachedFiles(0, new Observer<List<CachedFileInfo>>() {
-                private Disposable mDisposable;
+        if (mAuroraCommunicator == null) {
+            return;
+        }
 
-                @Override
-                public void onSubscribe(Disposable d) {
-                    mDisposable = d;
+        mAuroraCommunicator.getListOfCachedFiles(0, new Observer<List<CachedFileInfo>>() {
+            /**
+             * This is saved, because it needs to be disposed when finished
+             */
+            private Disposable mDisposable;
+            /**
+             * The list of cards that have a plugin that is still installed
+             */
+            private List<CachedFileInfo> mCurrentInfos = new ArrayList<>();
+
+            @Override
+            public void onSubscribe(Disposable d) {
+                mDisposable = d;
+            }
+
+            @Override
+            public void onNext(List<CachedFileInfo> cachedFileInfos) {
+                mCurrentInfos = cachedFileInfos;
+                if (cachedFileInfos.isEmpty()) {
+                    findViewById(R.id.cl_empty_text).setVisibility(View.VISIBLE);
+                } else {
+                    findViewById(R.id.cl_empty_text).setVisibility(View.GONE);
                 }
+            }
 
-                @Override
-                public void onNext(List<CachedFileInfo> cachedFileInfos) {
-                    mCachedFileInfoList = cachedFileInfos;
-                    ((CardFileAdapter) Objects.requireNonNull(mRecyclerView.getAdapter()))
-                            .updateData(mCachedFileInfoList);
-                    if (cachedFileInfos.isEmpty()) {
-                        findViewById(R.id.cl_empty_text).setVisibility(View.VISIBLE);
-                    } else {
-                        findViewById(R.id.cl_empty_text).setVisibility(View.GONE);
+            @Override
+            public void onError(Throwable e) {
+                Log.e("MainActivity", "Error while trying to get the list of cached files", e);
+            }
+
+            @Override
+            public void onComplete() {
+                mDisposable.dispose();
+
+                // Check which cards can be deleted
+                mCachedFileInfoList = new ArrayList<>();
+                for (CachedFileInfo currentInfo : mCurrentInfos) {
+                    try {
+                        getPackageManager().getApplicationIcon(currentInfo.getUniquePluginName());
+                        mCachedFileInfoList.add(currentInfo);
+                    } catch (PackageManager.NameNotFoundException e) {
+                        // The plugin is no longer installed, so the file should be removed from the cache
+                        mKernel.getAuroraCommunicator().removeFileFromCache(currentInfo.getFileRef(),
+                                currentInfo.getUniquePluginName());
                     }
                 }
+                runOnUiThread(() -> {
+                    CardFileAdapter adapter = new CardFileAdapter(mKernel, MainActivity.this, mCachedFileInfoList);
+                    mRecyclerView.setAdapter(adapter);
 
-                @Override
-                public void onError(Throwable e) {
-                    Log.e("MainActivity", "Error while trying to get the list of cached files", e);
-                }
-
-                @Override
-                public void onComplete() {
-                    mDisposable.dispose();
-                }
-            });
-        }
+                    /* Show TextView when RecyclerView is empty */
+                    if (adapter.getItemCount() == 0) {
+                        findViewById(R.id.cl_empty_text).setVisibility(View.VISIBLE);
+                    }
+                });
+            }
+        });
     }
 
     /**
