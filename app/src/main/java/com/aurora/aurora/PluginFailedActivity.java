@@ -4,6 +4,8 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 
 import com.aurora.auroralib.Constants;
@@ -36,16 +38,26 @@ public class PluginFailedActivity extends AppCompatActivity {
          */
         TextView mTextViewReason = findViewById(R.id.tv_reason);
         mTextViewReason.setText(reason);
+        // Set button
+        Button button = findViewById(R.id.btn_open);
+        button.setOnClickListener(view -> {
+            // Get uri and MimeType of the file to open it with another app
+            Uri fileUri = Uri.parse(intentThatStartedActivity
+                    .getStringExtra(Constants.PLUGIN_PROCESSING_FAILED_FILEURI));
+            String mimeType = getContentResolver().getType(fileUri);
 
-        // Get uri and MimeType of the file to open it with another app
-        Uri fileUri = Uri.parse(intentThatStartedActivity.getStringExtra(Constants.PLUGIN_PROCESSING_FAILED_FILEURI));
-        String mimeType = getContentResolver().getType(fileUri);
+            Intent openWithOtherAppIntent = new Intent();
+            openWithOtherAppIntent.setAction(Intent.ACTION_VIEW);
+            openWithOtherAppIntent.setDataAndType(fileUri, mimeType);
+            openWithOtherAppIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
 
-        Intent openWithOtherAppIntent = new Intent();
-        openWithOtherAppIntent.setAction(Intent.ACTION_VIEW);
-        openWithOtherAppIntent.setDataAndType(fileUri, mimeType);
-        openWithOtherAppIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-        startActivity(openWithOtherAppIntent);
+            Intent chooser = Intent.createChooser(openWithOtherAppIntent,
+                    "Choose another app to open the file");
 
+            // Verify the intent will resolve to at least one activity
+            if (openWithOtherAppIntent.resolveActivity(getPackageManager()) != null) {
+                startActivity(chooser);
+            }
+        });
     }
 }
