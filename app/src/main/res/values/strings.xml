@@ -9,7 +9,7 @@
     <string name="help_feedback">Feedback</string>
     <string name="plugin_market">Plugin Market</string>
     <string name="action_search">Search</string>
-    <string name="search_prompt">Search for a file...</string>
+    <string name="search_prompt">Search for a file…</string>
 
     <!-- Navigation Drawer strings-->
     <string name="nav_header_title">Aurora</string>
@@ -26,7 +26,7 @@
     <string name="file_location">\'Location of the file\'</string>
     <string name="file_last">Last opened on:</string>
     <string name="file_added_on">Added on:</string>
-    <string name="file_more_details">Hold for more info...</string>
+    <string name="file_more_details">Hold for more info…</string>
     <string name="file_details">Details about file</string>
     <string name="null_file">The selected file was null</string>
     <string name="file_not_found">The file could not be found</string>
@@ -49,13 +49,13 @@
 
     <!-- Plugin Market -->
     <string name="download_plugin">Downloading the new plugin!</string>
-    <string name="downloading">Downloading... See the progress in your notification bar!</string>
+    <string name="downloading">Downloading… See the progress in your notification bar!</string>
     <string name="already_installed">The plugin is already installed!</string>
     <string name="already_downloading">The plugin is downloading! Check the progress in your notification header</string>
     <string name="creator">Creator</string>
     <string name="description">Description</string>
     <string name="version">Version</string>
-    <string name="no_internet_connection">Could not load plugins from the server...</string>
+    <string name="no_internet_connection">Could not load plugins from the server</string>
 
     <string name="select_plugin">Select a plugin</string>
     <string name="no_plugins_available">No plugins available</string>
