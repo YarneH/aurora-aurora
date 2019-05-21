@@ -1,5 +1,7 @@
 package com.aurora.kernel;
 
+import android.os.Build;
+
 import com.aurora.auroralib.ExtractedText;
 import com.aurora.auroralib.Section;
 import com.aurora.internalservice.internalprocessor.DocumentNotSupportedException;
@@ -23,6 +25,8 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -84,6 +88,13 @@ public class PluginInternalServiceCommunicatorUnitTest {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        // Set the SDK version back to 22
+        try {
+            setFinalStatic(Build.VERSION.class.getField("SDK_INT"), Build.VERSION_CODES.LOLLIPOP_MR1);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
     }
 
     @Test
@@ -121,6 +132,13 @@ public class PluginInternalServiceCommunicatorUnitTest {
         // Subscribe to observable
         observable.map(InternalProcessorResponse::getExtractedText).subscribe(testObserver);
 
+        // Set the SDK version to 26 (minimum for NLP)
+        try {
+            setFinalStatic(Build.VERSION.class.getField("SDK_INT"), Build.VERSION_CODES.O);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
         // Create request to process file and put on bus
         List<InternalServices> internalServices =
                 new ArrayList<>(Arrays.asList(
@@ -141,6 +159,8 @@ public class PluginInternalServiceCommunicatorUnitTest {
         annotationPipeline.addAnnotator(new TokenizerAnnotator(false, "en"));
         annotationPipeline.addAnnotator(new WordsToSentencesAnnotator(false));
         annotationPipeline.addAnnotator(new POSTaggerAnnotator(false));
+
+
 
         if(extractedText.getTitle() != null) {
             Assert.assertNotNull(extractedText.getTitleAnnotation());
@@ -230,5 +250,15 @@ public class PluginInternalServiceCommunicatorUnitTest {
             mExtractedText = super.processFile(file, fileUri, fileRef, type, extractImages);
             return mExtractedText;
         }
+    }
+
+    static void setFinalStatic(Field field, Object newValue) throws Exception {
+        field.setAccessible(true);
+
+        Field modifiersField = Field.class.getDeclaredField("modifiers");
+        modifiersField.setAccessible(true);
+        modifiersField.setInt(field, field.getModifiers() & ~Modifier.FINAL);
+
+        field.set(null, newValue);
     }
 }
