@@ -44,6 +44,7 @@ import com.google.firebase.analytics.FirebaseAnalytics;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 
@@ -126,11 +127,12 @@ public class MainActivity extends AppCompatActivity
         /* Set up kernel */
         setupKernel();
 
+        /* Get list of cached files */
+        refreshCachedFileInfoList();
+
         /* Setup RecyclerView */
         mRecyclerView = findViewById(R.id.rv_files);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
-        CardFileAdapter adapter = new CardFileAdapter(mKernel, this, mCachedFileInfoList);
-        mRecyclerView.setAdapter(adapter);
 
         /* Setup swipes of RecyclerView */
         ItemTouchHelper.SimpleCallback simpleCallback = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT) {
@@ -181,9 +183,6 @@ public class MainActivity extends AppCompatActivity
 
         new ItemTouchHelper(simpleCallback).attachToRecyclerView(mRecyclerView);
 
-        /* Get list of cached files */
-        refreshCachedFileInfoList();
-
         /* Initialize FirebaseAnalytics */
         mFirebaseAnalytics = FirebaseAnalytics.getInstance(this);
 
@@ -205,11 +204,6 @@ public class MainActivity extends AppCompatActivity
         NavigationView mNavigationView = findViewById(R.id.nav_view);
         mNavigationView.setNavigationItemSelectedListener(this);
         mNavigationView.getMenu().getItem(0).setChecked(true);
-
-        /* Show TextView when RecyclerView is empty */
-        if (adapter.getItemCount() == 0) {
-            findViewById(R.id.cl_empty_text).setVisibility(View.VISIBLE);
-        }
 
         // If opening the file is done from a file explorer
         if (Intent.ACTION_VIEW.equals(getIntent().getAction())) {
@@ -252,6 +246,7 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onResume() {
         super.onResume();
+        setupKernel();
         refreshCachedFileInfoList();
     }
 
@@ -263,6 +258,7 @@ public class MainActivity extends AppCompatActivity
         if (mAuroraCommunicator != null) {
             mAuroraCommunicator.getListOfCachedFiles(0, new Observer<List<CachedFileInfo>>() {
                 private Disposable mDisposable;
+                private List<CachedFileInfo> currentInfos = new ArrayList<>();
 
                 @Override
                 public void onSubscribe(Disposable d) {
@@ -271,9 +267,7 @@ public class MainActivity extends AppCompatActivity
 
                 @Override
                 public void onNext(List<CachedFileInfo> cachedFileInfos) {
-                    mCachedFileInfoList = cachedFileInfos;
-                    ((CardFileAdapter) Objects.requireNonNull(mRecyclerView.getAdapter()))
-                            .updateData(mCachedFileInfoList);
+                    currentInfos = cachedFileInfos;
                     if (cachedFileInfos.isEmpty()) {
                         findViewById(R.id.cl_empty_text).setVisibility(View.VISIBLE);
                     } else {
@@ -289,6 +283,26 @@ public class MainActivity extends AppCompatActivity
                 @Override
                 public void onComplete() {
                     mDisposable.dispose();
+                    // Check which cards can be deleted
+                    mCachedFileInfoList = new ArrayList<>();
+                    for (CachedFileInfo currentInfo : currentInfos) {
+                        try {
+                            getPackageManager().getApplicationIcon(currentInfo.getUniquePluginName());
+                            mCachedFileInfoList.add(currentInfo);
+                        } catch (PackageManager.NameNotFoundException e) {
+                            // The plugin is no longer installed, so the file should be removed from the cache
+                            mKernel.getAuroraCommunicator().removeFileFromCache(currentInfo.getFileRef(),
+                                    currentInfo.getUniquePluginName());
+                        }
+                    }
+                    runOnUiThread(() -> {
+                        CardFileAdapter adapter = new CardFileAdapter(mKernel, MainActivity.this, mCachedFileInfoList);
+                        mRecyclerView.setAdapter(adapter);
+                        /* Show TextView when RecyclerView is empty */
+                        if (adapter.getItemCount() == 0) {
+                            findViewById(R.id.cl_empty_text).setVisibility(View.VISIBLE);
+                        }
+                    });
                 }
             });
         }

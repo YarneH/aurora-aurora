@@ -32,11 +32,6 @@ public class CardFileAdapter extends RecyclerView.Adapter<CardFileAdapter.CardFi
     private final SimpleDateFormat mDateFormat = new SimpleDateFormat("E, dd MMM yyyy", Locale.getDefault());
 
     /**
-     * The amount of cards that the RecyclerView manages
-     */
-    private int mAmount;
-
-    /**
      * The data of the cached files
      */
     private List<CachedFileInfo> mCachedFileInfoList;
@@ -54,19 +49,7 @@ public class CardFileAdapter extends RecyclerView.Adapter<CardFileAdapter.CardFi
     CardFileAdapter(Kernel kernel, Context context, @NonNull List<CachedFileInfo> cachedFileInfoList) {
         mKernel = kernel;
         mCachedFileInfoList = cachedFileInfoList;
-        mAmount = mCachedFileInfoList.size();
         mContext = context;
-    }
-
-    /**
-     * Replaces the old list of info about the cached files with a new one
-     *
-     * @param cachedFileInfoList The new list which will replace the old one
-     */
-    void updateData(@NonNull List<CachedFileInfo> cachedFileInfoList) {
-        mCachedFileInfoList = cachedFileInfoList;
-        mAmount = mCachedFileInfoList.size();
-        notifyDataSetChanged();
     }
 
     /**
@@ -103,7 +86,7 @@ public class CardFileAdapter extends RecyclerView.Adapter<CardFileAdapter.CardFi
      */
     @Override
     public int getItemCount() {
-        return mAmount;
+        return mCachedFileInfoList.size();
     }
 
     /**
@@ -126,7 +109,6 @@ public class CardFileAdapter extends RecyclerView.Adapter<CardFileAdapter.CardFi
          * The ImageView showing the icon of the plugin
          */
         private ImageView mIconImageView;
-
         /**
          * The index of the current file
          */
@@ -161,6 +143,7 @@ public class CardFileAdapter extends RecyclerView.Adapter<CardFileAdapter.CardFi
         void bind(int i) {
             index = i;
             mCachedFileInfo = mCachedFileInfoList.get(index);
+            Log.d("Recycler", "plugin: " + mCachedFileInfo);
 
             try {
                 Drawable icon = mContext.getPackageManager().getApplicationIcon(
@@ -168,7 +151,7 @@ public class CardFileAdapter extends RecyclerView.Adapter<CardFileAdapter.CardFi
                 mIconImageView.setImageDrawable(icon);
             } catch (PackageManager.NameNotFoundException e) {
                 // The plugin is no longer installed, so the file should be removed from the cache
-                removeCard(index);
+                mIconImageView.setImageDrawable(mContext.getDrawable(R.drawable.ic_nav_help));
                 return;
             }
 
@@ -212,6 +195,5 @@ public class CardFileAdapter extends RecyclerView.Adapter<CardFileAdapter.CardFi
     void removeCard(int i) {
         CachedFileInfo current = mCachedFileInfoList.remove(i);
         mKernel.getAuroraCommunicator().removeFileFromCache(current.getFileRef(), current.getUniquePluginName());
-        mAmount--;
     }
 }
