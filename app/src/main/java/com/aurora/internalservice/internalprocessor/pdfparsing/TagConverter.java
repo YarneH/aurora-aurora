@@ -26,7 +26,7 @@ public final class TagConverter {
      * @param tag the extracted tag
      * @return the possibly accepted tag
      */
-    public static String convertTag(String tag){
+    static String convertTag(String tag){
         if (tagConverterMap.containsKey(tag)){
             tag = tagConverterMap.get(tag);
         }

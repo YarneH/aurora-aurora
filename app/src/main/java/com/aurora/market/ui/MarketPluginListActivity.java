@@ -10,15 +10,14 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
-
 import com.aurora.aurora.R;
 import com.aurora.market.data.database.MarketPlugin;
+import com.aurora.market.data.network.MarketNetworkDataSource;
 import com.aurora.utilities.InjectorUtils;
 
 import java.util.List;
@@ -43,13 +42,22 @@ public class MarketPluginListActivity extends AppCompatActivity {
      * The ViewModel of the PluginMarket, containing all the data needed for the UI
      */
     private PluginMarketViewModel mViewModel = null;
+    /**
+     * The TextView showing that there is no connection to the server
+     */
+    private TextView mNoConnectionTextView = null;
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_marketplugin_list);
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        mNoConnectionTextView = findViewById(R.id.tv_no_connection);
+
         setSupportActionBar(toolbar);
         toolbar.setTitle(getTitle());
 
@@ -74,7 +82,20 @@ public class MarketPluginListActivity extends AppCompatActivity {
 
     }
 
-    // Set up the RecyclerView responsible for the CardViews of the MarketPlugins
+    @Override
+    protected void onResume() {
+        super.onResume();
+        mNoConnectionTextView = findViewById(R.id.tv_no_connection);
+        mNoConnectionTextView.setVisibility(View.GONE);
+
+        MarketNetworkDataSource.getInstance(getBaseContext()).fetchMarketPlugins();
+    }
+
+    /**
+     * Set up the RecyclerView responsible for the CardViews of the MarketPlugins
+     *
+     * @param recyclerView The RecyclerView which is responsible for the CardViews
+     */
     private void setupRecyclerView(@NonNull RecyclerView recyclerView) {
 
         // Get the List of MarketPlugins and initiate the MarketPluginsRecyclerViewAdapter with it
@@ -82,14 +103,21 @@ public class MarketPluginListActivity extends AppCompatActivity {
         recyclerView.setAdapter(new MarketPluginsRecyclerViewAdapter(this, marketPlugins, mTwoPane));
 
         // Observe the LiveData and update the MarketPluginsRecyclerViewAdapter when the data changes
-        mViewModel.getMarketPlugins().observe(this, (List<MarketPlugin> marketPlugins1) -> {
-            Log.d("MARKET", "Observing " + marketPlugins1);
+        mViewModel.getMarketPlugins().observe(this, (List<MarketPlugin> newMarketPlugins) -> {
+            if (newMarketPlugins == null || newMarketPlugins.isEmpty()) {
+                mNoConnectionTextView.setVisibility(View.VISIBLE);
+            } else {
+                mNoConnectionTextView.setVisibility(View.GONE);
+            }
             Objects.requireNonNull((MarketPluginsRecyclerViewAdapter) recyclerView.getAdapter()).setMarketPlugins(
-                    marketPlugins1);
+                    newMarketPlugins);
             Objects.requireNonNull(recyclerView.getAdapter()).notifyDataSetChanged();
         });
     }
 
+    /**
+     * The Adapter used for showing all the MarketPlugins in the home screen of the Plugin Market
+     */
     public static class MarketPluginsRecyclerViewAdapter
             extends RecyclerView.Adapter<MarketPluginsRecyclerViewAdapter.ViewHolder> {
         /**
@@ -107,6 +135,9 @@ public class MarketPluginListActivity extends AppCompatActivity {
          */
         private List<MarketPlugin> mMarketPlugins;
 
+        /**
+         * The onClickListener which handles clicking on a MarketPlugin card
+         */
         private final View.OnClickListener mOnClickListener = new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -132,26 +163,40 @@ public class MarketPluginListActivity extends AppCompatActivity {
             }
         };
 
-        MarketPluginsRecyclerViewAdapter(MarketPluginListActivity parent, List<MarketPlugin> items, boolean twoPane) {
+        /**
+         * Constructor for the MarketPluginsRecyclerViewAdapter
+         *
+         * @param parent  The parent activity (the list activity)
+         * @param items   A list of all the displayed MarketPlugins
+         * @param twoPane indicating whether the screen is a wide screen
+         */
+        MarketPluginsRecyclerViewAdapter(
+                MarketPluginListActivity parent, List<MarketPlugin> items, boolean twoPane) {
             mMarketPlugins = items;
             mParentActivity = parent;
             mTwoPane = twoPane;
         }
 
+        /**
+         * {@inheritDoc}
+         */
+        @NonNull
         @Override
-        public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
             View view = LayoutInflater.from(parent.getContext())
                     .inflate(R.layout.marketplugin_list_content, parent, false);
             return new ViewHolder(view);
         }
 
+        /**
+         * {@inheritDoc}
+         */
         @Override
-        public void onBindViewHolder(final ViewHolder holder, int position) {
+        public void onBindViewHolder(@NonNull final ViewHolder holder, int position) {
             holder.mContentView.setText(mMarketPlugins.get(position).getPluginName());
             holder.itemView.setTag(mMarketPlugins.get(position));
             holder.itemView.setOnClickListener(mOnClickListener);
             Bitmap imgBitmap = mMarketPlugins.get(position).getLogo();
-            Log.d("image", "" + imgBitmap);
             if (imgBitmap != null) {
                 int logoDimen = (int) holder.mContentView.getResources().getDimension(R.dimen.market_plugin_logo);
                 Bitmap tempBitmap = Bitmap.createScaledBitmap(imgBitmap, logoDimen,
@@ -161,6 +206,9 @@ public class MarketPluginListActivity extends AppCompatActivity {
             }
         }
 
+        /**
+         * {@inheritDoc}
+         */
         @Override
         public int getItemCount() {
             if (mMarketPlugins == null) {
@@ -172,21 +220,23 @@ public class MarketPluginListActivity extends AppCompatActivity {
         /**
          * Set the List of MarketPlugins. This is used to update the data of the adapter
          *
-         * @param items
+         * @param items Plugins to set in the market
          */
-        public void setMarketPlugins(List<MarketPlugin> items) {
-            Log.d("Market", "Plugins in adapter set: " + items);
+        void setMarketPlugins(List<MarketPlugin> items) {
             mMarketPlugins = items;
         }
 
+        /**
+         * A simple ViewHolder, representing a MarketPlugin card
+         */
         class ViewHolder extends RecyclerView.ViewHolder {
             private final TextView mContentView;
             private final ImageView mImageView;
 
             ViewHolder(View view) {
                 super(view);
-                mContentView = (TextView) view.findViewById(R.id.content);
-                mImageView = (ImageView) view.findViewById(R.id.img_logo);
+                mContentView = view.findViewById(R.id.content);
+                mImageView = view.findViewById(R.id.img_logo);
             }
         }
     }

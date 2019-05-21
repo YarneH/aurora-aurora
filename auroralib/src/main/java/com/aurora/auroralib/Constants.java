@@ -1,9 +1,17 @@
 package com.aurora.auroralib;
 
 /**
- * A class containing constants used for interaction between aurora and the plugins.
+ * A class containing constants used for interaction between aurora and the plugins. The most
+ * important constants are {@link #PLUGIN_ACTION} which specifies that a plugin should be
+ * launched and {@link #PLUGIN_INPUT_TYPE} which is an {@link android.content.Intent} extra key
+ * where the value specifies the input type.
  */
 public final class Constants {
+    /**
+     * The package name of Aurora
+     */
+    public static final String AURORA = "com.aurora.aurora";
+
     /**
      * Intent Action used to launch plugins
      */
@@ -31,6 +39,21 @@ public final class Constants {
      * PluginObject
      */
     public static final String PLUGIN_INPUT_TYPE_OBJECT = "PLUGIN_INPUT_TYPE_OBJECT";
+
+    /**
+     * Intent Action used to indicate that a plugin failed
+     */
+    public static final String PLUGIN_PROCESSING_FAILED_ACTION = "com.aurora.auroralib.AURORA_PLUGIN_FAILED";
+
+    /**
+     * Key used for the reason why a plugin failed
+     */
+    public static final String PLUGIN_PROCESSING_FAILED_REASON = "PLUGIN_PROCESSING_FAILED_REASON";
+
+    /**
+     * Key used for giving the uri of the file on which the plugin failed
+     */
+    public static final String PLUGIN_PROCESSING_FAILED_FILEURI = "PLUGIN_PROCESSING_FAILED_FILEURI";
 
     /**
      * Private constructor to prevent instantiation (the class only contains constants)

@@ -28,6 +28,12 @@ public class TranslationServiceCaller extends ServiceCaller {
      */
     private ITranslate mTranslateBinding = null;
 
+
+    /**
+     * Constructor for a TranslationServiceCaller
+     *
+     * @param context Context used for binding
+     */
     public TranslationServiceCaller(Context context){
         super(context);
     }
@@ -122,7 +128,7 @@ public class TranslationServiceCaller extends ServiceCaller {
     }
 
     /**
-     * A private thread class that will translate the senteces in another thread to avoid blocking
+     * A private thread class that will translate the sentences in another thread to avoid blocking
      * of the main thread
      */
     private class TranslateThread extends Thread {
@@ -138,7 +144,7 @@ public class TranslationServiceCaller extends ServiceCaller {
         /**
          * Translated sentences
          */
-        private List<String> mTranslatedSentences = null;
+        private List<String> mTranslatedSentences = new ArrayList<>();
 
         /**
          * Sentences to be translated
@@ -146,15 +152,22 @@ public class TranslationServiceCaller extends ServiceCaller {
         private List<String> mSentences;
 
         /**
-         * Language of original sentences
+         * Language of original sentences in ISO format
          */
         private String mSourceLanguage;
 
         /**
-         * Language to translate to
+         * Language to translate to in ISO format
          */
         private String mDestinationLanguage;
 
+        /**
+         * Constructs a TranslateThread
+         *
+         * @param sentences             List of sentences to be translated
+         * @param sourceLanguage        ISO code of the language of the original sentences
+         * @param destinationLanguage   ISO code of the language to translate to
+         */
         protected TranslateThread(List<String> sentences, String sourceLanguage,
                                     String destinationLanguage) {
             mSentences = sentences;
@@ -162,6 +175,12 @@ public class TranslationServiceCaller extends ServiceCaller {
             mDestinationLanguage = destinationLanguage;
         }
 
+        /**
+         * Getter for the resulting translated sentences, used to receive the result of the {@link
+         * TranslateThread#run()} function which itself only returns void.
+         *
+         * @return the list of translated sentences or an empty list if an error occured during translation
+         */
         protected List<String> getTranslatedSentences() {
             return mTranslatedSentences;
         }
@@ -228,9 +247,9 @@ public class TranslationServiceCaller extends ServiceCaller {
          *                          {@link TranslationServiceCaller#translate(List, String, String)}
          */
         private List<String> executeTranslateRequest() throws RemoteException {
-            List<String> translatedSentences = null;
+            List<String> translatedSentences = new ArrayList<>();
 
-            List<List<String>> smallerRequestList = null;
+            List<List<String>> smallerRequestList;
             try {
                 smallerRequestList = createSmallerRequests(mSentences);
                 translatedSentences = new ArrayList<>();

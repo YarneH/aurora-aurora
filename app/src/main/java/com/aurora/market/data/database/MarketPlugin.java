@@ -34,10 +34,14 @@ public class MarketPlugin implements Serializable {
      */
     private String mVersion;
     /**
+     * The unique name of the plugin
+     */
+    private String mUniqueName;
+
+    /**
      * The link the plugin can be downloaded from
      */
     private URL mDownloadLink;
-
 
     /**
      * Dummy constructor for testing UI
@@ -46,8 +50,10 @@ public class MarketPlugin implements Serializable {
      * @param description   a string representing the description of the plugin
      * @param url           a string representing the link the plugin can be downloaded from
      */
-    public MarketPlugin(byte[] logo, String name, String description, String creator, String version, String url){
+    public MarketPlugin(byte[] logo, String name, String description, String creator, String version, String uniqueName,
+                        String url){
         this.mPluginName = name;
+        this.mUniqueName = uniqueName;
         this.mDescription = description;
         try {
             this.mDownloadLink = new URL(url);
@@ -59,6 +65,10 @@ public class MarketPlugin implements Serializable {
         this.mCreator = creator;
     }
 
+    /**
+     * Default getter
+     * @return the logo of the MarketPlugin
+     */
     public Bitmap getLogo() {
         if (mLogo != null) {
             return BitmapFactory.decodeByteArray(mLogo, 0, mLogo.length);
@@ -67,23 +77,51 @@ public class MarketPlugin implements Serializable {
         }
     }
 
+    /**
+     * Default getter
+     * @return the logo of the MarketPlugin
+     */
     public String getDescription() {
         return mDescription;
     }
 
+    /**
+     * Default getter
+     * @return the plugin name of the MarketPlugin
+     */
     public String getPluginName() {
         return mPluginName;
     }
 
+    /**
+     * Default getter
+     * @return the downloadlink of the MarketPlugin, as URL
+     */
     public URL getDownloadLink() {
         return mDownloadLink;
     }
 
+    /**
+     * Default getter
+     * @return the name of the creator of the MarketPlugin
+     */
     public String getCreator() {
         return mCreator;
     }
 
+    /**
+     * Default getter
+     * @return the versioncode of the MarketPlugin
+     */
     public String getVersion() {
         return mVersion;
+    }
+
+    /**
+     * Default getter
+     * @return the unique name of the plugin, used by the Package Installer
+     */
+    public String getUniqueName() {
+        return mUniqueName;
     }
 }

@@ -22,11 +22,12 @@ public class TextExtractorDOCXUnitTest {
     public void initialize() throws FileNotFoundException {
         // Initialize the extractor
         TextExtractorDOCX textExtractorDOCX = new TextExtractorDOCX();
+        String fileUri = "dummyUri";
         String mfileRef = RES_PATH + "Pasta.docx";
         File file = new File(mfileRef);
         InputStream inputStream = new FileInputStream(file);
         // Extract the text
-        mExtractedText = textExtractorDOCX.extract(inputStream, mfileRef, false);
+        mExtractedText = textExtractorDOCX.extract(inputStream, fileUri, mfileRef, false);
     }
 
     @Test

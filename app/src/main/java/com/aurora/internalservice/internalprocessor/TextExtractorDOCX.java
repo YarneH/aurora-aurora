@@ -70,14 +70,15 @@ public class TextExtractorDOCX implements TextExtractor {
     /**
      * Extracts the text from a .docx file.
      *
-     * @param file      InputStream to the file
-     * @param fileRef   a reference to where the file can be found
+     * @param file          InputStream to the file
+     * @param fileUri       the uri of the file to be processed
+     * @param fileRef       the name of the file
      * @param extractImages True if images need to be extracted, False otherwise
      * @return ExtractedText object with title and sections.
      */
     @Override
-    public ExtractedText extract(InputStream file, String fileRef, boolean extractImages) {
-        mExtractedText = new ExtractedText(fileRef);
+    public ExtractedText extract(InputStream file, String fileUri, String fileRef, boolean extractImages) {
+        mExtractedText = new ExtractedText(fileUri, fileRef);
 
         // Set the values to defaults
         mSectionInProgress = null;
@@ -101,7 +102,7 @@ public class TextExtractorDOCX implements TextExtractor {
 
         } finally {
             // Flush section in progress
-            if(mSectionInProgress != null) {
+            if (mSectionInProgress != null) {
                 mExtractedText.addSection(mSectionInProgress);
             }
         }
@@ -114,26 +115,26 @@ public class TextExtractorDOCX implements TextExtractor {
      * Appends the String run to the extractedText object. State is maintained in order to
      * estimate if the run is a title. The first run is always the title.
      *
-     * @param run               String that needs to be added to extractedText
-     * @param paragraphLevel    If a level can be extracted from the parent paragraph, this will
-     *                          be for multilevel titles.
-     * @param runSize           If the paragraphlevel cannot be used, the textsize is used to
-     *                          determine (sub)titles. Only one level of titles is supported in
-     *                          this case.
+     * @param run            String that needs to be added to extractedText
+     * @param paragraphLevel If a level can be extracted from the parent paragraph, this will
+     *                       be for multilevel titles.
+     * @param runSize        If the paragraphlevel cannot be used, the textsize is used to
+     *                       determine (sub)titles. Only one level of titles is supported in
+     *                       this case.
      */
     //I suppress these warnings because there is no easy way to simplify or split this logic into
     // multiple methods without making it harder to understand.
-    @java.lang.SuppressWarnings({"squid:MethodCyclomaticComplexity","squid:S3776"})
+    @java.lang.SuppressWarnings({"squid:MethodCyclomaticComplexity", "squid:S3776"})
     private void addRun(@NonNull String run, int paragraphLevel, int runSize,
                         @NonNull List<ExtractedImage> extractedImages) {
         String formatted = run.trim();
 
         // First text line is always a title for simplicity
-        if(mExtractedText.getTitle() == null && !formatted.isEmpty()) {
+        if (mExtractedText.getTitle().isEmpty() && !formatted.isEmpty()) {
             mExtractedText.setTitle(formatted);
 
             // The title section contains extractedImages, add them to their own section.
-            if(!extractedImages.isEmpty()) {
+            if (!extractedImages.isEmpty()) {
                 Section imageSection = new Section();
                 imageSection.setExtractedImages(extractedImages);
                 mExtractedText.addSection(imageSection);
@@ -141,14 +142,14 @@ public class TextExtractorDOCX implements TextExtractor {
 
             // If the font size is larger than 0 keep track of this. If the built in word
             // headers are used, font size is -1 for some reason.
-            if(runSize>0) {
+            if (runSize > 0) {
                 mPreviousRunSize = runSize;
             }
             return;
         }
 
         // A Header is encountered -> start a new Section and flush the previous one if it exists
-        if(paragraphLevel >= 0 || mPreviousRunSize < runSize) {
+        if (paragraphLevel >= 0 || mPreviousRunSize < runSize) {
             // Flush the previous section, a title will always create a new section
             if (mSectionInProgress != null) {
                 mExtractedText.addSection(mSectionInProgress);
@@ -161,7 +162,7 @@ public class TextExtractorDOCX implements TextExtractor {
 
             // If the default headers of word are used, we can extract a paragraph level, non
             // header sections will get the last seen paragraph level.
-            if(paragraphLevel >= 0) {
+            if (paragraphLevel >= 0) {
                 mSectionInProgress.setLevel(paragraphLevel);
                 mLastSeenParagraphLevel = paragraphLevel;
             } else {
@@ -176,8 +177,8 @@ public class TextExtractorDOCX implements TextExtractor {
             // The section is not a title
 
             // If its empty, flush the previous section (if it has body or extractedImages)
-            if(formatted.isEmpty() && mSectionInProgress != null &&
-                    (mSectionInProgress.getBody()!=null || !mSectionInProgress.getExtractedImages().isEmpty())) {
+            if (formatted.isEmpty() && mSectionInProgress != null &&
+                    (!mSectionInProgress.getBody().isEmpty() || !mSectionInProgress.getExtractedImages().isEmpty())) {
                 mSectionInProgress.addExtractedImages(extractedImages);
                 mExtractedText.addSection(mSectionInProgress);
                 mSectionInProgress = null;
@@ -209,7 +210,7 @@ public class TextExtractorDOCX implements TextExtractor {
      */
     //I suppress these warnings because there is no easy way to simplify or split this logic into
     // multiple methods without making it harder to understand.
-    @java.lang.SuppressWarnings({"squid:MethodCyclomaticComplexity","squid:S3776"})
+    @java.lang.SuppressWarnings({"squid:MethodCyclomaticComplexity", "squid:S3776"})
     private void appendParagraphText(XWPFParagraph paragraph, boolean extractImages) {
         // For some reason runs can be split randomly, even in the middle of sentences or words.
         // This code is an attempt to combine such runs to one coherent piece of text.
@@ -223,8 +224,8 @@ public class TextExtractorDOCX implements TextExtractor {
         /* List of extractedImages that has yet to be added */
         List<ExtractedImage> extractedImages = new ArrayList<>();
 
-        if(paragraph.getRuns().isEmpty()) {
-              addRun(paragraph.getText(), getLevel(paragraph), -1, new ArrayList<>());
+        if (paragraph.getRuns().isEmpty()) {
+            addRun(paragraph.getText(), getLevel(paragraph), -1, new ArrayList<>());
         }
 
         // Loop over all the runs in a single paragraph.
@@ -233,7 +234,7 @@ public class TextExtractorDOCX implements TextExtractor {
             if (run instanceof XWPFRun) {
                 // Extract the extractedImages from the run and add them to the list of yet to process extractedImages
                 List<XWPFPicture> piclist = ((XWPFRun) run).getEmbeddedPictures();
-                for (XWPFPicture image: piclist) {
+                for (XWPFPicture image : piclist) {
                     if (extractImages) {
                         ExtractedImage imageObject =
                                 new ExtractedImage(Base64.encodeToString(image.getPictureData().getData(),
@@ -245,10 +246,10 @@ public class TextExtractorDOCX implements TextExtractor {
                 XWPFRun currentRun = (XWPFRun) run;
 
                 //Loop over all breaks and tabs. This certainly signifies the end of a section.
-                for (String text: currentRun.text().split("(?<=\n|\t)")) {
+                for (String text : currentRun.text().split("(?<=[\n\t])")) {
                     // A section ends with a tab or an newline.
-                    if((text.endsWith("\t") || text.endsWith("\n"))) {
-                        if(textInProgress != null) {
+                    if ((text.endsWith("\t") || text.endsWith("\n"))) {
+                        if (textInProgress != null) {
                             textInProgress.append(text);
                         } else {
                             textInProgress = new StringBuilder(text);
@@ -262,7 +263,7 @@ public class TextExtractorDOCX implements TextExtractor {
                         extractedImages = new ArrayList<>();
                         textInProgress = null;
                         runInProgress = null;
-                    } else if(textInProgress != null) {
+                    } else if (textInProgress != null) {
                         // Build upon the previous run and the section has not ended.
                         textInProgress.append(text);
                     } else if (!"".equals(text.trim())) {
@@ -282,11 +283,11 @@ public class TextExtractorDOCX implements TextExtractor {
             }
         }
         // Flush the last run and any extractedImages that are not yet pushed.
-        if(runInProgress != null) {
+        if (runInProgress != null) {
             addRun(textInProgress.toString(), getLevel(paragraph)
                     , runInProgress.getFontSize(), extractedImages);
-        } else if(!extractedImages.isEmpty()) {
-            addRun("",getLevel(paragraph), -1, extractedImages);
+        } else if (!extractedImages.isEmpty()) {
+            addRun("", getLevel(paragraph), -1, extractedImages);
         }
     }
 
@@ -303,14 +304,14 @@ public class TextExtractorDOCX implements TextExtractor {
 
         int level = -1;
 
-        if(paragraphStyle == null) {
+        if (paragraphStyle == null) {
             return -1;
-        } else if("Titel".equals(paragraphStyle) || "Title".equals(paragraphStyle)) {
+        } else if ("Titel".equals(paragraphStyle) || "Title".equals(paragraphStyle)) {
             level = 0;
-        } else if(paragraphStyle.contains("Heading") || paragraphStyle.contains("Kop")) {
+        } else if (paragraphStyle.contains("Heading") || paragraphStyle.contains("Kop")) {
             Pattern p = Pattern.compile("[0-9]+$");
             Matcher m = p.matcher(paragraphStyle);
-            if(m.find()) {
+            if (m.find()) {
                 level = Integer.parseInt(m.group());
             }
         }

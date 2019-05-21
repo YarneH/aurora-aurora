@@ -27,11 +27,12 @@ public class ParsedPDF {
     /**
      * Adds structure to the text
      *
-     * @param fileRef the reference to the file
+     * @param fileUri the uri of the file
+     * @param fileRef the name of the file
      * @return the same ExtractedText but now filled with text
      */
-    public ExtractedText toExtractedText(String fileRef) {
-        mExtractedText = new ExtractedText(fileRef);
+    public ExtractedText toExtractedText(String fileUri, String fileRef) {
+        mExtractedText = new ExtractedText(fileUri, fileRef);
         if (mContainsHeaders) {
             toExtractedTextWithHeaders();
         } else {
@@ -135,18 +136,18 @@ public class ParsedPDF {
     }
 
 
-    public void addHeader(String text, int level) {
+    void addHeader(String text, int level) {
         mContainsHeaders = true;
         mPDFElements.add(new HeadingFromPDF(text, level));
     }
 
 
-    public void addParagraph(String text) {
+    void addParagraph(String text) {
         mPDFElements.add(new ParagraphFromPDF(text));
     }
 
 
-    public void addImage(String image) {
+    void addImage(String image) {
         mPDFElements.add(new ImageFromPDF(image));
     }
 }

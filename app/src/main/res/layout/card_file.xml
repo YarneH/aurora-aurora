@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?><!-- The main view for the ViewHolder of the RecyclerView -->
-<android.support.v7.widget.CardView
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/cv_file"
     android:layout_width="match_parent"
@@ -16,20 +15,30 @@
         android:id="@+id/cv_fl_base_card"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:background="?android:attr/selectableItemBackground"
         android:padding="@dimen/fc_padding">
+
+        <android.support.constraint.Guideline
+            android:id="@+id/guideline"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintGuide_percent="0.8" />
 
         <!-- File name -->
         <!-- Gravity "start" in stead of "left".
             Users might use right to left text flow. -->
         <TextView
             android:id="@+id/tv_card_title"
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_gravity="start"
+            android:ellipsize="middle"
+            android:singleLine="true"
             android:textSize="@dimen/fc_large_text"
             android:textStyle="bold"
+            app:layout_constraintEnd_toStartOf="@+id/iv_icon"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"/>
+            app:layout_constraintTop_toTopOf="parent" />
 
         <!-- Description of the file -->
         <TextView
@@ -40,26 +49,18 @@
             android:text="@string/file_last"
             android:textSize="@dimen/fc_small_text"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/tv_card_title"/>
+            app:layout_constraintTop_toBottomOf="@+id/tv_card_title" />
 
-        <!-- Details of the file -->
-        <!-- TODO: Remove invisibility is details should be used! -->
-        <TextView
-            android:id="@+id/tv_card_more_details"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/file_more_details"
-            app:layout_constraintBottom_toBottomOf="@+id/cv_fl_base_card"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/tv_card_location"
-            android:visibility="gone"/>
-
-        <!-- Include file detail content -->
-        <include
-            layout="@layout/card_file_detail"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
+        <ImageView
+            android:id="@+id/iv_icon"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_marginStart="8dp"
+            android:contentDescription="@string/plugin_logo_description"
+            android:scaleType="fitEnd"
             app:layout_constraintBottom_toBottomOf="@id/cv_fl_base_card"
-            app:layout_constraintTop_toBottomOf="@+id/tv_card_location"/>
+            app:layout_constraintEnd_toEndOf="@id/cv_fl_base_card"
+            app:layout_constraintStart_toStartOf="@+id/guideline"
+            app:layout_constraintTop_toTopOf="@id/cv_fl_base_card" />
     </android.support.constraint.ConstraintLayout>
 </android.support.v7.widget.CardView>

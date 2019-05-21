@@ -21,7 +21,7 @@ public class InternalTextProcessorUnitTest {
     @Test(expected = FileTypeNotSupportedException.class)
     public void processFile_shouldThrowErrorUnsupportedExtension() throws FileTypeNotSupportedException {
         try {
-            mInternalTextProcessor.processFile(null, null, "jpg", false);
+            mInternalTextProcessor.processFile(null, null, null,"jpg", false);
         } catch (DocumentNotSupportedException e) {
             e.printStackTrace();
         }
@@ -30,11 +30,12 @@ public class InternalTextProcessorUnitTest {
     // Test if, when a 'txt'-file is passed, text is extracted
     @Test
     public void processFile_shouldReturnExtractedTextTXT() throws FileTypeNotSupportedException {
+        String fileUri = "dummyUri";
         String fileRef = RES_PATH + "Pasta.txt";
         File file = new File(fileRef);
         try {
             InputStream inputStream = new FileInputStream(file);
-            ExtractedText extractedText = mInternalTextProcessor.processFile(inputStream, fileRef
+            ExtractedText extractedText = mInternalTextProcessor.processFile(inputStream, fileUri, fileRef
                     , "txt", false);
             assertNotNull("The extraction of the 'txt'-file has failed" , extractedText);
         } catch (FileNotFoundException e) {
@@ -47,11 +48,12 @@ public class InternalTextProcessorUnitTest {
     // Test if, when a 'docx'-file is passed, text is extracted
     @Test
     public void processFile_shouldReturnExtractedTextDOCX() throws FileTypeNotSupportedException {
+        String fileUri = "dummyUri";
         String fileRef = RES_PATH + "Pasta.docx";
         File file = new File(fileRef);
         try {
             InputStream inputStream = new FileInputStream(file);
-            ExtractedText extractedText = mInternalTextProcessor.processFile(inputStream, fileRef
+            ExtractedText extractedText = mInternalTextProcessor.processFile(inputStream, fileUri, fileRef
                     , "docx", false);
             assertNotNull("The extraction of the 'docx'-file has failed" , extractedText);
         } catch (FileNotFoundException e) {
@@ -64,11 +66,12 @@ public class InternalTextProcessorUnitTest {
     // Test if, when a 'pdf'-file is passed, text is extracted
     @Test
     public void processFile_shouldReturnExtractedTextPDF() throws FileTypeNotSupportedException {
+        String fileUri = "dummyUri";
         String fileRef = RES_PATH + "Pasta.pdf";
         File file = new File(fileRef);
         try {
             InputStream inputStream = new FileInputStream(file);
-            ExtractedText extractedText = mInternalTextProcessor.processFile(inputStream, fileRef
+            ExtractedText extractedText = mInternalTextProcessor.processFile(inputStream, fileUri, fileRef
                     , "pdf", false);
             assertNotNull("The extraction of the 'pdf'-file has failed" , extractedText);
         } catch (FileNotFoundException e) {

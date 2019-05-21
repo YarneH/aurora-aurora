@@ -10,32 +10,40 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Scanner;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * These utilities will be used to communicate with the weather servers.
  */
 final class NetworkUtils {
     /**
+     * The tag used for Logs
+     */
+    private static final String LOG_TAG = NetworkUtils.class.getSimpleName();
+    /**
      * The URL to the list of MarketPlugins
      */
     private static final String PLUGINLIST_URL =
-            "http://pluginmarket.aurora-files.ml/plugin";
+            "https://pluginmarket.aurora-files.ml/plugin";
 
 
+    /**
+     * Constructor that should not be accessed
+     */
     private NetworkUtils() {
         throw new IllegalStateException("Utility class");
     }
 
+    /**
+     * Get the MarketPluginURL
+     *
+     * @return a URL, which locates to the plugins
+     */
     static URL getMarketPluginURL() {
         try {
             return new URL(PLUGINLIST_URL);
         } catch (MalformedURLException e) {
-            Logger.getLogger("NetworkUtils").log(Level.SEVERE, null, e);
-
+            Log.e(LOG_TAG, "exception", e);
         }
-
         return null;
     }
 
@@ -51,7 +59,7 @@ final class NetworkUtils {
         try (
                 InputStream in = urlConnection.getInputStream();
                 Scanner scanner = new Scanner(in)
-                ){
+        ) {
             scanner.useDelimiter("\\A");
 
             boolean hasInput = scanner.hasNext();
@@ -72,14 +80,12 @@ final class NetworkUtils {
      * @return The contents of the HTTP response, null if no response
      * @throws IOException Related to network and stream reading
      */
-    static Bitmap getBitmapFromHttpUrl(URL url) throws  IOException {
+    static Bitmap getBitmapFromHttpUrl(URL url) throws IOException {
         HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
         try (
                 InputStream in = urlConnection.getInputStream()
-        ){
-            Bitmap testBitmap = BitmapFactory.decodeStream(in);
-            Log.d("image", "Bitmap: " + testBitmap);
-            return testBitmap;
+        ) {
+            return BitmapFactory.decodeStream(in);
         } finally {
             urlConnection.disconnect();
         }

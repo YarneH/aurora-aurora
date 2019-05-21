@@ -68,7 +68,7 @@ public class Translator implements InternalService {
     /**
      * The tag of this class for logging purposes
      */
-    private final String LOG_TAG = Translator.class.getSimpleName();
+    private static final String LOG_TAG = Translator.class.getSimpleName();
 
     public Translator(RequestQueue requestQueue) {
 
@@ -100,7 +100,7 @@ public class Translator implements InternalService {
             Log.e(LOG_TAG, "Translation failed", e);
             evaluateResponse(e);
         }
-        // either the request is added or an error response will be created so wait untill a response
+        // either the request is added or an error response will be created so wait until a response
         // is made
         synchronized (mLock) {
             while (mInternalResponse == null) {
@@ -129,7 +129,7 @@ public class Translator implements InternalService {
      * @return The url to access
      * @throws UnsupportedEncodingException if the sentences cannot be encoded into url
      */
-    public static String makeUrl(String[] sentencesToTranslate, String sourceLanguage, String targetLanguage)
+    static String makeUrl(String[] sentencesToTranslate, String sourceLanguage, String targetLanguage)
             throws UnsupportedEncodingException {
         StringBuilder bld = new StringBuilder(HTTP_BEGIN);
         boolean first = true;

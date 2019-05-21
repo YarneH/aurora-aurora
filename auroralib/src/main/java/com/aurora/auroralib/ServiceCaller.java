@@ -10,6 +10,9 @@ import android.util.Log;
 
 import java.util.List;
 
+/**
+ * Abstract class that holds functionality common to specific ServiceCallers
+ */
 public abstract class ServiceCaller implements ServiceConnection {
     /**
      * Context used for binding
@@ -27,6 +30,11 @@ public abstract class ServiceCaller implements ServiceConnection {
     protected boolean mServiceConnected = false;
 
 
+    /**
+     * Constructor for a ServiceCaller
+     *
+     * @param context Context used for binding
+     */
     public ServiceCaller(Context context){ mAppContext = context;}
 
 
@@ -34,7 +42,7 @@ public abstract class ServiceCaller implements ServiceConnection {
      * Binds the service so that a call to the AIDL defined function of the Service can be called
      *
      * @param c        The class of the AIDL defined interface
-     * @param logTag   the logTag to be used (should be the logtag of the subclass
+     * @param logTag   the logTag to be used (should be the logtag of the subclass)
      */
     protected void bindService(Class c, String logTag) {
         Intent implicit = new Intent(c.getName());

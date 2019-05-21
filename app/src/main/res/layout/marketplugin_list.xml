@@ -8,7 +8,7 @@
     android:layout_height="match_parent"
     android:layout_marginLeft="16dp"
     android:layout_marginRight="16dp"
+    android:background="@drawable/background"
     app:layoutManager="LinearLayoutManager"
     tools:context="com.aurora.market.ui.MarketPluginListActivity"
-    tools:listitem="@layout/marketplugin_list_content"
-    android:backgroundTint="@color/colorPrimaryDark"/>
+    tools:listitem="@layout/marketplugin_list_content" />

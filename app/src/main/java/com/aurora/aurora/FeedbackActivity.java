@@ -13,6 +13,7 @@ import org.json.JSONObject;
 import java.io.DataOutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.Objects;
 
 /**
  * <p>
@@ -39,6 +40,9 @@ public class FeedbackActivity extends AppCompatActivity {
      */
     private static final String FEEDBACK_WEBHOOK_URL =
             "https://hooks.slack.com/services/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";
+    /**
+     * Edit text field.
+     */
     private EditText mEditTextFeedback = null;
 
     /**
@@ -49,7 +53,9 @@ public class FeedbackActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_feedback);
 
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setTitle(R.string.feedback_title);
+
 
         mEditTextFeedback = findViewById(R.id.et_feedback);
         mEditTextFeedback.setHint(getString(R.string.enter_feedback));
@@ -103,7 +109,7 @@ public class FeedbackActivity extends AppCompatActivity {
             try {
                 URL url = new URL(FEEDBACK_WEBHOOK_URL);
                 HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-                try (AutoCloseable conc = conn::disconnect) {
+                try (AutoCloseable ignored = conn::disconnect) {
                     conn.setRequestMethod("POST");
                     conn.setRequestProperty("Content-Type", "application/json;charset=UTF-8");
                     conn.setRequestProperty("Accept", "application/json");

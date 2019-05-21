@@ -15,6 +15,10 @@ import com.aurora.internalservice.internalcache.ICache;
 import java.io.FileWriter;
 import java.io.IOException;
 
+/**
+ * Class used by plugins to call the cache service of Aurora. Should not be used directly. Instead
+ * calls to the service should be handled by a ProcessorCacheThread.
+ */
 public class CacheServiceCaller extends ServiceCaller {
     /**
      * Tag used for log messages
@@ -27,6 +31,11 @@ public class CacheServiceCaller extends ServiceCaller {
     private ICache mCacheBinding = null;
 
 
+    /**
+     * Constructor for a CacheServiceCaller
+     *
+     * @param context Context used for binding
+     */
     public CacheServiceCaller(Context context) {
         super(context);
     }
@@ -49,7 +58,6 @@ public class CacheServiceCaller extends ServiceCaller {
                 while (!mServiceConnected) {
                     mMonitor.wait();
                 }
-
                 result = cache(fileName, uniquePluginName, pluginObjectJSON);
                 unbindService();
             } catch (InterruptedException e) {
@@ -70,7 +78,7 @@ public class CacheServiceCaller extends ServiceCaller {
      * @param fileName         the name of the file that contained the original plain text
      * @param uniquePluginName the name of the plugin that processed the file
      * @param pluginObjectJSON the JSON string of the object that needs to be cached
-     * @return status code of the cache operation from Cache Service in Aurora Internal Services
+     * @return status code of the cache operation from CacheService in Aurora Internal Services
      */
     private int cache(@NonNull String fileName, @NonNull String uniquePluginName,
                       @NonNull String pluginObjectJSON) {
@@ -90,7 +98,7 @@ public class CacheServiceCaller extends ServiceCaller {
     }
 
     /**
-     * This function will be called by the android system
+     * This function will be called by the android system and sets the binding
      *
      * @param className Name of the class
      * @param binder    Finishes the binding process
@@ -127,11 +135,32 @@ public class CacheServiceCaller extends ServiceCaller {
          */
         private Context mContext;
 
+        /**
+         * The result of the caching operation, corresponding to a value in CacheResults
+         */
         private int mCacheResult = CacheResults.NOT_REACHED;
+        /**
+         * The name of the original file of the PluginObject to be cached
+         */
         private String mFileName;
+        /**
+         * The unique plugin name of the plugin that is executing the caching operation
+         */
         private String mUniquePluginName;
+        /**
+         * The PluginObject to be cached in JSON format
+         */
         private String mPluginObjectJSON;
 
+        /**
+         * Constructs a CacheThread
+         *
+         * @param context          An application context object
+         * @param fileName         The name of the original file of the PluginObject to be cached
+         * @param uniquePluginName The unique plugin name of the plugin that is executing the caching
+         *                         operation
+         * @param pluginObjectJSON The PluginObject to be cached in JSON format
+         */
         CacheThread(final Context context, String fileName, String uniquePluginName,
                     String pluginObjectJSON) {
             mContext = context;
@@ -140,6 +169,12 @@ public class CacheServiceCaller extends ServiceCaller {
             mPluginObjectJSON = pluginObjectJSON;
         }
 
+        /**
+         * Getter used to query the result of the caching operation since {@link CacheThread#run()}
+         * returns void
+         *
+         * @return The result code of the caching operation
+         */
         int getCacheResult() {
             return mCacheResult;
         }
@@ -175,6 +210,15 @@ public class CacheServiceCaller extends ServiceCaller {
             }
         }
 
+        /**
+         * Executes the caching service by calling the cache operation on the binding, which executes
+         * the cache service in Aurora.
+         * If there is no connection to the service yet, this function waits until it is connected
+         *
+         * @return an int corresponding to a value in CacheResults
+         * @throws RemoteException is thrown by {@link CacheThread#writeToAurora()}
+         * @throws IOException     is thrown when waiting for the connection to the service gets interrupted
+         */
         private int cache() throws RemoteException, IOException {
             synchronized (mMonitor) {
                 try {
@@ -207,7 +251,7 @@ public class CacheServiceCaller extends ServiceCaller {
          */
         private Uri writeToAurora() throws RemoteException, IOException {
             // Get a Uri to a file in internal storage of Aurora.
-            Uri uri = mCacheBinding.getWritePermissionUri( mContext.getPackageName());
+            Uri uri = mCacheBinding.getWritePermissionUri(mContext.getPackageName());
 
             // Open the file
             ParcelFileDescriptor outputPFD = mContext.getContentResolver().openFileDescriptor(uri

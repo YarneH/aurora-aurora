@@ -3,9 +3,9 @@ package com.aurora.kernel;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
-import android.support.annotation.NonNull;
 import android.os.Handler;
 import android.os.Looper;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.content.FileProvider;
 import android.util.Log;
@@ -14,16 +14,12 @@ import android.widget.Toast;
 import com.aurora.aurora.R;
 import com.aurora.auroralib.Constants;
 import com.aurora.auroralib.ExtractedText;
-import com.aurora.kernel.event.ListPluginsRequest;
-import com.aurora.kernel.event.ListPluginsResponse;
 import com.aurora.kernel.event.OpenCachedFileWithPluginRequest;
 import com.aurora.kernel.event.OpenFileWithPluginRequest;
-import com.aurora.plugin.Plugin;
 
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.List;
 
 import io.reactivex.Observable;
 
@@ -37,11 +33,6 @@ public class PluginCommunicator extends Communicator {
     private static final String CLASS_TAG = "PluginCommunicator";
 
     /**
-     * A reference to the plugin registry
-     */
-    private PluginRegistry mPluginRegistry;
-
-    /**
      * An observable keeping track of incoming OpenFileWithPluginRequests
      */
     private final Observable<OpenFileWithPluginRequest> mOpenFileWithPluginRequestObservable;
@@ -50,11 +41,6 @@ public class PluginCommunicator extends Communicator {
      * An observable keeping track of incoming OpenCachedFileWithPluginRequests
      */
     private final Observable<OpenCachedFileWithPluginRequest> mOpenCachedFileWithPluginRequestObservable;
-
-    /**
-     * An observable keeping track of incoming ListPluginsRequests
-     */
-    private final Observable<ListPluginsRequest> mListPluginsRequestObservable;
 
     /**
      * String that is logged on a writing error
@@ -76,18 +62,20 @@ public class PluginCommunicator extends Communicator {
      */
     private static final String EXTENSION = ".aur";
 
+    /**
+     * a Toast to keep track of the current toast
+     */
+    private Toast mToast = null;
+
 
     /**
      * Creates a PluginCommunicator. There should be only one instance at a time
      *
      * @param bus            a reference to the unique bus instances that all communicators should use to
      *                       communicate events
-     * @param pluginRegistry a reference to the plugin registry
      */
-    public PluginCommunicator(@NonNull Bus bus, @NonNull PluginRegistry pluginRegistry) {
+    PluginCommunicator(@NonNull Bus bus) {
         super(bus);
-
-        this.mPluginRegistry = pluginRegistry;
 
         // Register for requests to open file with plugin
         mOpenFileWithPluginRequestObservable = mBus.register(OpenFileWithPluginRequest.class);
@@ -105,12 +93,6 @@ public class PluginCommunicator extends Communicator {
                 openCachedFileWithPlugin(request.getJsonRepresentation(),
                         request.getUniquePluginName(), request.getContext())
         );
-
-        // Register for requests to list available plugins
-        mListPluginsRequestObservable = mBus.register(ListPluginsRequest.class);
-
-        // When a request comes in, call the appropriate function
-        mListPluginsRequestObservable.subscribe((ListPluginsRequest listPluginsRequest) -> listPlugins());
     }
 
 
@@ -197,19 +179,6 @@ public class PluginCommunicator extends Communicator {
 
     }
 
-    /**
-     * Lists all available plugins. It actually fires a ListPluginsResponseEvent that should be
-     * subscribed on by the AuroraCommunicator
-     */
-    private void listPlugins() {
-        // Get available plugins from plugin registry
-        List<Plugin> pluginList = mPluginRegistry.getPlugins();
-
-        // Make a response event and post it
-        ListPluginsResponse response = new ListPluginsResponse(pluginList);
-        mBus.post(response);
-    }
-
 
     /**
      * Private non recursive helper function to clear a directory from files that start with prefix
@@ -244,8 +213,13 @@ public class PluginCommunicator extends Communicator {
      */
     private void showToast(Context context, String message) {
         Handler handler = new Handler(Looper.getMainLooper());
-        handler.post(() -> Toast.makeText(context, message,
-                Toast.LENGTH_LONG).show());
+        if (mToast != null) {
+            mToast.cancel();
+        }
+        handler.post(() -> {
+            mToast = Toast.makeText(context, message, Toast.LENGTH_LONG);
+            mToast.show();
+        });
     }
 
     /**

@@ -1,30 +1,47 @@
 package com.aurora.market.data.network;
 
+import android.app.DownloadManager;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Build;
+import android.os.Environment;
+import android.support.v4.content.FileProvider;
+
+import android.util.Log;
+import com.aurora.aurora.R;
 import com.aurora.market.data.database.MarketPlugin;
 import com.firebase.jobdispatcher.Driver;
 import com.firebase.jobdispatcher.FirebaseJobDispatcher;
 import com.firebase.jobdispatcher.GooglePlayDriver;
+
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
-
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.concurrent.ExecutionException;
 
 /**
  * A singleton structure that is responsible for all the data of the Plugin Marget
  * that is gather from online services
  */
 public final class MarketNetworkDataSource {
+    /**
+     * The log tag of this class
+     */
+    private static final String LOG_TAG = MarketNetworkDataSource.class.getSimpleName();
     /**
      * One of the JSON keys
      */
@@ -60,7 +77,11 @@ public final class MarketNetworkDataSource {
     /**
      * The HTTP prefix of a url
      */
-    private static final String URL_PREFIX = "http://";
+    private static final String URL_HTTP_PREFIX = "http://";
+    /**
+     * The HTTPS prefix of a url
+     */
+    private static final String URL_HTTPS_PREFIX = "https://";
     /**
      * The quality percentage for the compressing of the logo
      */
@@ -85,6 +106,11 @@ public final class MarketNetworkDataSource {
      * A list of all the available MarketPlugins
      */
     private static MutableLiveData<List<MarketPlugin>> mMarketPlugins = new MutableLiveData<>();
+
+    /**
+     * A list of the unique names of the downloading plugins
+     */
+    private List<String> mDownloadingPlugins = new ArrayList<>();
 
     private MarketNetworkDataSource(Context context) {
         mContext = context;
@@ -119,10 +145,33 @@ public final class MarketNetworkDataSource {
     }
 
     /**
+     * Download the Plugin
+     *
+     * @param marketPlugin The MarketPlugin of which the Plugin should be downloaded
+     */
+    public void downloadMarketPlugin(MarketPlugin marketPlugin) {
+        mDownloadingPlugins.add(marketPlugin.getPluginName());
+        new DownloadAndInstallPluginTask().execute(marketPlugin);
+    }
+
+    /**
+     * Returns whether the plugin is downloading or not
+     *
+     * @param marketPlugin The MarketPlugin which will be checked on downloading
+     * @return a boolean, indicating whether the provided MarketPlugin is downloading
+     */
+    public boolean isDownloading(MarketPlugin marketPlugin) {
+        return mDownloadingPlugins.contains(marketPlugin.getPluginName());
+    }
+
+    /**
      * Returns a JSONArray of all the MarketPlugins available on the Plugin Market Server
      */
     private static class GetMarketPlugins extends AsyncTask<Void, Void, JSONArray> {
 
+        /**
+         * {@inheritDoc}
+         */
         @Override
         protected JSONArray doInBackground(Void... strings) {
             try {
@@ -136,19 +185,21 @@ public final class MarketNetworkDataSource {
 
                 // Parse response
                 return new JSONArray(jsonPluginListResponse);
-            } catch (Exception e) {
-                Logger.getLogger(this.getClass().getSimpleName()).log(Level.SEVERE, null, e);
+            } catch (IOException | JSONException e) {
+                Log.e(LOG_TAG, "exception", e);
             }
 
             return null;
         }
 
+        /**
+         * {@inheritDoc}
+         */
         @Override
         protected void onPostExecute(JSONArray pluginList) {
+            ArrayList<MarketPlugin> tempList = new ArrayList<>();
             if (pluginList != null) {
                 try {
-                    ArrayList<MarketPlugin> tempList = new ArrayList<>();
-
                     for (int i = 0; i < pluginList.length(); i++) {
                         JSONObject currentPlugin = pluginList.getJSONObject(i);
                         String imageLocation = currentPlugin.getString(JSON_LOGO_KEY);
@@ -157,20 +208,25 @@ public final class MarketNetworkDataSource {
                         String description = currentPlugin.getString(JSON_DESCRIPTION_KEY);
                         String creator = currentPlugin.getString(JSON_CREATOR_KEY);
                         String version = currentPlugin.getString(JSON_VERSION_KEY);
+                        String unique = currentPlugin.getString(JSON_UNIQUE_NAME);
                         byte[] logo = new GetMarketPluginLogo().execute(imageLocation).get();
 
                         MarketPlugin currentMarketPlugin =
-                                new MarketPlugin(logo, name, description, creator, version, downloadLocation);
+                                new MarketPlugin(logo, name, description, creator, version, unique, downloadLocation);
 
                         tempList.add(currentMarketPlugin);
                     }
-
-                    mMarketPlugins.postValue(tempList);
-
-                } catch (Exception e) {
-                    Logger.getLogger(this.getClass().getSimpleName()).log(Level.SEVERE, null, e);
+                } catch (JSONException | ExecutionException e) {
+                    Log.e(LOG_TAG, "exception", e);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+            } else {
+                if (mMarketPlugins.getValue() != null && !mMarketPlugins.getValue().isEmpty()) {
+                    return;
                 }
             }
+            mMarketPlugins.postValue(tempList);
         }
     }
 
@@ -179,24 +235,116 @@ public final class MarketNetworkDataSource {
      */
     private static class GetMarketPluginLogo extends AsyncTask<String, Void, byte[]> {
 
+        /**
+         * {@inheritDoc}
+         */
         @Override
         protected byte[] doInBackground(String... strings) {
             String url = strings[0];
 
-            if (!url.contains(URL_PREFIX)) {
-                url = URL_PREFIX + url;
+            if (!url.contains(URL_HTTP_PREFIX) && !url.contains(URL_HTTPS_PREFIX)) {
+                url = URL_HTTPS_PREFIX + url;
             }
+
+            Bitmap bitmap = null;
+
             try {
                 URL downloadLink = new URL(url);
-                Bitmap bitmap = NetworkUtils.getBitmapFromHttpUrl(downloadLink);
+                bitmap = NetworkUtils.getBitmapFromHttpUrl(downloadLink);
+            } catch (IOException e) {
+                Log.e(LOG_TAG, "exception", e);
+            }
+
+            if (bitmap != null) {
                 ByteArrayOutputStream stream = new ByteArrayOutputStream();
                 bitmap.compress(Bitmap.CompressFormat.PNG, COMPRESS_QUALITY, stream);
                 return stream.toByteArray();
-            } catch (Exception e) {
-                Logger.getLogger(this.getClass().getSimpleName()).log(Level.FINE, null, e);
             }
             return new byte[0];
         }
 
+    }
+
+    /**
+     * A AsyncTask that will download and install a plugin from the market
+     */
+    private class DownloadAndInstallPluginTask extends AsyncTask<MarketPlugin, Void, Void> {
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        protected Void doInBackground(MarketPlugin... marketPlugins) {
+            MarketPlugin marketPlugin = marketPlugins[0];
+            // Create request for android download manager
+            Uri uri = Uri.parse(marketPlugin.getDownloadLink().toString());
+            DownloadManager downloadManager = (DownloadManager) mContext.getSystemService(Context.DOWNLOAD_SERVICE);
+            DownloadManager.Request request = new DownloadManager.Request(uri);
+            request.setAllowedNetworkTypes(DownloadManager.Request.NETWORK_WIFI |
+                    DownloadManager.Request.NETWORK_MOBILE);
+
+            // Set title and description
+            request.setTitle(marketPlugin.getPluginName() + ".apk");
+            request.setDescription(mContext.getResources().getString(R.string.download_plugin));
+
+            request.allowScanningByMediaScanner();
+            request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE);
+
+            // Set the destination for download file to a path within the application's external files directory
+            request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS,
+                    marketPlugin.getPluginName() + ".apk");
+            request.setMimeType("application/vnd.android.package-archive");
+
+            // Save the downloadID for later
+            long downloadID = downloadManager.enqueue(request);
+
+            BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
+                @Override
+                public void onReceive(Context context, Intent intent) {
+                    long id = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1);
+                    if (id == downloadID) {
+                        context.unregisterReceiver(this);
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+
+                            Intent installIntent = new Intent(Intent.ACTION_INSTALL_PACKAGE);
+
+                            // Build up the path to the downloaded plugin
+                            String path = Environment.getExternalStorageDirectory() +
+                                    File.pathSeparator +
+                                    Environment.DIRECTORY_DOWNLOADS +
+                                    File.separator +
+                                    marketPlugin.getPluginName() +
+                                    ".apk";
+
+                            // Get the URI of the downloaded apk and prepare intent
+                            Uri apkURI = FileProvider.getUriForFile(context,
+                                    context.getApplicationContext().getPackageName() + ".provider",
+                                    new File(path));
+
+                            // Check if the Uri really points to a file
+                            installIntent.setDataAndType(apkURI, "application/vnd.android.package-archive");
+                            installIntent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION
+                                    + Intent.FLAG_ACTIVITY_NEW_TASK);
+                            // Start install intent
+                            mDownloadingPlugins.remove(marketPlugin.getPluginName());
+                            mContext.startActivity(installIntent);
+                        } else {
+                            String location = Environment.
+                                    getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
+                                    + "/" + marketPlugin.getPluginName() + ".apk";
+                            Uri uri = Uri.parse("file://" + location);
+
+                            Intent installIntent = new Intent(Intent.ACTION_VIEW);
+                            installIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP + Intent.FLAG_ACTIVITY_NEW_TASK);
+                            installIntent.setDataAndType(uri, "application/vnd.android.package-archive");
+                            mContext.startActivity(installIntent);
+                        }
+                    }
+                }
+            };
+            mContext.registerReceiver(broadcastReceiver, new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
+
+            return null;
+        }
     }
 }

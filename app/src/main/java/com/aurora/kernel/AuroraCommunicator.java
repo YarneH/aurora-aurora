@@ -1,6 +1,9 @@
 package com.aurora.kernel;
 
+import android.annotation.SuppressLint;
+import android.arch.lifecycle.MutableLiveData;
 import android.content.Context;
+import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.util.Log;
 import android.widget.Toast;
@@ -12,17 +15,19 @@ import com.aurora.internalservice.internalcache.CachedProcessedFile;
 import com.aurora.kernel.event.DocumentNotSupportedEvent;
 import com.aurora.kernel.event.InternalProcessorRequest;
 import com.aurora.kernel.event.InternalProcessorResponse;
-import com.aurora.kernel.event.ListPluginsRequest;
-import com.aurora.kernel.event.ListPluginsResponse;
 import com.aurora.kernel.event.OpenCachedFileWithPluginRequest;
 import com.aurora.kernel.event.OpenFileWithPluginRequest;
 import com.aurora.kernel.event.QueryCacheRequest;
 import com.aurora.kernel.event.QueryCacheResponse;
+import com.aurora.kernel.event.RemoveFromCacheRequest;
 import com.aurora.kernel.event.RetrieveFileFromCacheRequest;
 import com.aurora.kernel.event.RetrieveFileFromCacheResponse;
+import com.aurora.kernel.event.UpdateCachedFileDateRequest;
 import com.aurora.plugin.Plugin;
+import com.google.firebase.analytics.FirebaseAnalytics;
 
 import java.io.InputStream;
+import java.util.Date;
 import java.util.List;
 
 import io.reactivex.Observable;
@@ -39,36 +44,38 @@ public class AuroraCommunicator extends Communicator {
     private static final String CLASS_TAG = "AuroraCommunicator";
 
     /**
-     * A reference to the plugin registry
-     */
-    private PluginRegistry mPluginRegistry;
-
-    /**
      * The android application context
      */
     private Context mContext;
-
     /**
-     * Observable keeping track of events indicating that a document is not supported
+     * Keeps track of the starting timestamp of processing.
      */
-    private Observable<DocumentNotSupportedEvent> mDocumentNotSupportedEventObservable;
+    private long mStartTime;
+    /**
+     * Indicates whether or not the text is being extracted.
+     */
+    private MutableLiveData<Boolean> mLoading;
 
     /**
      * Creates an AuroraCommunicator. There should be only one AuroraCommunicator at a time
      *
      * @param bus                A reference to the unique bus instance over which
      *                           the communicators will communicate events
-     * @param pluginRegistry     a reference to the plugin registry
      * @param applicationContext the android context
      */
-    public AuroraCommunicator(@NonNull final Bus bus, @NonNull final PluginRegistry pluginRegistry,
-                              @NonNull final Context applicationContext) {
+    AuroraCommunicator(@NonNull final Bus bus, @NonNull final Context applicationContext) {
         super(bus);
-        mPluginRegistry = pluginRegistry;
-        mContext = applicationContext;
 
+        mContext = applicationContext;
+        mLoading = new MutableLiveData<>();
+        mLoading.postValue(false);
+
+        /*
+         * Observable keeping track of events indicating that a document is not supported
+         */
+        Observable<DocumentNotSupportedEvent> mDocumentNotSupportedEventObservable =
+                mBus.register(DocumentNotSupportedEvent.class);
         // Register for incoming events
-        mDocumentNotSupportedEventObservable = mBus.register(DocumentNotSupportedEvent.class);
 
         // Call right method when event comes in
         mDocumentNotSupportedEventObservable
@@ -82,25 +89,37 @@ public class AuroraCommunicator extends Communicator {
      * the text from the given file reference,
      * then it will send a request to let the plugin make the representation.
      *
-     * @param fileRef            a reference to the file that needs to be opened
-     * @param fileType           the file type
-     * @param file               the input stream of the file
-     * @param plugin             the plugin to open the file with.
+     * @param fileUri  The uri of the file that needs to be opened
+     * @param fileRef  The name of the file that needs to be opened
+     * @param fileType the file type
+     * @param file     the input stream of the file
+     * @param plugin   the plugin to open the file with.
      */
-    public void openFileWithPlugin(String fileRef, String fileType, InputStream file,
+    @SuppressLint("CheckResult")
+    public void openFileWithPlugin(String fileUri, String fileRef, String fileType, InputStream file,
                                    Plugin plugin) {
+
+        // mark starting time
+        mStartTime = System.currentTimeMillis();
+        // Set the state to loading.
+        mLoading.postValue(true);
 
         // Register observable
         Observable<InternalProcessorResponse> internalProcessorResponseObservable =
                 mBus.register(InternalProcessorResponse.class);
-
         // Subscribe to observable
         // The subscribe will only be triggered after the file was processed internally
         internalProcessorResponseObservable
                 .map(InternalProcessorResponse::getExtractedText)
                 .take(1)
-                .subscribe((ExtractedText extractedText) ->
-                                sendOpenFileRequest(extractedText, plugin.getUniqueName())
+                .subscribe((ExtractedText extractedText) -> {
+                            Bundle params = new Bundle();
+                            params.putInt("extracted_text_length", extractedText.toString().length());
+                            params.putLong("processing_time", System.currentTimeMillis() - mStartTime);
+                            FirebaseAnalytics.getInstance(mContext).logEvent("processing_performance", params);
+                            mLoading.postValue(false);
+                            sendOpenFileRequest(extractedText, plugin.getUniqueName());
+                        }
                         , (Throwable e) ->
                                 Log.e(CLASS_TAG,
                                         "Something went wrong when receiving the internally processed file.", e)
@@ -108,13 +127,11 @@ public class AuroraCommunicator extends Communicator {
 
 
         InternalProcessorRequest internalProcessorRequest =
-                new InternalProcessorRequest(fileRef, fileType, file, plugin.getInternalServices());
+                new InternalProcessorRequest(fileUri, fileRef, fileType, file, plugin.getInternalServices());
 
         // Post request on the bus
         mBus.post(internalProcessorRequest);
     }
-
-
 
 
     /**
@@ -123,6 +140,7 @@ public class AuroraCommunicator extends Communicator {
      * @param fileRef          a reference to the file to open
      * @param uniquePluginName the name of the plugin that the file was processed with
      */
+    @SuppressLint("CheckResult")
     public void openFileWithCache(String fileRef, String uniquePluginName) {
         // Create observable to listen to
         Observable<RetrieveFileFromCacheResponse> retrieveFileFromCacheResponse =
@@ -136,13 +154,13 @@ public class AuroraCommunicator extends Communicator {
                 .subscribe((CachedProcessedFile processedFile) -> {
                             if ("{}".equals(processedFile.getJsonRepresentation())) {
                                 Toast.makeText(mContext,
-                                        mContext.getString(R.string.cached_file_not_found_processing_file),
+                                        mContext.getString(R.string.cached_file_not_found),
                                         Toast.LENGTH_LONG).show();
                                 // TODO: change this such that it processes the original file
 
                             } else {
                                 sendOpenCachedFileRequest(processedFile.getJsonRepresentation(),
-                                        processedFile.getUniquePluginName());
+                                        processedFile.getFileRef(), processedFile.getUniquePluginName());
                             }
                         }, (Throwable e) ->
                                 Log.e(CLASS_TAG, "Something went wrong while retrieving a file from the cache!", e)
@@ -176,31 +194,15 @@ public class AuroraCommunicator extends Communicator {
     }
 
     /**
-     * Gets a list of all the available plugins
+     * Removes a file from the cache, if it is present. In case the file is not in the cache, nothing will happen.
      *
-     * @param observer an observer containing code that will be executed when the list of plugins comes in
+     * @param fileRef          a reference to the file to remove
+     * @param uniquePluginName the name of the plugin that the file was opened with
      */
-    public void getListOfPlugins(@NonNull final Observer<List<Plugin>> observer) {
-        Observable<ListPluginsResponse> mListPluginsResponse
-                = this.mBus.register(ListPluginsResponse.class);
-
-        mListPluginsResponse
-                .map(ListPluginsResponse::getPlugins)
-                .take(1)
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(observer);
-
-        this.mBus.post(new ListPluginsRequest());
-    }
-
-    /**
-     * Registers a plugin in the pluginRegistry
-     *
-     * @param plugin the plugin metadata object
-     * @return true if the plugin was successfully saved in the plugin registry, false otherwise
-     */
-    public boolean registerPlugin(@NonNull final Plugin plugin) {
-        return mPluginRegistry.registerPlugin(plugin.getUniqueName(), plugin);
+    public void removeFileFromCache(@NonNull final String fileRef, @NonNull final String uniquePluginName) {
+        // Create request and post it on the bus
+        RemoveFromCacheRequest removeFromCacheRequest = new RemoveFromCacheRequest(fileRef, uniquePluginName);
+        mBus.post(removeFromCacheRequest);
     }
 
     /**
@@ -225,11 +227,17 @@ public class AuroraCommunicator extends Communicator {
      * @param jsonRepresentation the representation of the object to represent
      * @param uniquePluginName   the name of the plugin that the file was processed with
      */
-    private void sendOpenCachedFileRequest(final String jsonRepresentation, final String uniquePluginName) {
+    private void sendOpenCachedFileRequest(@NonNull final String jsonRepresentation, @NonNull final String fileRef,
+                                           @NonNull final String uniquePluginName) {
         // Create request and post it on bus
         OpenCachedFileWithPluginRequest openCachedFileWithPluginRequest =
                 new OpenCachedFileWithPluginRequest(jsonRepresentation, uniquePluginName, mContext);
         mBus.post(openCachedFileWithPluginRequest);
+
+        // Create request to update the dateLastOpened of the file
+        UpdateCachedFileDateRequest updateCachedFileDateRequest =
+                new UpdateCachedFileDateRequest(fileRef, uniquePluginName, new Date());
+        mBus.post(updateCachedFileDateRequest);
     }
 
     /**
@@ -237,7 +245,17 @@ public class AuroraCommunicator extends Communicator {
      *
      * @param reason the reason why the document could not be processed
      */
-    private void showDocumentNotSupportedMessage(String reason) {
+    private void showDocumentNotSupportedMessage(@NonNull final String reason) {
         Toast.makeText(mContext, reason, Toast.LENGTH_LONG).show();
+        mLoading.postValue(false);
+    }
+
+    /**
+     * Getter for the loading state LiveData.
+     *
+     * @return LiveData that changes when the loading state changes
+     */
+    public MutableLiveData<Boolean> getLoadingData() {
+        return mLoading;
     }
 }

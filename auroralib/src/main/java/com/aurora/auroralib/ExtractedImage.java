@@ -8,6 +8,7 @@ import android.util.Base64;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.util.Objects;
 
 /**
  * Class representing an Image extracted from Files by Aurora. An ExtractedImage contains the
@@ -34,15 +35,18 @@ public class ExtractedImage {
      */
     public ExtractedImage(@NonNull final String base64EncodedImage) {
         mBase64EncodedImage = base64EncodedImage;
+        mCaption = "";
     }
 
     /**
-     * Constructor to create a base64Encoded image with a caption
+     * Constructor to create a base64Encoded image withØ a caption
+     *
      * @param base64EncodedImage the base64 encode String
-     * @param caption           the caption String
+     * @param caption            the caption String
      */
+    @SuppressWarnings("unused")
     public ExtractedImage(@NonNull final String base64EncodedImage,
-                          @Nullable final String caption) {
+                          @NonNull final String caption) {
         mBase64EncodedImage = base64EncodedImage;
         mCaption = caption;
     }
@@ -52,42 +56,89 @@ public class ExtractedImage {
      *
      * @param extractedImage Image that needs copying
      */
-    public ExtractedImage(final ExtractedImage extractedImage) {
+    @SuppressWarnings("WeakerAccess")
+    public ExtractedImage(@NonNull final ExtractedImage extractedImage) {
         mBase64EncodedImage = extractedImage.mBase64EncodedImage;
         mCaption = extractedImage.mCaption;
     }
 
     /**
-     * Returns the raw base64 encoded image
+     * Returns the raw base64 encoded image. In odd cases the String may not contain an image but
+     * instead be an empty String.
      *
      * @return the base64 encoded image
      */
-    public @NonNull String getBase64EncodedImage() {
+    @SuppressWarnings("WeakerAccess")
+    @NonNull
+    public String getBase64EncodedImage() {
         return mBase64EncodedImage;
     }
 
     /**
-     * Returns the decoded image as Bitmap
+     * Sets the base64 encoded image of the {@link ExtractedImage}.
+     *
+     * @param base64EncodedImage String of the base64 encoded image
+     */
+    @SuppressWarnings("unused")
+    public void setBase64EncodedImage(@NonNull final String base64EncodedImage) {
+        mBase64EncodedImage = base64EncodedImage;
+    }
+
+    /**
+     * Returns the decoded image as Bitmap. Can be null in special cases.
      *
      * @return the Bitmap of the image
      */
-    @SuppressWarnings("unused")
-    public @NonNull Bitmap getBitmap() {
+    @SuppressWarnings({"unused"})
+    @Nullable
+    public Bitmap getBitmap() {
         InputStream stream = new ByteArrayInputStream(Base64.decode(mBase64EncodedImage.getBytes()
                 , Base64.DEFAULT));
         return BitmapFactory.decodeStream(stream);
     }
 
-    public void setBase64EncodedImage(@NonNull final String base64EncodedImage) {
-        this.mBase64EncodedImage = base64EncodedImage;
-    }
-
-    @SuppressWarnings("unused")
-    public @Nullable String getCaption() {
+    @SuppressWarnings({"unused", "WeakerAccess"})
+    @NonNull
+    public String getCaption() {
+        if (mCaption == null) {
+            return "";
+        }
         return mCaption;
     }
 
-    public void setCaption(@Nullable final String caption) {
-        this.mCaption = caption;
+    /**
+     * Sets the caption of the {@link ExtractedImage}.
+     *
+     * @param caption String of the caption
+     */
+    @SuppressWarnings("unused")
+    public void setCaption(@NonNull final String caption) {
+        mCaption = caption;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+
+        if (this == o) {
+            return true;
+        }
+
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
+        ExtractedImage other = (ExtractedImage) o;
+
+        boolean equals;
+
+        equals = this.getBase64EncodedImage().equals(other.getBase64EncodedImage());
+        equals &= this.getCaption().equals(other.getCaption());
+
+        return equals;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getBase64EncodedImage(), getCaption());
     }
 }

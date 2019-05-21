@@ -32,11 +32,12 @@ public class InternalNLPUnitTest {
         // Load a text file in order to have an ExtractedText object
         ExtractedText extractedText = null;
 
+        String fileUri = "dummyUri";
         String fileRef = "src/test/res/Pasta.txt";
         File file = new File(fileRef);
         try {
             InputStream inputStream = new FileInputStream(file);
-            extractedText = mInternalTextProcessor.processFile(inputStream, fileRef
+            extractedText = mInternalTextProcessor.processFile(inputStream, fileUri, fileRef
                     , "txt", false);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
@@ -49,15 +50,15 @@ public class InternalNLPUnitTest {
         // Annotate
         mInternalNLP.annotate(extractedText);
 
-        if(extractedText.getTitle() != null) {
+        if(!extractedText.getTitle().isEmpty()) {
             Assert.assertNotNull(extractedText.getTitleAnnotation());
         }
 
         for (Section section: extractedText.getSections()) {
-            if(section.getBody() != null) {
+            if(!section.getBody().isEmpty()) {
                 Assert.assertNotNull(section.getBodyAnnotation());
             }
-            if(section.getTitle() != null) {
+            if(!section.getTitle().isEmpty()) {
                 Assert.assertNotNull(section.getTitleAnnotation());
             }
         }

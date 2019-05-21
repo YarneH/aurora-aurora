@@ -11,10 +11,12 @@ import java.io.InputStream;
 public interface TextExtractor {
     /**
      * @param file          InputStream to the file
-     * @param fileRef       a reference to where the file can be found
+     * @param fileUri       the uri of the file to be processed
+     * @param fileRef       the name of the file
      * @param extractImages True if images need to be extracted, False otherwise
      * @return the extracted text, split in parts
      * @throws DocumentNotSupportedException if the document cannot be processed
      */
-    ExtractedText extract(InputStream file, String fileRef, boolean extractImages) throws DocumentNotSupportedException;
+    ExtractedText extract(InputStream file, String fileUri, String fileRef, boolean extractImages)
+            throws DocumentNotSupportedException;
 }

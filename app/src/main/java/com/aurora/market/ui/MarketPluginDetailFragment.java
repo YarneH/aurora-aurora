@@ -3,9 +3,9 @@ package com.aurora.market.ui;
 import android.app.Activity;
 import android.graphics.Bitmap;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -46,6 +46,9 @@ public class MarketPluginDetailFragment extends Fragment {
         // Mandatory empty constructor
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -55,15 +58,18 @@ public class MarketPluginDetailFragment extends Fragment {
 
             // Set the title of the details
             Activity activity = this.getActivity();
-            CollapsingToolbarLayout appBarLayout = (CollapsingToolbarLayout) activity.findViewById(R.id.toolbar_layout);
+            CollapsingToolbarLayout appBarLayout = activity.findViewById(R.id.toolbar_layout);
             if (appBarLayout != null) {
                 appBarLayout.setTitle(mMarketPlugin.getPluginName());
             }
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.marketplugin_detail, container, false);
 
@@ -73,16 +79,11 @@ public class MarketPluginDetailFragment extends Fragment {
             ((TextView) rootView.findViewById(R.id.tv_creator_input)).setText(mMarketPlugin.getCreator());
             ((TextView) rootView.findViewById(R.id.tv_version_input)).setText(mMarketPlugin.getVersion());
 
-
             Bitmap imgBitmap = mMarketPlugin.getLogo();
-            Log.d("image", "" + imgBitmap);
             if (imgBitmap != null) {
                 ((ImageView)rootView.findViewById(R.id.iv_icon)).setImageBitmap(imgBitmap);
             }
         }
-
-
-
         return rootView;
     }
 }

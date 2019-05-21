@@ -15,7 +15,7 @@ import java.io.IOException;
 public class ImageExtractionStrategy implements TextExtractionStrategy {
     private String mImage;
 
-    public ImageExtractionStrategy() {
+    ImageExtractionStrategy() {
         this.mImage = "";
     }
 

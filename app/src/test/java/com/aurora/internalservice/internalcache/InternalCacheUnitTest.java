@@ -14,7 +14,9 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.Calendar;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 public class InternalCacheUnitTest {
 
@@ -33,13 +35,13 @@ public class InternalCacheUnitTest {
         String title = "title";
         String text = "text";
         String pluginObject = new DummyPluginObject1(title, text).toJSON();
-        String uniquePluginName = "DummyPlugin";
+        String uniquePluginName = "com.aurora.dummyplugin";
 
         // Call method under test
         mInternalCache.cacheFile(fileRef, pluginObject, uniquePluginName);
 
         // Check that file has been written to the right location
-        File cachedFile = new File("-123456_testFile.aur");
+        File cachedFile = new File("-123456_testFile_dummyplugin.aur");
 
         Assert.assertTrue(cachedFile.exists());
 
@@ -268,13 +270,42 @@ public class InternalCacheUnitTest {
         CachedFileInfo originalFileInfo = mInternalCache.checkCacheForProcessedFile(fileRef1, pluginName);
 
         // Update date
-        mInternalCache.updateCachedFileDate(fileRef1, pluginName);
+        Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.SECOND, 5);
+        mInternalCache.updateCachedFileDate(fileRef1, pluginName, calendar.getTime());
 
         // Get file from cache
         CachedFileInfo updatedFile = mInternalCache.checkCacheForProcessedFile(fileRef1, pluginName);
 
         // Compare file dates
         Assert.assertTrue(originalFileInfo.getLastOpened().before(updatedFile.getLastOpened()));
+    }
+
+    @Test
+    public void InternalCache_getFullCache_shouldReturnFilesSortedOnDateMostRecent() {
+        // Add files to cache
+        String fileRef1 = "123_dummyFileRef1.docx";
+        String fileRef2 = "456_dummyfileRef2.pdf";
+        String object1 = new DummyPluginObject1("Title", "Text").toJSON();
+        String object2 = new DummyPluginObject2("Title", 2, "Name").toJSON();
+        String pluginName = "com.aurora.dummyplugin";
+
+        mInternalCache.cacheFile(fileRef1, object1, pluginName);
+
+        // Wait for 1 second to cache the file so the dateLastOpened is later
+        try {
+            TimeUnit.SECONDS.sleep(1);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        mInternalCache.cacheFile(fileRef2, object2, pluginName);
+
+        // Get files from cache
+        List<CachedFileInfo> cachedFiles = mInternalCache.getFullCache();
+
+        // Assert that the date of the first element is more recent than the date of the second element
+        Assert.assertTrue(cachedFiles.get(0).getLastOpened().after(cachedFiles.get(1).getLastOpened()));
     }
 
     // After every test, reset the cache
@@ -323,7 +354,7 @@ public class InternalCacheUnitTest {
         private String mText;
 
         public DummyPluginObject1(String title, String text) {
-            super("dummyfilename", "dummyplugin");
+            super("dummyfilename");
             mTitle = title;
             mText = text;
         }
@@ -344,7 +375,7 @@ public class InternalCacheUnitTest {
         private String mName;
 
         public DummyPluginObject2(String title, int number, String name) {
-            super("dummyfilename", "dummyplugin");
+            super("dummyfilename");
             mTitle = title;
             mNumber = number;
             mName = name;

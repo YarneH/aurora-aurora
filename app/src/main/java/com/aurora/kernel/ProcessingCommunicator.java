@@ -82,9 +82,7 @@ public class ProcessingCommunicator extends Communicator {
                         notifyAll();
                     }
                 });
-
         // Create request to cache the file
-
         CacheFileRequest cacheFileRequest = new CacheFileRequest(fileRef, pluginObject, uniquePluginName);
 
         // Post on the bus
@@ -106,18 +104,20 @@ public class ProcessingCommunicator extends Communicator {
     }
 
     /**
-     * Translate sentences sent by a plugin
+     * Sentences to translate sent by a plugin
      *
      * @param sentences           the list of strings to be translated
      * @param sourceLanguage      the language of the input sentences in ISO code
      * @param destinationLanguage the desired language of the translations in ISO format
-     * @return the list of translated sentences
+     * @return the list of translated sentences or an empty list if the translate operation failed
      */
     public List<String> translateSentences(@NonNull List<String> sentences,
                                            String sourceLanguage,
                                            @NonNull String destinationLanguage) {
         // response contains boolean, which is converted to a status code which is then synchronously returned
         AtomicBoolean isSet = new AtomicBoolean(false);
+        // errorCode is currently not being used. It is supposed to be retruned in a Bundle together
+        // with the translatedSentences but AIDL troubles need to be fixed for this.
         final AtomicInteger errorCode = new AtomicInteger(TranslationErrorCodes.TRANSLATION_FAIL);
         final AtomicReference<String[]> translatedSentences = new AtomicReference<>();
 
@@ -129,6 +129,8 @@ public class ProcessingCommunicator extends Communicator {
                     errorCode.set(TranslationErrorCodes.TRANSLATION_SUCCESS);
                     translatedSentences.set(response.getTranslatedSentences());
                 } else {
+                    errorCode.set(TranslationErrorCodes.TRANSLATION_FAIL);
+                    translatedSentences.set(new String[]{});
                     Log.e(LOG_TAG, errorMessage);
                 }
                 notifyAll();

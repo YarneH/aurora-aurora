@@ -13,13 +13,15 @@ import java.io.InputStream;
 public class TextExtractorPDF implements TextExtractor {
 
     /**
-     * @param fileRef       a reference to where the file can be found
+     * @param file          InputStream to the file
+     * @param fileUri       the uri of the file to be processed
+     * @param fileRef       the name of the file to be processed
      * @param extractImages True if images need to be extracted, false otherwise
      * @return the extracted text from the file on fileRef
      * @throws DocumentNotSupportedException if the document cannot be processed
      */
     @Override
-    public ExtractedText extract(InputStream file, String fileRef, boolean extractImages)
+    public ExtractedText extract(InputStream file, String fileUri, String fileRef, boolean extractImages)
             throws DocumentNotSupportedException {
         PDFContentExtractor reader = new PDFContentExtractor();
         PdfReader pdfreader;
@@ -32,6 +34,6 @@ public class TextExtractorPDF implements TextExtractor {
             Log.e("IOexception PDF Reader:",
                     "Error opening and reading the pdf file: " + e.getLocalizedMessage(), e);
         }
-        return parsedPDF.toExtractedText(fileRef);
+        return parsedPDF.toExtractedText(fileUri, fileRef);
     }
 }

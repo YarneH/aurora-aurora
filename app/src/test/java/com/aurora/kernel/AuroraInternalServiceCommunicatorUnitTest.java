@@ -23,6 +23,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import io.reactivex.Observable;
@@ -208,7 +209,7 @@ public class AuroraInternalServiceCommunicatorUnitTest {
 
         // Create request on the bus
         UpdateCachedFileDateRequest request =
-                new UpdateCachedFileDateRequest("fileRef", "com.aurora.dummyplugin");
+                new UpdateCachedFileDateRequest("fileRef", "com.aurora.dummyplugin", new Date());
         mBus.post(request);
 
         // Check if the method was called
@@ -278,7 +279,8 @@ public class AuroraInternalServiceCommunicatorUnitTest {
         }
 
         @Override
-        public void updateCachedFileDate(@NonNull String fileRef, @NonNull String uniquePluginName) {
+        public void updateCachedFileDate(@NonNull final String fileRef, @NonNull final String uniquePluginName,
+                                         @NonNull final Date date) {
             dateCalled = true;
         }
 
@@ -296,7 +298,7 @@ public class AuroraInternalServiceCommunicatorUnitTest {
      */
     private class DummyPluginObject extends PluginObject {
         public DummyPluginObject() {
-            super("dummyfilename", "dummyplugin");
+            super("dummyfilename");
         }
     }
 }

@@ -25,12 +25,13 @@ public class TextExtractorPDFUnitTest {
     public void initialize() throws FileNotFoundException {
         // Initialize the extractor
         TextExtractorPDF textExtractorPDF = new TextExtractorPDF();
+        String fileUri = "dummyUri";
         String mfileRef = RES_PATH + "/Pasta.pdf";
         File file = new File(mfileRef);
         InputStream inputStream = new FileInputStream(file);
         // Extract the text
         try {
-            mExtractedText = textExtractorPDF.extract(inputStream, mfileRef, false);
+            mExtractedText = textExtractorPDF.extract(inputStream, fileUri, mfileRef, false);
         } catch (DocumentNotSupportedException e) {
             e.printStackTrace();
         }

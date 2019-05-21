@@ -1,5 +1,7 @@
 package com.aurora.kernel;
 
+import android.os.Build;
+
 import com.aurora.auroralib.ExtractedText;
 import com.aurora.auroralib.Section;
 import com.aurora.internalservice.internalprocessor.DocumentNotSupportedException;
@@ -23,6 +25,8 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -43,6 +47,7 @@ public class PluginInternalServiceCommunicatorUnitTest {
     private static PluginInternalServiceCommunicator mCommunicator;
 
     private static String mTitle = "Dummy Title";
+    private static String mFileUri = "dummyFileUri";
     private static String mFileRef = "src/test/res/Pasta.txt";
     private static String mFileType = "txt";
     private static List<String> mParagraphs = Arrays.asList("Paragraph1", "Paragraph2");
@@ -63,7 +68,7 @@ public class PluginInternalServiceCommunicatorUnitTest {
         mCommunicator = new PluginInternalServiceCommunicator(mBus, mInternalTextProcessor, new Translator(new FakeRequestQueue()));
 
         // Initialize extracted text with dummy contents
-        mExtractedText = new ExtractedText(mTitle, null, mParagraphs);
+        mExtractedText = new ExtractedText(mFileUri, mTitle, mParagraphs);
     }
 
     @Before
@@ -77,12 +82,15 @@ public class PluginInternalServiceCommunicatorUnitTest {
     }
 
     @After
-    public void cleanUp() {
+    public void cleanUp() throws NoSuchFieldException, IllegalAccessException{
         try {
             mInputStream.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
+        // Set the SDK version back to 22
+        setFinalStatic(Build.VERSION.class.getField("SDK_INT"), Build.VERSION_CODES.LOLLIPOP_MR1);
+
     }
 
     @Test
@@ -97,7 +105,7 @@ public class PluginInternalServiceCommunicatorUnitTest {
         observable.map(InternalProcessorResponse::getExtractedText).subscribe(testObserver);
 
         // Create request to process file and put on bus
-        InternalProcessorRequest request = new InternalProcessorRequest(mFileRef, mFileType, mInputStream,
+        InternalProcessorRequest request = new InternalProcessorRequest(mFileUri, mFileRef, mFileType, mInputStream,
                 Plugin.getDefaultInternalServices());
         mBus.post(request);
 
@@ -110,7 +118,8 @@ public class PluginInternalServiceCommunicatorUnitTest {
     }
 
     @Test
-    public void PluginInternalServiceCommunicator_processFileWithInternalProcessor_shouldDoNLPWhenAsked(){
+    public void PluginInternalServiceCommunicator_processFileWithInternalProcessor_shouldDoNLPWhenAsked()
+    throws IllegalAccessException, NoSuchFieldException{
         // Listen for internal processor response
         Observable<InternalProcessorResponse> observable = mBus.register(InternalProcessorResponse.class);
 
@@ -119,6 +128,10 @@ public class PluginInternalServiceCommunicatorUnitTest {
 
         // Subscribe to observable
         observable.map(InternalProcessorResponse::getExtractedText).subscribe(testObserver);
+
+        // Set the SDK version to 26 (minimum for NLP)
+        // Can throw the exceptions
+        setFinalStatic(Build.VERSION.class.getField("SDK_INT"), Build.VERSION_CODES.O);
 
         // Create request to process file and put on bus
         List<InternalServices> internalServices =
@@ -130,7 +143,7 @@ public class PluginInternalServiceCommunicatorUnitTest {
                         InternalServices.NLP_POS
                 ));
 
-        InternalProcessorRequest request = new InternalProcessorRequest(mFileRef, mFileType, mInputStream,
+        InternalProcessorRequest request = new InternalProcessorRequest(mFileUri, mFileRef, mFileType, mInputStream,
                 internalServices);
         mBus.post(request);
 
@@ -140,6 +153,8 @@ public class PluginInternalServiceCommunicatorUnitTest {
         annotationPipeline.addAnnotator(new TokenizerAnnotator(false, "en"));
         annotationPipeline.addAnnotator(new WordsToSentencesAnnotator(false));
         annotationPipeline.addAnnotator(new POSTaggerAnnotator(false));
+
+
 
         if(extractedText.getTitle() != null) {
             Assert.assertNotNull(extractedText.getTitleAnnotation());
@@ -159,7 +174,7 @@ public class PluginInternalServiceCommunicatorUnitTest {
 
                 assert (section.getBodyAnnotation().equals(annotation));
             }
-            if(section.getTitle() != null) {
+            if(!section.getTitle().isEmpty()) {
                 Assert.assertNotNull(section.getTitleAnnotation());
 
                 Annotation annotation = new Annotation(section.getTitle());
@@ -190,7 +205,7 @@ public class PluginInternalServiceCommunicatorUnitTest {
                         InternalServices.IMAGE_EXTRACTION
                 ));
 
-        InternalProcessorRequest request = new InternalProcessorRequest(mFileRef, mFileType, mInputStream,
+        InternalProcessorRequest request = new InternalProcessorRequest(mFileUri, mFileRef, mFileType, mInputStream,
                 internalServices);
         mBus.post(request);
 
@@ -216,17 +231,37 @@ public class PluginInternalServiceCommunicatorUnitTest {
         /**
          * Dummy method that will just return a fake extracted text
          *
-         * @param fileRef a reference to where the file can be found
-         * @param extractImages
+         * @param fileUri the uri of the file
+         * @param fileRef the name of the file
+         * @param extractImages boolean indicating whether or not to extract images
          * @return dummy extracted text
          * @throws FileTypeNotSupportedException thrown when a file with an unsupported extension is opened
          */
         @Override
-        public ExtractedText processFile(InputStream file, String fileRef, String type,
+        public ExtractedText processFile(InputStream file, String fileUri, String fileRef, String type,
                                          boolean extractImages) throws FileTypeNotSupportedException, DocumentNotSupportedException {
             // Just return the dummy extracted text
-            mExtractedText = super.processFile(file, fileRef, type, extractImages);
+            mExtractedText = super.processFile(file, fileUri, fileRef, type, extractImages);
             return mExtractedText;
         }
+    }
+
+    /**
+     * Private method to set final static values during tests (e.g. Build Version)
+     *
+     * @param field                     Field to set
+     * @param newValue                  Value to be set
+     * @throws IllegalAccessException   thrown if the field cannot be accessed
+     * @throws NoSuchFieldException     thrown if the field does not exist
+     */
+    private static void setFinalStatic(Field field, Object newValue)
+            throws IllegalAccessException, NoSuchFieldException {
+        field.setAccessible(true);
+
+        Field modifiersField = Field.class.getDeclaredField("modifiers");
+        modifiersField.setAccessible(true);
+        modifiersField.setInt(field, field.getModifiers() & ~Modifier.FINAL);
+
+        field.set(null, newValue);
     }
 }

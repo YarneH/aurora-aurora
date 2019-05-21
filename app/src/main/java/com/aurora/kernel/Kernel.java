@@ -114,13 +114,10 @@ public final class Kernel {
         // Initialize plugin config
         initializePluginConfig(applicationContext);
 
-        // Create plugin registry that keeps info of the plugins
-        PluginRegistry pluginRegistry = new PluginRegistry(PLUGINS_CFG, applicationContext);
-
         // Create the different communicators
-        sAuroraCommunicator = new AuroraCommunicator(bus, pluginRegistry, applicationContext);
+        sAuroraCommunicator = new AuroraCommunicator(bus, applicationContext);
         sProcessingCommunicator = new ProcessingCommunicator(bus);
-        sPluginCommunicator = new PluginCommunicator(bus, pluginRegistry);
+        sPluginCommunicator = new PluginCommunicator(bus);
 
         // Create internal text processor for the PluginInternalServiceCommunicator
         InternalTextProcessor internalTextProcessing = new InternalTextProcessor();
