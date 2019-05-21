@@ -73,7 +73,8 @@ public class AuroraCommunicator extends Communicator {
         /*
          * Observable keeping track of events indicating that a document is not supported
          */
-        Observable<DocumentNotSupportedEvent> mDocumentNotSupportedEventObservable = mBus.register(DocumentNotSupportedEvent.class);
+        Observable<DocumentNotSupportedEvent> mDocumentNotSupportedEventObservable =
+                mBus.register(DocumentNotSupportedEvent.class);
         // Register for incoming events
 
         // Call right method when event comes in

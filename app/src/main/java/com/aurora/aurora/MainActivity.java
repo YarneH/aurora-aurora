@@ -143,7 +143,8 @@ public class MainActivity extends AppCompatActivity
 
             @Override
             public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int i) {
-                ((CardFileAdapter) Objects.requireNonNull(mRecyclerView.getAdapter())).removeCard(viewHolder.getAdapterPosition());
+                ((CardFileAdapter) Objects.requireNonNull(mRecyclerView.getAdapter()))
+                        .removeCard(viewHolder.getAdapterPosition());
                 mRecyclerView.getAdapter().notifyDataSetChanged();
             }
 
@@ -436,13 +437,6 @@ public class MainActivity extends AppCompatActivity
                         applicationInfo.metaData.getBoolean(internalService.name())) {
                     internalServices.add(internalService);
                 }
-            }
-            // Get the version code without deprecation:
-            int versionCode;
-            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.P) {
-                versionCode = packageInfo.versionCode;
-            } else {
-                versionCode = (int) packageInfo.getLongVersionCode();
             }
 
             // Create the plugin

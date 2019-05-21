@@ -47,21 +47,6 @@ public abstract class PluginObject implements Serializable {
     protected String mUniquePluginName;
 
     /**
-     * @deprecated The uniquePluginName should only be passed to the ProcessorCommunicator for safety
-     * The ProcessorCommunicator will then correctly set it
-     *
-     * PluginObject constructor
-     *
-     * @param fileName          Name of the processed file
-     * @param uniquePluginName  Unique name of the plugin that processed the file
-     */
-    @Deprecated
-    private PluginObject(@NonNull final String fileName, @NonNull final String uniquePluginName) {
-        mFileName = fileName;
-        mUniquePluginName = uniquePluginName;
-    }
-
-    /**
      * PluginObject constructor
      *
      * @param fileName Name of the processed file
@@ -73,28 +58,28 @@ public abstract class PluginObject implements Serializable {
     /**
      * Turn the JSON string back into a PluginObject object.
      *
-     * @param json  The extracted JSON string of the PluginObject object
-     * @param type  Class to convert the Json to
+     * @param json The extracted JSON string of the PluginObject object
+     * @param type Class to convert the Json to
      * @return PluginObject
      */
-    public static final <T extends PluginObject> T fromJson(String json, Class<T> type) {
+    public static <T extends PluginObject> T fromJson(String json, Class<T> type) {
         return sGson.fromJson(json, type);
     }
 
     /**
      * Method to convert the file accessed by the Uri to a PluginObject object
      *
-     * @param fileUri   The Uri to the temp file
-     * @param context   The context
-     * @param type      Class of the Object stored in the file on Uri
+     * @param fileUri The Uri to the temp file
+     * @param context The context
+     * @param type    Class of the Object stored in the file on Uri
      * @return PluginObject object
      * @throws IOException          On IO trouble
      * @throws NullPointerException When the file cannot be found.
      */
     @SuppressWarnings("unused")
-    public static <T extends PluginObject> T getPluginObjectFromFile(@NonNull Uri fileUri,
-                                                                     @NonNull Context context,
-                                                                     @NonNull Class<T> type)
+    static <T extends PluginObject> T getPluginObjectFromFile(@NonNull Uri fileUri,
+                                                              @NonNull Context context,
+                                                              @NonNull Class<T> type)
             throws IOException {
 
         // Open the file
@@ -145,7 +130,7 @@ public abstract class PluginObject implements Serializable {
      *
      * @param uniquePluginName name of the plugin
      */
-     void setUniquePluginName(@NonNull final String uniquePluginName) {
+    void setUniquePluginName(@NonNull final String uniquePluginName) {
         mUniquePluginName = uniquePluginName;
     }
 

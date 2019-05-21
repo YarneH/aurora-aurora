@@ -14,6 +14,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ProgressBar;
+
 import com.aurora.aurora.R;
 import com.aurora.market.data.database.MarketPlugin;
 import com.aurora.market.data.network.MarketNetworkDataSource;
@@ -65,7 +66,7 @@ public class MarketPluginDetailActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
         // Setup the FAB for downloading the Plugin
         Activity activity = this;
-        mDownloadFAB.setOnClickListener(view -> {
+        mDownloadFAB.setOnClickListener((View view) -> {
             if (mInstalled) {
                 Snackbar.make(view, getResources().getString(R.string.already_installed), Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
