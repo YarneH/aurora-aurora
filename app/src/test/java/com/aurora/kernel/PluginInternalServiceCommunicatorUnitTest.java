@@ -82,18 +82,14 @@ public class PluginInternalServiceCommunicatorUnitTest {
     }
 
     @After
-    public void cleanUp() {
+    public void cleanUp() throws NoSuchFieldException, IllegalAccessException{
         try {
             mInputStream.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
         // Set the SDK version back to 22
-        try {
-            setFinalStatic(Build.VERSION.class.getField("SDK_INT"), Build.VERSION_CODES.LOLLIPOP_MR1);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        setFinalStatic(Build.VERSION.class.getField("SDK_INT"), Build.VERSION_CODES.LOLLIPOP_MR1);
 
     }
 
@@ -122,7 +118,8 @@ public class PluginInternalServiceCommunicatorUnitTest {
     }
 
     @Test
-    public void PluginInternalServiceCommunicator_processFileWithInternalProcessor_shouldDoNLPWhenAsked(){
+    public void PluginInternalServiceCommunicator_processFileWithInternalProcessor_shouldDoNLPWhenAsked()
+    throws IllegalAccessException, NoSuchFieldException{
         // Listen for internal processor response
         Observable<InternalProcessorResponse> observable = mBus.register(InternalProcessorResponse.class);
 
@@ -133,11 +130,8 @@ public class PluginInternalServiceCommunicatorUnitTest {
         observable.map(InternalProcessorResponse::getExtractedText).subscribe(testObserver);
 
         // Set the SDK version to 26 (minimum for NLP)
-        try {
-            setFinalStatic(Build.VERSION.class.getField("SDK_INT"), Build.VERSION_CODES.O);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        // Can throw the exceptions
+        setFinalStatic(Build.VERSION.class.getField("SDK_INT"), Build.VERSION_CODES.O);
 
         // Create request to process file and put on bus
         List<InternalServices> internalServices =
@@ -252,7 +246,16 @@ public class PluginInternalServiceCommunicatorUnitTest {
         }
     }
 
-    static void setFinalStatic(Field field, Object newValue) throws Exception {
+    /**
+     * Private method to set final static values during tests (e.g. Build Version)
+     *
+     * @param field                     Field to set
+     * @param newValue                  Value to be set
+     * @throws IllegalAccessException   thrown if the field cannot be accessed
+     * @throws NoSuchFieldException     thrown if the field does not exist
+     */
+    private static void setFinalStatic(Field field, Object newValue)
+            throws IllegalAccessException, NoSuchFieldException {
         field.setAccessible(true);
 
         Field modifiersField = Field.class.getDeclaredField("modifiers");
