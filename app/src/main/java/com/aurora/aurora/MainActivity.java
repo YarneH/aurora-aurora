@@ -31,6 +31,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.webkit.MimeTypeMap;
 import android.widget.TextView;
+
 import com.aurora.auroralib.Constants;
 import com.aurora.internalservice.internalcache.CachedFileInfo;
 import com.aurora.kernel.AuroraCommunicator;
@@ -40,6 +41,7 @@ import com.aurora.market.ui.MarketPluginListActivity;
 import com.aurora.plugin.InternalServices;
 import com.aurora.plugin.Plugin;
 import com.google.firebase.analytics.FirebaseAnalytics;
+
 import io.reactivex.Observer;
 import io.reactivex.disposables.Disposable;
 
@@ -215,7 +217,7 @@ public class MainActivity extends AppCompatActivity
     /**
      * Set up the kernel
      */
-    private void setupKernel(){
+    private void setupKernel() {
         /* Listen to the loading state of the communicator */
         try {
             mKernel = Kernel.getInstance(this.getApplicationContext());
