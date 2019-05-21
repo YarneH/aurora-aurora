@@ -46,14 +46,14 @@ public class PluginFailedActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 // Get uri and mimetype of the file to open it with another app
-                Uri fileUri = Uri.parse(intentThatStartedActivity.getStringExtra(Constants.PLUGIN_PROCESSING_FAILED_FILEURI));
+                Uri fileUri = Uri.parse(intentThatStartedActivity
+                        .getStringExtra(Constants.PLUGIN_PROCESSING_FAILED_FILEURI));
                 String mimeType = getContentResolver().getType(fileUri);
 
                 Intent openWithOtherAppIntent = new Intent();
                 openWithOtherAppIntent.setAction(Intent.ACTION_VIEW);
                 openWithOtherAppIntent.setDataAndType(fileUri, mimeType);
                 openWithOtherAppIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                //startActivity(openWithOtherAppIntent);
 
                 Intent chooser = Intent.createChooser(openWithOtherAppIntent, "Choose another app to open the file");
 
