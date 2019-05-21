@@ -14,6 +14,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ProgressBar;
+
 import com.aurora.aurora.R;
 import com.aurora.market.data.database.MarketPlugin;
 import com.aurora.market.data.network.MarketNetworkDataSource;
@@ -25,7 +26,6 @@ import com.aurora.market.data.network.MarketNetworkDataSource;
  * in a {@link MarketPluginListActivity}.
  */
 public class MarketPluginDetailActivity extends AppCompatActivity {
-    private static final String LOG_TAG = MarketPluginDetailActivity.class.getSimpleName();
 
     /**
      * The request code used for requesting the writing and reading external storage permission
@@ -59,46 +59,43 @@ public class MarketPluginDetailActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_marketplugin_detail);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.detail_toolbar);
+        Toolbar toolbar = findViewById(R.id.detail_toolbar);
         mProgressBar = findViewById(R.id.pb_download);
         mDownloadFAB = findViewById(R.id.fab_download_plugin);
 
         setSupportActionBar(toolbar);
         // Setup the FAB for downloading the Plugin
         Activity activity = this;
-        mDownloadFAB.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (mInstalled) {
-                    Snackbar.make(view, getResources().getString(R.string.already_installed), Snackbar.LENGTH_LONG)
-                            .setAction("Action", null).show();
-                    return;
-                } else if (MarketNetworkDataSource.getInstance(getBaseContext()).isDownloading(mMarketPlugin)) {
-                    Snackbar.make(view, getResources().getString(R.string.already_downloading), Snackbar.LENGTH_LONG)
-                            .setAction("Action", null).show();
-                    return;
-                }
-                Snackbar.make(view, getResources().getString(R.string.download_plugin), Snackbar.LENGTH_LONG)
+        mDownloadFAB.setOnClickListener((View view) -> {
+            if (mInstalled) {
+                Snackbar.make(view, getResources().getString(R.string.already_installed), Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
+                return;
+            } else if (MarketNetworkDataSource.getInstance(getBaseContext()).isDownloading(mMarketPlugin)) {
+                Snackbar.make(view, getResources().getString(R.string.already_downloading), Snackbar.LENGTH_LONG)
+                        .setAction("Action", null).show();
+                return;
+            }
+            Snackbar.make(view, getResources().getString(R.string.download_plugin), Snackbar.LENGTH_LONG)
+                    .setAction("Action", null).show();
 
-                // Check if the permissions for reading and writing are acquired
-                boolean readPermission = ActivityCompat.checkSelfPermission(
-                        activity, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED;
-                boolean writePermission = ActivityCompat.checkSelfPermission(
-                        activity, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED;
+            // Check if the permissions for reading and writing are acquired
+            boolean readPermission = ActivityCompat.checkSelfPermission(
+                    activity, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED;
+            boolean writePermission = ActivityCompat.checkSelfPermission(
+                    activity, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED;
 
-                // Ask the permissions if needed, otherwise download the MarketPlugin
-                if (!readPermission || !writePermission) {
-                    ActivityCompat.requestPermissions(
-                            activity,
-                            new String[]{
-                                    Manifest.permission.READ_EXTERNAL_STORAGE,
-                                    Manifest.permission.WRITE_EXTERNAL_STORAGE},
-                            WRITE_AND_READ_REQUEST_CODE);
-                } else {
-                    MarketNetworkDataSource.getInstance(getBaseContext()).downloadMarketPlugin(mMarketPlugin);
-                    updateDownloadUI();
-                }
+            // Ask the permissions if needed, otherwise download the MarketPlugin
+            if (!readPermission || !writePermission) {
+                ActivityCompat.requestPermissions(
+                        activity,
+                        new String[]{
+                                Manifest.permission.READ_EXTERNAL_STORAGE,
+                                Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                        WRITE_AND_READ_REQUEST_CODE);
+            } else {
+                MarketNetworkDataSource.getInstance(getBaseContext()).downloadMarketPlugin(mMarketPlugin);
+                updateDownloadUI();
             }
         });
 

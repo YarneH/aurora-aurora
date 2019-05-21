@@ -57,26 +57,25 @@ public class AuroraCommunicator extends Communicator {
     private MutableLiveData<Boolean> mLoading;
 
     /**
-     * Observable keeping track of events indicating that a document is not supported
-     */
-    private Observable<DocumentNotSupportedEvent> mDocumentNotSupportedEventObservable;
-
-    /**
      * Creates an AuroraCommunicator. There should be only one AuroraCommunicator at a time
      *
      * @param bus                A reference to the unique bus instance over which
      *                           the communicators will communicate events
      * @param applicationContext the android context
      */
-    public AuroraCommunicator(@NonNull final Bus bus, @NonNull final Context applicationContext) {
+    AuroraCommunicator(@NonNull final Bus bus, @NonNull final Context applicationContext) {
         super(bus);
 
         mContext = applicationContext;
         mLoading = new MutableLiveData<>();
         mLoading.postValue(false);
 
+        /*
+         * Observable keeping track of events indicating that a document is not supported
+         */
+        Observable<DocumentNotSupportedEvent> mDocumentNotSupportedEventObservable =
+                mBus.register(DocumentNotSupportedEvent.class);
         // Register for incoming events
-        mDocumentNotSupportedEventObservable = mBus.register(DocumentNotSupportedEvent.class);
 
         // Call right method when event comes in
         mDocumentNotSupportedEventObservable
@@ -155,7 +154,7 @@ public class AuroraCommunicator extends Communicator {
                 .subscribe((CachedProcessedFile processedFile) -> {
                             if ("{}".equals(processedFile.getJsonRepresentation())) {
                                 Toast.makeText(mContext,
-                                        mContext.getString(R.string.cached_file_not_found_processing_file),
+                                        mContext.getString(R.string.cached_file_not_found),
                                         Toast.LENGTH_LONG).show();
                                 // TODO: change this such that it processes the original file
 

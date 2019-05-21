@@ -46,7 +46,7 @@ public class InternalNLP implements InternalService {
     /** The CoreNLP annotation pipeline */
     private AnnotationPipeline mAnnotationPipeline;
 
-    /** Serializer used for to serialize the annotations. Uses Google's protobuf scheme */
+    /** Serializer used for to serialize the annotations. Uses Google's proto-buf scheme */
     private ProtobufAnnotationSerializer mAnnotationSerializer;
 
     /** Set of satisfied dependencies */

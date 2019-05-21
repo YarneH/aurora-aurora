@@ -136,18 +136,18 @@ public class ParsedPDF {
     }
 
 
-    public void addHeader(String text, int level) {
+    void addHeader(String text, int level) {
         mContainsHeaders = true;
         mPDFElements.add(new HeadingFromPDF(text, level));
     }
 
 
-    public void addParagraph(String text) {
+    void addParagraph(String text) {
         mPDFElements.add(new ParagraphFromPDF(text));
     }
 
 
-    public void addImage(String image) {
+    void addImage(String image) {
         mPDFElements.add(new ImageFromPDF(image));
     }
 }
