@@ -144,22 +144,15 @@ public class PDFContentExtractor {
         inspectChild(k.getDirectObject(PdfName.K), tag);
     }
 
-    protected String xmlName(PdfName name) {
-        String xmlName = name.toString().replaceFirst("/", "");
-        xmlName = Character.toLowerCase(xmlName.charAt(0))
-                + xmlName.substring(1);
-        return xmlName;
-    }
-
     /**
      * Searches for a tag in a page.
      *
      * @param object an identifier to find the marked content
      * @param page   a page dictionary
      */
-    public String parseTag(PdfObject object, PdfDictionary page, boolean image) {
+    private String parseTag(PdfObject object, PdfDictionary page, boolean image) {
         // if the identifier is a number, we can extract the content right away
-        String parsed = "";
+        String parsed;
         if (object instanceof PdfNumber) {
             PdfNumber mcid = (PdfNumber) object;
             RenderFilter filter = new MarkedContentRenderFilter(mcid.intValue());

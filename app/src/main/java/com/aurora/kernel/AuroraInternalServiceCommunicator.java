@@ -67,7 +67,7 @@ public class AuroraInternalServiceCommunicator extends Communicator {
      * @param bus           a reference to the unique bus instance over which the communicators will communicate events
      * @param internalCache a reference to the internal cache
      */
-    public AuroraInternalServiceCommunicator(@NonNull final Bus bus, @NonNull final InternalCache internalCache) {
+    AuroraInternalServiceCommunicator(@NonNull final Bus bus, @NonNull final InternalCache internalCache) {
         super(bus);
         mInternalCache = internalCache;
 

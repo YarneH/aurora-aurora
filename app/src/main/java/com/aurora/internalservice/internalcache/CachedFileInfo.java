@@ -89,15 +89,15 @@ public class CachedFileInfo {
     /**
      * @param lastOpened the moment at which the file was last opened
      */
-    public void setLastOpened(Date lastOpened) {
+    void setLastOpened(Date lastOpened) {
         mLastOpened = lastOpened;
     }
 
     /**
-     * Overridden equals method will only keep track of fileref and plugin, not the date
+     * Overridden equals method will only keep track of file-ref and plugin, not the date
      *
      * @param o the object to compare to this
-     * @return true if the objects have equal filerefs and plugin name
+     * @return true if the objects have equal file-refs and plugin name
      */
     @Override
     public boolean equals(Object o) {
@@ -115,7 +115,7 @@ public class CachedFileInfo {
     }
 
     /**
-     * Overridden hashcode method that only takes into account the fileref and the plugin name, not the date
+     * Overridden hashcode method that only takes into account the file-ref and the plugin name, not the date
      *
      * @return a hash based on the file reference and the plugin name
      */

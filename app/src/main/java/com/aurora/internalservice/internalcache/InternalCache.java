@@ -203,7 +203,7 @@ public class InternalCache implements InternalService {
     public boolean cacheFile(String fileRef, String pluginObject, String uniquePluginName) {
         /*
         This method consists of two parts: We have to actually write the representation to a file.
-        We should do this by mapping a file ref to another fileref that represents the cached
+        We should do this by mapping a file ref to another file-ref that represents the cached
         representation.
         In this file, we should have a json representation of the plugin object representation.
 
@@ -516,7 +516,7 @@ public class InternalCache implements InternalService {
      * @return true if the file was successfully removed
      */
     public boolean removeFile(String fileRef, String uniquePluginName) {
-        // Create cachedfileinfo object
+        // Create CachedFileInfo object
         CachedFileInfo cachedFileInfo = new CachedFileInfo(fileRef, uniquePluginName);
 
         // First check if the file is in the cache registry, if it is, remove it
@@ -548,7 +548,7 @@ public class InternalCache implements InternalService {
         private String uniquePluginName;
 
         /**
-         * The filerefs of the cached files belonging to this plugin
+         * The file-refs of the cached files belonging to this plugin
          */
         private CachedFileInfo[] cachedFileRefs;
 

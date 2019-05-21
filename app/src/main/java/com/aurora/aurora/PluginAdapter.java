@@ -37,17 +37,17 @@ public class PluginAdapter extends ArrayAdapter<Plugin>{
      * @param plugins  The list of Plugins to be shown
      * @param context  A Context object related to the activity the uses this adapter
      */
-    public PluginAdapter(List<Plugin> plugins, Context context) {
+    PluginAdapter(List<Plugin> plugins, Context context) {
         super(context, R.layout.plugin_alert_dialog_adapter_row, plugins);
     }
 
 
     /**
-     * Overriden method from ArrayAdapter.
+     * Overridden method from ArrayAdapter.
      *
      * @param position      Position of the item in the adapter
      * @param convertView   View that corresponds to the item
-     * @param parent        parent Viewgroup
+     * @param parent        parent ViewGroup
      * @return the inflated and updated convertView
      */
     @Override
@@ -63,11 +63,11 @@ public class PluginAdapter extends ArrayAdapter<Plugin>{
             LayoutInflater inflater = LayoutInflater.from(getContext());
             convertView = inflater.inflate(
                     R.layout.plugin_alert_dialog_adapter_row, parent, false);
-            viewHolder.pluginName = (TextView) convertView.findViewById(
+            viewHolder.pluginName = convertView.findViewById(
                     R.id.pluginChooserDialogItemNameTextView);
-            viewHolder.pluginDescription = (TextView) convertView.findViewById(
+            viewHolder.pluginDescription = convertView.findViewById(
                     R.id.pluginChooserDialogItemDescriptionTextView);
-            viewHolder.pluginLogo = (ImageView) convertView.findViewById(
+            viewHolder.pluginLogo = convertView.findViewById(
                     R.id.pluginChooserDialogItemLogoItemImageView);
             convertView.setTag(viewHolder);
         } else {

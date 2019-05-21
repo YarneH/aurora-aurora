@@ -19,19 +19,9 @@ public final class InjectorUtils {
      * @param context the application context
      * @return the MarketRepository instance
      */
-    public static MarketRepository provideRepository(Context context) {
+    private static MarketRepository provideRepository(Context context) {
         MarketNetworkDataSource auroraNetworkDataSource = MarketNetworkDataSource.getInstance(context);
         return MarketRepository.getInstance(auroraNetworkDataSource);
-    }
-
-    /**
-     * Provides the NetworkDataSource of the Plugin Market
-     * @param context the application context
-     * @return the MarketNetworkDataSource instance
-     */
-    public static MarketNetworkDataSource provideNetworkDataSource(Context context) {
-        provideRepository(context);
-        return MarketNetworkDataSource.getInstance(context);
     }
 
     /**
