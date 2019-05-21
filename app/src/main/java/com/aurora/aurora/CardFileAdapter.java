@@ -17,8 +17,8 @@ import com.aurora.internalservice.internalcache.CachedFileInfo;
 import com.aurora.kernel.Kernel;
 
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * The adapter for the RecyclerView of the file-cards
@@ -29,29 +29,29 @@ public class CardFileAdapter extends RecyclerView.Adapter<CardFileAdapter.CardFi
     /**
      * The format of a date used in the cards
      */
-    private final SimpleDateFormat mDateFormat = new SimpleDateFormat("E, dd MMM yyyy");
+    private final SimpleDateFormat mDateFormat = new SimpleDateFormat("E, dd MMM yyyy", Locale.getDefault());
 
     /**
      * The amount of cards that the RecyclerView manages
      */
-    private int mAmount = 0;
+    private int mAmount;
 
     /**
      * The data of the cached files
      */
-    private List<CachedFileInfo> mCachedFileInfoList = new ArrayList<>();
+    private List<CachedFileInfo> mCachedFileInfoList;
 
     /**
      * The context of the application
      */
-    private Context mContext = null;
+    private Context mContext;
 
     /**
      * A reference to the (unique) kernel instance
      */
     private Kernel mKernel;
 
-    public CardFileAdapter(Kernel kernel, Context context, @NonNull List<CachedFileInfo> cachedFileInfoList) {
+    CardFileAdapter(Kernel kernel, Context context, @NonNull List<CachedFileInfo> cachedFileInfoList) {
         mKernel = kernel;
         mCachedFileInfoList = cachedFileInfoList;
         mAmount = mCachedFileInfoList.size();
@@ -63,7 +63,7 @@ public class CardFileAdapter extends RecyclerView.Adapter<CardFileAdapter.CardFi
      *
      * @param cachedFileInfoList The new list which will replace the old one
      */
-    public void updateData(@NonNull List<CachedFileInfo> cachedFileInfoList) {
+    void updateData(@NonNull List<CachedFileInfo> cachedFileInfoList) {
         mCachedFileInfoList = cachedFileInfoList;
         mAmount = mCachedFileInfoList.size();
         notifyDataSetChanged();
@@ -107,7 +107,7 @@ public class CardFileAdapter extends RecyclerView.Adapter<CardFileAdapter.CardFi
     }
 
     /**
-     * ViewHolder for the recyclerview. Holds the file cards.
+     * ViewHolder for the recycler-view. Holds the file cards.
      */
     public class CardFileViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         /**
@@ -115,7 +115,7 @@ public class CardFileAdapter extends RecyclerView.Adapter<CardFileAdapter.CardFi
          */
         private TextView mTitleTextView;
         /**
-         * The TextView showing the date on which the file was last opend
+         * The TextView showing the date on which the file was last opened
          */
         private TextView mLastOpenedTextView;
         /**
@@ -141,7 +141,7 @@ public class CardFileAdapter extends RecyclerView.Adapter<CardFileAdapter.CardFi
          *
          * @param itemView the card view
          */
-        public CardFileViewHolder(View itemView) {
+        CardFileViewHolder(View itemView) {
             super(itemView);
             mCardView = itemView.findViewById(R.id.cv_file);
             mTitleTextView = itemView.findViewById(R.id.tv_card_title);
@@ -158,7 +158,7 @@ public class CardFileAdapter extends RecyclerView.Adapter<CardFileAdapter.CardFi
          *
          * @param i index of the card
          */
-        public void bind(int i) {
+        void bind(int i) {
             index = i;
             mCachedFileInfo = mCachedFileInfoList.get(index);
 
@@ -209,7 +209,7 @@ public class CardFileAdapter extends RecyclerView.Adapter<CardFileAdapter.CardFi
      * Remove a cached file from the list
      * @param i the index of the cached file that needs to be removed
      */
-    public void removeCard(int i) {
+    void removeCard(int i) {
         CachedFileInfo current = mCachedFileInfoList.remove(i);
         mKernel.getAuroraCommunicator().removeFileFromCache(current.getFileRef(), current.getUniquePluginName());
         mAmount--;

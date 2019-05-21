@@ -33,7 +33,6 @@
 
         <!-- Background for the loading screen -->
         <View
-            android:id="@+id/view"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:background="@color/alpha_grey"/>

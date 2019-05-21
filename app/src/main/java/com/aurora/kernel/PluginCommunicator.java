@@ -74,7 +74,7 @@ public class PluginCommunicator extends Communicator {
      * @param bus            a reference to the unique bus instances that all communicators should use to
      *                       communicate events
      */
-    public PluginCommunicator(@NonNull Bus bus) {
+    PluginCommunicator(@NonNull Bus bus) {
         super(bus);
 
         // Register for requests to open file with plugin

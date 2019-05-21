@@ -55,7 +55,7 @@ public class MarketPluginListActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_marketplugin_list);
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         mNoConnectionTextView = findViewById(R.id.tv_no_connection);
 
         setSupportActionBar(toolbar);
@@ -170,7 +170,7 @@ public class MarketPluginListActivity extends AppCompatActivity {
          * @param items   A list of all the displayed MarketPlugins
          * @param twoPane indicating whether the screen is a wide screen
          */
-        public MarketPluginsRecyclerViewAdapter(
+        MarketPluginsRecyclerViewAdapter(
                 MarketPluginListActivity parent, List<MarketPlugin> items, boolean twoPane) {
             mMarketPlugins = items;
             mParentActivity = parent;
@@ -180,8 +180,9 @@ public class MarketPluginListActivity extends AppCompatActivity {
         /**
          * {@inheritDoc}
          */
+        @NonNull
         @Override
-        public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
             View view = LayoutInflater.from(parent.getContext())
                     .inflate(R.layout.marketplugin_list_content, parent, false);
             return new ViewHolder(view);
@@ -191,7 +192,7 @@ public class MarketPluginListActivity extends AppCompatActivity {
          * {@inheritDoc}
          */
         @Override
-        public void onBindViewHolder(final ViewHolder holder, int position) {
+        public void onBindViewHolder(@NonNull final ViewHolder holder, int position) {
             holder.mContentView.setText(mMarketPlugins.get(position).getPluginName());
             holder.itemView.setTag(mMarketPlugins.get(position));
             holder.itemView.setOnClickListener(mOnClickListener);
@@ -219,9 +220,9 @@ public class MarketPluginListActivity extends AppCompatActivity {
         /**
          * Set the List of MarketPlugins. This is used to update the data of the adapter
          *
-         * @param items
+         * @param items Plugins to set in the market
          */
-        public void setMarketPlugins(List<MarketPlugin> items) {
+        void setMarketPlugins(List<MarketPlugin> items) {
             mMarketPlugins = items;
         }
 
@@ -234,8 +235,8 @@ public class MarketPluginListActivity extends AppCompatActivity {
 
             ViewHolder(View view) {
                 super(view);
-                mContentView = (TextView) view.findViewById(R.id.content);
-                mImageView = (ImageView) view.findViewById(R.id.img_logo);
+                mContentView = view.findViewById(R.id.content);
+                mImageView = view.findViewById(R.id.img_logo);
             }
         }
     }

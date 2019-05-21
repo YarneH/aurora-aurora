@@ -31,6 +31,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.webkit.MimeTypeMap;
 import android.widget.TextView;
+
 import com.aurora.auroralib.Constants;
 import com.aurora.internalservice.internalcache.CachedFileInfo;
 import com.aurora.kernel.AuroraCommunicator;
@@ -40,6 +41,7 @@ import com.aurora.market.ui.MarketPluginListActivity;
 import com.aurora.plugin.InternalServices;
 import com.aurora.plugin.Plugin;
 import com.google.firebase.analytics.FirebaseAnalytics;
+
 import io.reactivex.Observer;
 import io.reactivex.disposables.Disposable;
 
@@ -112,10 +114,6 @@ public class MainActivity extends AppCompatActivity
      * The list of cached files, which will be shown in the RecyclerView
      */
     private List<CachedFileInfo> mCachedFileInfoList = new ArrayList<>();
-    /**
-     * LiveData keeping track of the loading state of the kernel.
-     */
-    private MutableLiveData<Boolean> mLoading = null;
 
 
     /**
@@ -145,8 +143,8 @@ public class MainActivity extends AppCompatActivity
 
             @Override
             public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int i) {
-                ((CardFileAdapter) mRecyclerView.getAdapter()).removeCard(viewHolder.getAdapterPosition());
-                ((CardFileAdapter) mRecyclerView.getAdapter()).notifyDataSetChanged();
+                ((CardFileAdapter) Objects.requireNonNull(mRecyclerView.getAdapter())).removeCard(viewHolder.getAdapterPosition());
+                mRecyclerView.getAdapter().notifyDataSetChanged();
             }
 
             @Override
@@ -157,8 +155,14 @@ public class MainActivity extends AppCompatActivity
                 View itemView = viewHolder.itemView;
                 int itemHeight = itemView.getHeight();
                 Drawable icon = getDrawable(R.drawable.delete_shape);
-                int iconHeight = icon.getIntrinsicHeight();
-                int iconWidth = icon.getIntrinsicWidth();
+                int iconHeight = 0;
+                if (icon != null) {
+                    iconHeight = icon.getIntrinsicHeight();
+                }
+                int iconWidth = 0;
+                if (icon != null) {
+                    iconWidth = icon.getIntrinsicWidth();
+                }
 
                 // Calculate the position of the icon
                 int deleteIconTop = itemView.getTop() + (itemHeight - iconHeight) / DEVIDE_IN_HALF;
@@ -168,8 +172,10 @@ public class MainActivity extends AppCompatActivity
                 int deleteIconBottom = deleteIconTop + iconHeight;
 
                 // Draw icon
-                icon.setBounds(deleteIconLeft, deleteIconTop, deleteIconRight, deleteIconBottom);
-                icon.draw(c);
+                if (icon != null) {
+                    icon.setBounds(deleteIconLeft, deleteIconTop, deleteIconRight, deleteIconBottom);
+                    icon.draw(c);
+                }
             }
         };
 
@@ -215,12 +221,12 @@ public class MainActivity extends AppCompatActivity
     /**
      * Set up the kernel
      */
-    private void setupKernel(){
+    private void setupKernel() {
         /* Listen to the loading state of the communicator */
         try {
             mKernel = Kernel.getInstance(this.getApplicationContext());
             mAuroraCommunicator = mKernel.getAuroraCommunicator();
-            mLoading = mAuroraCommunicator.getLoadingData();
+            MutableLiveData<Boolean> mLoading = mAuroraCommunicator.getLoadingData();
             mLoading.observe(this, (Boolean isLoading) -> {
                 if (isLoading == null || !isLoading) {
                     findViewById(R.id.pb_extracting).setVisibility(View.GONE);
@@ -442,10 +448,10 @@ public class MainActivity extends AppCompatActivity
             // Create the plugin
             plugin = new Plugin(packageName, (String) packageManager.getApplicationLabel(
                     applicationInfo), null, (String) applicationInfo.loadDescription(
-                    packageManager), versionCode, packageInfo.versionName, internalServices);
+                    packageManager), internalServices);
         } else {
             plugin = new Plugin(packageName, packageName.substring(
-                    packageName.lastIndexOf('.') + 1), null, null, 0, "");
+                    packageName.lastIndexOf('.') + 1), null, null);
         }
         return plugin;
     }
@@ -483,7 +489,7 @@ public class MainActivity extends AppCompatActivity
 
         builder.setCancelable(true);
         AlertDialog dialog = builder.create();
-        dialog.getWindow().setBackgroundDrawable(getDrawable(R.drawable.inset_dialog));
+        Objects.requireNonNull(dialog.getWindow()).setBackgroundDrawable(getDrawable(R.drawable.inset_dialog));
         dialog.show();
     }
 

@@ -3,7 +3,7 @@ package com.aurora.internalservice.internalprocessor.pdfparsing;
 public class ImageFromPDF implements PDFStructureElement {
     private String mImage;
     public static final String TYPE = "ExtractedImage";
-    public ImageFromPDF(String image) {
+    ImageFromPDF(String image) {
         mImage = image;
     }
 
